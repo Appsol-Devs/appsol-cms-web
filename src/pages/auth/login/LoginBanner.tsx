@@ -7,32 +7,38 @@ const LoginBanner = () => {
       <div className="relative text-sm h-full flex flex-col w-full justify-between">
         <p>Application Logo</p>
 
-        <div className="space-y-2">
-          <p className="text-2xl font-semibold">
+        <div className="space-y-2 text-primary">
+          <p className="text-4xl font-semibold text-white">
             Manage customer subscriptions and interactions with confidence
           </p>
           <div className="flex items-center gap-1">
             <ShieldCheck className="w-4 h-4" />
-            <p>Secure authentication and role-based access control</p>
+            <p className="text-white">
+              Secure authentication and role-based access control
+            </p>
           </div>
           <div className="flex items-center gap-1">
             <ChartArea className="w-4 h-4" />
-            <p>Real-time insights into customer behavior</p>
+            <p className="text-white">
+              Real-time insights into customer behavior
+            </p>
           </div>
           <div className="flex items-center gap-1">
             <User2 className="w-4 h-4" />
-            <p>Centralized customer and customer interaction management</p>
+            <p className="text-white">
+              Centralized customer and customer interaction management
+            </p>
           </div>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-2 text-primary">
           <div className="flex items-center gap-1">
             <Lock className="w-4 h-4" />
-            <p>ISO-grade data protection</p>
+            <p className="text-white">ISO-grade data protection</p>
           </div>
           <div className="flex items-center gap-1">
             <Sparkles className="w-4 h-4" />
-            <p>Uptime SLS 99.9%</p>
+            <p className="text-white">Uptime SLS 99.9%</p>
           </div>
         </div>
       </div>
