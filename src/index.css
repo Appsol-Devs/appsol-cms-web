@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
+/* @custom-variant dark (&:is(.dark *)); */
 
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -61,10 +61,38 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
   min-height: 100vh;
+
+  /* Brand / Primary Colors */
+  --primary: #4a90e2; /* Soft blue for trust and professionalism */
+  --on-primary: #ffffff;
+
+  --secondary: #6c757d; /* Muted gray-blue for accents */
+  --on-secondary: #ffffff;
+
+  /* Surfaces */
+  --surface: #f9fafb; /* Subtle off-white background */
+  --on-surface: #1e1e1e; /* Neutral text color for readability */
+
+  --card: #ffffff; /* White card surfaces */
+  --on-card: #2c2c2c;
+
+  /* Success / Warning / Error */
+  --success: #4caf50;
+  --on-success: #ffffff;
+
+  --warning: #ffc107;
+  --on-warning: #000000;
+
+  --error: #e53935;
+  --on-error: #ffffff;
+
+  /* Borders / Muted Elements */
+  --outline: #e0e0e0;
+  --divider: #f0f0f0;
+
+  /* Elevation shadows */
+  --shadow: rgba(0, 0, 0, 0.08);
 }
 
 h1 {
@@ -109,16 +137,21 @@ button:focus-visible {
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--surface);
+  --color-surface: var(--surface);
+  --color-foreground: var(--on-surface);
+  --color-onSurface: var(--on-surface);
   --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
+  --color-onCard: var(--on-card);
+  --color-card-foreground: var(--on-card);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
+  --color-onPrimary: var(--on-primary);
+  --color-primary-foreground: var(--on-primary);
   --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
+  --color-onSecondary: var(--on-secondary);
+  --color-secondary-foreground: var(--on-secondary);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
