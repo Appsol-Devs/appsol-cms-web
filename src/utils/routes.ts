@@ -3,4 +3,13 @@ export const allRoutes = Object.freeze({
   PORTAL: "/portal",
   LOGIN: "/login",
   DASHBOARD: "/dashboard",
+  CUSTOMERS: "/customers",
+  AGENTS: "/agents",
+  BILLINGS: "/billings",
+  TICKETS: "/tickets",
+  LEADS: "/leads",
+  COMPLAINTS: "/complaints",
+  ENQUIRIES: "/enquiries",
+  ANALYTICS: "/analytics",
+  SETTINGS: "/settings",
 });

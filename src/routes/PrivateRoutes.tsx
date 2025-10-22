@@ -1,9 +1,11 @@
+import Dashboard from "@/pages/dashboard/component/Dashboard";
+import { allRoutes } from "@/utils/routes";
 import { Route, Routes } from "react-router-dom";
 
 const PrivateRoutes = () => {
   return (
     <Routes>
-      <Route></Route>
+      <Route path={allRoutes.DASHBOARD} element={<Dashboard />} />
     </Routes>
   );
 };
