@@ -12,7 +12,7 @@ function App() {
         <div className="w-full sticky top-0">
           <Header />
         </div>
-        <div className="overflow-y-scroll min-h-[calc(100vh-56px)]">
+        <div className="overflow-y-scroll min-h-[calc(100vh-56px)] p-5">
           <Outlet />
         </div>
       </div>

@@ -12,4 +12,6 @@ export const allRoutes = Object.freeze({
   ENQUIRIES: "/enquiries",
   ANALYTICS: "/analytics",
   SETTINGS: "/settings",
+  SOFTWARES: "/softwares",
+  UNAUTHORIZED: "/unauthorized",
 });

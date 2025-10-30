@@ -1,0 +1,25 @@
+export const prepareApiHeaders = (headers: Headers) => {
+  if (localStorage.length > 2) {
+    const authHeadersString: string | null =
+      localStorage.getItem("auth_headers");
+
+    if (authHeadersString !== null) {
+      const auth_headers = JSON.parse(authHeadersString);
+      headers.set("Authorization", `Bearer ${auth_headers["accessToken"]}`);
+      headers.set("Content-Type", "application/json; charset=utf-8");
+    }
+    return headers;
+  }
+};
+
+export interface IBaseQueryParam {
+  page?: number;
+  paginate?: boolean;
+  size?: number;
+  search?: string;
+  id?: string;
+  userId?: string;
+  startDate?: string;
+  endDate?: string;
+  //   filters?: IFilters;
+}
