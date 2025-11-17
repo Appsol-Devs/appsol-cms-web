@@ -1,17 +1,16 @@
-import { format } from "date-fns";
-import { Briefcase, NotepadText, Pen, User } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import ActionButton from "@/components/ActionButtons";
-import { useNavigate } from "react-router-dom";
 import FeatureContentRenderer from "@/components/table/component/FeatureContentRenderer";
-import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { allRoutes } from "@/utils/routes";
-import { useLazyGetCustomersQuery } from "../common/customersApi";
-import type { ICustomer } from "../common/customers";
+import type { ColumnDef } from "@tanstack/react-table";
+import { File, NotepadText, Pen } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import type { ILeadStatus } from "../../common/settings";
+import { useLazyGetLeadStatusesQuery } from "../../common/settingsApi";
+import ActionButton from "@/components/ActionButtons";
 
-const Customers = () => {
-  const [fetchQuery, fetchState] = useLazyGetCustomersQuery();
+const LeadStatuses = () => {
+  const [fetchQuery, fetchState] = useLazyGetLeadStatusesQuery();
   const [executed, setExecuted] = useState(false);
   const navigate = useNavigate();
 
@@ -20,7 +19,8 @@ const Customers = () => {
       setTimeout(() => setExecuted(false), 2000);
     }
   }, [executed]);
-  const columns = useMemo<ColumnDef<ICustomer>[]>(
+
+  const columns = useMemo<ColumnDef<ILeadStatus>[]>(
     () => [
       {
         header: "#",
@@ -28,44 +28,28 @@ const Customers = () => {
         cell: ({ row }) => row.index + 1,
       },
       {
-        header: "Customer",
+        header: "Name",
         accessorKey: "name",
-        meta: { icon: <User size={14} /> },
+        meta: { icon: <File size={14} /> },
         cell: ({ row }) => (
           <div className=" flex flex-col items-start gap-1">
             <span className="font-semibold text-xs">
               {row.original?.name || ""}
             </span>
-            <span className="font-semibold text-muted-foreground text-xs">
-              {row.original?.createdAt
-                ? format(row.original.createdAt, "do MMM y hh:mm aa")
-                : ""}
-            </span>
+            <Badge>
+              {row.original?.leadStatusCode ? row.original.leadStatusCode : ""}
+            </Badge>
           </div>
         ),
       },
       {
-        header: "Business Name",
-        accessorKey: "companyName",
-        meta: { icon: <Briefcase size={14} /> },
-        cell: ({ row }) => (
-          <div className=" flex flex-col items-start gap-1">
-            <span className="font-semibold p-0.5 text-xs">
-              <Badge className="rounded-sm!">
-                {row.original?.companyName ?? ""}
-              </Badge>
-            </span>
-          </div>
-        ),
-      },
-      {
-        header: "Location",
-        accessorKey: "location",
+        header: "Description",
+        accessorKey: "description",
         meta: { icon: <NotepadText size={14} /> },
         cell: ({ row }) => (
           <div className=" flex flex-col items-start gap-1">
             <span className="font-semibold p-0.5 text-xs">
-              {row.original.location ?? ""}
+              {row.original.description ?? ""}
             </span>
           </div>
         ),
@@ -77,11 +61,11 @@ const Customers = () => {
         cell: ({ row }) => (
           <div className="flex items-center space-x-2">
             <ActionButton
-              type="view"
+              type="edit"
               onClick={() =>
                 navigate(
                   allRoutes.PORTAL +
-                    allRoutes.VIEW_CUSTOMER(row.original._id as string)
+                    allRoutes.UPDATE_LEAD_STATUS(row.original._id as string)
                 )
               }
             />
@@ -98,18 +82,20 @@ const Customers = () => {
         tableAddComponent={() => (
           <ActionButton
             type="add"
-            useText="Add Customer"
-            onClick={() => navigate(allRoutes.PORTAL + allRoutes.ADD_CUSTOMER)}
+            onClick={() =>
+              navigate(allRoutes.PORTAL + allRoutes.ADD_LEAD_STATUS)
+            }
           />
         )}
         columns={columns}
+        // isSetting
         // filters={["company", "location", "role", "gender"]}
         refetchData={executed}
-        title="Customers"
+        title="Lead Statuses"
         lazyFetchQuery={[fetchQuery, fetchState]}
       />
     </>
   );
 };
 
-export default Customers;
+export default LeadStatuses;

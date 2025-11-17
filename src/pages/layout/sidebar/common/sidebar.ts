@@ -1,80 +1,146 @@
 import { allRoutes } from "@/utils/routes";
 import {
-  Briefcase,
+  BriefcaseBusiness,
+  CalendarCheck2,
   ChartArea,
   ChartBar,
-  Cog,
+  Computer,
+  Headset,
   LayoutDashboardIcon,
   Phone,
   PhoneCall,
   Receipt,
+  Settings,
+  Spotlight,
+  StepForward,
   Ticket,
+  User,
   Users,
   Users2,
 } from "lucide-react";
 import type { SVGProps } from "react";
 
-export type ISideMenu = {
-  title: string;
-  icon?: React.FC<SVGProps<SVGSVGElement>>;
+export interface ISidebar {
+  name: string;
   path?: string;
-  children?: ISideMenu[];
-};
+  subMenu?: ISubMenu[];
+  // authorize?: IPermission;
+  icon?: React.FC<SVGProps<SVGSVGElement>>;
+  key?: string;
+}
 
-export const allSideMenus: ISideMenu[] = [
+export interface ISubMenu {
+  name: string;
+  path: string;
+  icon?: React.FC<SVGProps<SVGSVGElement>>;
+}
+
+export const sidebarMainMenus: ISidebar[] = [
   {
-    title: "Dashboard",
+    name: "Dashboard",
     icon: LayoutDashboardIcon,
     path: allRoutes.DASHBOARD,
   },
   {
-    title: "Customers",
+    name: "Customers",
     icon: Users,
     path: allRoutes.CUSTOMERS,
   },
   {
-    title: "Agents",
+    name: "Agents",
     icon: Users2,
     path: allRoutes.AGENTS,
   },
   {
-    title: "Billings",
+    name: "Billings",
     icon: Receipt,
     path: allRoutes.BILLINGS,
   },
   {
-    title: "Tickets",
+    name: "Tickets",
     icon: Ticket,
     path: allRoutes.TICKETS,
   },
   {
-    title: "Leads",
+    name: "Leads",
     icon: ChartArea,
     path: allRoutes.LEADS,
   },
   {
-    title: "Enquiries",
+    name: "Enquiries",
     icon: PhoneCall,
     path: allRoutes.ENQUIRIES,
   },
   {
-    title: "Complaints",
+    name: "Complaints",
     icon: Phone,
     path: allRoutes.COMPLAINTS,
   },
   {
-    title: "Analytics",
+    name: "Analytics",
     icon: ChartBar,
     path: allRoutes.ANALYTICS,
   },
   {
-    title: "Settings",
-    icon: Cog,
-    path: allRoutes.SETTINGS,
+    name: "Settings",
+    // path: `${allRoutes.PORTAL}${allRoutes.SETTINGS}`,
+    icon: Settings,
+    subMenu: [
+      {
+        name: "Roles",
+        path: `${allRoutes.ROLES}?type=settings`,
+        icon: User,
+      },
+      {
+        name: "Softwares",
+        path: `${allRoutes.SOFTWARES}?type=settings`,
+        icon: Computer,
+      },
+      {
+        name: "Complaint Types",
+        path: `${allRoutes.COMPLAINT_TYPES}?type=settings`,
+        icon: Phone,
+      },
+      {
+        name: "Complaint Categories",
+        path: `${allRoutes.COMPLAINT_CATEGORIES}?type=settings`,
+        icon: Headset,
+      },
+      {
+        name: "Subscription Types",
+        path: `${allRoutes.SUBSCRIPTION_TYPES}?type=settings`,
+        icon: CalendarCheck2,
+      },
+      {
+        name: "Call Statuses",
+        path: `${allRoutes.CALL_STATUSES}?type=settings`,
+        icon: PhoneCall,
+      },
+      {
+        name: "Setup Statuses",
+        path: `${allRoutes.SETUP_STATUSES}?type=settings`,
+        icon: BriefcaseBusiness,
+      },
+      {
+        name: "Lead Statuses",
+        path: `${allRoutes.LEAD_STATUSES}?type=settings`,
+        icon: Spotlight,
+      },
+      {
+        name: "Lead Next Steps",
+        path: `${allRoutes.LEAD_NEXT_STEPS}?type=settings`,
+        icon: StepForward,
+      },
+    ],
   },
-  {
-    title: "Roles",
-    icon: Briefcase,
-    path: allRoutes.ROLES,
-  },
+];
+
+export const sidebarConfigMenus: ISidebar[] = [
+  { name: "General Config", path: "/config/general" },
+  { name: "User Management", path: "/config/users" },
+];
+
+export const sidebarSettingMenus: ISidebar[] = [
+  { name: "Profile", path: "/settings/profile" },
+  { name: "Preferences", path: "/settings/preferences" },
 ];

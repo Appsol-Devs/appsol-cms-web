@@ -58,18 +58,15 @@ export interface IChangePassword {
   old_password?: string;
 }
 
-export const transformAndLogLoginData = (
-  response: Response | undefined,
+export const transformAndLogLoginData = async (
+  token: string,
   avoidClear?: boolean
 ) => {
-  if (response && response.headers) {
-    const headers = response?.headers ?? {};
-
+  if (token) {
     if (!avoidClear) localStorage.clear();
-    const accessToken: unknown = headers?.get("Accesstoken");
 
     const authHeaders: IAuthHeaders = {
-      accessToken: accessToken as unknown as string,
+      accessToken: token as string,
       isLoggedIn: true,
     };
 

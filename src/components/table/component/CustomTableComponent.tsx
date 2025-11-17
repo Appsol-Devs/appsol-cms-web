@@ -148,7 +148,7 @@ const CustomTableComponent = <T extends object>({
                             onRowSelected ? "cursor-pointer" : "cursor-default"
                           } ${
                             isLastRow ? "border-x" : "border-b border-x"
-                          }  bg-rx-card text-rx-card-foreground hover:bg-muted/60 hover:text-primary`}
+                          }  bg-card text-card-foreground hover:bg-muted/60`}
                           onClick={() =>
                             onRowSelected && onRowSelected(row.original)
                           }

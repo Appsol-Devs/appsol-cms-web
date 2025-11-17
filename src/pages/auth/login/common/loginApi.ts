@@ -21,10 +21,12 @@ export const loginApi = createApi({
       }),
       transformResponse: async (response: Response) => {
         const data: ILoginResponse = await response.json();
-        transformAndLogLoginData(response);
-
         const loginResponse = data as ILoginResponse;
+
         if (loginResponse) {
+          const token = loginResponse.token;
+          transformAndLogLoginData(token);
+
           const newData = {
             signedIn: true,
             user_validation_info: loginResponse,

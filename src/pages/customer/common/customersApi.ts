@@ -5,20 +5,23 @@ import {
   type IPagination,
   type PaginatedResponse,
 } from "@/lib/pagination";
-import type { IRole } from "@/pages/auth/login/common/login";
+import type { ICustomer } from "./customers";
 
-export const rolesApi = createApi({
-  reducerPath: "rolesApi",
+export const customersApi = createApi({
+  reducerPath: "customersApi",
   baseQuery: fetchBaseQuery({
     baseUrl: import.meta.env.VITE_BASE_URL,
     prepareHeaders: (headers) => prepareApiHeaders(headers),
     responseHandler: async (response) => response,
   }),
-  tagTypes: ["IRole"],
+  tagTypes: ["ICustomer"],
   endpoints: (builder) => ({
-    getRoles: builder.query<PaginatedResponse<IRole[]>, IBaseQueryParam>({
-      query: ({ pageIndex, limit, search }) => {
-        let url = `/roles?limit=${limit}`;
+    getCustomers: builder.query<
+      PaginatedResponse<ICustomer[]>,
+      IBaseQueryParam
+    >({
+      query: ({ pageIndex, search, limit }) => {
+        let url = `/customers?limit=${limit}`;
         if (search) {
           url += `&search=${search}`;
         }
@@ -30,30 +33,30 @@ export const rolesApi = createApi({
         };
       },
       transformResponse: async (response: Response) => {
-        const data: IRole[] = await response.json();
+        const data: ICustomer[] = await response.json();
         return {
           pagination: getPaginationMetaDataV2(response) as IPagination,
-          contents: data as IRole[],
+          contents: data as ICustomer[],
         };
       },
     }),
-    addRole: builder.mutation<IRole, IRole>({
+    addCustomer: builder.mutation<ICustomer, ICustomer>({
       query: (payload) => ({
-        url: "roles",
+        url: "customers",
         body: payload,
         method: "POST",
       }),
     }),
-    updateRole: builder.mutation<IRole, IRole>({
+    updateCustomer: builder.mutation<ICustomer, ICustomer>({
       query: ({ _id, ...payload }) => ({
-        url: `roles/${_id}`,
+        url: `customers/${_id}`,
         body: payload,
         method: "PUT",
       }),
     }),
-    deleteRole: builder.mutation<void, { id: string }>({
+    deleteCustomer: builder.mutation<void, { id: string }>({
       query: ({ id }) => ({
-        url: `roles/${id}`,
+        url: `customers/${id}`,
         method: "DELETE",
       }),
     }),
@@ -61,8 +64,8 @@ export const rolesApi = createApi({
 });
 
 export const {
-  useLazyGetRolesQuery,
-  useAddRoleMutation,
-  useUpdateRoleMutation,
-  useDeleteRoleMutation,
-} = rolesApi;
+  useLazyGetCustomersQuery,
+  useAddCustomerMutation,
+  useUpdateCustomerMutation,
+  useDeleteCustomerMutation,
+} = customersApi;

@@ -14,6 +14,8 @@ import storage from "redux-persist/lib/storage";
 import { userReducer } from "./pages/auth/login/common/loginSlice";
 import { loginApi } from "./pages/auth/login/common/loginApi";
 import { rolesApi } from "./pages/roles/common/rolesApi";
+import { customersApi } from "./pages/customer/common/customersApi";
+import { settingsApi } from "./pages/settings/common/settingsApi";
 
 const persistConfig = {
   key: "root",
@@ -27,6 +29,8 @@ export const store = configureStore({
     user: persistedUser,
     [loginApi.reducerPath]: loginApi.reducer,
     [rolesApi.reducerPath]: rolesApi.reducer,
+    [settingsApi.reducerPath]: settingsApi.reducer,
+    [customersApi.reducerPath]: customersApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -35,7 +39,12 @@ export const store = configureStore({
         warnAfter: 0,
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }).concat(loginApi.middleware, rolesApi.middleware),
+    }).concat(
+      loginApi.middleware,
+      rolesApi.middleware,
+      settingsApi.middleware,
+      customersApi.middleware
+    ),
 });
 
 const persistor = persistStore(store);

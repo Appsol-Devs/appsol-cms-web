@@ -13,9 +13,9 @@ export const prepareApiHeaders = (headers: Headers) => {
 };
 
 export interface IBaseQueryParam {
-  page?: number;
+  pageIndex?: number;
   paginate?: boolean;
-  size?: number;
+  limit?: number;
   search?: string;
   id?: string;
   userId?: string;

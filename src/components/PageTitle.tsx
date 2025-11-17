@@ -17,7 +17,7 @@ const PageTitle = ({
 }) => {
   const navigate = useNavigate();
   return (
-    <div className="flex space-x-1">
+    <div className="flex space-x-1 p-0">
       {showBack && (
         <Button
           className="bg-transparent text-primary hover:bg-muted-foreground hover:text-white"
@@ -30,7 +30,7 @@ const PageTitle = ({
       <div>
         <p
           className={`${
-            isSmaller ? "text-base md:text-xl" : "text-lg md:text-2xl"
+            isSmaller ? "text-base md:text-xl" : "text-lg md:text-xl"
           } font-bold tracking-tight`}
         >
           {title} {totalCount ? `(${totalCount})` : ""}

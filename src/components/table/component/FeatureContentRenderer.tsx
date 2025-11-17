@@ -63,7 +63,7 @@ const FeatureContentRenderer = <
   data,
   tableAddComponent,
   lazyFetchQuery,
-  subtext,
+  // subtext,
   id,
   userId,
   pathOnRowSelected,
@@ -162,9 +162,9 @@ const FeatureContentRenderer = <
   const fetchData = async () => {
     const params: IBaseQueryParam = {
       search: searchQuery as string,
-      page: page_number,
-      paginate: true,
-      size: 10,
+      pageIndex: page_number,
+      // paginate: true,
+      limit: 10,
       id: id,
       userId: userId,
       // filters: { ...queryFilters, ...initialQueryFilters },
@@ -246,9 +246,7 @@ const FeatureContentRenderer = <
   return (
     <>
       <div
-        className={` space-y-2 md:space-y-2 ${
-          isSetting ? "" : "md:p-3 p-2"
-        } relative`}
+        className={`space-y-1 md:space-y-2 ${isSetting ? "" : " "} relative`}
       >
         <div className="rounded-3xl flex items-center justify-between">
           <PageTitle isSmaller={isSetting} title={title} />
@@ -261,7 +259,7 @@ const FeatureContentRenderer = <
               <div className="flex flex-col md:flex-row items-start md:items-center md:justify-between w-full">
                 <div className="flex items-center gap-4">
                   <p className="text-sm font-thin flex flex-col">
-                    <span>Total Records</span>
+                    <span className="text-[10px]">Total Records</span>
                     <span className="text-lg md:text-2xl font-bold">
                       {totalCounts || 0}
                     </span>{" "}

@@ -61,7 +61,9 @@ export const getPaginationMetaData = (meta: FetchBaseQueryMeta | undefined) => {
 
 export const getPaginationMetaDataV2 = (response: Response | undefined) => {
   let paginationState: IPagination | null = null;
+
   if (response) {
+    // console.log("response", response);
     const headers = response?.headers ?? {};
     paginationState = {
       totalCounts: Number(headers.get("_meta_total_count") ?? "0"),
