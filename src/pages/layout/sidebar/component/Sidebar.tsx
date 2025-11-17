@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   ChevronRight,
   Cog,
@@ -6,7 +6,7 @@ import {
   Settings,
   StretchHorizontal,
 } from "lucide-react";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import BackButton from "@/components/BackButton";
 import {
@@ -23,18 +23,11 @@ export default function Sidebar() {
   >("main");
   const [currentRoutes, setCurrentRoutes] =
     useState<ISidebar[]>(sidebarMainMenus);
-
-  const [queryParams] = useSearchParams();
-
-  const queryType = queryParams.get("type");
-
   const [parentName, setParentName] = useState<string>("");
   const navigate = useNavigate();
 
   const location = useLocation();
   const currentPath = location.pathname;
-
-  console.log(queryType, queryParams);
 
   const handleOpenSubRoutes = (route: ISidebar) => {
     if (route.subMenu) {
@@ -45,12 +38,6 @@ export default function Sidebar() {
       navigate(allRoutes.PORTAL + route.path);
     }
   };
-
-  useEffect(() => {
-    if (queryType === "settings") {
-      setActiveView("sub");
-    }
-  }, [queryType]);
 
   const handleBack = () => {
     setCurrentRoutes(sidebarMainMenus);

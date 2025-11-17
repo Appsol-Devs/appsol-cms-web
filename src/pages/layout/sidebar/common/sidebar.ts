@@ -88,47 +88,47 @@ export const sidebarMainMenus: ISidebar[] = [
     subMenu: [
       {
         name: "Roles",
-        path: `${allRoutes.ROLES}?type=settings`,
+        path: `${allRoutes.ROLES}`,
         icon: User,
       },
       {
         name: "Softwares",
-        path: `${allRoutes.SOFTWARES}?type=settings`,
+        path: `${allRoutes.SOFTWARES}`,
         icon: Computer,
       },
       {
         name: "Complaint Types",
-        path: `${allRoutes.COMPLAINT_TYPES}?type=settings`,
+        path: `${allRoutes.COMPLAINT_TYPES}`,
         icon: Phone,
       },
       {
         name: "Complaint Categories",
-        path: `${allRoutes.COMPLAINT_CATEGORIES}?type=settings`,
+        path: `${allRoutes.COMPLAINT_CATEGORIES}`,
         icon: Headset,
       },
       {
         name: "Subscription Types",
-        path: `${allRoutes.SUBSCRIPTION_TYPES}?type=settings`,
+        path: `${allRoutes.SUBSCRIPTION_TYPES}`,
         icon: CalendarCheck2,
       },
       {
         name: "Call Statuses",
-        path: `${allRoutes.CALL_STATUSES}?type=settings`,
+        path: `${allRoutes.CALL_STATUSES}`,
         icon: PhoneCall,
       },
       {
         name: "Setup Statuses",
-        path: `${allRoutes.SETUP_STATUSES}?type=settings`,
+        path: `${allRoutes.SETUP_STATUSES}`,
         icon: BriefcaseBusiness,
       },
       {
         name: "Lead Statuses",
-        path: `${allRoutes.LEAD_STATUSES}?type=settings`,
+        path: `${allRoutes.LEAD_STATUSES}`,
         icon: Spotlight,
       },
       {
         name: "Lead Next Steps",
-        path: `${allRoutes.LEAD_NEXT_STEPS}?type=settings`,
+        path: `${allRoutes.LEAD_NEXT_STEPS}`,
         icon: StepForward,
       },
     ],
