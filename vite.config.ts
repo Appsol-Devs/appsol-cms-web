@@ -23,8 +23,8 @@ export default defineConfig(({ mode }) => ({
       "/api": {
         target:
           mode === "development"
-            ? "http://192.168.100.35:3000/api"
-            : "https://api.yourproductionurl.com",
+            ? "https://enneadic-mee-authentically.ngrok-free.dev/api/"
+            : "https://enneadic-mee-authentically.ngrok-free.dev/api/",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ""),
       },

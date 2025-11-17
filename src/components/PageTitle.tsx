@@ -28,13 +28,13 @@ const PageTitle = ({
         </Button>
       )}
       <div>
-        <h1
+        <p
           className={`${
-            isSmaller ? "text-base md:text-xl" : "text-lg md:text-3xl"
+            isSmaller ? "text-base md:text-xl" : "text-lg md:text-2xl"
           } font-bold tracking-tight`}
         >
           {title} {totalCount ? `(${totalCount})` : ""}
-        </h1>
+        </p>
         <p
           className={`${
             isSmaller ? "text-[10px] md:text-xs" : "text-xs md:text-sm"

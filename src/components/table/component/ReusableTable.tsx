@@ -1,15 +1,15 @@
-import { type Dispatch, type SetStateAction } from "react";
-import { type QueryDefinition } from "@reduxjs/toolkit/query";
 import CustomTableComponent from "./CustomTableComponent";
-import type { ColumnDef, PaginationState } from "@tanstack/react-table";
+import type { QueryDefinition } from "@reduxjs/toolkit/query";
+import type { ColumnDef } from "@tanstack/react-table";
+import type { IMetaData } from "@/lib/pagination";
 
 interface ReusableTableProps<
   T extends object = any,
   R extends QueryDefinition<any, any, any, any, string> = any
 > {
   data: T[] | R[];
-  onPaginationChange: Dispatch<SetStateAction<PaginationState>>;
-  pagination: PaginationState;
+  onPaginationChange: React.Dispatch<React.SetStateAction<IMetaData>>;
+  pagination: IMetaData;
   columns: ColumnDef<T>[];
   hidePagination?: boolean;
   isError?: boolean;

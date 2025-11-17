@@ -5,14 +5,14 @@ import {
   useReactTable,
   getSortedRowModel,
   type ColumnDef,
-  type SortDirection,
   type OnChangeFn,
+  type SortDirection,
 } from "@tanstack/react-table";
-import type { IPaginationState } from "@/lib/pagination";
-import { PaginationComponent } from "@/components/PaginationComponent";
 import FetchingError from "@/components/FetchingError";
 import NoResultsFound from "@/components/NoResultsFound";
-import type { Dispatch, SetStateAction } from "react";
+import { PaginationComponent } from "@/components/PaginationComponent";
+import { cn } from "@/lib/utils";
+import type { IMetaData } from "@/lib/pagination";
 
 interface CustomTableProps<T extends object> {
   data: T[];
@@ -20,11 +20,11 @@ interface CustomTableProps<T extends object> {
   loading?: boolean;
   isError?: boolean;
   noResultFound?: boolean;
-  pagination?: IPaginationState;
+  pagination?: IMetaData;
   sortOptions?: SortingState;
   sorting?: SortingState;
-  onPaginationChange?: Dispatch<SetStateAction<IPaginationState>>;
-  onSortingChange?: Dispatch<SetStateAction<SortingState>>;
+  onPaginationChange?: React.Dispatch<React.SetStateAction<IMetaData>>;
+  onSortingChange?: React.Dispatch<React.SetStateAction<SortingState>>;
   hidePagination?: boolean;
   enableSorting?: boolean;
   onRowSelected?: (row: T) => void;
@@ -50,7 +50,7 @@ const CustomTableComponent = <T extends object>({
   enableSorting,
   refetchData,
   onRowSelected,
-  sorting,
+  // sorting,
   setSorting,
   noItemFoundContent,
 }: CustomTableProps<T>) => {
@@ -61,104 +61,120 @@ const CustomTableComponent = <T extends object>({
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    onPaginationChange,
+    // onPaginationChange,
     getSortedRowModel: getSortedRowModel(),
     manualPagination: true,
     manualSorting: true,
     onSortingChange: setSorting,
-    state: {
-      pagination,
-      sorting: enableSorting ? sorting : [],
-    },
+    // state: {
+    //   pagination,
+    //   sorting: enableSorting ? sorting : [],
+    // },
 
-    pageCount: pagination?.pageCount,
-    rowCount: pagination?.totalCount,
+    pageCount: pagination?.page_number,
+    rowCount: pagination?.total_pages,
   });
 
   return (
     <>
-      <div className="flex flex-col rounded-lg text-onCard">
+      <div className="flex flex-col text-onCard">
         <div className="overflow-x-auto hide-scrollbar">
-          <div className="inline-block min-w-full py-4 ">
-            <div className="overflow-hidden">
-              <table className="w-full text-center ">
-                <thead className="">
+          <div className="inline-block min-w-full">
+            <div className="overflow-hidden shadow-sm rounded-md bg-surface pb-1">
+              <table className="w-full text-center border-collapse">
+                <thead>
                   {table.getHeaderGroups().map((headerGroup) => (
-                    <tr className="w-full bg-secondary" key={headerGroup.id}>
-                      {headerGroup.headers.map((header, idx) => (
+                    <tr key={headerGroup.id} className=" border-b border-x">
+                      {headerGroup.headers.map((header) => (
                         <th
                           key={header.id}
-                          //align={(header.column.columnDef.meta as any)?.align}
                           colSpan={header.colSpan}
-                          className={` pl-2 px-1 w-max text-start py-3 text-xs lg:text-sm  font-medium  ${
-                            idx == 0 && "rounded-l-xl"
-                          } ${
-                            idx == headerGroup.headers.length - 1 &&
-                            "rounded-r-xl"
-                          }`}
+                          className={`px-3 py-3 text-xs lg:text-sm font-medium text-start cursor-pointer select-none last:rounded-tr-md first:rounded-tl-md bg-[#F0F0F0] text-[#7E8299]`}
                           onClick={
-                            enableSorting != null && enableSorting
+                            enableSorting
                               ? header.column.getCanSort()
                                 ? header.column.getToggleSortingHandler()
                                 : undefined
                               : undefined
                           }
                         >
-                          {header.isPlaceholder
-                            ? null
-                            : flexRender(
-                                header.column.columnDef.header,
-                                header.getContext()
+                          {header.isPlaceholder ? null : (
+                            <div className="flex items-center gap-1">
+                              {(header.column.columnDef.meta as any)?.icon && (
+                                <span className="text-gray-600 flex items-center">
+                                  {(header.column.columnDef.meta as any).icon}
+                                </span>
                               )}
-
-                          {/* Sorting */}
-                          {
-                            { asc: "▲", desc: "▼", null: "" }[
-                              (header.column.getIsSorted() as SortDirection) ??
-                                null
-                            ]
-                          }
+                              <span>
+                                {flexRender(
+                                  header.column.columnDef.header,
+                                  header.getContext()
+                                )}
+                              </span>
+                              <span className="ml-1 text-xs">
+                                {
+                                  { asc: "▲", desc: "▼", null: "" }[
+                                    (header.column.getIsSorted() as SortDirection) ??
+                                      null
+                                  ]
+                                }
+                              </span>
+                            </div>
+                          )}
                         </th>
                       ))}
                     </tr>
                   ))}
                 </thead>
+
                 <tbody>
                   {isError ? (
                     <tr>
-                      <td colSpan={10}>
+                      <td colSpan={10} className="p-4">
                         <FetchingError
                           refetch={() => refetchData && refetchData(true)}
                         />
                       </td>
                     </tr>
                   ) : data && data.length > 0 ? (
-                    table.getRowModel().rows.map((row) => (
-                      <tr
-                        key={row.id}
-                        className={`${
-                          onRowSelected ? "cursor-pointer" : "cursor-default"
-                        } border-b border-solid hover:bg-muted/50 hover:text-primary bg-opacity-15 h-14`}
-                        onClick={() =>
-                          onRowSelected && onRowSelected(row.original)
-                        }
-                      >
-                        {row.getVisibleCells().map((cell) => (
-                          <td
-                            className=" pl-2 text-start whitespace-nowrap p-1 text-xs lg:text-sm font-light"
-                            key={cell.id}
-                          >
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext()
-                            )}
-                          </td>
-                        ))}
-                      </tr>
-                    ))
+                    table.getRowModel().rows.map((row, idx) => {
+                      const isLastRow =
+                        idx === table.getRowModel().rows.length - 1;
+
+                      return (
+                        <tr
+                          key={row.id}
+                          className={`${
+                            onRowSelected ? "cursor-pointer" : "cursor-default"
+                          } ${
+                            isLastRow ? "border-x" : "border-b border-x"
+                          }  bg-rx-card text-rx-card-foreground hover:bg-muted/60 hover:text-primary`}
+                          onClick={() =>
+                            onRowSelected && onRowSelected(row.original)
+                          }
+                        >
+                          {row.getVisibleCells().map((cell) => (
+                            <td
+                              key={cell.id}
+                              className={cn(
+                                "px-3 py-3 text-xs lg:text-sm text-start",
+                                isLastRow
+                                  ? "last:rounded-br-md first:rounded-bl-md "
+                                  : ""
+                              )}
+                            >
+                              {flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext()
+                              )}
+                            </td>
+                          ))}
+                        </tr>
+                      );
+                    })
                   ) : (
                     <tr>
-                      <td colSpan={10}>
+                      <td colSpan={10} className="p-4">
                         <NoResultsFound
                           content={noItemFoundContent || "No results"}
                         />
@@ -170,56 +186,16 @@ const CustomTableComponent = <T extends object>({
             </div>
           </div>
         </div>
+
         {data && pagination && !hidePagination && (
-          <PaginationComponent {...pagination} />
+          <PaginationComponent
+            pagination={pagination}
+            onPaginationChange={onPaginationChange}
+          />
         )}
-        {/* pagination */}
-        {/* {data &&
-                    data?.length > 0 &&hea
-                    !(table.getState().pagination == undefined) ? (
-                    <div>
-                        <div
-                            className={`flex justify-between ${hidePagination && "hidden"}`}
-                        >
-                            <div>
-                                <span>{`Page ${table.getState().pagination.pageIndex + 1
-                                    } of ${table.getPageCount()}`}</span>
-                            </div>
-                            <div className="flex  justify-start">
-                                <div className="flex flex-row gap-2 ">
-                                    <button
-                                        className="p-0 w-9 h-9 border border-primary bg-transparent text-primary hover:border-primary"
-                                        disabled={!table.getCanPreviousPage()}
-                                        onClick={table.previousPage}
-                                    >
-                                        <ArrowLeft style={{ fontSize: "12px" }} />
-                                    </button>
-                                    <button
-                                        onClick={() => table.firstPage()}
-                                        className="p-0 w-9 h-9 text-xs text-white border border-primary
-                  hover:border-gray-400 bg-primary"
-                                    >
-                                        {data?.length}
-                                    </button>
-                                    <button className="p-0 w-9 h-9 border bg-transparent border-gray-400 hover:border-gray-400">
-                                        ...
-                                    </button>
-                                    <button className="p-0 w-9 h-9 text-xs bg-transparent border border-gray-400 hover:border-gray-400">
-                                        {pagination?.totalCount}
-                                    </button>
-                                    <button
-                                        className="p-0 w-9 h-9 border-[2px] border-primary bg-transparent text-primary hover:border-primary"
-                                        disabled={!table.getCanNextPage()}
-                                        onClick={table.nextPage}
-                                    >
-                                        <ArrowRight style={{ fontSize: "12px" }} />
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                ) : null} */}
       </div>
+
+      {/* pagination */}
     </>
   );
 };

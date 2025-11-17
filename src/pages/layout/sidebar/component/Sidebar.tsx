@@ -26,7 +26,7 @@ const Sidebar = () => {
                 onClick={() => navigateToPath(menu.path)}
                 key={index}
                 className={cn(
-                  "text-onCard flex items-center py-1.5 px-4 text-sm gap-1.5 rounded-full hover:cursor-pointer hover:bg-primary hover:text-onPrimary",
+                  "text-onCard flex items-center py-1.5 px-4 text-sm gap-1.5 rounded-md hover:cursor-pointer hover:bg-primary hover:text-onPrimary",
                   isActive && "bg-primary text-onPrimary",
                   !isActive && "bg-inherit"
                 )}

@@ -1,5 +1,6 @@
 import { allRoutes } from "@/utils/routes";
 import {
+  Briefcase,
   ChartArea,
   ChartBar,
   Cog,
@@ -70,5 +71,10 @@ export const allSideMenus: ISideMenu[] = [
     title: "Settings",
     icon: Cog,
     path: allRoutes.SETTINGS,
+  },
+  {
+    title: "Roles",
+    icon: Briefcase,
+    path: allRoutes.ROLES,
   },
 ];
