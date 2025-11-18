@@ -20,8 +20,8 @@ export const customersApi = createApi({
       PaginatedResponse<ICustomer[]>,
       IBaseQueryParam
     >({
-      query: ({ pageIndex, search, limit }) => {
-        let url = `/customers?limit=${limit}`;
+      query: ({ pageIndex, search, pageSize }) => {
+        let url = `/customers?pageSize=${pageSize}`;
         if (search) {
           url += `&search=${search}`;
         }

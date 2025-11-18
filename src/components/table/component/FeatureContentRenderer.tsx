@@ -164,60 +164,50 @@ const FeatureContentRenderer = <
       search: searchQuery as string,
       pageIndex: page_number,
       // paginate: true,
-      limit: 10,
+      pageSize: 10,
       id: id,
       userId: userId,
       // filters: { ...queryFilters, ...initialQueryFilters },
     };
 
     if ((isUserLoggedIn() && lazyFetchQuery) || refetchData || searchQuery) {
-      if (fetchQuery) {
-        await fetchQuery(params as Q)
-          .unwrap()
-          .then((res) => {
-            if (res) {
-              // DATA
-              setAllData(res.contents as R[]);
+      try {
+        if (fetchQuery) {
+          await fetchQuery(params as Q)
+            .unwrap()
+            .then((res) => {
+              if (res) {
+                // DATA
+                setAllData(res.contents as R[]);
 
-              // PAGINATION (from transformResponse → getPaginationMetaDataV2)
-              const metaHeaders = res.pagination.metaData ?? {};
+                // PAGINATION (from transformResponse → getPaginationMetaDataV2)
+                const metaHeaders = res.pagination.metaData ?? {};
 
-              const meta: IMetaData = {
-                total_count: Number(metaHeaders.total_count ?? 0),
-                total_pages: Number(metaHeaders.total_pages ?? 0),
-                page_number: Number(metaHeaders.page_number ?? 1),
-                page_size: Number(metaHeaders.page_size ?? 10),
-                // has_next_page: metaHeaders.has_next_page === "true",
-                // has_prev_page: metaHeaders.has_prev_page === "true",
-                // next_page:
-                //   metaHeaders.next_page === "null"
-                //     ? null
-                //     : Number(metaHeaders.next_page),
-                // prev_page:
-                //   metaHeaders.prev_page === "null"
-                //     ? null
-                //     : Number(metaHeaders.prev_page),
-              };
+                const meta: IMetaData = {
+                  total_count: Number(metaHeaders.total_count ?? 0),
+                  total_pages: Number(metaHeaders.total_pages ?? 0),
+                  page_number: Number(metaHeaders.page_number ?? 1),
+                  page_size: Number(metaHeaders.page_size ?? 10),
+                  // has_next_page: metaHeaders.has_next_page === "true",
+                  // has_prev_page: metaHeaders.has_prev_page === "true",
+                  // next_page:
+                  //   metaHeaders.next_page === "null"
+                  //     ? null
+                  //     : Number(metaHeaders.next_page),
+                  // prev_page:
+                  //   metaHeaders.prev_page === "null"
+                  //     ? null
+                  //     : Number(metaHeaders.prev_page),
+                };
 
-              onPaginationChange(meta);
-              setTotalCounts(meta.total_count || 0);
-            } else {
-              showToast({
-                title: "Fetch Error",
-                message: "Could not fetch data",
-                type: "error",
-              });
-            }
-          })
-          .catch(() => {
-            showToast({
-              title: "Fetch Error",
-              message: "Error fetching data",
-              type: "error",
+                onPaginationChange(meta);
+                setTotalCounts(meta.total_count || 0);
+              }
             });
-          });
-
-        setRefetch(false);
+          setRefetch(false);
+        }
+      } catch (e) {
+        if (!e) return;
       }
     }
   };

@@ -30,8 +30,8 @@ export const settingsApi = createApi({
       PaginatedResponse<ISoftware[]>,
       IBaseQueryParam
     >({
-      query: ({ pageIndex, limit, search }) => {
-        let url = `/softwares?limit=${limit}`;
+      query: ({ pageIndex, pageSize, search }) => {
+        let url = `/softwares?pageSize=${pageSize}`;
         if (search) {
           url += `&search=${search}`;
         }
@@ -74,8 +74,8 @@ export const settingsApi = createApi({
       PaginatedResponse<IComplaintType[]>,
       IBaseQueryParam
     >({
-      query: ({ pageIndex, limit, search }) => {
-        let url = `/complaintsTypes?limit=${limit}`;
+      query: ({ pageIndex, pageSize, search }) => {
+        let url = `/complaint_types?pageSize=${pageSize}`;
         if (search) {
           url += `&search=${search}`;
         }
@@ -96,21 +96,21 @@ export const settingsApi = createApi({
     }),
     addComplaintType: builder.mutation<IComplaintType, IComplaintType>({
       query: (payload) => ({
-        url: "complaintsTypes",
+        url: "complaint_types",
         body: payload,
         method: "POST",
       }),
     }),
     updateComplaintType: builder.mutation<IComplaintType, IComplaintType>({
       query: ({ _id, ...payload }) => ({
-        url: `complaintsTypes/${_id}`,
+        url: `complaint_types/${_id}`,
         body: payload,
         method: "PUT",
       }),
     }),
     deleteComplaintType: builder.mutation<void, { id: string }>({
       query: ({ id }) => ({
-        url: `complaintsTypes/${id}`,
+        url: `complaint_types/${id}`,
         method: "DELETE",
       }),
     }),
@@ -118,8 +118,8 @@ export const settingsApi = createApi({
       PaginatedResponse<IComplaintCategory[]>,
       IBaseQueryParam
     >({
-      query: ({ pageIndex, limit, search }) => {
-        let url = `/complaintCategories?limit=${limit}`;
+      query: ({ pageIndex, pageSize, search }) => {
+        let url = `/complaint_categories?pageSize=${pageSize}`;
         if (search) {
           url += `&search=${search}`;
         }
@@ -143,7 +143,7 @@ export const settingsApi = createApi({
       IComplaintCategory
     >({
       query: (payload) => ({
-        url: "complaintCategories",
+        url: "complaint_categories",
         body: payload,
         method: "POST",
       }),
@@ -153,14 +153,14 @@ export const settingsApi = createApi({
       IComplaintCategory
     >({
       query: ({ _id, ...payload }) => ({
-        url: `complaintCategories/${_id}`,
+        url: `complaint_categories/${_id}`,
         body: payload,
         method: "PUT",
       }),
     }),
     deleteComplaintCategory: builder.mutation<void, { id: string }>({
       query: ({ id }) => ({
-        url: `complaintCategories/${id}`,
+        url: `complaint_categories/${id}`,
         method: "DELETE",
       }),
     }),
@@ -168,8 +168,8 @@ export const settingsApi = createApi({
       PaginatedResponse<ICallStatus[]>,
       IBaseQueryParam
     >({
-      query: ({ pageIndex, limit, search }) => {
-        let url = `/callStatuses?limit=${limit}`;
+      query: ({ pageIndex, pageSize, search }) => {
+        let url = `/call_statuses?pageSize=${pageSize}`;
         if (search) {
           url += `&search=${search}`;
         }
@@ -190,21 +190,21 @@ export const settingsApi = createApi({
     }),
     addCallStatus: builder.mutation<ICallStatus, ICallStatus>({
       query: (payload) => ({
-        url: "callStatuses",
+        url: "call_statuses",
         body: payload,
         method: "POST",
       }),
     }),
     updateCallStatus: builder.mutation<ICallStatus, ICallStatus>({
       query: ({ _id, ...payload }) => ({
-        url: `callStatuses/${_id}`,
+        url: `call_statuses/${_id}`,
         body: payload,
         method: "PUT",
       }),
     }),
     deleteCallStatus: builder.mutation<void, { id: string }>({
       query: ({ id }) => ({
-        url: `callStatuses/${id}`,
+        url: `call_statuses/${id}`,
         method: "DELETE",
       }),
     }),
@@ -212,8 +212,8 @@ export const settingsApi = createApi({
       PaginatedResponse<ISetupStatus[]>,
       IBaseQueryParam
     >({
-      query: ({ pageIndex, limit, search }) => {
-        let url = `/setupStatuses?limit=${limit}`;
+      query: ({ pageIndex, pageSize, search }) => {
+        let url = `/setup_statuses?pageSize=${pageSize}`;
         if (search) {
           url += `&search=${search}`;
         }
@@ -234,21 +234,21 @@ export const settingsApi = createApi({
     }),
     addSetupStatus: builder.mutation<ISetupStatus, ISetupStatus>({
       query: (payload) => ({
-        url: "setupStatuses",
+        url: "setup_statuses",
         body: payload,
         method: "POST",
       }),
     }),
     updateSetupStatus: builder.mutation<ISetupStatus, ISetupStatus>({
       query: ({ _id, ...payload }) => ({
-        url: `setupStatuses/${_id}`,
+        url: `setup_statuses/${_id}`,
         body: payload,
         method: "PUT",
       }),
     }),
     deleteSetupStatus: builder.mutation<void, { id: string }>({
       query: ({ id }) => ({
-        url: `setupStatuses/${id}`,
+        url: `setup_statuses/${id}`,
         method: "DELETE",
       }),
     }),
@@ -256,8 +256,8 @@ export const settingsApi = createApi({
       PaginatedResponse<ISubscriptionType[]>,
       IBaseQueryParam
     >({
-      query: ({ pageIndex, limit, search }) => {
-        let url = `/subscriptionTypes?limit=${limit}`;
+      query: ({ pageIndex, pageSize, search }) => {
+        let url = `/subscription_types?pageSize=${pageSize}`;
         if (search) {
           url += `&search=${search}`;
         }
@@ -279,7 +279,7 @@ export const settingsApi = createApi({
     addSubscriptionType: builder.mutation<ISubscriptionType, ISubscriptionType>(
       {
         query: (payload) => ({
-          url: "subscriptionTypes",
+          url: "subscription_types",
           body: payload,
           method: "POST",
         }),
@@ -290,14 +290,14 @@ export const settingsApi = createApi({
       ISubscriptionType
     >({
       query: ({ _id, ...payload }) => ({
-        url: `subscriptionTypes/${_id}`,
+        url: `subscription_types/${_id}`,
         body: payload,
         method: "PUT",
       }),
     }),
     deleteSubscriptionType: builder.mutation<void, { id: string }>({
       query: ({ id }) => ({
-        url: `subscriptionTypes/${id}`,
+        url: `subscription_types/${id}`,
         method: "DELETE",
       }),
     }),
@@ -305,8 +305,8 @@ export const settingsApi = createApi({
       PaginatedResponse<ILeadStatus[]>,
       IBaseQueryParam
     >({
-      query: ({ pageIndex, limit, search }) => {
-        let url = `/leadStatuses?limit=${limit}`;
+      query: ({ pageIndex, pageSize, search }) => {
+        let url = `/lead_statuses?pageSize=${pageSize}`;
         if (search) {
           url += `&search=${search}`;
         }
@@ -327,21 +327,21 @@ export const settingsApi = createApi({
     }),
     addLeadStatus: builder.mutation<ILeadStatus, ILeadStatus>({
       query: (payload) => ({
-        url: "leadStatuses",
+        url: "lead_statuses",
         body: payload,
         method: "POST",
       }),
     }),
     updateLeadStatus: builder.mutation<ILeadStatus, ILeadStatus>({
       query: ({ _id, ...payload }) => ({
-        url: `leadStatuses/${_id}`,
+        url: `lead_statuses/${_id}`,
         body: payload,
         method: "PUT",
       }),
     }),
     deleteLeadStatus: builder.mutation<void, { id: string }>({
       query: ({ id }) => ({
-        url: `leadStatuses/${id}`,
+        url: `lead_statuses/${id}`,
         method: "DELETE",
       }),
     }),
@@ -349,8 +349,8 @@ export const settingsApi = createApi({
       PaginatedResponse<ILeadNextStep[]>,
       IBaseQueryParam
     >({
-      query: ({ pageIndex, limit, search }) => {
-        let url = `/leadNextSteps?limit=${limit}`;
+      query: ({ pageIndex, pageSize, search }) => {
+        let url = `/lead_next_steps?pageSize=${pageSize}`;
         if (search) {
           url += `&search=${search}`;
         }
@@ -371,21 +371,21 @@ export const settingsApi = createApi({
     }),
     addLeadNextStep: builder.mutation<ILeadNextStep, ILeadNextStep>({
       query: (payload) => ({
-        url: "leadNextSteps",
+        url: "lead_next_steps",
         body: payload,
         method: "POST",
       }),
     }),
     updateLeadNextStep: builder.mutation<ILeadNextStep, ILeadNextStep>({
       query: ({ _id, ...payload }) => ({
-        url: `leadNextSteps/${_id}`,
+        url: `lead_next_steps/${_id}`,
         body: payload,
         method: "PUT",
       }),
     }),
     deleteLeadNextStep: builder.mutation<void, { id: string }>({
       query: ({ id }) => ({
-        url: `leadNextSteps/${id}`,
+        url: `lead_next_steps/${id}`,
         method: "DELETE",
       }),
     }),

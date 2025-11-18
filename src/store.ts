@@ -16,6 +16,7 @@ import { loginApi } from "./pages/auth/login/common/loginApi";
 import { rolesApi } from "./pages/roles/common/rolesApi";
 import { customersApi } from "./pages/customer/common/customersApi";
 import { settingsApi } from "./pages/settings/common/settingsApi";
+import { apiErrorMiddleware } from "./lib/apiErrorMiddleware";
 
 const persistConfig = {
   key: "root",
@@ -39,12 +40,14 @@ export const store = configureStore({
         warnAfter: 0,
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }).concat(
-      loginApi.middleware,
-      rolesApi.middleware,
-      settingsApi.middleware,
-      customersApi.middleware
-    ),
+    })
+      .concat(
+        loginApi.middleware,
+        rolesApi.middleware,
+        settingsApi.middleware,
+        customersApi.middleware
+      )
+      .concat(apiErrorMiddleware),
 });
 
 const persistor = persistStore(store);

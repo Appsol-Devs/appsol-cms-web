@@ -23,7 +23,7 @@ export function showToast({
     );
 
   return toast(title, {
-    className: "w-[100px] border-2",
+    className: "w-[100px] border-2 bg-primary! text-primary-foreground!",
     description: message,
     closeButton: true,
     style: {

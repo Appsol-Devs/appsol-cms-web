@@ -37,6 +37,7 @@ export interface ISetupStatus {
   _id?: string;
   setupStatusCode?: string;
   description?: string;
+  colorCode?: string;
   isActive?: boolean;
 }
 
@@ -53,6 +54,7 @@ export interface ILeadStatus {
   name?: string;
   _id?: string;
   leadStatusCode?: string;
+  colorCode?: string;
   description?: string;
   isActive?: boolean;
 }

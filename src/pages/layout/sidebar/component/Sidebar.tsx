@@ -77,7 +77,7 @@ export default function Sidebar() {
                 <p className="text-xs uppercase font-bold">{parentName}</p>
               </div>
             )}
-            {currentRoutes.map(({ icon: Icon, ...route }) => {
+            {currentRoutes.map(({ icon: Icon, ...route }, idx) => {
               const isActiveParent =
                 route.subMenu &&
                 route.subMenu.some(
@@ -92,7 +92,7 @@ export default function Sidebar() {
 
               return (
                 <div
-                  key={route.path}
+                  key={idx}
                   className={cn(
                     `${
                       isActive || isActiveParent

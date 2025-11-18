@@ -17,8 +17,8 @@ export const rolesApi = createApi({
   tagTypes: ["IRole"],
   endpoints: (builder) => ({
     getRoles: builder.query<PaginatedResponse<IRole[]>, IBaseQueryParam>({
-      query: ({ pageIndex, limit, search }) => {
-        let url = `/roles?limit=${limit}`;
+      query: ({ pageIndex, pageSize, search }) => {
+        let url = `/roles?pageSize=${pageSize}`;
         if (search) {
           url += `&search=${search}`;
         }

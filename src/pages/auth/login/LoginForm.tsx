@@ -58,21 +58,10 @@ const LoginForm = () => {
             });
             dispatch(setCurrentUser(res));
             navigate(`${allRoutes.PORTAL}${allRoutes.DASHBOARD}`);
-          })
-          .catch(() =>
-            showToast({
-              title: "Could not login.",
-              message: "Invalid Login Credentials. Check credentials and retry",
-              type: "error",
-            })
-          );
+          });
       }
     } catch (err) {
-      showToast({
-        title: "Could not login.",
-        message: "Invalid Login Credentials. Check credentials and retry",
-        type: "error",
-      });
+      if (!err) return;
     }
   };
 
@@ -131,6 +120,7 @@ const LoginForm = () => {
               </div>
             </div>
             <Button
+              disabled={isLoading}
               type="submit"
               variant="default"
               className="w-full bg-primary! rounded-full! text-onPrimary"

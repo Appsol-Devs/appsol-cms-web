@@ -1,8 +1,8 @@
 import { Edit, Plus, Trash2 } from "lucide-react";
-import { ReactNode, useEffect, useState } from "react";
-import DialogComponent from "./DialogComponent";
+import { useEffect, useState, type ReactNode } from "react";
 import { Button } from "./ui/button";
 import { ScrollArea } from "./ui/scroll-area";
+import DialogComponent from "./DialogComponent";
 
 export interface DataControlEntityProps {
   dialogTitle: string;
