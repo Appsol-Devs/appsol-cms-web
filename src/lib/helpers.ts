@@ -1,3 +1,6 @@
+import type { DropDownOption } from "@/components/DropdownComponent";
+import { formatDistanceToNow } from "date-fns";
+
 export const formatToCurrency = (value: number) => {
   return new Intl.NumberFormat("gh-GH", {
     style: "currency",
@@ -6,3 +9,53 @@ export const formatToCurrency = (value: number) => {
     maximumFractionDigits: 2,
   }).format(value);
 };
+
+export const findActiveDropdownOption = (
+  value?: string | number,
+  options?: DropDownOption[]
+) => {
+  if (value && options) {
+    const active = options.find((option) => option.value === value);
+    return active?.label;
+  }
+  return "";
+};
+
+export const generateRandomColor = (): string => {
+  const randomColor = Math.floor(Math.random() * 16777215).toString(16);
+  return `#${randomColor.padStart(6, "0")}`;
+};
+
+export const useGenerateDropdownOptionsFromEnum = <
+  T extends Record<string, string>
+>(
+  enumObject: T
+): DropDownOption[] => {
+  return Object.entries(enumObject).map(([key, value]) => ({
+    label: key,
+    value: value,
+  }));
+};
+
+export const useGenerateDropdownOptions = <T extends Record<string, string>>(
+  dataArray: T[],
+  labelKey: string,
+  valueKey: string
+): DropDownOption[] => {
+  return dataArray.map((data) => ({
+    label: data[labelKey],
+    value: data[valueKey],
+  }));
+};
+
+export const cleanPayload = (obj: Record<string, any>) => {
+  return Object.fromEntries(
+    Object.entries(obj).filter(
+      ([_, v]) => v !== "" && v !== undefined && v !== null
+    )
+  );
+};
+
+export function formatToTimeAgo(date: string | Date) {
+  return formatDistanceToNow(new Date(date), { addSuffix: true });
+}

@@ -14,6 +14,9 @@ import LeadStatuses from "@/pages/settings/components/lead-status/LeadStatuses";
 import LeadNextSteps from "@/pages/settings/components/lead-next-step/LeadNextSteps";
 import CallStatuses from "@/pages/settings/components/call-status/CallStatuses";
 import SubscriptionTypes from "@/pages/settings/components/subscription-types/SubscriptionTypes";
+import Users from "@/pages/users/component/Users";
+import UsersView from "@/pages/users/component/UsersView";
+import UsersForm from "@/pages/users/component/UsersForm";
 
 const PrivateRoutes = () => {
   return (
@@ -39,6 +42,10 @@ const PrivateRoutes = () => {
       <Route path={allRoutes.LEAD_STATUSES} element={<LeadStatuses />} />
       <Route path={allRoutes.LEAD_NEXT_STEPS} element={<LeadNextSteps />} />
       <Route path={allRoutes.ROLES} element={<Roles />} />
+      <Route path={allRoutes.USERS} element={<Users />} />
+      <Route path={allRoutes.ADD_USER} element={<UsersForm />} />
+      <Route path={allRoutes.UPDATE_USER(":id")} element={<UsersForm />} />
+      <Route path={allRoutes.VIEW_USER(":id")} element={<UsersView />} />
 
       <Route
         path={`${allRoutes.SETTINGS}/*`}

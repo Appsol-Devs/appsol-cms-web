@@ -57,7 +57,11 @@ const LoginForm = () => {
               title: "User Login",
             });
             dispatch(setCurrentUser(res));
-            navigate(`${allRoutes.PORTAL}${allRoutes.DASHBOARD}`);
+            if (!res.isVerified) {
+              navigate(`${allRoutes.PORTAL}${allRoutes.VERIFICATION}`);
+            } else {
+              navigate(`${allRoutes.PORTAL}${allRoutes.DASHBOARD}`);
+            }
           });
       }
     } catch (err) {

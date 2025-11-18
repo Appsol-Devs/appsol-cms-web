@@ -17,6 +17,7 @@ import { rolesApi } from "./pages/roles/common/rolesApi";
 import { customersApi } from "./pages/customer/common/customersApi";
 import { settingsApi } from "./pages/settings/common/settingsApi";
 import { apiErrorMiddleware } from "./lib/apiErrorMiddleware";
+import { usersApi } from "./pages/users/common/usersApi";
 
 const persistConfig = {
   key: "root",
@@ -32,6 +33,7 @@ export const store = configureStore({
     [rolesApi.reducerPath]: rolesApi.reducer,
     [settingsApi.reducerPath]: settingsApi.reducer,
     [customersApi.reducerPath]: customersApi.reducer,
+    [usersApi.reducerPath]: usersApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -45,7 +47,8 @@ export const store = configureStore({
         loginApi.middleware,
         rolesApi.middleware,
         settingsApi.middleware,
-        customersApi.middleware
+        customersApi.middleware,
+        usersApi.middleware
       )
       .concat(apiErrorMiddleware),
 });

@@ -4,6 +4,7 @@ import {
   Edit,
   Eye,
   Plus,
+  Save,
   ThumbsDown,
   ThumbsUp,
   Trash2,
@@ -18,7 +19,15 @@ const ActionButton = ({
   onClick?: () => void;
   disabled?: boolean;
   useText?: string;
-  type: "add" | "edit" | "delete" | "view" | "remove" | "approve" | "reject";
+  type:
+    | "add"
+    | "edit"
+    | "delete"
+    | "view"
+    | "remove"
+    | "approve"
+    | "reject"
+    | "save";
 }) => {
   return (
     <div>
@@ -30,7 +39,7 @@ const ActionButton = ({
           className="bg-secondary rounded-md text-xs text-secondary-foreground"
         >
           <Edit className="w-2 h-2" />
-          {useText ? useText : "Edit"}
+          <span className="text-xs">{useText ? useText : "Edit"}</span>
         </Button>
       ) : type === "add" ? (
         <Button
@@ -45,7 +54,7 @@ const ActionButton = ({
         <Button
           onClick={onClick}
           disabled={disabled}
-          className="bg-primary text-xs rounded-md text-primary-foreground"
+          className="bg-primary! text-xs rounded-md text-primary-foreground!"
         >
           <Eye />
           <span className="text-xs">{useText ? useText : "View"}</span>
@@ -54,7 +63,7 @@ const ActionButton = ({
         <Button
           onClick={onClick}
           disabled={disabled}
-          className="hover:bg-muted/60 rounded-md text-xs hover:text-muted-foreground bg-destructive text-destructive-foreground"
+          className="hover:bg-muted/60 rounded-md text-xs hover:text-muted-foreground bg-destructive! text-destructive-foreground!"
         >
           <Trash2 />
           <span className="text-xs">{useText ? useText : "Delete"}</span>
@@ -63,7 +72,7 @@ const ActionButton = ({
         <Button
           onClick={onClick}
           disabled={disabled}
-          className="rounded-md text-xs hover:opacity-90 bg-primary text-primary-foreground"
+          className="rounded-md text-xs hover:opacity-90 bg-primary! text-primary-foreground!"
         >
           <ThumbsUp />
           <span className="text-xs">{useText ? useText : "Approve"}</span>
@@ -77,11 +86,20 @@ const ActionButton = ({
           <ThumbsDown />
           <span className="text-xs">{useText ? useText : "Reject"}</span>
         </Button>
+      ) : type === "save" ? (
+        <Button
+          onClick={onClick}
+          disabled={disabled}
+          className="rounded-md text-xs hover:opacity-90 bg-primary! text-primary-foreground!"
+        >
+          <Save />
+          <span className="text-xs">{useText ? useText : "Save Changes"}</span>
+        </Button>
       ) : (
         <Button
           onClick={onClick}
           disabled={disabled}
-          className="hover:bg-muted/60 rounded-md text-xs hover:text-muted-foreground bg-rx-neutral text-rx-neutral-foreground"
+          className="hover:bg-muted/60 rounded-md text-xs hover:text-muted-foreground bg-muted! text-muted-foreground!"
         >
           <Ban />
           <span className="text-xs">{useText ? useText : "Remove"}</span>

@@ -1,4 +1,4 @@
-import type { IRole } from "@/pages/auth/login/common/login";
+import type { ILoginResponse, IRole } from "@/pages/auth/login/common/login";
 
 export interface ICustomer {
   _id?: string;
@@ -41,4 +41,28 @@ export interface IUser {
   token?: string;
   deviceToken?: string;
   createdBy?: string;
+}
+
+export interface IRequestOTPPayload {
+  userId: string;
+  email: string;
+}
+
+export interface IVerifiyOTPPayload {
+  userId: string;
+  otp: string;
+}
+
+export interface IRequestOTPResponse {
+  status: string;
+  message: string;
+  data: {
+    userId: string;
+    email: string;
+  };
+}
+export interface IVerifyOTPResponse {
+  status: string;
+  message: string;
+  data: ILoginResponse;
 }

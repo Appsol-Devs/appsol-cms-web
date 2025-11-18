@@ -23,6 +23,8 @@ export type ILoginResponse = {
   role: IRole;
   isActive: boolean;
   isVerified: boolean;
+  loginCount: number;
+  lastLogin: string;
   status: string;
   createdAt: string;
   updatedAt: string;

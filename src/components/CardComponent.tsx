@@ -25,7 +25,7 @@ const CardComponent = ({
   footer,
 }: ICardComponent) => {
   return (
-    <Card className={clsx("w-full rounded-3xl shadow-sm gap-1!", className)}>
+    <Card className={clsx("w-full rounded-md shadow-sm gap-1!", className)}>
       <CardHeader className="">
         <CardTitle>{headerTitle}</CardTitle>
         <CardDescription>{headerDescription}</CardDescription>

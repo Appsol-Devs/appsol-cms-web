@@ -7,6 +7,7 @@ import {
   Computer,
   Headset,
   LayoutDashboardIcon,
+  Lock,
   Phone,
   PhoneCall,
   Receipt,
@@ -75,6 +76,11 @@ export const sidebarMainMenus: ISidebar[] = [
     name: "Complaints",
     icon: Phone,
     path: allRoutes.COMPLAINTS,
+  },
+  {
+    name: "Users",
+    icon: Lock,
+    path: allRoutes.USERS,
   },
   {
     name: "Analytics",
