@@ -4,25 +4,36 @@ import {
   FLUSH,
   PAUSE,
   PERSIST,
-  //   persistReducer,
+  persistReducer,
   persistStore,
   PURGE,
   REGISTER,
   REHYDRATE,
 } from "redux-persist";
-// import storage from "redux-persist/lib/storage";
+import storage from "redux-persist/lib/storage";
+import { userReducer } from "./pages/auth/login/common/loginSlice";
+import { loginApi } from "./pages/auth/login/common/loginApi";
+import { rolesApi } from "./pages/roles/common/rolesApi";
+import { customersApi } from "./pages/customer/common/customersApi";
+import { settingsApi } from "./pages/settings/common/settingsApi";
+import { apiErrorMiddleware } from "./lib/apiErrorMiddleware";
+import { usersApi } from "./pages/users/common/usersApi";
 
-// const persistConfig = {
-//   key: "root",
-//   storage,
-// };
+const persistConfig = {
+  key: "root",
+  storage,
+};
 
-// const persistedUser = persistReducer(persistConfig, userReducer);
+const persistedUser = persistReducer(persistConfig, userReducer);
 
 export const store = configureStore({
   reducer: {
-    // user: persistedUser,
-    // [usersApi.reducerPath]: usersApi.reducer,
+    user: persistedUser,
+    [loginApi.reducerPath]: loginApi.reducer,
+    [rolesApi.reducerPath]: rolesApi.reducer,
+    [settingsApi.reducerPath]: settingsApi.reducer,
+    [customersApi.reducerPath]: customersApi.reducer,
+    [usersApi.reducerPath]: usersApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -32,9 +43,14 @@ export const store = configureStore({
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
     })
-      .concat
-      //   usersApi.middleware,
-      (),
+      .concat(
+        loginApi.middleware,
+        rolesApi.middleware,
+        settingsApi.middleware,
+        customersApi.middleware,
+        usersApi.middleware
+      )
+      .concat(apiErrorMiddleware),
 });
 
 const persistor = persistStore(store);

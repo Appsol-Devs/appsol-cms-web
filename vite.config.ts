@@ -3,8 +3,13 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 import tailwindcss from "@tailwindcss/vite";
 
+// const BASE_URL = "https://enneadic-mee-authentically.ngrok-free.dev/api/";
+
+// const BASE_URL = "localhost:3000/api/";
+const BASE_URL = "http://192.168.45.33:3000/api";
+
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
@@ -18,4 +23,14 @@ export default defineConfig({
       "@theme": "/src/theme",
     },
   },
-});
+  server: {
+    proxy: {
+      // "/api": "",
+      "/api": {
+        target: mode === "development" ? BASE_URL : BASE_URL,
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ""),
+      },
+    },
+  },
+}));

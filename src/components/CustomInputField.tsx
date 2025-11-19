@@ -93,6 +93,7 @@ const CustomInputField = <T extends Record<string, unknown>>({
   // hideBorder,
   ref,
   type,
+  required,
   control,
   ...props
 }: CustomInputFiledProps<T>) => {
@@ -102,6 +103,7 @@ const CustomInputField = <T extends Record<string, unknown>>({
     <div className={cn("leading-3", customClass)}>
       <Label htmlFor={name} className="text-xs text-onCard">
         {label}
+        {required && <span className="text-destructive">*</span>}
       </Label>
       <div
       // className={cn(
