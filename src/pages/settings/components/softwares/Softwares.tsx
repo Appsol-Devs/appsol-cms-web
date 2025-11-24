@@ -55,6 +55,20 @@ const Softwares = () => {
         ),
       },
       {
+        header: "Status",
+        accessorKey: "status",
+        cell: ({ row }) => (
+          <div className=" flex flex-col items-start gap-1">
+            <Badge
+              variant={row.original.isActive ? "default" : "destructive"}
+              className="font-semibold p-1 text-xs"
+            >
+              {row.original.isActive ? "Active" : "Inactive"}
+            </Badge>
+          </div>
+        ),
+      },
+      {
         header: "Action",
         meta: { icon: <Pen size={14} /> },
         accessorKey: "action",
