@@ -20,6 +20,7 @@ import UsersForm from "@/pages/users/component/UsersForm";
 import CustomersForm from "@/pages/customer/component/CustomersForm";
 import SoftwaresForm from "@/pages/settings/components/softwares/SoftwaresForm";
 import ComplaintTypesForm from "@/pages/settings/components/complaint-types/ComplaintTypesForm";
+import ComplaintCategoriesForm from "@/pages/settings/components/complaint-category/ComplaintCategoriesForm";
 
 const PrivateRoutes = () => {
   return (
@@ -53,6 +54,14 @@ const PrivateRoutes = () => {
       <Route
         path={allRoutes.COMPLAINT_CATEGORIES}
         element={<ComplaintCategories />}
+      />
+      <Route
+        path={allRoutes.ADD_COMPLAINT_CATEGORIES}
+        element={<ComplaintCategoriesForm />}
+      />
+      <Route
+        path={allRoutes.UPDATE_COMPLAINT_CATEGORIES(":id")}
+        element={<ComplaintCategoriesForm />}
       />
       <Route path={allRoutes.SETUP_STATUSES} element={<SetupStatuses />} />
       <Route path={allRoutes.CALL_STATUSES} element={<CallStatuses />} />

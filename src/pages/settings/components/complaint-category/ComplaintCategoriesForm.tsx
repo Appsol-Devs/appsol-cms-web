@@ -2,44 +2,45 @@ import type { ISummarySection } from "@/components/form/MutationFormSummary";
 import MutationFormTemplate from "@/components/form/MutationFormTemplate";
 import { showToast } from "@/components/ui/CustomToast";
 import { cleanPayload } from "@/lib/helpers";
-import { Phone } from "lucide-react";
+import { Headset } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
-import type { IComplaintType } from "../../common/settings";
+import type { IComplaintCategory } from "../../common/settings";
 import {
-  useAddComplaintTypeMutation,
-  useLazyGetAComplaintTypeQuery,
-  useUpdateComplaintTypeMutation,
+  useAddComplaintCategoryMutation,
+  useLazyGetAComplaintCategoryQuery,
+  useUpdateComplaintCategoryMutation,
 } from "../../common/settingsApi";
-import ComplaintTypesFormContent from "./ComplaintTypesFormContent";
+import ComplaintCategoriesFormContent from "./ComplaintCategoriesFormContent";
 
-export type IComplaintTypeFields = Omit<IComplaintType, "_id"> & {};
+export type IComplaintCategoryFields = Omit<IComplaintCategory, "_id"> & {};
 
-const ComplaintTypesForm = () => {
+const ComplaintCategoriesForm = () => {
   const { id } = useParams();
 
-  const [createNewComplaintType, { isLoading: isCreating }] =
-    useAddComplaintTypeMutation();
-  const [updateComplaintType, { isLoading: isUpdating }] =
-    useUpdateComplaintTypeMutation();
-  const [getAComplaintType, { isLoading: isGetting }] =
-    useLazyGetAComplaintTypeQuery();
-  const form = useForm<IComplaintTypeFields>();
+  const [createNewMutation, { isLoading: isCreating }] =
+    useAddComplaintCategoryMutation();
+  const [updateMutation, { isLoading: isUpdating }] =
+    useUpdateComplaintCategoryMutation();
+  const [getSelectedData, { isLoading: isGetting }] =
+    useLazyGetAComplaintCategoryQuery();
+  const form = useForm<IComplaintCategoryFields>();
   const { watch, getValues, reset } = form;
   const values = watch();
 
   const navigate = useNavigate();
-  const [selectedComplaintType, setSelectedComplaintTypes] =
-    useState<IComplaintType | null>(null);
+  const [selectedData, setSelectedData] = useState<IComplaintCategory | null>(
+    null
+  );
 
   const fetchData = async (id: string) => {
     if (!id) return;
 
     try {
-      const res = await getAComplaintType(id).unwrap();
+      const res = await getSelectedData(id).unwrap();
       if (res) {
-        setSelectedComplaintTypes(res);
+        setSelectedData(res);
       }
     } catch (err) {
       if (!err) return;
@@ -47,7 +48,7 @@ const ComplaintTypesForm = () => {
     }
   };
 
-  const resetFormWithData = (data: IComplaintType) => {
+  const resetFormWithData = (data: IComplaintCategory) => {
     if (!data) return;
     reset({
       ...data,
@@ -64,24 +65,24 @@ const ComplaintTypesForm = () => {
   }, [id]);
 
   useEffect(() => {
-    if (id && selectedComplaintType) {
-      resetFormWithData(selectedComplaintType);
+    if (id && selectedData) {
+      resetFormWithData(selectedData);
     }
-  }, [selectedComplaintType]);
+  }, [selectedData]);
 
-  const handleDataSubmission = async (payload: IComplaintType) => {
+  const handleDataSubmission = async (payload: IComplaintCategory) => {
     if (!payload) return;
     try {
       const res = id
-        ? await updateComplaintType({ _id: id, ...payload }).unwrap()
-        : await createNewComplaintType(payload).unwrap();
+        ? await updateMutation({ _id: id, ...payload }).unwrap()
+        : await createNewMutation(payload).unwrap();
 
       if (res) {
         showToast({
           title: "Success",
           message: id
-            ? "Complaint type updated successfully."
-            : "Complaint type created successfully.",
+            ? "Complaint category updated successfully."
+            : "Complaint category created successfully.",
           type: "success",
         });
         navigate(-1);
@@ -105,7 +106,7 @@ const ComplaintTypesForm = () => {
       }
     }
 
-    const payload: IComplaintType = cleanPayload({
+    const payload: IComplaintCategory = cleanPayload({
       name: data.name,
       description: data.description,
       isActive: id ? data.isActive : undefined,
@@ -118,7 +119,7 @@ const ComplaintTypesForm = () => {
   const summarySections: ISummarySection[] = [
     {
       title: "Information",
-      icon: <Phone className="w-4 h-4" />,
+      icon: <Headset className="w-4 h-4" />,
       data: [
         { label: "Name", value: values?.name, required: true },
         { label: "Description", value: values?.description },
@@ -130,17 +131,19 @@ const ComplaintTypesForm = () => {
 
   return (
     <div>
-      <MutationFormTemplate<IComplaintTypeFields>
+      <MutationFormTemplate<IComplaintCategoryFields>
         form={form}
         pageSummary={{
-          title: id ? "Update Complaint Type" : "Create New Complaint Type",
-          description: `Enter all the details of the complaint type you want to ${
+          title: id
+            ? "Update Complaint Category"
+            : "Create New Complaint Category",
+          description: `Enter all the details of the complaint category you want to ${
             id ? "update" : "create"
           }.`,
-          icon: Phone,
+          icon: Headset,
         }}
         formContent={
-          <ComplaintTypesFormContent
+          <ComplaintCategoriesFormContent
             isUpdate={!!id}
             form={form}
             isLoading={isLoading}
@@ -149,18 +152,20 @@ const ComplaintTypesForm = () => {
         submitData={submitData}
         pageTitle={
           id
-            ? `Update Complaint Type - ${selectedComplaintType?.name ?? ""} `
-            : "Add Complaint Type"
+            ? `Update Complaint Category - ${selectedData?.name ?? ""} `
+            : "Add Complaint Category"
         }
         loading={isLoading}
         mutationFormSummary={{
           summaryData: summarySections,
-          summaryMainTitle: "Complaint Type Details Summary",
-          summarySaveButtonText: id ? "Save Changes" : "Save Complaint Type",
+          summaryMainTitle: "Complaint Category Details Summary",
+          summarySaveButtonText: id
+            ? "Save Changes"
+            : "Save Complaint Category",
         }}
       />
     </div>
   );
 };
 
-export default ComplaintTypesForm;
+export default ComplaintCategoriesForm;
