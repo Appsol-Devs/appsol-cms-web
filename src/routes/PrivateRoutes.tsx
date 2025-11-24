@@ -20,6 +20,8 @@ import UsersForm from "@/pages/users/component/UsersForm";
 import CustomersForm from "@/pages/customer/component/CustomersForm";
 import SoftwaresForm from "@/pages/settings/components/softwares/SoftwaresForm";
 import ComplaintTypesForm from "@/pages/settings/components/complaint-types/ComplaintTypesForm";
+import ComplaintCategoriesForm from "@/pages/settings/components/complaint-category/ComplaintCategoriesForm";
+import SubscriptionTypesForm from "@/pages/settings/components/subscription-types/SubscriptionTypesForm";
 
 const PrivateRoutes = () => {
   return (
@@ -54,11 +56,27 @@ const PrivateRoutes = () => {
         path={allRoutes.COMPLAINT_CATEGORIES}
         element={<ComplaintCategories />}
       />
+      <Route
+        path={allRoutes.ADD_COMPLAINT_CATEGORIES}
+        element={<ComplaintCategoriesForm />}
+      />
+      <Route
+        path={allRoutes.UPDATE_COMPLAINT_CATEGORIES(":id")}
+        element={<ComplaintCategoriesForm />}
+      />
       <Route path={allRoutes.SETUP_STATUSES} element={<SetupStatuses />} />
       <Route path={allRoutes.CALL_STATUSES} element={<CallStatuses />} />
       <Route
         path={allRoutes.SUBSCRIPTION_TYPES}
         element={<SubscriptionTypes />}
+      />
+      <Route
+        path={allRoutes.ADD_SUBSCRIPTION_TYPE}
+        element={<SubscriptionTypesForm />}
+      />
+      <Route
+        path={allRoutes.UPDATE_SUBSCRIPTION_TYPE(":id")}
+        element={<SubscriptionTypesForm />}
       />
       <Route path={allRoutes.LEAD_STATUSES} element={<LeadStatuses />} />
       <Route path={allRoutes.LEAD_NEXT_STEPS} element={<LeadNextSteps />} />
