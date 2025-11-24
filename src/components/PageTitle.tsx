@@ -1,6 +1,4 @@
-import { ArrowLeft } from "lucide-react";
-import { Button } from "./ui/button";
-import { useNavigate } from "react-router-dom";
+import BackButton from "./BackButton";
 
 const PageTitle = ({
   title,
@@ -15,18 +13,9 @@ const PageTitle = ({
   showBack?: boolean;
   isSmaller?: boolean;
 }) => {
-  const navigate = useNavigate();
   return (
-    <div className="flex space-x-1 p-0">
-      {showBack && (
-        <Button
-          className="bg-transparent text-primary hover:bg-muted-foreground hover:text-white"
-          size={"icon"}
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft />
-        </Button>
-      )}
+    <div className="flex space-x-1 p-0 items-center">
+      {showBack && <BackButton />}
       <div>
         <p
           className={`${

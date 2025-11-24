@@ -5,7 +5,6 @@ import DateRangeComponent, {
 import LoadingComponent from "@/components/LoadingComponent";
 import PageTitle from "@/components/PageTitle";
 import SearchComponent from "@/components/SearchComponent";
-import { showToast } from "@/components/ui/CustomToast";
 import type { IBaseQueryParam } from "@/lib/api";
 import { usePagination, type IMetaData } from "@/lib/pagination";
 import { isUserLoggedIn } from "@/lib/utils";
@@ -177,6 +176,7 @@ const FeatureContentRenderer = <
             .unwrap()
             .then((res) => {
               if (res) {
+                console.log("Res: ", res);
                 // DATA
                 setAllData(res.contents as R[]);
 

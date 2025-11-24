@@ -78,7 +78,7 @@ export function DatePicker({
       <Calendar
         mode="single"
         disabled={disabled}
-        captionLayout="dropdown-buttons"
+        // captionLayout="dropdown-buttons"
         selected={date}
         defaultMonth={new Date()}
         onSelect={handleDateSelect}
@@ -173,7 +173,7 @@ export function DatePicker({
         </div>
       ) : null}
       {title && !showInPopover ? (
-        <div className="font-bold text-sm flex items-center">
+        <div className="font-bold text-sm bg-gray-300 flex items-center">
           <CalendarIcon className="mr-2 h-4 w-4" />
           <div className="text-xs flex items-center space-x-1">
             <p className="mr-1">{title}</p>
@@ -186,9 +186,9 @@ export function DatePicker({
         {showInPopover ? (
           <Popover>
             <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className="w-full justify-start text-left font-normal"
+              <div
+                // variant="outline"
+                className="w-full flex text-xs border-2 justify-start text-left p-1 rounded-sm bg-accent font-normal "
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
                 {date ? (
@@ -196,7 +196,7 @@ export function DatePicker({
                 ) : (
                   <span className="text-muted-foreground">{placeholder}</span>
                 )}
-              </Button>
+              </div>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0">
               {innerContent}

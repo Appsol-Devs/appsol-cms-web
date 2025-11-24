@@ -1,5 +1,13 @@
 import { format } from "date-fns";
-import { Mail, NotepadText, Pen, User } from "lucide-react";
+import {
+  Briefcase,
+  Mail,
+  MailCheck,
+  MailX,
+  NotepadText,
+  Pen,
+  User,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import ActionButton from "@/components/ActionButtons";
 import { useNavigate } from "react-router-dom";
@@ -51,8 +59,33 @@ const Users = () => {
         meta: { icon: <Mail size={14} /> },
         cell: ({ row }) => (
           <div className=" flex flex-col items-start gap-1">
+            <div className="font-semibold p-0.5 text-xs flex flex-col gap-0.5">
+              <Badge
+                variant={row.original.isVerified ? "secondary" : "destructive"}
+                className="rounded-sm!"
+              >
+                {row.original?.isVerified ? (
+                  <MailCheck size={10} />
+                ) : (
+                  <MailX size={10} />
+                )}
+                {row.original?.email ?? ""}
+              </Badge>
+              <span className="font-semibold text-xs"></span>
+            </div>
+          </div>
+        ),
+      },
+      {
+        header: "Role",
+        accessorKey: "role",
+        meta: { icon: <Briefcase size={14} /> },
+        cell: ({ row }) => (
+          <div className=" flex flex-col items-start gap-1">
             <span className="font-semibold p-0.5 text-xs">
-              <Badge className="rounded-sm!">{row.original?.email ?? ""}</Badge>
+              <Badge variant="outline" className="rounded-sm!">
+                {row.original?.role?.name ?? "N/A"}
+              </Badge>
             </span>
           </div>
         ),

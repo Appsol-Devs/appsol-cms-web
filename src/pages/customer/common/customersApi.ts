@@ -40,6 +40,12 @@ export const customersApi = createApi({
         };
       },
     }),
+    getACustomer: builder.query<ICustomer, string>({
+      query: (id) => ({
+        url: "/customers/" + id,
+      }),
+      transformResponse: async (response: Response) => response.json(),
+    }),
     addCustomer: builder.mutation<ICustomer, ICustomer>({
       query: (payload) => ({
         url: "customers",
@@ -66,6 +72,7 @@ export const customersApi = createApi({
 export const {
   useLazyGetCustomersQuery,
   useAddCustomerMutation,
+  useLazyGetACustomerQuery,
   useUpdateCustomerMutation,
   useDeleteCustomerMutation,
 } = customersApi;

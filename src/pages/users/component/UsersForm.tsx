@@ -1,45 +1,43 @@
-import ActionButton from "@/components/ActionButtons";
-import PageSummary from "@/components/PageSummary";
-import PageTitle from "@/components/PageTitle";
-import { User } from "lucide-react";
-import UserBasicDetails from "./UserBasicDetails";
+import type { DropDownOption } from "@/components/DropdownComponent";
+import type { ISummarySection } from "@/components/form/MutationFormSummary";
+import MutationFormTemplate from "@/components/form/MutationFormTemplate";
+import { showToast } from "@/components/ui/CustomToast";
+import { cleanPayload } from "@/lib/helpers";
+import type { IUser } from "@/pages/customer/common/customers";
+import { BookOpenText, Shield } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   useAddUserMutation,
   useLazyGetAUserQuery,
   useUpdateUserMutation,
 } from "../common/usersApi";
-import { useForm } from "react-hook-form";
-import type { IUser } from "@/pages/customer/common/customers";
-import { showToast } from "@/components/ui/CustomToast";
-import { cleanPayload } from "@/lib/helpers";
-import UserBasicDetailsSummary from "./UserBasicDetailsSummary";
-import ConfirmationDialog from "@/components/ConfirmationDialog";
-import type { DropDownOption } from "@/components/DropdownComponent";
+import UsersFormContent from "./UsersFormContent";
 
 export type IUserFields = Omit<IUser, "_id"> & {
   role?: DropDownOption<string>;
   confirm_password?: string;
 };
+
 const UsersForm = () => {
   const { id } = useParams();
+
   const [createNewUser, { isLoading: isCreating }] = useAddUserMutation();
   const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation();
   const [getAUser, { isLoading: isGetting }] = useLazyGetAUserQuery();
   const form = useForm<IUserFields>();
+  const { watch, getValues, reset } = form;
+  const values = watch();
 
   const navigate = useNavigate();
   const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
 
-  const { watch, getValues, reset } = form;
-  const formValues = watch();
-
-  const fetchUserData = async (customerId: string) => {
-    if (!customerId) return;
+  const fetchUserData = async (id: string) => {
+    if (!id) return;
 
     try {
-      const res = await getAUser(customerId).unwrap();
+      const res = await getAUser(id).unwrap();
       if (res) {
         setSelectedUser(res);
       }
@@ -49,30 +47,18 @@ const UsersForm = () => {
     }
   };
 
-  const resetFormWithCustomerData = (data: IUser) => {
+  const resetFormWithData = (data: IUser) => {
     if (!data) return;
-    // reset({
-    //   ...data,
-    //   customerType: data.customerType
-    //     ? { label: data.customerType, value: data.customerType }
-    //     : undefined,
-    //   region: data.region
-    //     ? { label: data.region, value: data.region }
-    //     : undefined,
-    //   gender: data.gender
-    //     ? { label: data.gender, value: data.gender }
-    //     : undefined,
-    //   idType1: data.idType1
-    //     ? { label: data.idType1, value: data.idType1 }
-    //     : undefined,
-    //   idType2: data.idType2
-    //     ? { label: data.idType2, value: data.idType2 }
-    //     : undefined,
-    //   maritalStatus: data.maritalStatus
-    //     ? { label: data.maritalStatus, value: data.maritalStatus }
-    //     : undefined,
-    //   title: data.title ? { label: data.title, value: data.title } : undefined,
-    // });
+    reset({
+      ...data,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      email: data.email,
+      phone: data.phone,
+      role: data.role
+        ? { label: data.role.name, value: data.role._id as string }
+        : undefined,
+    });
   };
 
   useEffect(() => {
@@ -83,7 +69,7 @@ const UsersForm = () => {
 
   useEffect(() => {
     if (id && selectedUser) {
-      resetFormWithCustomerData(selectedUser);
+      resetFormWithData(selectedUser);
     }
   }, [selectedUser]);
 
@@ -112,22 +98,30 @@ const UsersForm = () => {
   const submitData = () => {
     const data = getValues();
 
+    const passwordsMatch = data.password === data.confirm_password;
+
+    const isUpdate = id ? true : false;
+
     const requiredFields = [
       {
-        field: data.password === data.confirm_password,
+        field: passwordsMatch,
         message: "Passwords do not match",
-        skip: id,
+        skip: isUpdate,
       },
       { field: data.firstName, message: "First Name is required." },
       { field: data.lastName, message: "Last Name is required." },
       { field: data.phone, message: "Phone Number is required." },
-      { field: data.password, message: "Password is required." },
+      {
+        field: data.password,
+        message: "Password is required.",
+        skip: isUpdate,
+      },
       { field: data.email, message: "Email is required." },
       { field: data.role, message: "Role is required." },
     ];
 
     for (const { field, message, skip } of requiredFields) {
-      if (!field || !skip) {
+      if (!field && !skip) {
         showToast({ title: "Info", message, type: "info", duration: 1000 });
         return;
       }
@@ -139,47 +133,76 @@ const UsersForm = () => {
       lastName: data.lastName,
       email: data.email,
       phone: data.phone,
-      password: data.password,
+      password: id ? undefined : data.password,
     });
 
+    // console.log(payload);
     handleDataSubmission(payload);
   };
+
+  const summarySections: ISummarySection[] = [
+    {
+      title: "Basic Information",
+      icon: <BookOpenText className="w-4 h-4" />,
+      data: [
+        { label: "First Name", value: values?.firstName, required: true },
+        { label: "Last Name", value: values?.lastName, required: true },
+        {
+          label: "Phone Number",
+          value: values?.phone,
+          required: true,
+        },
+      ],
+    },
+    {
+      title: "Identification & Security Information",
+      icon: <Shield className="w-4 h-4" />,
+      data: [
+        {
+          label: "Role",
+          value: values?.role?.label as string,
+          required: true,
+        },
+        {
+          label: "Email",
+          value: values?.email as string,
+          required: true,
+        },
+      ],
+    },
+  ];
 
   const isLoading = isGetting || isCreating || isUpdating;
 
   return (
-    <div className="space-y-1">
-      <PageTitle title="Add User" />
-      <PageSummary
-        icon={User}
-        title="Create New User"
-        description="Enter all the details of the user you want to create."
-        actionComponent={
-          <div className="flex items-center gap-2">
-            <ActionButton type="save" useText="Save User" />
-            <ConfirmationDialog
-              onConfirmClicked={() => form.reset()}
-              title="Clear Form"
-              content={
-                <div className="text-center">
-                  <p>Are you sure you want to clear this form?</p>
-                  <p>If you proceed, you will remove all entered data.</p>
-                </div>
-              }
-              rightActionTitle="Proceed"
-              trigger={<ActionButton type="remove" useText="Reset Form" />}
-            />
-          </div>
+    <div>
+      <MutationFormTemplate<IUserFields>
+        form={form}
+        pageSummary={{
+          title: id ? "Update User" : "Create New User",
+          description: `Enter all the details of the user you want to ${
+            id ? "update" : "create"
+          }.`,
+          icon: BookOpenText,
+        }}
+        formContent={
+          <UsersFormContent isUpdate={!!id} form={form} isLoading={isLoading} />
         }
+        submitData={submitData}
+        pageTitle={
+          id
+            ? `Update User - ${selectedUser?.firstName ?? ""} ${
+                selectedUser?.lastName ?? ""
+              }`
+            : "Add User"
+        }
+        loading={isLoading}
+        mutationFormSummary={{
+          summaryData: summarySections,
+          summaryMainTitle: "User Details Summary",
+          summarySaveButtonText: id ? "Save Changes" : "Save User",
+        }}
       />
-      <div className="w-full flex md:flex-row flex-col gap-4">
-        <UserBasicDetails isLoading={isLoading} form={form} />
-        <UserBasicDetailsSummary
-          isLoading={isLoading}
-          submitData={submitData}
-          values={formValues}
-        />
-      </div>
     </div>
   );
 };
