@@ -50,6 +50,12 @@ export const settingsApi = createApi({
         };
       },
     }),
+    getASoftware: builder.query<ISoftware, string>({
+      query: (id) => ({
+        url: "/softwares/" + id,
+      }),
+      transformResponse: async (response: Response) => response.json(),
+    }),
     addSoftware: builder.mutation<ISoftware, ISoftware>({
       query: (payload) => ({
         url: "softwares",
@@ -94,6 +100,12 @@ export const settingsApi = createApi({
         };
       },
     }),
+    getAComplaintType: builder.query<IComplaintType, string>({
+      query: (id) => ({
+        url: "/complaint_types/" + id,
+      }),
+      transformResponse: async (response: Response) => response.json(),
+    }),
     addComplaintType: builder.mutation<IComplaintType, IComplaintType>({
       query: (payload) => ({
         url: "complaint_types",
@@ -137,6 +149,12 @@ export const settingsApi = createApi({
           contents: data as IComplaintCategory[],
         };
       },
+    }),
+    getAComplaintCategory: builder.query<IComplaintCategory, string>({
+      query: (id) => ({
+        url: "/complaint_categories/" + id,
+      }),
+      transformResponse: async (response: Response) => response.json(),
     }),
     addComplaintCategory: builder.mutation<
       IComplaintCategory,
@@ -188,6 +206,12 @@ export const settingsApi = createApi({
         };
       },
     }),
+    getACallStatus: builder.query<ICallStatus, string>({
+      query: (id) => ({
+        url: "/call_statuses/" + id,
+      }),
+      transformResponse: async (response: Response) => response.json(),
+    }),
     addCallStatus: builder.mutation<ICallStatus, ICallStatus>({
       query: (payload) => ({
         url: "call_statuses",
@@ -232,6 +256,12 @@ export const settingsApi = createApi({
         };
       },
     }),
+    getASetupStatus: builder.query<ISetupStatus, string>({
+      query: (id) => ({
+        url: "/setup_statuses/" + id,
+      }),
+      transformResponse: async (response: Response) => response.json(),
+    }),
     addSetupStatus: builder.mutation<ISetupStatus, ISetupStatus>({
       query: (payload) => ({
         url: "setup_statuses",
@@ -275,6 +305,12 @@ export const settingsApi = createApi({
           contents: data as ISubscriptionType[],
         };
       },
+    }),
+    getASubscriptionType: builder.query<ISubscriptionType, string>({
+      query: (id) => ({
+        url: "/subscription_types/" + id,
+      }),
+      transformResponse: async (response: Response) => response.json(),
     }),
     addSubscriptionType: builder.mutation<ISubscriptionType, ISubscriptionType>(
       {
@@ -325,6 +361,12 @@ export const settingsApi = createApi({
         };
       },
     }),
+    getALeadStatus: builder.query<ILeadStatus, string>({
+      query: (id) => ({
+        url: "/lead_statuses/" + id,
+      }),
+      transformResponse: async (response: Response) => response.json(),
+    }),
     addLeadStatus: builder.mutation<ILeadStatus, ILeadStatus>({
       query: (payload) => ({
         url: "lead_statuses",
@@ -363,11 +405,18 @@ export const settingsApi = createApi({
       },
       transformResponse: async (response: Response) => {
         const data: ILeadNextStep[] = await response.json();
+        console.log("response 11", response.headers);
         return {
           pagination: getPaginationMetaDataV2(response) as IPagination,
           contents: data as ILeadNextStep[],
         };
       },
+    }),
+    getALeadNextStep: builder.query<ILeadNextStep, string>({
+      query: (id) => ({
+        url: "/lead_next_steps/" + id,
+      }),
+      transformResponse: async (response: Response) => response.json(),
     }),
     addLeadNextStep: builder.mutation<ILeadNextStep, ILeadNextStep>({
       query: (payload) => ({
@@ -425,4 +474,12 @@ export const {
   useAddLeadNextStepMutation,
   useUpdateLeadNextStepMutation,
   useDeleteLeadNextStepMutation,
+  useLazyGetACallStatusQuery,
+  useLazyGetASetupStatusQuery,
+  useLazyGetASubscriptionTypeQuery,
+  useLazyGetALeadStatusQuery,
+  useLazyGetALeadNextStepQuery,
+  useLazyGetASoftwareQuery,
+  useLazyGetAComplaintTypeQuery,
+  useLazyGetAComplaintCategoryQuery,
 } = settingsApi;

@@ -47,6 +47,7 @@ export const usersApi = createApi({
       query: (id) => ({
         url: "/users/" + id,
       }),
+      transformResponse: async (response: Response) => response.json(),
     }),
     requestVerificationOTP: builder.mutation<
       IRequestOTPResponse,

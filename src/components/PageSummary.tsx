@@ -21,7 +21,7 @@ const PageSummary = ({
 }: Props) => {
   return (
     <div className="">
-      <div className="border-2 flex lg:flex-row flex-col items-center justify-between bg-rx-card text-rx-card-foreground py-4 px-6 rounded-lg lg:rounded-md shadow-md">
+      <div className="border-2 flex lg:flex-row flex-col items-center justify-between bg-rx-card text-rx-card-foreground py-4 px-6 rounded-lg lg:rounded-md shadow-sm">
         <div className="flex items-center gap-2">
           <Icon className="h-4 w-4" />
           <div className="flex flex-col">

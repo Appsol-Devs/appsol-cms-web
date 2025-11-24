@@ -17,6 +17,9 @@ import SubscriptionTypes from "@/pages/settings/components/subscription-types/Su
 import Users from "@/pages/users/component/Users";
 import UsersView from "@/pages/users/component/UsersView";
 import UsersForm from "@/pages/users/component/UsersForm";
+import CustomersForm from "@/pages/customer/component/CustomersForm";
+import SoftwaresForm from "@/pages/settings/components/softwares/SoftwaresForm";
+import ComplaintTypesForm from "@/pages/settings/components/complaint-types/ComplaintTypesForm";
 
 const PrivateRoutes = () => {
   return (
@@ -27,8 +30,26 @@ const PrivateRoutes = () => {
         path={allRoutes.VIEW_CUSTOMER(":id")}
         element={<CustomersView />}
       />
+      <Route path={allRoutes.ADD_CUSTOMER} element={<CustomersForm />} />
+      <Route
+        path={allRoutes.UPDATE_CUSTOMER(":id")}
+        element={<CustomersForm />}
+      />
       <Route path={allRoutes.SOFTWARES} element={<Softwares />} />
+      <Route path={allRoutes.ADD_SOFTWARE} element={<SoftwaresForm />} />
+      <Route
+        path={allRoutes.UPDATE_SOFTWARE(":id")}
+        element={<SoftwaresForm />}
+      />
       <Route path={allRoutes.COMPLAINT_TYPES} element={<ComplaintTypes />} />
+      <Route
+        path={allRoutes.ADD_COMPLAINT_TYPE}
+        element={<ComplaintTypesForm />}
+      />
+      <Route
+        path={allRoutes.UPDATE_COMPLAINT_TYPE(":id")}
+        element={<ComplaintTypesForm />}
+      />
       <Route
         path={allRoutes.COMPLAINT_CATEGORIES}
         element={<ComplaintCategories />}

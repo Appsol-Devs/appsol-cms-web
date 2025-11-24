@@ -30,7 +30,7 @@ export interface IUser {
   lastName?: string;
   email?: string;
   phone?: string;
-  role?: IRole | string;
+  role?: IRole;
   isActive?: boolean;
   isVerified?: boolean;
   imageUrl?: string;

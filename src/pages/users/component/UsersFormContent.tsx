@@ -1,22 +1,25 @@
 import CardComponent from "@/components/CardComponent";
-import { Separator } from "@/components/ui/separator";
-import { type UseFormReturn } from "react-hook-form";
-import { BookOpenText } from "lucide-react";
-import { useLazyGetRolesQuery } from "@/pages/roles/common/rolesApi";
-import type { IUserFields } from "./UsersForm";
-import { useEffect, useState } from "react";
-import type { DropDownOption } from "@/components/DropdownComponent";
 import CustomInputField from "@/components/CustomInputField";
-import DropDownComponent from "@/components/DropdownComponent";
+import { Separator } from "@/components/ui/separator";
+import { BookOpenText } from "lucide-react";
+import type { UseFormReturn } from "react-hook-form";
+import DropDownComponent, {
+  type DropDownOption,
+} from "@/components/DropdownComponent";
+import { useLazyGetRolesQuery } from "@/pages/roles/common/rolesApi";
+import { useEffect, useState } from "react";
+import type { IUserFields } from "./UsersForm";
 
-const UserBasicDetails = ({
-  form,
-  isLoading,
-}: {
-  form: UseFormReturn<IUserFields, any, IUserFields>;
+interface IField {
   isLoading?: boolean;
-}) => {
+  form: UseFormReturn<IUserFields, any, IUserFields>;
+  isUpdate?: boolean;
+}
+
+const UsersFormContent = ({ isLoading, form, isUpdate }: IField) => {
   const [getAllRoles] = useLazyGetRolesQuery();
+
+  const isVerified = form.watch("isVerified");
 
   const [roleOptions, setRoleOptions] = useState<DropDownOption[]>([]);
 
@@ -33,11 +36,9 @@ const UserBasicDetails = ({
       }
     });
   }, []);
-
   const { control, register } = form;
-
   return (
-    <div className="md:w-2/3 space-y-2">
+    <div className="space-y-2">
       <CardComponent
         headerTitle={
           <>
@@ -55,14 +56,6 @@ const UserBasicDetails = ({
       >
         <div>
           <div className="grid grid-cols-2 gap-4">
-            {/* <DropDownComponent
-              title="Title"
-              disabled={isLoading}
-              control={control}
-              options={titleOptions}
-              name="title"
-              label="Select a title"
-            /> */}
             <CustomInputField<IUserFields>
               type="text"
               label="First Name"
@@ -152,38 +145,43 @@ const UserBasicDetails = ({
                   message: "Please enter a valid email address.",
                 },
               }}
+              disabled={isLoading || isVerified}
               type="email"
               name="email"
               label="Email"
             />
-            <CustomInputField<IUserFields>
-              type="password"
-              name="password"
-              required
-              register={register}
-              label="Password"
-              rules={{
-                required: "Password is required.",
-                min: {
-                  value: 8,
-                  message: "Password must be at least 8 characters long.",
-                },
-              }}
-            />
-            <CustomInputField<IUserFields>
-              type="password"
-              name="confirm_password"
-              register={register}
-              required
-              label="Confirm Password"
-              rules={{
-                required: "Password is required.",
-                min: {
-                  value: 8,
-                  message: "Password must be at least 8 characters long.",
-                },
-              }}
-            />
+            {!isUpdate && (
+              <CustomInputField<IUserFields>
+                type="password"
+                name="password"
+                required
+                register={register}
+                label="Password"
+                rules={{
+                  required: "Password is required.",
+                  min: {
+                    value: 8,
+                    message: "Password must be at least 8 characters long.",
+                  },
+                }}
+              />
+            )}
+            {!isUpdate && (
+              <CustomInputField<IUserFields>
+                type="password"
+                name="confirm_password"
+                register={register}
+                required
+                label="Confirm Password"
+                rules={{
+                  required: "Password is required.",
+                  min: {
+                    value: 8,
+                    message: "Password must be at least 8 characters long.",
+                  },
+                }}
+              />
+            )}
           </div>
         </div>
       </CardComponent>
@@ -191,4 +189,4 @@ const UserBasicDetails = ({
   );
 };
 
-export default UserBasicDetails;
+export default UsersFormContent;

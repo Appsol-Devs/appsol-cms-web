@@ -59,30 +59,47 @@ export const getPaginationMetaData = (meta: FetchBaseQueryMeta | undefined) => {
   return paginationState;
 };
 
-export const getPaginationMetaDataV2 = (response: Response | undefined) => {
-  let paginationState: IPagination | null = null;
+export const getPaginationMetaDataV2 = (
+  response: Response | undefined
+): IPagination | null => {
+  if (!response) return null;
 
-  if (response) {
-    // console.log("response", response);
-    const headers = response?.headers ?? {};
-    paginationState = {
-      totalCounts: Number(headers.get("_meta_total_count") ?? "0"),
-      metaData:
-        headers &&
-        (Object.fromEntries(
-          [...(response?.headers.entries() ?? {})]
-            .filter(
-              ([key]) => key.startsWith("_meta_") || key.startsWith("_metal_")
-            ) // Filter headers that start with "_meta_  /#|_/g"
-            .map(([key, value]) => [
-              key.replace(/_meta_|_metal_/g, ""),
-              Number(value),
-            ]) // Remove prefix and convert to number
-        ) as unknown as IMetaData),
-    };
+  const paginationHeader = response.headers.get("x-pagination");
+  if (!paginationHeader) return null;
+
+  let parsed: any;
+  try {
+    parsed = JSON.parse(paginationHeader);
+  } catch (err) {
+    console.error("Invalid x-pagination JSON:", paginationHeader);
+    return null;
   }
 
-  return paginationState;
+  const totalPages = Number(parsed.totalPages ?? 0);
+  const currentPage = Number(parsed.pageCount ?? 1);
+  const totalCount = Number(parsed.totalCount ?? 0);
+  const pageSize = Number(parsed.size ?? 0);
+
+  const hasNextPage = currentPage < totalPages;
+  const hasPrevPage = currentPage > 1;
+
+  const metaData: IMetaData = {
+    total_count: totalCount,
+    total_pages: totalPages,
+    page_number: currentPage,
+    page_size: pageSize,
+    has_next_page: hasNextPage,
+    has_prev_page: hasPrevPage,
+    next_page: hasNextPage ? currentPage + 1 : null,
+    prev_page: hasPrevPage ? currentPage - 1 : null,
+  };
+
+  const pagination: IPagination = {
+    totalCounts: totalCount,
+    metaData,
+  };
+
+  return pagination;
 };
 
 export interface PaginatedResponse<T> {

@@ -1,6 +1,6 @@
 export interface ISoftware {
   name?: string;
-  _id: string;
+  _id?: string;
   softwareCode?: string;
   description?: string;
   isActive?: boolean;
