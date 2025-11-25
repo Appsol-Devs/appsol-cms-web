@@ -4,14 +4,13 @@ import {
   useVerifyOTPMutation,
 } from "@/pages/users/common/usersApi";
 import type { RootState } from "@/store";
-import { useState, type ChangeEvent } from "react";
+import { useState } from "react";
 import { useSelector } from "react-redux";
 import type { ILoginResponse } from "./common/login";
 import type {
   IRequestOTPPayload,
   IVerifiyOTPPayload,
 } from "@/pages/customer/common/customers";
-import CustomInputField from "@/components/CustomInputField";
 import { showToast } from "@/components/ui/CustomToast";
 import { useNavigate } from "react-router-dom";
 import { allRoutes } from "@/utils/routes";
@@ -19,6 +18,12 @@ import LoadingComponent from "@/components/LoadingComponent";
 import { Mail } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import BackButton from "@/components/BackButton";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
+import { REGEXP_ONLY_DIGITS } from "input-otp";
 
 const LoginOTPVerification = () => {
   const [requestVerificationOTP, { isLoading: isRequesting }] =
@@ -73,42 +78,62 @@ const LoginOTPVerification = () => {
         <div className="absolute top-5 left-5">
           <BackButton />
         </div>
-        {otpSent ? (
-          <div>
-            <CustomInputField
-              disabled={loading}
-              type="text"
-              onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                setUserOTP(event.target.value)
-              }
-            />
-            <Button disabled={loading} onClick={() => verifyOTP()}>
-              Verify OTP
-            </Button>
-          </div>
-        ) : (
-          <div className="p-4 space-y-2 flex flex-col items-center justify-between">
-            <p className="text-2xl">
-              Welcome,{" "}
-              <span className="font-bold">
-                {user.firstName ?? ""} {user.lastName ?? ""}
-              </span>
-            </p>
-            <p className="text-center">
-              You Are Not Verified. Please click on the button below to get
-              verification OTP
-            </p>
-            <Badge variant={"secondary"}>{user.email}</Badge>
+        <div className="p-4 space-y-2 flex flex-col items-center justify-between border">
+          <p className="text-2xl">
+            Welcome,{" "}
+            <span className="font-bold">
+              {user.firstName ?? ""} {user.lastName ?? ""}
+            </span>
+          </p>
+          <p className="text-center">
+            You Are Not Verified. Please click on the button below to get
+            verification OTP
+          </p>
+          <Badge variant={"secondary"}>{user.email}</Badge>
+          {otpSent ? (
+            <div className="p-4 space-y-2 text-center">
+              <InputOTP
+                onChange={(newValue) => setUserOTP(newValue)}
+                maxLength={6}
+                pattern={REGEXP_ONLY_DIGITS}
+                disabled={loading}
+                placeholder="- - - - - -"
+              >
+                <InputOTPGroup>
+                  <InputOTPSlot index={0} />
+                  <InputOTPSlot index={1} />
+                  <InputOTPSlot index={2} />
+                  <InputOTPSlot index={3} />
+                  <InputOTPSlot index={4} />
+                  <InputOTPSlot index={5} />
+                </InputOTPGroup>
+              </InputOTP>
+              {/* <CustomInputField
+                disabled={loading}
+                type="text"
+                onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                  setUserOTP(event.target.value)
+                }
+              /> */}
+              <Button
+                className="text-sm"
+                disabled={loading}
+                onClick={() => verifyOTP()}
+              >
+                Verify OTP
+              </Button>
+            </div>
+          ) : (
             <Button
-              className="min-w-[250px] bg-primary! text-primary-foreground!"
+              className="min-w-[250px] bg-primary! text-primary-foreground! text-sm"
               disabled={loading}
               onClick={() => requestOTP()}
             >
               <Mail />
               Request OTP
             </Button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
