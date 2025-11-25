@@ -22,6 +22,9 @@ import SoftwaresForm from "@/pages/settings/components/softwares/SoftwaresForm";
 import ComplaintTypesForm from "@/pages/settings/components/complaint-types/ComplaintTypesForm";
 import ComplaintCategoriesForm from "@/pages/settings/components/complaint-category/ComplaintCategoriesForm";
 import SubscriptionTypesForm from "@/pages/settings/components/subscription-types/SubscriptionTypesForm";
+import Complaints from "@/pages/complaint/component/Complaints";
+import ComplaintsForm from "@/pages/complaint/component/ComplaintsForm";
+import ComplaintsView from "@/pages/complaint/component/ComplaintsView";
 
 const PrivateRoutes = () => {
   return (
@@ -51,6 +54,16 @@ const PrivateRoutes = () => {
       <Route
         path={allRoutes.UPDATE_COMPLAINT_TYPE(":id")}
         element={<ComplaintTypesForm />}
+      />
+      <Route path={allRoutes.COMPLAINTS} element={<Complaints />} />
+      <Route path={allRoutes.ADD_COMPLAINT} element={<ComplaintsForm />} />
+      <Route
+        path={allRoutes.UPDATE_COMPLAINT(":id")}
+        element={<ComplaintsForm />}
+      />
+      <Route
+        path={allRoutes.VIEW_COMPLAINT(":id")}
+        element={<ComplaintsView />}
       />
       <Route
         path={allRoutes.COMPLAINT_CATEGORIES}

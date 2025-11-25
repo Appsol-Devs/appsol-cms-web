@@ -5,15 +5,15 @@
     { "path": "./tsconfig.node.json" }
   ],
   "compilerOptions": {
-    "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
     "paths": {
       "@/*": ["./src/*"],
-      "@layout/*": ["/src/layout/*"],
-      "@components/*": ["/src/components/*"],
-      "@pages/*": ["/src/pages/*"],
-      "@utils/*": ["/src/utils/*"],
-      "@routes/*": ["/src/routes/*"],
-      "@theme/*": ["/src/theme/*"]
+      "@layout/*": ["./src/layout/*"],
+      "@components/*": ["./src/components/*"],
+      "@pages/*": ["./src/pages/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@routes/*": ["./src/routes/*"],
+      "@theme/*": ["./src/theme/*"]
     }
   }
 }

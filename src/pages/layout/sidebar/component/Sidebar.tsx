@@ -96,9 +96,9 @@ export default function Sidebar() {
                   className={cn(
                     `${
                       isActive || isActiveParent
-                        ? "bg-primary text-primary-foreground hover:bg-primary"
-                        : "hover:bg-background hover:opacity-90 text-card-foreground"
-                    } w-full text-sm text-left  px-2 py-2 rounded-md font-semibold hover:cursor-pointer transition flex items-center justify-between
+                        ? "bg-primary/30 text-primary hover:bg-primary/30 hover:text-primary"
+                        : "hover:bg-primary/30 hover:text-primary hover:opacity-90 text-card-foreground"
+                    } w-full text-sm text-left px-2 py-2 rounded-md font-semibold hover:cursor-pointer transition flex items-center justify-between
                 `
                   )}
                   onClick={() => handleOpenSubRoutes(route)}

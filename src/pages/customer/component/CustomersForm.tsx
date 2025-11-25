@@ -158,7 +158,6 @@ const CustomersForm = () => {
         {
           label: "Date Converted",
           value: values?.dateConverted as string,
-          required: true,
         },
       ],
     },

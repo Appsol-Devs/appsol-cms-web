@@ -65,7 +65,7 @@ body {
   min-height: 100vh;
 
   /* Brand / Primary Colors */
-  --primary: #4a90e2; /* Soft blue for trust and professionalism */
+  --primary: #0E9F6E; /* Soft blue for trust and professionalism */
   --on-primary: #ffffff;
 
   --secondary: #6c757d; /* Muted gray-blue for accents */
