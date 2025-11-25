@@ -1,18 +1,15 @@
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import Sidebar from "./pages/layout/sidebar/component/Sidebar";
 import Header from "./pages/layout/header/component/Header";
-import { useSelector } from "react-redux";
-import type { RootState } from "./store";
 import { isUserLoggedIn } from "./lib/utils";
-import { allRoutes } from "./utils/routes";
 
 function App() {
-  const navigate = useNavigate();
-  const isUserVerified = useSelector(
-    (state: RootState) => state.user.user?.isVerified as boolean
-  );
+  // const navigate = useNavigate();
+  // const isUserVerified = useSelector(
+  //   (state: RootState) => state.user.user?.isVerified as boolean
+  // );
 
-  // if (!isUserLoggedIn) return null;
+  if (!isUserLoggedIn) return null;
   // if (!isUserVerified) navigate(`${allRoutes.PORTAL}${allRoutes.VERIFICATION}`);
 
   return (
