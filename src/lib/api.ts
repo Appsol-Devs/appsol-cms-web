@@ -23,3 +23,8 @@ export interface IBaseQueryParam {
   endDate?: string;
   //   filters?: IFilters;
 }
+
+export const lookup_params: IBaseQueryParam = {
+  pageSize: 1000,
+  pageIndex: 1,
+};

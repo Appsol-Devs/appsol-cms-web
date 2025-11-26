@@ -13,7 +13,7 @@ import {
 } from "@/pages/settings/common/settingsApi";
 import { useEffect, useState } from "react";
 import type { DropDownOption } from "@/components/DropdownComponent";
-import type { IBaseQueryParam } from "@/lib/api";
+import { lookup_params, type IBaseQueryParam } from "@/lib/api";
 import DropDownComponent from "@/components/DropdownComponent";
 
 interface IField {
@@ -44,11 +44,7 @@ const ComplaintsFormContent = ({ isLoading, form, isUpdate }: IField) => {
   >([]);
 
   useEffect(() => {
-    const params: IBaseQueryParam = {
-      pageSize: 1000,
-      pageIndex: 1,
-    };
-    getCustomers(params)
+    getCustomers(lookup_params)
       .unwrap()
       .then((res) => {
         if (res && res.contents) {
@@ -62,7 +58,7 @@ const ComplaintsFormContent = ({ isLoading, form, isUpdate }: IField) => {
         }
       });
 
-    getComplaintTypes(params)
+    getComplaintTypes(lookup_params)
       .unwrap()
       .then((res) => {
         if (res && res.contents) {
@@ -76,7 +72,7 @@ const ComplaintsFormContent = ({ isLoading, form, isUpdate }: IField) => {
         }
       });
 
-    getComplaintCategories(params)
+    getComplaintCategories(lookup_params)
       .unwrap()
       .then((res) => {
         if (res && res.contents) {
@@ -90,7 +86,7 @@ const ComplaintsFormContent = ({ isLoading, form, isUpdate }: IField) => {
         }
       });
 
-    getSoftwares(params)
+    getSoftwares(lookup_params)
       .unwrap()
       .then((res) => {
         if (res && res.contents) {
