@@ -60,7 +60,13 @@ export default function Sidebar() {
   return (
     <div className="relative h-full bg-card text-onCard shadow-sm">
       <div className="flex flex-col h-full">
-        <div className="h-14 p-2 border">Logo</div>
+        <div className="h-14 p-2">
+          <img
+            className="h-9"
+            src="/assets/images/logo/appsol_cmslight.png"
+            alt="Appsol Logo Light mode"
+          />
+        </div>
         {/* Header with Back Button */}
 
         {/* Animated Routes List */}

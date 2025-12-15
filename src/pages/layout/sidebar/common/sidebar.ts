@@ -2,7 +2,6 @@ import { allRoutes } from "@/utils/routes";
 import {
   BriefcaseBusiness,
   CalendarCheck2,
-  ChartArea,
   ChartBar,
   Computer,
   Headset,
@@ -64,7 +63,7 @@ export const sidebarMainMenus: ISidebar[] = [
   },
   {
     name: "Leads",
-    icon: ChartArea,
+    icon: Spotlight,
     path: allRoutes.LEADS,
   },
   {

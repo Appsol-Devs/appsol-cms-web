@@ -5,7 +5,11 @@ const LoginBanner = () => {
     <div className="w-1/2 h-full p-10 relative text-white bg-[url('/assets/images/login-banner.png')] bg-cover bg-center">
       <div className="absolute inset-0 bg-black/60"></div> {/* Overlay */}
       <div className="relative text-sm h-full flex flex-col w-full justify-between">
-        <p>Application Logo</p>
+        <img
+          className="w-14"
+          src="/assets/images/logo/appsol_cmslighticon.png"
+          alt="Appsol Logo Light mode"
+        />
 
         <div className="space-y-2 text-primary">
           <p className="text-4xl font-semibold text-white">

@@ -72,6 +72,11 @@ const LoginForm = () => {
   return (
     <div className="w-1/2 border-2 h-full flex items-center justify-center flex-col gap-4 relative">
       <LoadingComponent loading={isLoading} />
+      <img
+        className="w-48"
+        src="/assets/images/logo/appsol_cmslight.png"
+        alt="Appsol Logo Light mode"
+      />
       <div className="p-8 bg-card text-onCard rounded-3xl w-3/5 min-h-1/3 shadow-lg">
         <div className="h-full">
           <div>
