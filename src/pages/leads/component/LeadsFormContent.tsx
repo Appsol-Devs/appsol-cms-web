@@ -5,6 +5,7 @@ import {
   BookOpenText,
   Headset,
   Home,
+  Lock,
   StepBack,
   StepForward,
 } from "lucide-react";
@@ -16,6 +17,8 @@ import type { DropDownOption } from "@/components/DropdownComponent";
 import { useEffect, useState } from "react";
 import { lookup_params } from "@/lib/api";
 import DropDownComponent from "@/components/DropdownComponent";
+import { useGenerateDropdownOptionsFromEnum } from "@/lib/helpers";
+import { LEAD_PRIORITY_ENUM, LEAD_STATUS_ENUM } from "@/lib/enums";
 
 interface IField {
   isLoading?: boolean;
@@ -32,6 +35,12 @@ const LeadsFormContent = ({ isLoading, form, isUpdate }: IField) => {
   >([]);
 
   const { control, register } = form;
+
+  const leadPriorityOptions =
+    useGenerateDropdownOptionsFromEnum(LEAD_PRIORITY_ENUM);
+
+  const leadStatusOptions =
+    useGenerateDropdownOptionsFromEnum(LEAD_STATUS_ENUM);
 
   useEffect(() => {
     getleadNextStages(lookup_params)
@@ -190,6 +199,40 @@ const LeadsFormContent = ({ isLoading, form, isUpdate }: IField) => {
               placeholder="Any notes go here"
               disabled={isLoading}
               register={register}
+            />
+          </div>
+        </div>
+      </CardComponent>
+      <CardComponent
+        headerTitle={
+          <>
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <p className="flex items-center gap-2">
+                <Lock className="w-4 h-4" /> Status
+              </p>
+              <p className="text-xs text-rx-secondary">
+                Required Information <span className="text-red-500">*</span>
+              </p>
+            </div>
+            <Separator orientation="horizontal" />
+          </>
+        }
+      >
+        <div>
+          <div className="grid grid-cols-2 gap-4">
+            <DropDownComponent
+              control={control}
+              name="priority"
+              title="Lead Priority"
+              label="Select the lead priority"
+              options={leadPriorityOptions}
+            />
+            <DropDownComponent
+              control={control}
+              name="leadStatus"
+              title="Lead Status"
+              label="Select the lead status"
+              options={leadStatusOptions}
             />
           </div>
         </div>

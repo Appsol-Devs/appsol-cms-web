@@ -2,7 +2,7 @@ import type { ISummarySection } from "@/components/form/MutationFormSummary";
 import MutationFormTemplate from "@/components/form/MutationFormTemplate";
 import { showToast } from "@/components/ui/CustomToast";
 import { cleanPayload } from "@/lib/helpers";
-import { BookOpenText, Headset, Home, StepForward } from "lucide-react";
+import { Spotlight, Headset, Home, Lock, StepForward } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
@@ -18,6 +18,8 @@ import type { DropDownOption } from "@/components/DropdownComponent";
 export type ILeadFields = Omit<ILead, "_id"> & {
   nextStep?: DropDownOption<string>;
   leadStage?: DropDownOption<string>;
+  priority?: DropDownOption<string>;
+  leadStatus?: DropDownOption<string>;
 };
 
 const LeadsForm = () => {
@@ -102,7 +104,7 @@ const LeadsForm = () => {
       { field: data.name, message: "Name is required." },
       { field: data.companyName, message: "Company Name is required." },
       { field: data.phone, message: "Phone Number is required." },
-      { field: data.email, message: "Email is required." },
+      // { field: data.email, message: "Email is required." },
     ];
 
     for (const { field, message } of requiredFields) {
@@ -123,7 +125,8 @@ const LeadsForm = () => {
       location: data.location,
     });
 
-    // console.log(payload);
+    console.log(payload);
+    return;
     handleDataSubmission(payload);
   };
 
@@ -189,6 +192,22 @@ const LeadsForm = () => {
         // },
       ],
     },
+    {
+      title: "Status",
+      icon: <Lock className="w-4 h-4" />,
+      data: [
+        {
+          label: "Priority",
+          value: values?.priority?.label as string,
+          required: true,
+        },
+        {
+          label: "Status",
+          value: values?.leadStatus?.label as string,
+          required: true,
+        },
+      ],
+    },
   ];
 
   const isLoading = isGetting || isCreating || isUpdating;
@@ -202,7 +221,7 @@ const LeadsForm = () => {
           description: `Enter all the details of the lead you want to ${
             id ? "update" : "create"
           }.`,
-          icon: BookOpenText,
+          icon: Spotlight,
         }}
         formContent={
           <LeadsFormContent isUpdate={!!id} form={form} isLoading={isLoading} />
