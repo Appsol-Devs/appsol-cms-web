@@ -11,6 +11,7 @@ import ComplaintTypes from "@/pages/settings/components/complaint-types/Complain
 import ComplaintCategories from "@/pages/settings/components/complaint-category/ComplaintCategories";
 import SetupStatuses from "@/pages/settings/components/setup-status/SetupStatuses";
 import LeadStatuses from "@/pages/settings/components/lead-status/LeadStatuses";
+import LeadStatusesForm from "@/pages/settings/components/lead-status/LeadStatusesForm";
 import LeadNextSteps from "@/pages/settings/components/lead-next-step/LeadNextSteps";
 import CallStatuses from "@/pages/settings/components/call-status/CallStatuses";
 import SubscriptionTypes from "@/pages/settings/components/subscription-types/SubscriptionTypes";
@@ -27,6 +28,9 @@ import ComplaintsForm from "@/pages/complaint/component/ComplaintsForm";
 import ComplaintsView from "@/pages/complaint/component/ComplaintsView";
 import Leads from "@/pages/leads/component/Leads";
 import LeadsForm from "@/pages/leads/component/LeadsForm";
+import CallStatusesForm from "@/pages/settings/components/call-status/CallStatusesForm";
+import SetupStatusesForm from "@/pages/settings/components/setup-status/SetupStatusesForm";
+import LeadNextStepsForm from "@/pages/settings/components/lead-next-step/LeadNextStepsForm";
 
 const PrivateRoutes = () => {
   return (
@@ -83,7 +87,17 @@ const PrivateRoutes = () => {
         element={<ComplaintCategoriesForm />}
       />
       <Route path={allRoutes.SETUP_STATUSES} element={<SetupStatuses />} />
+      <Route path={allRoutes.ADD_SETUP_STATUS} element={<SetupStatusesForm />} />
+      <Route
+        path={allRoutes.UPDATE_SETUP_STATUS(":id")}
+        element={<SetupStatusesForm />}
+      />
       <Route path={allRoutes.CALL_STATUSES} element={<CallStatuses />} />
+      <Route path={allRoutes.ADD_CALL_STATUS} element={<CallStatusesForm />} />
+      <Route
+        path={allRoutes.UPDATE_CALL_STATUS(":id")}
+        element={<CallStatusesForm />}
+      />
       <Route
         path={allRoutes.SUBSCRIPTION_TYPES}
         element={<SubscriptionTypes />}
@@ -97,7 +111,17 @@ const PrivateRoutes = () => {
         element={<SubscriptionTypesForm />}
       />
       <Route path={allRoutes.LEAD_STATUSES} element={<LeadStatuses />} />
+      <Route path={allRoutes.ADD_LEAD_STATUS} element={<LeadStatusesForm />} />
+      <Route
+        path={allRoutes.UPDATE_LEAD_STATUS(":id")}
+        element={<LeadStatusesForm />}
+      />
       <Route path={allRoutes.LEAD_NEXT_STEPS} element={<LeadNextSteps />} />
+      <Route path={allRoutes.ADD_LEAD_NEXT_STEP} element={<LeadNextStepsForm />} />
+      <Route
+        path={allRoutes.UPDATE_LEAD_NEXT_STEP(":id")}
+        element={<LeadNextStepsForm />}
+      />
       <Route path={allRoutes.ROLES} element={<Roles />} />
       <Route path={allRoutes.USERS} element={<Users />} />
       <Route path={allRoutes.ADD_USER} element={<UsersForm />} />
