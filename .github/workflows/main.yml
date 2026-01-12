@@ -19,23 +19,23 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
+          cache: yarn
 
       - name: Install dependencies
-        run: npm ci
+        run: yarn install --frozen-lockfile
 
       - name: Lint
         run: |
-          if npm run | grep -q "lint"; then
-            npm run lint
+          if yarn run | grep -q "lint"; then
+            yarn lint
           else
             echo "No lint script found, skipping..."
           fi
 
       - name: Run tests
         run: |
-          if npm run | grep -q "test"; then
-            npm test -- --run
+          if yarn run | grep -q "test"; then
+           yarn test -- --run
           else
             echo "No test script found, skipping..."
           fi
