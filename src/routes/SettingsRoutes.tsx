@@ -25,7 +25,7 @@ const SettingsRoutes = () => {
             key={route.path}
             path={route.path}
             element={
-              !!route.authorize ? (
+              route.authorize ? (
                 <ProtectedRoute
                   redirectPath={
                     allRoutes.PORTAL +
