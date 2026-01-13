@@ -3,7 +3,6 @@ import CustomInputField from "@/components/CustomInputField";
 import { Separator } from "@/components/ui/separator";
 import { Headset, Notebook, Phone } from "lucide-react";
 import type { UseFormReturn } from "react-hook-form";
-import { CheckboxComponent } from "@/components/CheckboxComponent";
 import type { IComplaintFields } from "./ComplaintsForm";
 import { useLazyGetCustomersQuery } from "@/pages/customer/common/customersApi";
 import {
@@ -13,7 +12,7 @@ import {
 } from "@/pages/settings/common/settingsApi";
 import { useEffect, useState } from "react";
 import type { DropDownOption } from "@/components/DropdownComponent";
-import { lookup_params, type IBaseQueryParam } from "@/lib/api";
+import { lookup_params,  } from "@/lib/api";
 import DropDownComponent from "@/components/DropdownComponent";
 
 interface IField {
@@ -22,7 +21,7 @@ interface IField {
   isUpdate?: boolean;
 }
 
-const ComplaintsFormContent = ({ isLoading, form, isUpdate }: IField) => {
+const ComplaintsFormContent = ({ isLoading, form,  }: IField) => {
   const { control, register } = form;
 
   const [getCustomers] = useLazyGetCustomersQuery();

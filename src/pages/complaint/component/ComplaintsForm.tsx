@@ -33,7 +33,7 @@ const ComplaintsForm = () => {
   const [getSelectedData, { isLoading: isGetting }] =
     useLazyGetAComplaintQuery();
   const form = useForm<IComplaintFields>();
-  const { watch, getValues, reset } = form;
+  const { watch, getValues,  } = form;
   const values = watch();
 
   const navigate = useNavigate();

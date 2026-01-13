@@ -25,7 +25,7 @@ const CustomersForm = () => {
     useUpdateCustomerMutation();
   const [getACustomer, { isLoading: isGetting }] = useLazyGetACustomerQuery();
   const form = useForm<ICustomerFields>();
-  const { watch, getValues, reset } = form;
+  const { watch, getValues,  } = form;
   const values = watch();
 
   const navigate = useNavigate();

@@ -2,11 +2,11 @@ import { format } from "date-fns";
 import {
   Briefcase,
   Mail,
-  MailCheck,
   MailX,
   NotepadText,
   Pen,
   User,
+  VerifiedIcon,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import ActionButton from "@/components/ActionButtons";
@@ -61,11 +61,11 @@ const Users = () => {
           <div className=" flex flex-col items-start gap-1">
             <div className="font-semibold p-0.5 text-xs flex flex-col gap-0.5">
               <Badge
-                variant={row.original.isVerified ? "secondary" : "destructive"}
+                variant={row.original.isVerified ? "outline" : "outline"}
                 className="rounded-sm!"
               >
                 {row.original?.isVerified ? (
-                  <MailCheck size={10} />
+                  <VerifiedIcon size={10} className="w-6 h-6 text-blue-500" fill="currentColor" color="white" />
                 ) : (
                   <MailX size={10} />
                 )}
@@ -113,7 +113,7 @@ const Users = () => {
               onClick={() =>
                 navigate(
                   allRoutes.PORTAL +
-                    allRoutes.VIEW_USER(row.original._id as string)
+                  allRoutes.VIEW_USER(row.original._id as string)
                 )
               }
             />

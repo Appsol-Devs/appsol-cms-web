@@ -12,7 +12,7 @@ interface IField {
   isUpdate?: boolean;
 }
 
-const CustomersFormContent = ({ isLoading, form, isUpdate }: IField) => {
+const CustomersFormContent = ({ isLoading, form,  }: IField) => {
   // const isVerified = form.watch("isVerified");
 
   const { control, register } = form;

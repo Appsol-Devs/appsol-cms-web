@@ -2,15 +2,12 @@ import CardComponent from "@/components/CardComponent";
 import CustomInputField from "@/components/CustomInputField";
 import { Separator } from "@/components/ui/separator";
 import {
-  BookOpenText,
   Headset,
   Home,
   Lock,
-  StepBack,
   StepForward,
 } from "lucide-react";
-import { Controller, type UseFormReturn } from "react-hook-form";
-import { DatePicker } from "@/components/DatePicker";
+import {  type UseFormReturn } from "react-hook-form";
 import type { ILeadFields } from "./LeadsForm";
 import { useLazyGetLeadNextStepsQuery } from "@/pages/settings/common/settingsApi";
 import type { DropDownOption } from "@/components/DropdownComponent";
@@ -26,7 +23,7 @@ interface IField {
   isUpdate?: boolean;
 }
 
-const LeadsFormContent = ({ isLoading, form, isUpdate }: IField) => {
+const LeadsFormContent = ({ isLoading, form, }: IField) => {
   // const isVerified = form.watch("isVerified");
   const [getleadNextStages] = useLazyGetLeadNextStepsQuery();
 
