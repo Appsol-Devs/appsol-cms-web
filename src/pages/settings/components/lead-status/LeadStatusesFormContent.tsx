@@ -51,6 +51,13 @@ const LeadStatusesFormContent = ({ isLoading, form, isUpdate }: IField) => {
               disabled={isLoading}
               register={register}
             />
+            <CustomInputField<ILeadStatusFields>
+              type="color"
+              label="Color Code"
+              name="colorCode"
+              disabled={isLoading}
+              register={register}
+            />
             {isUpdate && (
               <CheckboxComponent
                 control={control}

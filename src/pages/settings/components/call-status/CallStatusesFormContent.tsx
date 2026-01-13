@@ -51,6 +51,13 @@ const CallStatusesFormContent = ({ isLoading, form, isUpdate }: IField) => {
               disabled={isLoading}
               register={register}
             />
+            <CustomInputField<ICallStatusFields>
+              type="color"
+              label="Color Code"
+              name="colorCode"
+              disabled={isLoading}
+              register={register}
+            />
             <CheckboxComponent
                 control={control}
                 name="isFinal"

@@ -63,6 +63,13 @@ const SubscriptionTypesFormContent = ({
               disabled={isLoading}
               register={register}
             />
+            <CustomInputField<ISubscriptionTypeFields>
+              type="color"
+              label="Color Code"
+              name="colorCode"
+              disabled={isLoading}
+              register={register}
+            />
             {isUpdate && (
               <CheckboxComponent
                 control={control}

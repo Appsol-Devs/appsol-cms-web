@@ -55,6 +55,13 @@ const ComplaintCategoriesFormContent = ({
               disabled={isLoading}
               register={register}
             />
+            <CustomInputField<IComplaintCategoryFields>
+              type="color"
+              label="Color Code"
+              name="colorCode"
+              disabled={isLoading}
+              register={register}
+            />
             {isUpdate && (
               <CheckboxComponent
                 control={control}

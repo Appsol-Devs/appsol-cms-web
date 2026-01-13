@@ -42,7 +42,6 @@ const SetupStatusesForm = () => {
         setSelectedSetupStatus(res);
       }
     } catch (err) {
-      if (!err) return;
       console.error(err);
     }
   };
@@ -54,6 +53,7 @@ const SetupStatusesForm = () => {
       name: data.name,
       description: data.description,
       isActive: data.isActive,
+      colorCode: data.colorCode,
     });
   };
 
@@ -87,7 +87,7 @@ const SetupStatusesForm = () => {
         navigate(-1);
       }
     } catch (error) {
-      if (!error) return;
+      console.error(error); 
     }
   };
 
@@ -109,6 +109,7 @@ const SetupStatusesForm = () => {
       name: data.name,
       description: data.description,
       isActive: id ? data.isActive : undefined,
+      colorCode: data.colorCode,
     });
 
     // console.log(payload);
