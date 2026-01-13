@@ -127,6 +127,7 @@ const PrivateRoutes = () => {
       <Route path={allRoutes.ADD_USER} element={<UsersForm />} />
       <Route path={allRoutes.UPDATE_USER(":id")} element={<UsersForm />} />
       <Route path={allRoutes.VIEW_USER(":id")} element={<UsersView />} />
+      <Route path={allRoutes.DELETE_USER(":id")} element={<UsersForm />} />
 
       <Route
         path={`${allRoutes.SETTINGS}/*`}
