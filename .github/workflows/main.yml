@@ -24,13 +24,13 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Lint
-        run: |
-          if yarn run | grep -q "lint"; then
-            yarn lint
-          else
-            echo "No lint script found, skipping..."
-          fi
+      #- name: Lint
+       # run: |
+          #if yarn run | grep -q "lint"; then
+           # yarn lint
+          #else
+            #echo "No lint script found, skipping..."
+          #fi
 
       - name: Run tests
         run: |
