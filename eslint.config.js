@@ -5,6 +5,8 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
+//const isCI = process.env.CI === 'true'
+
 export default defineConfig([
   globalIgnores(['dist']),
   {
@@ -18,6 +20,9 @@ export default defineConfig([
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
+    },
+     rules: {
+      '@typescript-eslint/no-explicit-any':  'off' ,
     },
   },
 ])

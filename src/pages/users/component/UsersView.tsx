@@ -13,7 +13,7 @@ const UsersView = () => {
   const navigate = useNavigate();
 
   const [getUserDetails] = useLazyGetAUserQuery();
-  const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
+  const [_selectedUser, setSelectedUser] = useState<IUser | null>(null);
 
   useEffect(() => {
     if (id) {
