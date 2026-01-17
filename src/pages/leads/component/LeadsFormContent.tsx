@@ -1,16 +1,8 @@
 import CardComponent from "@/components/CardComponent";
 import CustomInputField from "@/components/CustomInputField";
 import { Separator } from "@/components/ui/separator";
-import {
-  BookOpenText,
-  Headset,
-  Home,
-  Lock,
-  StepBack,
-  StepForward,
-} from "lucide-react";
-import { Controller, type UseFormReturn } from "react-hook-form";
-import { DatePicker } from "@/components/DatePicker";
+import { Headset, Home, Lock, StepForward } from "lucide-react";
+import { type UseFormReturn } from "react-hook-form";
 import type { ILeadFields } from "./LeadsForm";
 import { useLazyGetLeadNextStepsQuery } from "@/pages/settings/common/settingsApi";
 import type { DropDownOption } from "@/components/DropdownComponent";
@@ -26,7 +18,7 @@ interface IField {
   isUpdate?: boolean;
 }
 
-const LeadsFormContent = ({ isLoading, form, isUpdate }: IField) => {
+const LeadsFormContent = ({ isLoading, form }: IField) => {
   // const isVerified = form.watch("isVerified");
   const [getleadNextStages] = useLazyGetLeadNextStepsQuery();
 
@@ -51,7 +43,7 @@ const LeadsFormContent = ({ isLoading, form, isUpdate }: IField) => {
             (item) => ({
               label: item.name ?? "",
               value: item._id ?? "",
-            })
+            }),
           );
           setLeadNextStepOptions(options);
         }
