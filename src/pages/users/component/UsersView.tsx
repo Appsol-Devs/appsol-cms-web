@@ -67,13 +67,13 @@ const UsersView = () => {
   };
 
   useEffect(() => {
-    if (selectedUser && selectedUser.createdBy)
-      fetchUser(String(selectedUser.createdBy))
-  }, [selectedUser, selectedUser?.createdBy]);
+    if (_selectedUser && _selectedUser.createdBy)
+      fetchUser(String(_selectedUser.createdBy))
+  }, [_selectedUser, _selectedUser?.createdBy]);
 
 
 
-  if (isFetching || !selectedUser) {
+  if (isFetching || !_selectedUser) {
     return <div className="p-8 text-center text-gray-500">Loading user details...</div>;
   }
 
@@ -84,8 +84,8 @@ const UsersView = () => {
 
       <PageSummary
         icon={User}
-        title={`${selectedUser.firstName} ${selectedUser.lastName}`}
-        description={`Manage access and details for ${selectedUser.firstName} ${selectedUser.lastName}`}
+        title={`${_selectedUser.firstName} ${_selectedUser.lastName}`}
+        description={`Manage access and details for ${_selectedUser.firstName} ${_selectedUser.lastName}`}
         actionComponent={
           <div className="flex items-center gap-3">
             <ActionButton
@@ -109,17 +109,17 @@ const UsersView = () => {
 
               <Avatar className="w-32 h-32 border-4 border-gray-50 shadow-md">
                 <AvatarImage
-                  src={selectedUser.imageUrl}
-                  alt={`${selectedUser.firstName} ${selectedUser.lastName}`}
+                  src={_selectedUser.imageUrl}
+                  alt={`${_selectedUser.firstName} ${_selectedUser.lastName}`}
                   className="object-cover"
                 />
 
                 <AvatarFallback className="text-4xl font-bold text-gray-500 bg-gray-100">
-                  {getInitials(selectedUser.firstName, selectedUser.lastName)}
+                  {getInitials(_selectedUser.firstName, _selectedUser.lastName)}
                 </AvatarFallback>
               </Avatar>
               <div className="absolute bottom-1 right-1 bg-white rounded-full p-1 shadow-sm">
-                {selectedUser.isVerified ? (
+                {_selectedUser.isVerified ? (
                   <VerifiedIcon className="w-6 h-6 text-blue-500" fill="currentColor" color="white" />
                 ) : (
                   <BadgeX className="w-6 h-6 text-gray-400" />
@@ -128,14 +128,14 @@ const UsersView = () => {
             </div>
 
             <h2 className="text-xl font-bold text-gray-900">
-              {selectedUser.firstName} {selectedUser.lastName}
+              {_selectedUser.firstName} {_selectedUser.lastName}
             </h2>
-            <p className="text-sm text-gray-500 mb-4">{selectedUser.email}</p>
+            <p className="text-sm text-gray-500 mb-4">{_selectedUser.email}</p>
 
             <div className="flex flex-wrap gap-2 justify-center w-full">
-              <StatusBadge active={selectedUser.isActive} />
+              <StatusBadge active={_selectedUser.isActive} />
               <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
-                {selectedUser.role?.name || "User"}
+                {_selectedUser.role?.name || "User"}
               </span>
             </div>
           </div>
@@ -147,11 +147,11 @@ const UsersView = () => {
             <div className="space-y-3">
               <div>
                 <p className="text-xs text-gray-500 uppercase">Verification Status</p>
-                <p className={`text-sm font-medium ${selectedUser.isVerified ? 'text-green-600' : 'text-amber-600'}`}>
-                  {selectedUser.isVerified ? "Verified Account" : "Unverified"}
+                <p className={`text-sm font-medium ${_selectedUser.isVerified ? 'text-green-600' : 'text-amber-600'}`}>
+                  {_selectedUser.isVerified ? "Verified Account" : "Unverified"}
                 </p>
               </div>
-             
+
             </div>
           </div>
         </div>
@@ -164,8 +164,8 @@ const UsersView = () => {
 
             <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
 
-              <DetailItem label="First Name" value={selectedUser.firstName} />
-              <DetailItem label="Last Name" value={selectedUser.lastName} />
+              <DetailItem label="First Name" value={_selectedUser.firstName} />
+              <DetailItem label="Last Name" value={_selectedUser.lastName} />
 
 
               <div className="md:col-span-2 border-t border-gray-100 my-2"></div>
@@ -173,12 +173,12 @@ const UsersView = () => {
               <DetailItem
                 icon={<Mail className="w-4 h-4" />}
                 label="Email Address"
-                value={selectedUser.email}
+                value={_selectedUser.email}
               />
               <DetailItem
                 icon={<Phone className="w-4 h-4" />}
                 label="Phone Number"
-                value={selectedUser.phone}
+                value={_selectedUser.phone}
               />
 
               <div className="md:col-span-2 border-t border-gray-100 my-2"></div>
@@ -186,7 +186,7 @@ const UsersView = () => {
 
               <DetailItem
                 label="Role"
-                value={selectedUser.role?.name}
+                value={_selectedUser.role?.name}
               />
 
               <div className="md:col-span-2 border-t border-gray-100 my-2"></div>
@@ -194,12 +194,12 @@ const UsersView = () => {
               <DetailItem
                 icon={<Calendar className="w-4 h-4" />}
                 label="Registered On"
-                value={formatDate(selectedUser.createdAt)}
+                value={formatDate(_selectedUser.createdAt)}
               />
               <DetailItem
                 icon={<Calendar className="w-4 h-4" />}
                 label="Last Updated"
-                value={formatDate(selectedUser.updatedAt)}
+                value={formatDate(_selectedUser.updatedAt)}
               />
               <DetailItem
                 label="Created By"
