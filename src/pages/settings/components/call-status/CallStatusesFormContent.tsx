@@ -5,6 +5,7 @@ import { BookOpenText } from "lucide-react";
 import type { UseFormReturn } from "react-hook-form";
 import type { ICallStatusFields } from "./CallStatusesForm";
 import { CheckboxComponent } from "@/components/CheckboxComponent";
+import { CustomSwitchComponent } from "@/components/CustomSwitchComponent";
 
 interface IField {
   isLoading?: boolean;
@@ -65,7 +66,7 @@ const CallStatusesFormContent = ({ isLoading, form, isUpdate }: IField) => {
             />
             {isUpdate && (
               <>
-                <CheckboxComponent
+                <CustomSwitchComponent
                   control={control}
                   name="isActive"
                   label="Is Active?"

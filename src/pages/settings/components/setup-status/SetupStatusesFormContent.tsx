@@ -4,7 +4,7 @@ import { Separator } from "@/components/ui/separator";
 import { BookOpenText } from "lucide-react";
 import type { UseFormReturn } from "react-hook-form";
 import type { ISetupStatusFields } from "./SetupStatusesForm";
-import { CheckboxComponent } from "@/components/CheckboxComponent";
+import { CustomSwitchComponent } from "@/components/CustomSwitchComponent";
 
 interface IField {
   isLoading?: boolean;
@@ -59,7 +59,7 @@ const SetupStatusesFormContent = ({ isLoading, form, isUpdate }: IField) => {
               register={register}
             />
             {isUpdate && (
-              <CheckboxComponent
+              <CustomSwitchComponent
                 control={control}
                 name="isActive"
                 label="Is Active?"

@@ -29,7 +29,7 @@ const LeadsForm = () => {
   const [updateMutation, { isLoading: isUpdating }] = useUpdateLeadMutation();
   const [getSelectedData, { isLoading: isGetting }] = useLazyGetALeadQuery();
   const form = useForm<ILeadFields>();
-  const { watch, getValues } = form;
+  const { watch, getValues, reset } = form;
   const values = watch();
 
   const navigate = useNavigate();
