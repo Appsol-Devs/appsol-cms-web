@@ -43,7 +43,6 @@ const ComplaintCategoriesForm = () => {
         setSelectedData(res);
       }
     } catch (err) {
-      if (!err) return;
       console.error(err);
     }
   };
@@ -55,6 +54,7 @@ const ComplaintCategoriesForm = () => {
       name: data.name,
       description: data.description,
       isActive: data.isActive,
+      colorCode: data.colorCode,
     });
   };
 
@@ -88,7 +88,7 @@ const ComplaintCategoriesForm = () => {
         navigate(-1);
       }
     } catch (error) {
-      if (!error) return;
+      console.error(error);
     }
   };
 
@@ -110,6 +110,7 @@ const ComplaintCategoriesForm = () => {
       name: data.name,
       description: data.description,
       isActive: id ? data.isActive : undefined,
+      colorCode: data.colorCode,
     });
 
     // console.log(payload);

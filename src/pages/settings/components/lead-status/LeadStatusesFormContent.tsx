@@ -4,7 +4,7 @@ import { Separator } from "@/components/ui/separator";
 import { BookOpenText } from "lucide-react";
 import type { UseFormReturn } from "react-hook-form";
 import type { ILeadStatusFields } from "./LeadStatusesForm";
-import { CheckboxComponent } from "@/components/CheckboxComponent";
+import { CustomSwitchComponent } from "@/components/CustomSwitchComponent";
 
 interface IField {
   isLoading?: boolean;
@@ -51,8 +51,15 @@ const LeadStatusesFormContent = ({ isLoading, form, isUpdate }: IField) => {
               disabled={isLoading}
               register={register}
             />
+            <CustomInputField<ILeadStatusFields>
+              type="color"
+              label="Color Code"
+              name="colorCode"
+              disabled={isLoading}
+              register={register}
+            />
             {isUpdate && (
-              <CheckboxComponent
+              <CustomSwitchComponent
                 control={control}
                 name="isActive"
                 label="Is Active?"

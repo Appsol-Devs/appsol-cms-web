@@ -4,6 +4,7 @@ export interface ISoftware {
   softwareCode?: string;
   description?: string;
   isActive?: boolean;
+  colorCode?: string;
 }
 
 export interface IComplaintType {
@@ -12,6 +13,7 @@ export interface IComplaintType {
   complaintTypeCode?: string;
   description?: string;
   isActive?: boolean;
+  colorCode?: string;
 }
 
 export interface IComplaintCategory {
@@ -20,6 +22,7 @@ export interface IComplaintCategory {
   complaintCategoryCode?: string;
   description?: string;
   isActive?: boolean;
+  colorCode?: string;
 }
 
 export interface ICallStatus {
@@ -48,6 +51,7 @@ export interface ISubscriptionType {
   description?: string;
   isActive?: boolean;
   durationInMonths?: number;
+  colorCode?: string;
 }
 
 export interface ILeadStatus {
@@ -65,4 +69,5 @@ export interface ILeadNextStep {
   leadNextStepCode?: string;
   description?: string;
   isActive?: boolean;
+  colorCode?: string;
 }

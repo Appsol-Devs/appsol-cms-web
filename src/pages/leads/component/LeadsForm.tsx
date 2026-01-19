@@ -29,7 +29,7 @@ const LeadsForm = () => {
   const [updateMutation, { isLoading: isUpdating }] = useUpdateLeadMutation();
   const [getSelectedData, { isLoading: isGetting }] = useLazyGetALeadQuery();
   const form = useForm<ILeadFields>();
-  const { watch, getValues } = form;
+  const { watch, getValues, reset } = form;
   const values = watch();
 
   const navigate = useNavigate();
@@ -44,23 +44,34 @@ const LeadsForm = () => {
         setSelectedData(res);
       }
     } catch (err) {
-      if (!err) return;
       console.error(err);
     }
   };
 
   const resetFormWithData = (data: ILead) => {
     if (!data) return;
-    // reset({
-    //   ...data,
-    //   firstName: data.firstName,
-    //   lastName: data.lastName,
-    //   email: data.email,
-    //   phone: data.phone,
-    //   role: data.role
-    //     ? { label: data.role.name, value: data.role._id as string }
-    //     : undefined,
-    // });
+    reset({
+      ...data,
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      companyName: data.companyName,
+      leadSource: data.leadSource,
+      location: data.location,
+      notes: data.notes,
+      leadStage: data.leadStage
+        ? { label: data.leadStage.name ?? "", value: data.leadStage._id ?? "" }
+        : undefined,
+      nextStep: data.nextStep
+        ? { label: data.nextStep.name ?? "", value: data.nextStep._id ?? "" }
+        : undefined,
+      priority: data.priority
+        ? { label: data.priority, value: data.priority }
+        : undefined,
+      leadStatus: data.leadStatus
+        ? { label: data.leadStatus, value: data.leadStatus }
+        : undefined,
+    });
   };
 
   useEffect(() => {
@@ -93,7 +104,7 @@ const LeadsForm = () => {
         navigate(-1);
       }
     } catch (error) {
-      if (!error) return;
+      console.error(error);
     }
   };
 

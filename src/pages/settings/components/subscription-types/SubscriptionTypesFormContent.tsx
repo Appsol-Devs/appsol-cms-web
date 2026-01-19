@@ -3,7 +3,7 @@ import CustomInputField from "@/components/CustomInputField";
 import { Separator } from "@/components/ui/separator";
 import { CalendarCheck2 } from "lucide-react";
 import type { UseFormReturn } from "react-hook-form";
-import { CheckboxComponent } from "@/components/CheckboxComponent";
+import { CustomSwitchComponent } from "@/components/CustomSwitchComponent";
 import type { ISubscriptionTypeFields } from "./SubscriptionTypesForm";
 
 interface IField {
@@ -63,8 +63,15 @@ const SubscriptionTypesFormContent = ({
               disabled={isLoading}
               register={register}
             />
+            <CustomInputField<ISubscriptionTypeFields>
+              type="color"
+              label="Color Code"
+              name="colorCode"
+              disabled={isLoading}
+              register={register}
+            />
             {isUpdate && (
-              <CheckboxComponent
+              <CustomSwitchComponent
                 control={control}
                 name="isActive"
                 label="Is Active?"

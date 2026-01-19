@@ -42,7 +42,6 @@ const CallStatusesForm = () => {
         setSelectedCallStatus(res);
       }
     } catch (err) {
-      if (!err) return;
       console.error(err);
     }
   };
@@ -54,7 +53,8 @@ const CallStatusesForm = () => {
       name: data.name,
       description: data.description,
       isActive: data.isActive,
-      isFinal: data.isFinal
+      isFinal: data.isFinal,
+      colorCode: data.colorCode
     });
   };
 
@@ -88,7 +88,7 @@ const CallStatusesForm = () => {
         navigate(-1);
       }
     } catch (error) {
-      if (!error) return;
+      console.error(error);
     }
   };
 
@@ -111,6 +111,7 @@ const CallStatusesForm = () => {
       description: data.description,
       isActive: id ? data.isActive : undefined,
       isFinal: id ? data.isFinal : undefined,
+      colorCode: data.colorCode,
     });
 
     // console.log(payload);

@@ -43,7 +43,6 @@ const SubscriptionTypesForm = () => {
         setSelectedData(res);
       }
     } catch (err) {
-      if (!err) return;
       console.error(err);
     }
   };
@@ -56,6 +55,7 @@ const SubscriptionTypesForm = () => {
       description: data.description,
       isActive: data.isActive,
       durationInMonths: data.durationInMonths,
+      colorCode: data.colorCode,
     });
   };
 
@@ -89,7 +89,7 @@ const SubscriptionTypesForm = () => {
         navigate(-1);
       }
     } catch (error) {
-      if (!error) return;
+      console.error(error);
     }
   };
 
@@ -118,6 +118,7 @@ const SubscriptionTypesForm = () => {
       description: data.description,
       durationInMonths: Number(data.durationInMonths),
       isActive: id ? data.isActive : undefined,
+      colorCode: data.colorCode,
     });
 
     // console.log(payload);
