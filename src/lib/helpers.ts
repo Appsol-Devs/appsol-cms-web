@@ -59,3 +59,20 @@ export const cleanPayload = (obj: Record<string, any>) => {
 export function formatToTimeAgo(date: string | Date) {
   return formatDistanceToNow(new Date(date), { addSuffix: true });
 }
+
+ export const formatDate = (date?: Date | string) => {
+    if (!date) return "N/A";
+    return new Date(date).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  export const getInitials = (firstName?: string, lastName?: string) => {
+  const first = firstName?.charAt(0) || "";
+  const last = lastName?.charAt(0) || "";
+  return (first + last).toUpperCase() || "U"; // "U" as default if no name
+};

@@ -39,6 +39,7 @@ export const allRoutes = Object.freeze({
   ADD_USER: "/users/new",
   VIEW_USER: (id: string) => `/users/${id}/view`,
   UPDATE_USER: (id: string) => `/users/${id}`,
+  DELETE_USER: (id: string) => `/users/${id}`,
   LEADS: "/leads",
   ADD_LEAD: "/leads/new",
   UPDATE_LEAD: (id: string) => `/leads/${id}`,
