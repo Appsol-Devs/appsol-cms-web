@@ -5,6 +5,7 @@ import { Headset } from "lucide-react";
 import type { UseFormReturn } from "react-hook-form";
 import { CustomSwitchComponent } from "@/components/CustomSwitchComponent";
 import type { IComplaintCategoryFields } from "./ComplaintCategoriesForm";
+import { ColorPickerComponent } from "@/components/ColorPickerComponent";
 
 interface IField {
   isLoading?: boolean;
@@ -55,12 +56,11 @@ const ComplaintCategoriesFormContent = ({
               disabled={isLoading}
               register={register}
             />
-            <CustomInputField<IComplaintCategoryFields>
-              type="color"
-              label="Color Code"
+            <ColorPickerComponent
+              control={control}
               name="colorCode"
+              label="Color Code"
               disabled={isLoading}
-              register={register}
             />
             {isUpdate && (
               <CustomSwitchComponent
