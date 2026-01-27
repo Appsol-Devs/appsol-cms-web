@@ -6,6 +6,7 @@ import type { UseFormReturn } from "react-hook-form";
 import type { ICallStatusFields } from "./CallStatusesForm";
 import { CheckboxComponent } from "@/components/CheckboxComponent";
 import { CustomSwitchComponent } from "@/components/CustomSwitchComponent";
+import { ColorPickerComponent } from "@/components/ColorPickerComponent";
 
 interface IField {
   isLoading?: boolean;
@@ -52,12 +53,11 @@ const CallStatusesFormContent = ({ isLoading, form, isUpdate }: IField) => {
               disabled={isLoading}
               register={register}
             />
-            <CustomInputField<ICallStatusFields>
-              type="color"
-              label="Color Code"
+            <ColorPickerComponent
+              control={control}
               name="colorCode"
+              label="Color Code"
               disabled={isLoading}
-              register={register}
             />
             <CheckboxComponent
                 control={control}

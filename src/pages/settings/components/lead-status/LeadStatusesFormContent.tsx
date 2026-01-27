@@ -5,6 +5,7 @@ import { BookOpenText } from "lucide-react";
 import type { UseFormReturn } from "react-hook-form";
 import type { ILeadStatusFields } from "./LeadStatusesForm";
 import { CustomSwitchComponent } from "@/components/CustomSwitchComponent";
+import { ColorPickerComponent } from "@/components/ColorPickerComponent";
 
 interface IField {
   isLoading?: boolean;
@@ -51,12 +52,11 @@ const LeadStatusesFormContent = ({ isLoading, form, isUpdate }: IField) => {
               disabled={isLoading}
               register={register}
             />
-            <CustomInputField<ILeadStatusFields>
-              type="color"
-              label="Color Code"
+            <ColorPickerComponent
+              control={control}
               name="colorCode"
+              label="Color Code"
               disabled={isLoading}
-              register={register}
             />
             {isUpdate && (
               <CustomSwitchComponent

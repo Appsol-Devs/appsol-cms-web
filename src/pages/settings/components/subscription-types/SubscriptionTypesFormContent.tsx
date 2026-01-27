@@ -5,6 +5,7 @@ import { CalendarCheck2 } from "lucide-react";
 import type { UseFormReturn } from "react-hook-form";
 import { CustomSwitchComponent } from "@/components/CustomSwitchComponent";
 import type { ISubscriptionTypeFields } from "./SubscriptionTypesForm";
+import { ColorPickerComponent } from "@/components/ColorPickerComponent";
 
 interface IField {
   isLoading?: boolean;
@@ -63,12 +64,11 @@ const SubscriptionTypesFormContent = ({
               disabled={isLoading}
               register={register}
             />
-            <CustomInputField<ISubscriptionTypeFields>
-              type="color"
-              label="Color Code"
+            <ColorPickerComponent
+              control={control}
               name="colorCode"
+              label="Color Code"
               disabled={isLoading}
-              register={register}
             />
             {isUpdate && (
               <CustomSwitchComponent
