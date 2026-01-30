@@ -52,7 +52,7 @@ export function ColorPickerComponent({
                     className={cn(
                       "w-8 h-8 rounded-full border-2 transition-all hover:scale-110 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed",
                       field.value === item.color
-                        ? "border-black border-[3px]"
+                        ? "border-black border-[3px] ring-2 ring-offset-2 ring-black-500"
                         : "border-gray-300"
                     )}
                     style={{ backgroundColor: item.color }}
@@ -70,7 +70,7 @@ export function ColorPickerComponent({
                     className={cn(
                       "w-8 h-8 rounded-full border-2 transition-all hover:scale-110 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed",
                       field.value === item.color
-                        ? "border-black border-[3px]"
+                        ? "border-black border-[3px] ring-2 ring-offset-2 ring-blue-500"
                         : "border-gray-300"
                     )}
                     style={{ backgroundColor: item.color }}

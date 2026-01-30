@@ -57,6 +57,18 @@ const SetupStatuses = () => {
         ),
       },
       {
+        header: "Color",
+        accessorKey: "colorCode",
+        cell: ({ row }) => (
+          <div className="flex items-center justify-center">
+            <span
+              className="inline-block w-4 h-4 rounded-full border border-gray-300"
+              style={{ backgroundColor: row.original.colorCode || "#e5e7eb" }}
+            />
+          </div>
+        ),
+      },
+      {
         header: "Action",
         meta: { icon: <Pen size={14} /> },
         accessorKey: "action",
