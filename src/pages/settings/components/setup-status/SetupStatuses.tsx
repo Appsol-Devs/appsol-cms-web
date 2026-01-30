@@ -2,7 +2,7 @@ import FeatureContentRenderer from "@/components/table/component/FeatureContentR
 import { Badge } from "@/components/ui/badge";
 import { allRoutes } from "@/utils/routes";
 import type { ColumnDef } from "@tanstack/react-table";
-import { File, NotepadText, Pen } from "lucide-react";
+import { File, NotepadText, Palette, Pen } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { ISetupStatus } from "../../common/settings";
@@ -53,6 +53,19 @@ const SetupStatuses = () => {
             <span className="font-semibold p-0.5 text-xs">
               {row.original.description ?? ""}
             </span>
+          </div>
+        ),
+      },
+      {
+        header: "Color",
+        accessorKey: "colorCode",
+        meta: { icon: <Palette size={14} /> },
+        cell: ({ row }) => (
+          <div className="flex flex-col items-start gap-1">
+            <span
+              className="inline-block w-4 h-4 rounded-full border border-gray-300"
+              style={{ backgroundColor: row.original.colorCode || "#e5e7eb" }}
+            />
           </div>
         ),
       },

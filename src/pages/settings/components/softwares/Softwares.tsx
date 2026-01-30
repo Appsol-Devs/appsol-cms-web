@@ -3,7 +3,7 @@ import FeatureContentRenderer from "@/components/table/component/FeatureContentR
 import { Badge } from "@/components/ui/badge";
 import { allRoutes } from "@/utils/routes";
 import type { ColumnDef } from "@tanstack/react-table";
-import { Computer, NotepadText, Pen } from "lucide-react";
+import { Computer, NotepadText, Palette, Pen } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { ISoftware } from "../../common/settings";
@@ -65,6 +65,19 @@ const Softwares = () => {
             >
               {row.original.isActive ? "Active" : "Inactive"}
             </Badge>
+          </div>
+        ),
+      },
+      {
+        header: "Color",
+        accessorKey: "colorCode",
+        meta: { icon: <Palette size={14} /> },
+        cell: ({ row }) => (
+          <div className="flex flex-col items-start gap-1">
+            <span
+              className="inline-block w-4 h-4 rounded-full border border-gray-300"
+              style={{ backgroundColor: row.original.colorCode || "#e5e7eb" }}
+            />
           </div>
         ),
       },

@@ -4,7 +4,6 @@ import { Separator } from "@/components/ui/separator";
 import { BookOpenText } from "lucide-react";
 import type { UseFormReturn } from "react-hook-form";
 import type { ICallStatusFields } from "./CallStatusesForm";
-import { CheckboxComponent } from "@/components/CheckboxComponent";
 import { CustomSwitchComponent } from "@/components/CustomSwitchComponent";
 import { ColorPickerComponent } from "@/components/ColorPickerComponent";
 
@@ -59,10 +58,10 @@ const CallStatusesFormContent = ({ isLoading, form, isUpdate }: IField) => {
               label="Color Code"
               disabled={isLoading}
             />
-            <CheckboxComponent
-                control={control}
-                name="isFinal"
-                label="Is Final?"
+            <CustomSwitchComponent
+              control={control}
+              name="isFinal"
+              label="Is Final?"
             />
             {isUpdate && (
               <>
