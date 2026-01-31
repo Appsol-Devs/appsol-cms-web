@@ -1,7 +1,7 @@
 import ActionButton from "@/components/ActionButtons";
 import PageSummary from "@/components/PageSummary";
 import PageTitle from "@/components/PageTitle";
-import { User, Mail, Phone, Calendar, Shield, VerifiedIcon, BadgeX, } from "lucide-react";
+import { User, Mail, Phone, Calendar, Shield, VerifiedIcon, BadgeX, Trash2, } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDeleteUserMutation, useLazyGetAUserQuery } from "../common/usersApi";
 import { useEffect, useState } from "react";
@@ -12,6 +12,8 @@ import type { IUser } from "@/pages/customer/common/customers";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDate, getInitials } from "@/lib/helpers";
 import StatusBadge from "@/components/ui/StatusBadge";
+import { Button } from "@/components/ui/button";
+import ConfirmationDialog from "@/components/ConfirmationDialog";
 
 
 
@@ -21,7 +23,7 @@ const UsersView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation();
+  const [deleteUser,] = useDeleteUserMutation();
   const [getUserDetails, { isLoading: isFetching }] = useLazyGetAUserQuery();
   const [_selectedUser, setSelectedUser] = useState<IUser | null>(null);
   const [getUser] = useLazyGetAUserQuery();
@@ -79,7 +81,7 @@ const UsersView = () => {
 
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-2">
       <PageTitle title="User Management" />
 
       <PageSummary
@@ -93,19 +95,34 @@ const UsersView = () => {
               type="edit"
               useText="Edit User"
             />
-            <ActionButton
-              type="delete"
-              useText={isDeleting ? "Deleting..." : "Delete User"}
-              onClick={() => handleUserDeletion(String(id))}
+            <ConfirmationDialog
+              alertType="delete"
+              title="Delete User Account?"
+              rightActionTitle="Delete"
+              content={
+                <p className="text-gray-500 text-center">
+                  This action cannot be undone. This will permanently delete
+                  the user <strong>{_selectedUser.firstName} {_selectedUser.lastName}</strong> and remove their data.
+                </p>
+              }
+
+              onConfirmClicked={() => handleUserDeletion(id as string)}
+
+              trigger={
+                <Button variant="destructive" className="bg-red-700! text-white">
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  <span className="text-xs">Delete User</span>
+                </Button>
+              }
             />
           </div>
         }
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1 space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-1 space-y-3">
           <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center text-center">
-            <div className="relative mb-4">
+            <div className="relative mb-2">
 
               <Avatar className="w-32 h-32 border-4 border-gray-50 shadow-md">
                 <AvatarImage
@@ -127,10 +144,10 @@ const UsersView = () => {
               </div>
             </div>
 
-            <h2 className="text-xl font-bold text-gray-900">
+            <h2 className="text-sm font-bold text-gray-900">
               {_selectedUser.firstName} {_selectedUser.lastName}
             </h2>
-            <p className="text-sm text-gray-500 mb-4">{_selectedUser.email}</p>
+            <p className="text-xs text-gray-500 mb-2">{_selectedUser.email}</p>
 
             <div className="flex flex-wrap gap-2 justify-center w-full">
               <StatusBadge active={_selectedUser.isActive} />
@@ -141,13 +158,13 @@ const UsersView = () => {
           </div>
 
           <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-            <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
               <Shield className="w-4 h-4 text-gray-500" /> Security & Device
             </h3>
-            <div className="space-y-3">
+            <div className="space-y-2">
               <div>
                 <p className="text-xs text-gray-500 uppercase">Verification Status</p>
-                <p className={`text-sm font-medium ${_selectedUser.isVerified ? 'text-green-600' : 'text-amber-600'}`}>
+                <p className={`text-xs font-medium ${_selectedUser.isVerified ? 'text-green-600' : 'text-amber-600'}`}>
                   {_selectedUser.isVerified ? "Verified Account" : "Unverified"}
                 </p>
               </div>
