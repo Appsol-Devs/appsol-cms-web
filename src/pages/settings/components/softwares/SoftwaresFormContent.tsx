@@ -63,6 +63,7 @@ const SoftwaresFormContent = ({ isLoading, form, isUpdate }: IField) => {
                 control={control}
                 name="isActive"
                 label="Is Active?"
+                disabled={isLoading}
               />
             )}
           </div>

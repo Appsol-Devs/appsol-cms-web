@@ -67,6 +67,7 @@ const ComplaintCategoriesFormContent = ({
                 control={control}
                 name="isActive"
                 label="Is Active?"
+                disabled={isLoading}
               />
             )}
           </div>

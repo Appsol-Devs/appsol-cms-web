@@ -62,6 +62,7 @@ const CallStatusesFormContent = ({ isLoading, form, isUpdate }: IField) => {
               control={control}
               name="isFinal"
               label="Is Final?"
+              disabled={isLoading}
             />
             {isUpdate && (
               <>
@@ -69,6 +70,7 @@ const CallStatusesFormContent = ({ isLoading, form, isUpdate }: IField) => {
                   control={control}
                   name="isActive"
                   label="Is Active?"
+                  disabled={isLoading}
                 />
               </>
             )}
