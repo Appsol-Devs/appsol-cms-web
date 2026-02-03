@@ -25,7 +25,7 @@ const UsersView = () => {
 
   const [deleteUser,] = useDeleteUserMutation();
   const [getUserDetails, { isLoading: isFetching }] = useLazyGetAUserQuery();
-  const [_selectedUser, setSelectedUser] = useState<IUser | null>(null);
+  const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
   const [getUser] = useLazyGetAUserQuery();
   const [creator, setCreator] = useState("");
 
@@ -69,13 +69,13 @@ const UsersView = () => {
   };
 
   useEffect(() => {
-    if (_selectedUser && _selectedUser.createdBy)
-      fetchUser(String(_selectedUser.createdBy))
-  }, [_selectedUser, _selectedUser?.createdBy]);
+    if (selectedUser && selectedUser.createdBy)
+      fetchUser(String(selectedUser.createdBy))
+  }, [selectedUser, selectedUser?.createdBy]);
 
 
 
-  if (isFetching || !_selectedUser) {
+  if (isFetching || !selectedUser) {
     return <div className="p-8 text-center text-gray-500">Loading user details...</div>;
   }
 
@@ -86,8 +86,8 @@ const UsersView = () => {
 
       <PageSummary
         icon={User}
-        title={`${_selectedUser.firstName} ${_selectedUser.lastName}`}
-        description={`Manage access and details for ${_selectedUser.firstName} ${_selectedUser.lastName}`}
+        title={`${selectedUser.firstName} ${selectedUser.lastName}`}
+        description={`Manage access and details for ${selectedUser.firstName} ${selectedUser.lastName}`}
         actionComponent={
           <div className="flex items-center gap-3">
             <ActionButton
@@ -102,7 +102,7 @@ const UsersView = () => {
               content={
                 <p className="text-gray-500 text-center">
                   This action cannot be undone. This will permanently delete
-                  the user <strong>{_selectedUser.firstName} {_selectedUser.lastName}</strong> and remove their data.
+                  the user <strong>{selectedUser.firstName} {selectedUser.lastName}</strong> and remove their data.
                 </p>
               }
 
@@ -126,17 +126,17 @@ const UsersView = () => {
 
               <Avatar className="w-32 h-32 border-4 border-gray-50 shadow-md">
                 <AvatarImage
-                  src={_selectedUser.imageUrl}
-                  alt={`${_selectedUser.firstName} ${_selectedUser.lastName}`}
+                  src={selectedUser.imageUrl}
+                  alt={`${selectedUser.firstName} ${selectedUser.lastName}`}
                   className="object-cover"
                 />
 
                 <AvatarFallback className="text-4xl font-bold text-gray-500 bg-gray-100">
-                  {getInitials(_selectedUser.firstName, _selectedUser.lastName)}
+                  {getInitials(selectedUser.firstName, selectedUser.lastName)}
                 </AvatarFallback>
               </Avatar>
               <div className="absolute bottom-1 right-1 bg-white rounded-full p-1 shadow-sm">
-                {_selectedUser.isVerified ? (
+                {selectedUser.isVerified ? (
                   <VerifiedIcon className="w-6 h-6 text-blue-500" fill="currentColor" color="white" />
                 ) : (
                   <BadgeX className="w-6 h-6 text-gray-400" />
@@ -145,14 +145,14 @@ const UsersView = () => {
             </div>
 
             <h2 className="text-sm font-bold text-gray-900">
-              {_selectedUser.firstName} {_selectedUser.lastName}
+              {selectedUser.firstName} {selectedUser.lastName}
             </h2>
-            <p className="text-xs text-gray-500 mb-2">{_selectedUser.email}</p>
+            <p className="text-xs text-gray-500 mb-2">{selectedUser.email}</p>
 
             <div className="flex flex-wrap gap-2 justify-center w-full">
-              <StatusBadge active={_selectedUser.isActive} />
+              <StatusBadge active={selectedUser.isActive} />
               <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
-                {_selectedUser.role?.name || "User"}
+                {selectedUser.role?.name || "User"}
               </span>
             </div>
           </div>
@@ -164,8 +164,8 @@ const UsersView = () => {
             <div className="space-y-2">
               <div>
                 <p className="text-xs text-gray-500 uppercase">Verification Status</p>
-                <p className={`text-xs font-medium ${_selectedUser.isVerified ? 'text-green-600' : 'text-amber-600'}`}>
-                  {_selectedUser.isVerified ? "Verified Account" : "Unverified"}
+                <p className={`text-xs font-medium ${selectedUser.isVerified ? 'text-green-600' : 'text-amber-600'}`}>
+                  {selectedUser.isVerified ? "Verified Account" : "Unverified"}
                 </p>
               </div>
 
@@ -181,8 +181,8 @@ const UsersView = () => {
 
             <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
 
-              <DetailItem label="First Name" value={_selectedUser.firstName} />
-              <DetailItem label="Last Name" value={_selectedUser.lastName} />
+              <DetailItem label="First Name" value={selectedUser.firstName} />
+              <DetailItem label="Last Name" value={selectedUser.lastName} />
 
 
               <div className="md:col-span-2 border-t border-gray-100 my-2"></div>
@@ -190,12 +190,12 @@ const UsersView = () => {
               <DetailItem
                 icon={<Mail className="w-4 h-4" />}
                 label="Email Address"
-                value={_selectedUser.email}
+                value={selectedUser.email}
               />
               <DetailItem
                 icon={<Phone className="w-4 h-4" />}
                 label="Phone Number"
-                value={_selectedUser.phone}
+                value={selectedUser.phone}
               />
 
               <div className="md:col-span-2 border-t border-gray-100 my-2"></div>
@@ -203,7 +203,7 @@ const UsersView = () => {
 
               <DetailItem
                 label="Role"
-                value={_selectedUser.role?.name}
+                value={selectedUser.role?.name}
               />
 
               <div className="md:col-span-2 border-t border-gray-100 my-2"></div>
@@ -211,12 +211,12 @@ const UsersView = () => {
               <DetailItem
                 icon={<Calendar className="w-4 h-4" />}
                 label="Registered On"
-                value={formatDate(_selectedUser.createdAt)}
+                value={formatDate(selectedUser.createdAt)}
               />
               <DetailItem
                 icon={<Calendar className="w-4 h-4" />}
                 label="Last Updated"
-                value={formatDate(_selectedUser.updatedAt)}
+                value={formatDate(selectedUser.updatedAt)}
               />
               <DetailItem
                 label="Created By"
