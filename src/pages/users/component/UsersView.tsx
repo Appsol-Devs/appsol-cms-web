@@ -1,7 +1,7 @@
 import ActionButton from "@/components/ActionButtons";
 import PageSummary from "@/components/PageSummary";
 import PageTitle from "@/components/PageTitle";
-import { User, Mail, Phone, Calendar, Shield, VerifiedIcon, BadgeX, } from "lucide-react";
+import { User, Mail, Phone, Calendar, Shield, VerifiedIcon, BadgeX, Trash2, } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDeleteUserMutation, useLazyGetAUserQuery } from "../common/usersApi";
 import { useEffect, useState } from "react";
@@ -12,6 +12,8 @@ import type { IUser } from "@/pages/customer/common/customers";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDate, getInitials } from "@/lib/helpers";
 import StatusBadge from "@/components/ui/StatusBadge";
+import { Button } from "@/components/ui/button";
+import ConfirmationDialog from "@/components/ConfirmationDialog";
 
 
 
@@ -21,9 +23,9 @@ const UsersView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation();
+  const [deleteUser,] = useDeleteUserMutation();
   const [getUserDetails, { isLoading: isFetching }] = useLazyGetAUserQuery();
-  const [_selectedUser, setSelectedUser] = useState<IUser | null>(null);
+  const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
   const [getUser] = useLazyGetAUserQuery();
   const [creator, setCreator] = useState("");
 
@@ -67,25 +69,25 @@ const UsersView = () => {
   };
 
   useEffect(() => {
-    if (_selectedUser && _selectedUser.createdBy)
-      fetchUser(String(_selectedUser.createdBy))
-  }, [_selectedUser, _selectedUser?.createdBy]);
+    if (selectedUser && selectedUser.createdBy)
+      fetchUser(String(selectedUser.createdBy))
+  }, [selectedUser, selectedUser?.createdBy]);
 
 
 
-  if (isFetching || !_selectedUser) {
+  if (isFetching || !selectedUser) {
     return <div className="p-8 text-center text-gray-500">Loading user details...</div>;
   }
 
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-2">
       <PageTitle title="User Management" />
 
       <PageSummary
         icon={User}
-        title={`${_selectedUser.firstName} ${_selectedUser.lastName}`}
-        description={`Manage access and details for ${_selectedUser.firstName} ${_selectedUser.lastName}`}
+        title={`${selectedUser.firstName} ${selectedUser.lastName}`}
+        description={`Manage access and details for ${selectedUser.firstName} ${selectedUser.lastName}`}
         actionComponent={
           <div className="flex items-center gap-3">
             <ActionButton
@@ -93,33 +95,48 @@ const UsersView = () => {
               type="edit"
               useText="Edit User"
             />
-            <ActionButton
-              type="delete"
-              useText={isDeleting ? "Deleting..." : "Delete User"}
-              onClick={() => handleUserDeletion(String(id))}
+            <ConfirmationDialog
+              alertType="delete"
+              title="Delete User Account?"
+              rightActionTitle="Delete"
+              content={
+                <p className="text-gray-500 text-center">
+                  This action cannot be undone. This will permanently delete
+                  the user <strong>{selectedUser.firstName} {selectedUser.lastName}</strong> and remove their data.
+                </p>
+              }
+
+              onConfirmClicked={() => handleUserDeletion(id as string)}
+
+              trigger={
+                <Button variant="destructive" className="bg-red-700! text-white">
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  <span className="text-xs">Delete User</span>
+                </Button>
+              }
             />
           </div>
         }
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1 space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-1 space-y-3">
           <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center text-center">
-            <div className="relative mb-4">
+            <div className="relative mb-2">
 
               <Avatar className="w-32 h-32 border-4 border-gray-50 shadow-md">
                 <AvatarImage
-                  src={_selectedUser.imageUrl}
-                  alt={`${_selectedUser.firstName} ${_selectedUser.lastName}`}
+                  src={selectedUser.imageUrl}
+                  alt={`${selectedUser.firstName} ${selectedUser.lastName}`}
                   className="object-cover"
                 />
 
                 <AvatarFallback className="text-4xl font-bold text-gray-500 bg-gray-100">
-                  {getInitials(_selectedUser.firstName, _selectedUser.lastName)}
+                  {getInitials(selectedUser.firstName, selectedUser.lastName)}
                 </AvatarFallback>
               </Avatar>
               <div className="absolute bottom-1 right-1 bg-white rounded-full p-1 shadow-sm">
-                {_selectedUser.isVerified ? (
+                {selectedUser.isVerified ? (
                   <VerifiedIcon className="w-6 h-6 text-blue-500" fill="currentColor" color="white" />
                 ) : (
                   <BadgeX className="w-6 h-6 text-gray-400" />
@@ -127,28 +144,28 @@ const UsersView = () => {
               </div>
             </div>
 
-            <h2 className="text-xl font-bold text-gray-900">
-              {_selectedUser.firstName} {_selectedUser.lastName}
+            <h2 className="text-sm font-bold text-gray-900">
+              {selectedUser.firstName} {selectedUser.lastName}
             </h2>
-            <p className="text-sm text-gray-500 mb-4">{_selectedUser.email}</p>
+            <p className="text-xs text-gray-500 mb-2">{selectedUser.email}</p>
 
             <div className="flex flex-wrap gap-2 justify-center w-full">
-              <StatusBadge active={_selectedUser.isActive} />
+              <StatusBadge active={selectedUser.isActive} />
               <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
-                {_selectedUser.role?.name || "User"}
+                {selectedUser.role?.name || "User"}
               </span>
             </div>
           </div>
 
           <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-            <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
               <Shield className="w-4 h-4 text-gray-500" /> Security & Device
             </h3>
-            <div className="space-y-3">
+            <div className="space-y-2">
               <div>
                 <p className="text-xs text-gray-500 uppercase">Verification Status</p>
-                <p className={`text-sm font-medium ${_selectedUser.isVerified ? 'text-green-600' : 'text-amber-600'}`}>
-                  {_selectedUser.isVerified ? "Verified Account" : "Unverified"}
+                <p className={`text-xs font-medium ${selectedUser.isVerified ? 'text-green-600' : 'text-amber-600'}`}>
+                  {selectedUser.isVerified ? "Verified Account" : "Unverified"}
                 </p>
               </div>
 
@@ -164,8 +181,8 @@ const UsersView = () => {
 
             <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
 
-              <DetailItem label="First Name" value={_selectedUser.firstName} />
-              <DetailItem label="Last Name" value={_selectedUser.lastName} />
+              <DetailItem label="First Name" value={selectedUser.firstName} />
+              <DetailItem label="Last Name" value={selectedUser.lastName} />
 
 
               <div className="md:col-span-2 border-t border-gray-100 my-2"></div>
@@ -173,12 +190,12 @@ const UsersView = () => {
               <DetailItem
                 icon={<Mail className="w-4 h-4" />}
                 label="Email Address"
-                value={_selectedUser.email}
+                value={selectedUser.email}
               />
               <DetailItem
                 icon={<Phone className="w-4 h-4" />}
                 label="Phone Number"
-                value={_selectedUser.phone}
+                value={selectedUser.phone}
               />
 
               <div className="md:col-span-2 border-t border-gray-100 my-2"></div>
@@ -186,7 +203,7 @@ const UsersView = () => {
 
               <DetailItem
                 label="Role"
-                value={_selectedUser.role?.name}
+                value={selectedUser.role?.name}
               />
 
               <div className="md:col-span-2 border-t border-gray-100 my-2"></div>
@@ -194,12 +211,12 @@ const UsersView = () => {
               <DetailItem
                 icon={<Calendar className="w-4 h-4" />}
                 label="Registered On"
-                value={formatDate(_selectedUser.createdAt)}
+                value={formatDate(selectedUser.createdAt)}
               />
               <DetailItem
                 icon={<Calendar className="w-4 h-4" />}
                 label="Last Updated"
-                value={formatDate(_selectedUser.updatedAt)}
+                value={formatDate(selectedUser.updatedAt)}
               />
               <DetailItem
                 label="Created By"

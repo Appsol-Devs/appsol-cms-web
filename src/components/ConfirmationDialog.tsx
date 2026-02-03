@@ -7,6 +7,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   CheckCircle,
   AlertTriangle,
@@ -17,106 +18,110 @@ import {
   Ban,
 } from "lucide-react";
 
+type AlertType = "success" | "warning" | "error" | "info" | "delete";
+
 interface IConfirmationDialog {
   title?: string;
-  children?: ReactNode;
-  trigger?: ReactNode;
-  maxWidth?: "xs" | "sm" | "md" | "lg" | "xl" | "fullscreen";
   content: ReactNode;
+  trigger?: ReactNode;
+  triggerClassName?: string; // Optional styling for the trigger
+  maxWidth?: "xs" | "sm" | "md" | "lg" | "xl" | "fullscreen";
   leftActionTitle?: string;
   rightActionTitle?: string;
   disableOutsideClick?: boolean;
   onConfirmClicked?: () => void;
-  alertType?: "success" | "warning" | "error" | "info" | "delete";
+  alertType?: AlertType;
   visible?: boolean;
   onClose?: () => void;
   disabled?: boolean;
 }
 
+const variantConfigs = {
+  success: { icon: CheckCircle, color: "text-green-600", btn: "bg-green-600 hover:bg-green-700" },
+  warning: { icon: AlertTriangle, color: "text-yellow-600", btn: "bg-yellow-600 hover:bg-yellow-700" },
+  error: { icon: XCircle, color: "text-red-600", btn: "bg-red-600 hover:bg-red-700" },
+  info: { icon: Info, color: "text-blue-600", btn: "bg-blue-600 hover:bg-blue-700" },
+  delete: { icon: Trash2, color: "text-red-600", btn: "bg-red-600 hover:bg-red-700" },
+};
+
 const ConfirmationDialog = ({
   title = "Are you sure?",
   trigger,
-  maxWidth,
+  triggerClassName,
+  maxWidth = "md",
   content,
   leftActionTitle = "Cancel",
-  disableOutsideClick = true,
   rightActionTitle = "Yes",
+  disableOutsideClick = true,
   onConfirmClicked,
   alertType = "info",
   visible = false,
   onClose,
   disabled = false,
 }: IConfirmationDialog) => {
-  const [open, setOpen] = useState<boolean>(false);
+  const [open, setOpen] = useState<boolean>(visible);
 
-  // Sync visibility with external control
   useEffect(() => {
     setOpen(visible);
   }, [visible]);
 
-  const handleConfirm = () => {
-    onConfirmClicked?.();
-    setOpen(false);
-    onClose?.();
+  const handleOpenChange = (val: boolean) => {
+    setOpen(val);
+    if (!val) onClose?.();
   };
 
-  const handleClose = () => {
-    setOpen(false);
-    onClose?.();
-  };
-
-  const renderIcon = () => {
-    switch (alertType) {
-      case "success":
-        return <CheckCircle className="w-10 h-10 text-green-600" />;
-      case "warning":
-        return <AlertTriangle className="w-10 h-10 text-yellow-600" />;
-      case "error":
-        return <XCircle className="w-10 h-10 text-red-600" />;
-      case "delete":
-        return <Trash2 className="w-10 h-10 text-red-600" />;
-      case "info":
-      default:
-        return <Info className="w-10 h-10 text-blue-600" />;
-    }
-  };
+  const config = variantConfigs[alertType];
+  const Icon = config.icon;
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      {trigger && (
+        <DialogTrigger asChild className={triggerClassName}>
+          {trigger}
+        </DialogTrigger>
+      )}
 
       <DialogContent
-        onInteractOutside={
-          disableOutsideClick ? (e) => e.preventDefault() : undefined
-        }
-        className={`${
-          maxWidth === "fullscreen"
-            ? "max-w-[95vw] h-[95vh]"
-            : `max-w-${maxWidth}`
-        }`}
+        onInteractOutside={(e) => disableOutsideClick && e.preventDefault()}
+        className={cn(
+          "gap-0",
+          maxWidth === "fullscreen" ? "max-w-[95vw] h-[95vh]" : `max-w-${maxWidth}`,
+          "[&>button]:text-white [&>button]:opacity-100 [&>button]:hover:opacity-80"
+        )}
       >
-        <DialogTitle></DialogTitle>
-        <div>
-          <div className="flex items-center flex-col gap-4">
-            {renderIcon()}
-            <p className="text-xl font-semibold">{title}</p>
+        <div className="pt-6">
+          <div className="flex flex-col items-center gap-4 text-center">
+            <Icon className={cn("w-12 h-12", config.color)} />
+            <DialogTitle className="text-xl font-semibold">{title}</DialogTitle>
+          </div>
+
+          <div className="py-6 flex items-center justify-center text-muted-foreground text-sm">
+            {content}
           </div>
         </div>
 
-        <div className="py-4 flex items-center justify-center">{content}</div>
-
-        <DialogFooter>
-          <Button variant="outline" onClick={handleClose}>
-            <Ban className="w-4 h-4" />
-
+        <DialogFooter className="sm:justify-center gap-2">
+          <Button 
+            variant="outline" 
+            onClick={() => handleOpenChange(false)}
+            className="text-white bg-slate-500 hover:bg-slate-600 hover:text-white border-none"
+          >
+            <Ban className="mr-2 h-4 w-4" />
             {leftActionTitle}
           </Button>
+
           <Button
-            className="min-w-24"
-            onClick={handleConfirm}
+            className={cn(
+              "min-w-24 text-white", 
+              alertType === "delete" ? "bg-red-600 hover:bg-red-700" : config.btn
+            )}
             disabled={disabled}
+            onClick={() => {
+              onConfirmClicked?.();
+              handleOpenChange(false);
+            }}
           >
-            <Check className="w-4 h-4" />
+            <Check className="mr-2 h-4 w-4" />
             {rightActionTitle}
           </Button>
         </DialogFooter>
