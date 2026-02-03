@@ -16,7 +16,7 @@ interface IField {
 const CallStatusesFormContent = ({ isLoading, form, isUpdate }: IField) => {
   const { control, register } = form;
 
-  return (
+  return ( 
     <div className="space-y-2">
       <CardComponent
         headerTitle={
