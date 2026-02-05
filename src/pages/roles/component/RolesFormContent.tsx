@@ -49,7 +49,7 @@ const RolesFormContent = ({ isLoading, form, }: IField) => {
           <>
             <div className="flex items-center justify-between gap-2 mb-2">
               <p className="flex items-center gap-2">
-                <BookOpenText className="w-4 h-4" /> Basic Role Information
+                <BookOpenText className="w-4 h-4" /> Role Basic Information
               </p>
               <p className="text-xs text-rx-secondary">
                 Required Information <span className="text-red-500">*</span>
@@ -120,5 +120,6 @@ const RolesFormContent = ({ isLoading, form, }: IField) => {
     </div>
   );
 };
+
 
 export default RolesFormContent;
