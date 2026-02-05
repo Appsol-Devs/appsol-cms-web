@@ -31,6 +31,7 @@ import LeadNextStepsForm from "@/pages/settings/components/lead-next-step/LeadNe
 import CustomerRoutes from "./CustomerRoutes";
 import Customers from "@/pages/customer/component/core/Customers";
 import CustomersForm from "@/pages/customer/component/core/CustomersForm";
+import RolesForm from "@/pages/roles/component/RolesForm";
 
 const PrivateRoutes = () => {
   return (
@@ -133,7 +134,12 @@ const PrivateRoutes = () => {
       <Route
         path={`${allRoutes.VIEW_CUSTOMER(":id")}/*`}
         element={<CustomerRoutes />}
-      />
+      />      <Route path={allRoutes.UPDATE_ROLE(":id")} element={<RolesForm />} />
+      <Route path={allRoutes.ADD_ROLE} element={<RolesForm />} />
+      <Route path={allRoutes.DELETE_ROLE(":id")} element={<RolesForm />} />
+
+
+
       <Route
         path={`${allRoutes.SETTINGS}/*`}
         element={
