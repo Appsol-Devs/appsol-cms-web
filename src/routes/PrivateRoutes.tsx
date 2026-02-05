@@ -31,6 +31,7 @@ import LeadsForm from "@/pages/leads/component/LeadsForm";
 import CallStatusesForm from "@/pages/settings/components/call-status/CallStatusesForm";
 import SetupStatusesForm from "@/pages/settings/components/setup-status/SetupStatusesForm";
 import LeadNextStepsForm from "@/pages/settings/components/lead-next-step/LeadNextStepsForm";
+import RolesForm from "@/pages/roles/component/RolesForm";
 
 const PrivateRoutes = () => {
   return (
@@ -128,6 +129,11 @@ const PrivateRoutes = () => {
       <Route path={allRoutes.UPDATE_USER(":id")} element={<UsersForm />} />
       <Route path={allRoutes.VIEW_USER(":id")} element={<UsersView />} />
       <Route path={allRoutes.DELETE_USER(":id")} element={<UsersForm />} />
+      <Route path={allRoutes.UPDATE_ROLE(":id")} element={<RolesForm />} />
+      <Route path={allRoutes.ADD_ROLE} element={<RolesForm />} />
+      <Route path={allRoutes.DELETE_ROLE(":id")} element={<RolesForm />} />
+
+
 
       <Route
         path={`${allRoutes.SETTINGS}/*`}

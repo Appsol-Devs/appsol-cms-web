@@ -4,15 +4,20 @@ export type ILoginDetails = {
 };
 
 export type IRole = {
-  _id: string;
+  _id?: string;
   name: string;
   description: string;
   permissions: string[];
   isDeleted: boolean;
   createdAt: string;
   updatedAt: string;
-  __v: number;
+  __v?: number;
 };
+
+export interface IPermission {
+  _id: number;
+  name: string;
+}
 
 export type ILoginResponse = {
   _id: string;
