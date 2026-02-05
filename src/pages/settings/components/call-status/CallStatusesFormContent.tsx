@@ -16,7 +16,7 @@ interface IField {
 const CallStatusesFormContent = ({ isLoading, form, isUpdate }: IField) => {
   const { control, register } = form;
 
-  return (
+  return ( 
     <div className="space-y-2">
       <CardComponent
         headerTitle={
@@ -58,20 +58,22 @@ const CallStatusesFormContent = ({ isLoading, form, isUpdate }: IField) => {
               label="Color Code"
               disabled={isLoading}
             />
-            <CustomSwitchComponent
-              control={control}
-              name="isFinal"
-              label="Is Final?"
-            />
-            {isUpdate && (
-              <>
+            <div className="flex flex-col gap-4 mt-6">
+              <CustomSwitchComponent
+                control={control}
+                name="isFinal"
+                label="Is Final?"
+                disabled={isLoading}
+              />
+              {isUpdate && (
                 <CustomSwitchComponent
                   control={control}
                   name="isActive"
                   label="Is Active?"
+                  disabled={isLoading}
                 />
-              </>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </CardComponent>
