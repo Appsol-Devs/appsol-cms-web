@@ -4,8 +4,6 @@ import { Route, Routes } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoutes";
 import SettingsRoutes from "./SettingsRoutes";
 import Roles from "@/pages/roles/component/Roles";
-import Customers from "@/pages/customer/component/Customers";
-import CustomersView from "@/pages/customer/component/CustomersView";
 import Softwares from "@/pages/settings/components/softwares/Softwares";
 import ComplaintTypes from "@/pages/settings/components/complaint-types/ComplaintTypes";
 import ComplaintCategories from "@/pages/settings/components/complaint-category/ComplaintCategories";
@@ -18,7 +16,6 @@ import SubscriptionTypes from "@/pages/settings/components/subscription-types/Su
 import Users from "@/pages/users/component/Users";
 import UsersView from "@/pages/users/component/UsersView";
 import UsersForm from "@/pages/users/component/UsersForm";
-import CustomersForm from "@/pages/customer/component/CustomersForm";
 import SoftwaresForm from "@/pages/settings/components/softwares/SoftwaresForm";
 import ComplaintTypesForm from "@/pages/settings/components/complaint-types/ComplaintTypesForm";
 import ComplaintCategoriesForm from "@/pages/settings/components/complaint-category/ComplaintCategoriesForm";
@@ -31,16 +28,15 @@ import LeadsForm from "@/pages/leads/component/LeadsForm";
 import CallStatusesForm from "@/pages/settings/components/call-status/CallStatusesForm";
 import SetupStatusesForm from "@/pages/settings/components/setup-status/SetupStatusesForm";
 import LeadNextStepsForm from "@/pages/settings/components/lead-next-step/LeadNextStepsForm";
+import CustomerRoutes from "./CustomerRoutes";
+import Customers from "@/pages/customer/component/core/Customers";
+import CustomersForm from "@/pages/customer/component/core/CustomersForm";
 
 const PrivateRoutes = () => {
   return (
     <Routes>
       <Route path={allRoutes.DASHBOARD} element={<Dashboard />} />
       <Route path={allRoutes.CUSTOMERS} element={<Customers />} />
-      <Route
-        path={allRoutes.VIEW_CUSTOMER(":id")}
-        element={<CustomersView />}
-      />
       <Route path={allRoutes.ADD_CUSTOMER} element={<CustomersForm />} />
       <Route
         path={allRoutes.UPDATE_CUSTOMER(":id")}
@@ -87,7 +83,10 @@ const PrivateRoutes = () => {
         element={<ComplaintCategoriesForm />}
       />
       <Route path={allRoutes.SETUP_STATUSES} element={<SetupStatuses />} />
-      <Route path={allRoutes.ADD_SETUP_STATUS} element={<SetupStatusesForm />} />
+      <Route
+        path={allRoutes.ADD_SETUP_STATUS}
+        element={<SetupStatusesForm />}
+      />
       <Route
         path={allRoutes.UPDATE_SETUP_STATUS(":id")}
         element={<SetupStatusesForm />}
@@ -117,7 +116,10 @@ const PrivateRoutes = () => {
         element={<LeadStatusesForm />}
       />
       <Route path={allRoutes.LEAD_NEXT_STEPS} element={<LeadNextSteps />} />
-      <Route path={allRoutes.ADD_LEAD_NEXT_STEP} element={<LeadNextStepsForm />} />
+      <Route
+        path={allRoutes.ADD_LEAD_NEXT_STEP}
+        element={<LeadNextStepsForm />}
+      />
       <Route
         path={allRoutes.UPDATE_LEAD_NEXT_STEP(":id")}
         element={<LeadNextStepsForm />}
@@ -128,7 +130,10 @@ const PrivateRoutes = () => {
       <Route path={allRoutes.UPDATE_USER(":id")} element={<UsersForm />} />
       <Route path={allRoutes.VIEW_USER(":id")} element={<UsersView />} />
       <Route path={allRoutes.DELETE_USER(":id")} element={<UsersForm />} />
-
+      <Route
+        path={`${allRoutes.VIEW_CUSTOMER(":id")}/*`}
+        element={<CustomerRoutes />}
+      />
       <Route
         path={`${allRoutes.SETTINGS}/*`}
         element={
