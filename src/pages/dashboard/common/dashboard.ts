@@ -1,48 +1,67 @@
-import type { IDashboardSummaryCardProps } from "../component/DashboardSummaryCard";
+import { format, startOfDay, subDays } from "date-fns";
+import type { SVGProps } from "react";
 
-export const dashboardSummaryInfo: IDashboardSummaryCardProps[] = [
-  { title: "Total Revenue", value: 12426 },
-  { title: "Outstanding Debts", value: 238478 },
-  { title: "Total Tickets", value: 260, isCurrency: false },
-  { title: "Total Customers", value: 550, isCurrency: false },
-];
-
-export interface IDashboardOutshandingProps {
-  invoiceId: string;
-  dueDate: string;
-  name: string;
-  amount: number;
+export interface IDashboardDateRange {
+  startDate: string;
+  endDate: string;
 }
 
-export const dashboardOutstanding: IDashboardOutshandingProps[] = [
-  {
-    invoiceId: "INV-0001",
-    dueDate: "2023-09-15",
-    name: "John Doe",
-    amount: 5000,
-  },
-  {
-    invoiceId: "INV-0002",
-    dueDate: "2023-09-20",
-    name: "Jane Smith",
-    amount: 8000,
-  },
-  {
-    invoiceId: "INV-0003",
-    dueDate: "2023-09-25",
-    name: "Alice Johnson",
-    amount: 12000,
-  },
-  {
-    invoiceId: "INV-0004",
-    dueDate: "2023-09-30",
-    name: "Bob Williams",
-    amount: 6000,
-  },
-  {
-    invoiceId: "INV-0005",
-    dueDate: "2023-10-05",
-    name: "Eve Brown",
-    amount: 9000,
-  },
-];
+export interface IDashboardSummary {
+  openIssuesCount: number;
+  revenue: number;
+  activeSubscriptions: number;
+  leadGrowthPercentage: number;
+}
+
+export interface IWeeklyRevenueTrends {
+  dates: string[];
+  revenues: number[];
+}
+
+export interface IOperationalInsights {
+  complaints: {
+    open: number;
+    "in-progress": number;
+    rescheduled: number;
+    resolved: number;
+    closed: number;
+  };
+  tickets: {
+    open: number;
+    fixed: number;
+    closed: number;
+    assigned: number;
+    rejected: number;
+  };
+}
+
+export interface IDashboardSummaryCardProps {
+  title: string;
+  icon?: React.FC<SVGProps<SVGSVGElement>>;
+  value: number;
+  isCurrency?: boolean;
+  valueSuffix?: string;
+  growthPercent?: number;
+}
+
+export const DEFAULT_DASHBOARD_DAYS = 7;
+
+/** "This week": 7 days ending today (current date). */
+export const getThisWeekRange = (): IDashboardDateRange => {
+  const end = startOfDay(new Date());
+  const start = subDays(end, DEFAULT_DASHBOARD_DAYS - 1);
+  return {
+    startDate: format(start, "yyyy-MM-dd"),
+    endDate: format(end, "yyyy-MM-dd"),
+  };
+};
+
+/** "Last week": 7 days ending 7 days ago. */
+export const getLastWeekRange = (): IDashboardDateRange => {
+  const end = subDays(startOfDay(new Date()), 7);
+  const start = subDays(end, DEFAULT_DASHBOARD_DAYS - 1);
+  return {
+    startDate: format(start, "yyyy-MM-dd"),
+    endDate: format(end, "yyyy-MM-dd"),
+  };
+};

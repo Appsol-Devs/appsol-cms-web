@@ -19,6 +19,13 @@ interface Props {
   allowFuture?: boolean;
   dateOnly?: boolean;
   showInPopover?: boolean;
+  calendarClassName?: string;
+  rangeStart?: Date | null;
+  rangeEnd?: Date | null;
+}
+
+function toDateOnly(d: Date): Date {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
 }
 
 export function DatePicker({
@@ -31,6 +38,9 @@ export function DatePicker({
   title,
   allowFuture = false,
   placeholder,
+  calendarClassName,
+  rangeStart,
+  rangeEnd,
 }: Props) {
   const [date, setDate] = React.useState<Date | undefined>(
     defaultDate ? defaultDate : undefined
@@ -73,17 +83,28 @@ export function DatePicker({
     }
   }, [date]);
 
+  const rangeModifiers =
+    rangeStart && rangeEnd
+      ? {
+          in_range: {
+            from: toDateOnly(rangeStart) <= toDateOnly(rangeEnd) ? toDateOnly(rangeStart) : toDateOnly(rangeEnd),
+            to: toDateOnly(rangeStart) <= toDateOnly(rangeEnd) ? toDateOnly(rangeEnd) : toDateOnly(rangeStart),
+          },
+        }
+      : undefined;
+
   const innerContent = (
     <div className="sm:flex">
       <Calendar
         mode="single"
         disabled={disabled}
-        // captionLayout="dropdown-buttons"
         selected={date}
-        defaultMonth={new Date()}
+        defaultMonth={date ?? defaultDate ?? new Date()}
         onSelect={handleDateSelect}
         toDate={allowFuture ? undefined : new Date()}
         initialFocus
+        modifiers={rangeModifiers}
+        className={calendarClassName}
       />
       {dateOnly ? null : (
         <div className="flex flex-col sm:flex-row sm:h-[300px] divide-y sm:divide-y-0 sm:divide-x">
