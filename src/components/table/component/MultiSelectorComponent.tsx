@@ -211,16 +211,16 @@ const MultiSelectorComponent = <T,>({
       )}
       {control && name ? (
         <Controller
-          name={name} 
+          name={name as any} 
           control={control}
-          defaultValue={defaultValue || []}
-          render={(field) => (
+          defaultValue={defaultValue ?? [] as any}
+          render={({ field }) => (
             <Select
               {...commonSelectProps}
               isClearable={isClearable}
-              value={field.field.value as MultiValue<DropDownOption<T>>}
+              value={field.value as unknown as MultiValue<DropDownOption<T>>}
               onChange={(val, actionMeta) => {
-                field.field.onChange(val);
+                field.onChange(val);
                 onChanged?.(val, actionMeta);
               }}
             />
