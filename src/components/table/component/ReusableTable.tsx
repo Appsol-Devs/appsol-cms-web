@@ -5,7 +5,7 @@ import type { IMetaData } from "@/lib/pagination";
 
 interface ReusableTableProps<
   T extends object = any,
-  R extends QueryDefinition<any, any, any, any, string> = any
+  R extends QueryDefinition<any, any, any, any, string> = any,
 > {
   data: T[] | R[];
   onPaginationChange: React.Dispatch<React.SetStateAction<IMetaData>>;
@@ -14,7 +14,7 @@ interface ReusableTableProps<
   hidePagination?: boolean;
   isError?: boolean;
   refetch?: () => void;
-  pathOnRowSelected?: string;
+  pathOnRowSelected?: (data: T) => void;
   // sortOptions?: SortingState;
   // setSorting: Dispatch<SetStateAction<SortingState>>;
   // sorting: SortingState;
@@ -26,19 +26,9 @@ const ReusableTable = <T extends object>({
   columns,
   refetch,
   isError,
-  // pathOnRowSelected,
+  pathOnRowSelected,
   hidePagination = false,
 }: ReusableTableProps<T>) => {
-  // const navigate = useNavigate();
-
-  // const navigateToPath = (data: T) => {
-  //     if (pathOnRowSelected) {
-  //         navigate(`${pathOnRowSelected}/${data?.id}`, {
-  //             state: { data: data },
-  //         });
-  //     }
-  // };
-
   return (
     <>
       <CustomTableComponent
@@ -49,7 +39,9 @@ const ReusableTable = <T extends object>({
         onPaginationChange={onPaginationChange}
         hidePagination={hidePagination}
         refetchData={() => refetch?.()}
-        // onRowSelected={navigateToPath}
+        onRowSelected={
+          pathOnRowSelected ? (data: T) => pathOnRowSelected?.(data) : undefined
+        }
         // sortOptions={sortOptions}
         // enableSorting={true}
         // setSorting={setSorting}

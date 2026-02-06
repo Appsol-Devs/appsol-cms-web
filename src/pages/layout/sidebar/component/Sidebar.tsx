@@ -57,6 +57,17 @@ export default function Sidebar() {
     setActiveView("settings");
   };
 
+  const isActiveLink = (link?: ISidebar) => {
+    if (!link?.path) return false;
+    if (
+      currentPath.startsWith(link?.path) ||
+      (link.mainPath && currentPath.startsWith(link?.mainPath))
+    ) {
+      return true;
+    }
+    return false;
+  };
+
   return (
     <div className="relative h-full bg-card text-onCard shadow-sm">
       <div className="flex flex-col h-full">
@@ -89,23 +100,19 @@ export default function Sidebar() {
                 route.subMenu.some(
                   (subRoute) =>
                     subRoute.path === currentPath ||
-                    (subRoute.path && currentPath.includes(subRoute.path))
+                    (subRoute.path && currentPath.includes(subRoute.path)),
                 );
-
-              const isActive =
-                (route.path && currentPath === route.path) ||
-                (route.path && currentPath.includes(route.path));
 
               return (
                 <div
                   key={idx}
                   className={cn(
                     `${
-                      isActive || isActiveParent
-                        ? "bg-primary/30 text-primary hover:bg-primary/30 hover:text-primary"
+                      isActiveLink(route) || isActiveParent
+                        ? "bg-primary/90 text-onPrimary hover:bg-primary/30 hover:text-primary"
                         : "hover:bg-primary/30 hover:text-primary hover:opacity-90 text-card-foreground"
                     } w-full text-sm text-left px-2 py-2 rounded-md font-semibold hover:cursor-pointer transition flex items-center justify-between
-                `
+                `,
                   )}
                   onClick={() => handleOpenSubRoutes(route)}
                 >
@@ -118,7 +125,7 @@ export default function Sidebar() {
                     {route.name}
                   </div>
                   <div className="flex gap-1 items-center">
-                    {isActive ||
+                    {isActiveLink(route) ||
                       (isActiveParent && (
                         <Dot className="w-5 h-5 animate-pulse" />
                       ))}
