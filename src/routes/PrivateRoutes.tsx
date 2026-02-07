@@ -139,6 +139,11 @@ const PrivateRoutes = () => {
       <Route path={allRoutes.DELETE_ROLE(":id")} element={<RolesForm />} />
 
 
+      <Route path={allRoutes.UPDATE_ROLE(":id")} element={<RolesForm />} />
+      <Route path={allRoutes.ADD_ROLE} element={<RolesForm />} />
+      <Route path={allRoutes.DELETE_ROLE(":id")} element={<RolesForm />} />
+
+
 
       <Route
         path={`${allRoutes.SETTINGS}/*`}
