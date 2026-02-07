@@ -39,7 +39,6 @@ const RolesForm = () => {
                 setSelectedRole(res);
             }
         } catch (err) {
-            if (!err) return;
             console.error(err);
         }
     };
