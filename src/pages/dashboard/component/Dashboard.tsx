@@ -1,6 +1,9 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import {
+  buildSummaryCards,
   getThisWeekRange,
+  SUMMARY_CARD_ICON_CLASSES,
+  toChartDate,
   type IDashboardDateRange,
   type IDashboardSummaryCardProps,
 } from "../common/dashboard";
@@ -14,60 +17,55 @@ import DashboardGreetings from "./DashboardGreetings";
 import DashboardOperationalInsights from "./DashboardOperationalInsights";
 import DashboardSummaryCard from "./DashboardSummaryCard";
 
-const Dashboard = () => {
-  const [dateRange, setDateRange] = useState<IDashboardDateRange>(
-    () => getThisWeekRange()
-  );
+const summaryCardIcon = (className: string) => (
+  <span className={`${className} size-4 shrink-0 inline-block`} aria-hidden />
+);
 
-  const {
-    data: summary,
-    isLoading: summaryLoading,
-    isError: summaryError,
-  } = useGetDashboardSummaryQuery(dateRange);
+const CARD_ICONS: Record<string, ReactNode> = Object.fromEntries(
+  Object.entries(SUMMARY_CARD_ICON_CLASSES).map(([title, cls]) => [
+    title,
+    summaryCardIcon(cls),
+  ])
+);
+
+function withCardIcons(cards: IDashboardSummaryCardProps[]): IDashboardSummaryCardProps[] {
+  return cards.map((card) => ({ ...card, icon: CARD_ICONS[card.title] ?? card.icon }));
+}
+
+const Dashboard = () => {
+  const [dateRange, setDateRange] = useState<IDashboardDateRange>(() => getThisWeekRange());
+
+  const { data: summary, isError: summaryError } = useGetDashboardSummaryQuery(dateRange);
   const {
     data: revenueTrends,
     isLoading: revenueLoading,
     isError: revenueError,
-  } = useGetWeeklyRevenueTrendsQuery(dateRange);
+  } = useGetWeeklyRevenueTrendsQuery(toChartDate(dateRange));
   const {
     data: operationalInsights,
     isLoading: insightsLoading,
     isError: insightsError,
   } = useGetOperationalInsightsQuery();
 
-  const summaryCards: IDashboardSummaryCardProps[] = useMemo(() => {
-    if (!summary) return [];
-    return [
-      { title: "Open Issues", value: summary.openIssuesCount },
-      { title: "Revenue", value: summary.revenue, isCurrency: true },
-      { title: "Active Subscriptions", value: summary.activeSubscriptions },
-      {
-        title: "Lead Growth",
-        value: summary.leadGrowthPercentage,
-        valueSuffix: "%",
-      },
-    ];
-  }, [summary]);
+  const summaryCards = useMemo(
+    () => withCardIcons(buildSummaryCards(summary ?? null)),
+    [summary]
+  );
 
   return (
     <div className="space-y-2 w-full">
       <DashboardGreetings />
+      {summaryError ? (
+        <p className="text-sm text-destructive">
+          Failed to load summary. Please try again.
+        </p>
+      ) : null}
       <div className="grid grid-cols-4 gap-4">
-        {summaryLoading ? (
-          Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-24 animate-pulse rounded-lg bg-muted" />
-          ))
-        ) : summaryError ? (
-          <p className="col-span-4 text-sm text-destructive">
-            Failed to load summary. Please try again.
-          </p>
-        ) : (
-          summaryCards.map((card) => (
-            <DashboardSummaryCard key={card.title} summary={card} />
-          ))
-        )}
+        {summaryCards.map((card) => (
+          <DashboardSummaryCard key={card.title} summary={card} />
+        ))}
       </div>
-      <div className="flex w-full min-h-60 gap-5">
+      <div className="flex w-full min-h-60 gap-5 items-start">
         <DashboardChart
           data={revenueTrends ?? null}
           isLoading={revenueLoading}

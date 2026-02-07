@@ -6,11 +6,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { formatToCurrency } from "@/lib/helpers";
 import { cn } from "@/lib/utils";
 import {
   CategoryScale,
   Chart as ChartJS,
+  type Chart,
+  type ChartData,
   Filler,
   Legend,
   LinearScale,
@@ -20,14 +21,16 @@ import {
   Title,
   Tooltip,
 } from "chart.js";
-import { differenceInCalendarDays, format, parseISO } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { Line } from "react-chartjs-2";
 import {
-  getLastWeekRange,
-  getThisWeekRange,
+  getPresetFromRange,
+  rangeFromDate,
+  REVENUE_RANGE_PRESETS,
   type IDashboardDateRange,
   type IWeeklyRevenueTrends,
+  type RangePreset,
 } from "../common/dashboard";
 
 ChartJS.register(
@@ -42,56 +45,68 @@ ChartJS.register(
   Filler
 );
 
-type RangePreset = "this-week" | "last-week" | "custom";
-
-const DURATION: Array<{
-  id: RangePreset;
-  label: string;
-  getRange: (() => IDashboardDateRange) | null;
-}> = [
-  { id: "this-week", label: "This week", getRange: getThisWeekRange },
-  { id: "last-week", label: "Last week", getRange: getLastWeekRange },
-  { id: "custom", label: "Custom", getRange: null },
-];
-
 const BUTTON_CLASS =
   "text-xs! px-2 py-1 rounded-sm cursor-pointer border-0 shadow-none outline-none hover:!bg-primary hover:!text-onPrimary hover:opacity-80";
 
-function getPresetFromRange(range: IDashboardDateRange): RangePreset {
-  const thisWeek = getThisWeekRange();
-  const lastWeek = getLastWeekRange();
-  if (range.startDate === thisWeek.startDate && range.endDate === thisWeek.endDate)
-    return "this-week";
-  if (range.startDate === lastWeek.startDate && range.endDate === lastWeek.endDate)
-    return "last-week";
-  return "custom";
+const CHART_HEIGHT = 300;
+
+function formatYAxisTick(v: number | string): string {
+  if (typeof v !== "number") return String(v);
+  if (v >= 1000) return `${(v / 1000).toFixed(0)}K`;
+  return String(v);
 }
 
 const CHART_OPTIONS = {
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
-    legend: { display: false },
+    legend: {
+      display: true,
+      position: "top" as const,
+      align: "start" as const,
+      labels: {
+        usePointStyle: true,
+        pointStyle: "rect" as const,
+        boxWidth: 14,
+        boxHeight: 14,
+        generateLabels: (chart: Chart<"line", number[], string>) => {
+          const dataset = chart.data.datasets[0];
+          const gradient = getLegendGradientFill(chart.ctx);
+          return [
+            {
+              text: dataset.label ?? "Revenue",
+              fillStyle: gradient,
+              strokeStyle: "#22c55e",
+              lineWidth: 1,
+              pointStyle: "rect" as const,
+              fontColor: "#171717",
+              hidden: false,
+              index: 0,
+              datasetIndex: 0,
+            },
+          ];
+        },
+      },
+    },
     tooltip: {
       callbacks: {
         label: (ctx: { parsed: { y: number | null } }) =>
-          ctx.parsed.y != null ? formatToCurrency(ctx.parsed.y) : "",
+          ctx.parsed.y != null ? `Revenue: ${ctx.parsed.y.toLocaleString()}` : "",
       },
     },
   },
   scales: {
     x: {
-      title: { display: true, text: "Date" },
+      title: { display: false },
       grid: { display: false },
       ticks: { maxRotation: 0 },
     },
     y: {
-      title: { display: true, text: "Revenue" },
+      title: { display: false },
       beginAtZero: true,
-      grid: { color: "#0000000F" },
+      grid: { display: false },
       ticks: {
-        callback: (v: number | string) =>
-          typeof v === "number" ? formatToCurrency(v) : v,
+        callback: (v: number | string) => formatYAxisTick(v),
       },
     },
   },
@@ -101,9 +116,63 @@ const CHART_DATASET = {
   label: "Revenue",
   fill: true,
   borderColor: "#22c55e",
-  backgroundColor: "#22c55e1a",
   tension: 0.3,
+  borderWidth: 1,
+  pointRadius: 4,
+  pointStyle: "circle" as const,
+  pointBackgroundColor: "transparent",
+  pointBorderColor: "#22c55e",
+  pointBorderWidth: 1,
 } as const;
+
+const GRADIENT_COLOR_STOPS = [
+  [0, "rgba(34, 197, 94, 0.55)"],
+  [0.5, "rgba(34, 197, 94, 0.28)"],
+  [1, "rgba(34, 197, 94, 0.08)"],
+] as const;
+
+function getGradientFill(
+  ctx: CanvasRenderingContext2D,
+  chartArea: { top: number; bottom: number; left: number; right: number } | null
+): string | CanvasGradient {
+  if (!chartArea) return "rgba(34, 197, 94, 0.2)";
+  const gradient = ctx.createLinearGradient(
+    0,
+    chartArea.top,
+    0,
+    chartArea.bottom
+  );
+  GRADIENT_COLOR_STOPS.forEach(([pos, color]) =>
+    gradient.addColorStop(pos, color)
+  );
+  return gradient;
+}
+
+function getLegendGradientFill(ctx: CanvasRenderingContext2D): CanvasGradient {
+  const gradient = ctx.createLinearGradient(0, 0, 0, 48);
+  GRADIENT_COLOR_STOPS.forEach(([pos, color]) =>
+    gradient.addColorStop(pos, color)
+  );
+  return gradient;
+}
+
+function buildLineDataset(data: number[]) {
+  return {
+    label: CHART_DATASET.label,
+    data,
+    fill: CHART_DATASET.fill,
+    borderColor: CHART_DATASET.borderColor,
+    backgroundColor: (ctx: { chart: { ctx: CanvasRenderingContext2D; chartArea: { top: number; bottom: number; left: number; right: number } | null } }) =>
+      getGradientFill(ctx.chart.ctx, ctx.chart.chartArea ?? null),
+    tension: CHART_DATASET.tension,
+    borderWidth: CHART_DATASET.borderWidth,
+    pointRadius: CHART_DATASET.pointRadius,
+    pointStyle: CHART_DATASET.pointStyle,
+    pointBackgroundColor: CHART_DATASET.pointBackgroundColor,
+    pointBorderColor: CHART_DATASET.pointBorderColor,
+    pointBorderWidth: CHART_DATASET.pointBorderWidth,
+  };
+}
 
 interface DashboardChartProps {
   data: IWeeklyRevenueTrends | null;
@@ -124,31 +193,20 @@ export default function DashboardChart({
     getPresetFromRange(dateRange)
   );
   const [customOpen, setCustomOpen] = useState(false);
-  const [customStart, setCustomStart] = useState<Date | null>(() =>
+  const [customDate, setCustomDate] = useState<Date | null>(() =>
     dateRange.startDate ? new Date(dateRange.startDate) : null
   );
-  const [customEnd, setCustomEnd] = useState<Date | null>(() =>
-    dateRange.endDate ? new Date(dateRange.endDate) : null
-  );
-  const [customRangeError, setCustomRangeError] = useState<string | null>(null);
 
   useEffect(() => {
     setActivePreset(getPresetFromRange(dateRange));
-    setCustomStart(dateRange.startDate ? new Date(dateRange.startDate) : null);
-    setCustomEnd(dateRange.endDate ? new Date(dateRange.endDate) : null);
+    setCustomDate(dateRange.startDate ? new Date(dateRange.startDate) : null);
   }, [dateRange.startDate, dateRange.endDate]);
 
-  useEffect(() => {
-    setCustomRangeError(null);
-  }, [customStart, customEnd]);
-
   const handlePreset = (preset: RangePreset) => {
-    const d = DURATION.find((x) => x.id === preset);
+    const d = REVENUE_RANGE_PRESETS.find((x) => x.id === preset);
     if (!d) return;
     if (d.id === "custom") {
-      setCustomStart(dateRange.startDate ? new Date(dateRange.startDate) : null);
-      setCustomEnd(dateRange.endDate ? new Date(dateRange.endDate) : null);
-      setCustomRangeError(null);
+      setCustomDate(dateRange.startDate ? new Date(dateRange.startDate) : null);
       setCustomOpen(true);
       return;
     }
@@ -159,46 +217,34 @@ export default function DashboardChart({
   };
 
   const handleCustomApply = () => {
-    if (!customStart || !customEnd) return;
-    const [start, end] =
-      customStart <= customEnd ? [customStart, customEnd] : [customEnd, customStart];
-    const days = differenceInCalendarDays(end, start) + 1;
-    if (days != 7) {
-      setCustomRangeError("Please select a range of 7 days.");
-      return;
-    }
-    setCustomRangeError(null);
+    if (!customDate) return;
     setActivePreset("custom");
-    onDateRangeChange({
-      startDate: format(start, "yyyy-MM-dd"),
-      endDate: format(end, "yyyy-MM-dd"),
-    });
+    onDateRangeChange(rangeFromDate(format(customDate, "yyyy-MM-dd")));
     setCustomOpen(false);
   };
 
-  const chartData = useMemo(() => {
-    const empty = {
-      labels: [] as string[],
-      datasets: [{ ...CHART_DATASET, data: [] as number[] }],
-    };
-    if (!data?.dates?.length) return empty;
+  const chartData = useMemo((): ChartData<"line", number[], string> => {
+    if (!data?.dates?.length) {
+      return { labels: [], datasets: [buildLineDataset([])] };
+    }
     try {
-      const labels = data.dates.map((d) => {
-        const parsed = parseISO(d);
-        return Number.isNaN(parsed.getTime()) ? d : format(parsed, "MMM d");
+      const labels = data.dates.map((dateStr) => {
+        const parsed = parseISO(dateStr);
+        return Number.isNaN(parsed.getTime()) ? dateStr : format(parsed, "yyyy-MM-dd");
       });
-      const values = data.revenues ?? [];
-      const len = Math.min(labels.length, values.length);
-      return {
-        labels: labels.slice(0, len),
-        datasets: [{ ...CHART_DATASET, data: values.slice(0, len) }],
-      };
+      const revenues = data.revenues ?? [];
+      const dataValues = labels.map((_, i) => {
+        const v = revenues[i];
+        const n = typeof v === "number" ? v : Number(v);
+        return Number.isFinite(n) ? n : 0;
+      });
+      return { labels, datasets: [buildLineDataset(dataValues)] };
     } catch {
-      return empty;
+      return { labels: [], datasets: [buildLineDataset([])] };
     }
   }, [data]);
 
-  const renderButton = (d: (typeof DURATION)[0]) => (
+  const renderButton = (d: (typeof REVENUE_RANGE_PRESETS)[0]) => (
     <Button
       variant="ghost"
       size="sm"
@@ -220,7 +266,7 @@ export default function DashboardChart({
         <div className="flex w-full items-center justify-between gap-2 p-0.5 bg-white dark:bg-white">
           <p className="text-sm font-bold">Weekly Revenue Trends</p>
           <div className="flex items-center gap-2">
-            {DURATION.map((d) =>
+            {REVENUE_RANGE_PRESETS.map((d) =>
               d.id === "custom" ? (
                 <Popover key={d.id} open={customOpen} onOpenChange={setCustomOpen}>
                   <PopoverTrigger asChild>{renderButton(d)}</PopoverTrigger>
@@ -229,43 +275,22 @@ export default function DashboardChart({
                     align="end"
                   >
                     <div className="flex flex-col gap-2">
-                      <div className="flex gap-2 items-start">
-                        <DatePicker
-                          key={`from-${dateRange.startDate}-${dateRange.endDate}`}
-                          title="From"
-                          placeholder="Start date"
-                          defaultDate={customStart}
-                          onChange={setCustomStart}
-                          dateOnly
-                          allowFuture={false}
-                          showInPopover={false}
-                          calendarClassName="[--cell-size:1.5rem] text-xs"
-                          rangeStart={customStart}
-                          rangeEnd={customEnd}
-                        />
-                        <DatePicker
-                          key={`to-${dateRange.startDate}-${dateRange.endDate}`}
-                          title="To"
-                          placeholder="End date"
-                          defaultDate={customEnd}
-                          onChange={setCustomEnd}
-                          dateOnly
-                          allowFuture={false}
-                          showInPopover={false}
-                          disabled={!customStart}
-                          calendarClassName="[--cell-size:1.5rem] text-xs"
-                          rangeStart={customStart}
-                          rangeEnd={customEnd}
-                        />
-                      </div>
-                      {customRangeError ? (
-                        <p className="text-xs text-destructive">{customRangeError}</p>
-                      ) : null}
+                      <DatePicker
+                        key={`date-${dateRange.startDate}`}
+                        title="Date"
+                        placeholder="Pick a date"
+                        defaultDate={customDate}
+                        onChange={setCustomDate}
+                        dateOnly
+                        allowFuture={false}
+                        showInPopover={false}
+                        calendarClassName="[--cell-size:1.5rem] text-xs"
+                      />
                       <Button
                         size="sm"
                         className="!bg-primary hover:!bg-primary/80 w-full"
                         onClick={handleCustomApply}
-                        disabled={!customStart || !customEnd}
+                        disabled={!customDate}
                       >
                         Apply
                       </Button>
@@ -280,13 +305,19 @@ export default function DashboardChart({
         </div>
       }
     >
-      <div className="min-h-[300px] w-full">
+      <div className="w-full" style={{ minHeight: CHART_HEIGHT }}>
         {isLoading ? (
-          <div className="flex h-[300px] items-center justify-center text-muted-foreground text-sm">
+          <div
+            className="flex items-center justify-center text-muted-foreground text-sm"
+            style={{ height: CHART_HEIGHT }}
+          >
             Loading chart...
           </div>
         ) : isError ? (
-          <div className="flex h-[300px] items-center justify-center text-destructive text-sm">
+          <div
+            className="flex items-center justify-center text-destructive text-sm"
+            style={{ height: CHART_HEIGHT }}
+          >
             Failed to load revenue trends.
           </div>
         ) : (

@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { prepareApiHeaders } from "@/lib/api";
 import type {
+  IChartDate,
   IDashboardDateRange,
   IDashboardSummary,
   IOperationalInsights,
@@ -27,14 +28,13 @@ export const dashboardApi = createApi({
 
     getWeeklyRevenueTrends: builder.query<
       IWeeklyRevenueTrends,
-      IDashboardDateRange
+      IChartDate
     >({
-      query: ({ endDate }) => {
+      query: ({ startDate }) => {
         const dateOnly = (s: string) => s.split("T")[0] ?? s;
-        const anchor = dateOnly(endDate);
         return {
           url: "/dashboard/weekly-revenue-trends",
-          params: { startDate: anchor, endDate: anchor },
+          params: { startDate: dateOnly(startDate) },
         };
       },
       transformResponse: async (response: Response) =>
