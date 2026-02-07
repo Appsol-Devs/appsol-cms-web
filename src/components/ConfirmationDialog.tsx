@@ -158,7 +158,6 @@ const ConfirmationDialog = ({
 
       <DialogContent
         onInteractOutside={(e) => disableOutsideClick && e.preventDefault()}
-
         className={cn(
           "p-6 gap-0 rounded-xl overflow-hidden bg-white",
           maxWidthClass,
