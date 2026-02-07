@@ -11,7 +11,7 @@ import {
   useAddCustomerMutation,
   useLazyGetACustomerQuery,
   useUpdateCustomerMutation,
-} from "../common/customersApi";
+} from "../../common/customersApi";
 import CustomersFormContent from "./CustomersFormContent";
 
 export type ICustomerFields = Omit<ICustomer, "_id"> & {};

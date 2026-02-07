@@ -22,7 +22,7 @@ import ReusableTable from "./ReusableTable";
 
 interface ITableTemplate<
   Q = any,
-  R extends QueryDefinition<any, any, any, any, string> = any
+  R extends QueryDefinition<any, any, any, any, string> = any,
 > {
   title: string;
   isSetting?: boolean;
@@ -34,7 +34,7 @@ interface ITableTemplate<
   refetchData?: boolean;
   useDateFilters?: boolean;
   // filters?: IFilterArray[];
-  pathOnRowSelected?: string;
+  pathOnRowSelected?: (data: R) => void;
   tableAddComponent?: () => React.ReactNode;
   lazyFetchQuery: [
     LazyGetTriggerType<any, { contents: R[]; pagination: any }>,
@@ -46,7 +46,7 @@ interface ITableTemplate<
       isError: boolean;
       isSuccess: boolean;
       originalArgs?: Q;
-    }
+    },
   ];
   // initialQueryFilters?: IFilters;
 }
@@ -54,7 +54,7 @@ interface ITableTemplate<
 const FeatureContentRenderer = <
   T extends object,
   Q = any,
-  R extends QueryDefinition<any, any, any, any, string> = any
+  R extends QueryDefinition<any, any, any, any, string> = any,
 >({
   title,
   columns,
@@ -303,7 +303,11 @@ const FeatureContentRenderer = <
             <LoadingComponent loading={isFetching || isLoading} />
           ) : isSuccess || isError ? (
             <ReusableTable
-              pathOnRowSelected={pathOnRowSelected}
+              pathOnRowSelected={
+                pathOnRowSelected
+                  ? (data: R | any) => pathOnRowSelected?.(data)
+                  : undefined
+              }
               isError={isError}
               refetch={() => setRefetch(true)}
               columns={columns}

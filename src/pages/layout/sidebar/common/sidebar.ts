@@ -16,7 +16,6 @@ import {
   Ticket,
   User,
   Users,
-  Users2,
 } from "lucide-react";
 import type { SVGProps } from "react";
 
@@ -27,12 +26,14 @@ export interface ISidebar {
   // authorize?: IPermission;
   icon?: React.FC<SVGProps<SVGSVGElement>>;
   key?: string;
+  mainPath?: string;
 }
 
 export interface ISubMenu {
   name: string;
   path: string;
   icon?: React.FC<SVGProps<SVGSVGElement>>;
+  mainPath?: string;
 }
 
 export const sidebarMainMenus: ISidebar[] = [
@@ -40,55 +41,63 @@ export const sidebarMainMenus: ISidebar[] = [
     name: "Dashboard",
     icon: LayoutDashboardIcon,
     path: allRoutes.DASHBOARD,
+    mainPath: `${allRoutes.PORTAL}${allRoutes.DASHBOARD}`,
   },
   {
     name: "Customers",
+    mainPath: `${allRoutes.PORTAL}${allRoutes.CUSTOMERS}`,
     icon: Users,
     path: allRoutes.CUSTOMERS,
   },
+  // {
+  //   name: "Agents",
+  //   icon: Users2,
+  //   path: allRoutes.AGENTS,
+  // },
   {
-    name: "Agents",
-    icon: Users2,
-    path: allRoutes.AGENTS,
-  },
-  {
+    mainPath: `${allRoutes.PORTAL}${allRoutes.BILLINGS}`,
     name: "Billings",
     icon: Receipt,
     path: allRoutes.BILLINGS,
   },
   {
     name: "Tickets",
+    mainPath: `${allRoutes.PORTAL}${allRoutes.TICKETS}`,
     icon: Ticket,
     path: allRoutes.TICKETS,
   },
   {
     name: "Leads",
     icon: Spotlight,
+    mainPath: `${allRoutes.PORTAL}${allRoutes.LEADS}`,
     path: allRoutes.LEADS,
   },
   {
     name: "Enquiries",
     icon: PhoneCall,
+    mainPath: `${allRoutes.PORTAL}${allRoutes.ENQUIRIES}`,
     path: allRoutes.ENQUIRIES,
   },
   {
     name: "Complaints",
+    mainPath: `${allRoutes.PORTAL}${allRoutes.COMPLAINTS}`,
     icon: Phone,
     path: allRoutes.COMPLAINTS,
   },
   {
+    mainPath: `${allRoutes.PORTAL}${allRoutes.USERS}`,
     name: "Users",
     icon: Lock,
     path: allRoutes.USERS,
   },
   {
+    mainPath: `${allRoutes.PORTAL}${allRoutes.ANALYTICS}`,
     name: "Analytics",
     icon: ChartBar,
     path: allRoutes.ANALYTICS,
   },
   {
     name: "Settings",
-    // path: `${allRoutes.PORTAL}${allRoutes.SETTINGS}`,
     icon: Settings,
     subMenu: [
       {

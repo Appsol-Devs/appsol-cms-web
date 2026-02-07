@@ -1,14 +1,14 @@
 import { format } from "date-fns";
-import { Briefcase, NotepadText, Pen, User } from "lucide-react";
+import { Briefcase, NotepadText, User } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import ActionButton from "@/components/ActionButtons";
 import { useNavigate } from "react-router-dom";
 import FeatureContentRenderer from "@/components/table/component/FeatureContentRenderer";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
-import { allRoutes } from "@/utils/routes";
-import { useLazyGetCustomersQuery } from "../common/customersApi";
-import type { ICustomer } from "../common/customers";
+import { allRoutes, customerRoutes } from "@/utils/routes";
+import { useLazyGetCustomersQuery } from "../../common/customersApi";
+import type { ICustomer } from "../../common/customers";
 
 const Customers = () => {
   const [fetchQuery, fetchState] = useLazyGetCustomersQuery();
@@ -70,27 +70,18 @@ const Customers = () => {
           </div>
         ),
       },
-      {
-        header: "Action",
-        meta: { icon: <Pen size={14} /> },
-        accessorKey: "action",
-        cell: ({ row }) => (
-          <div className="flex items-center space-x-2">
-            <ActionButton
-              type="view"
-              onClick={() =>
-                navigate(
-                  allRoutes.PORTAL +
-                    allRoutes.VIEW_CUSTOMER(row.original._id as string)
-                )
-              }
-            />
-          </div>
-        ),
-      },
     ],
-    [executed]
+    [executed],
   );
+
+  const pathOnRowSelected = (data: ICustomer) => {
+    const { _id } = data;
+    if (!_id) return;
+
+    navigate(
+      allRoutes.PORTAL + allRoutes.VIEW_CUSTOMER(_id) + customerRoutes.OVERVIEW,
+    );
+  };
 
   return (
     <>
@@ -102,6 +93,7 @@ const Customers = () => {
             onClick={() => navigate(allRoutes.PORTAL + allRoutes.ADD_CUSTOMER)}
           />
         )}
+        pathOnRowSelected={pathOnRowSelected}
         columns={columns}
         // filters={["company", "location", "role", "gender"]}
         refetchData={executed}

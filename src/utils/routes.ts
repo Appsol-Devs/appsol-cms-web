@@ -55,4 +55,15 @@ export const allRoutes = Object.freeze({
   TICKETS: "/tickets",
   SETTINGS: "/settings",
   UNAUTHORIZED: "/unauthorized",
+  NOT_FOUND: "/not-found",
+});
+
+export const customerRoutes = Object.freeze({
+  OVERVIEW: "/overview",
+  DASHBOARD: "/dashboard",
+  TICKETS: "/tickets",
+  COMPLAINTS: "/complaints",
+  ENQUIRIES: "/enquiries",
+  PAYMENTS: "/payments",
+  OUTREACHS: "/outreachs",
 });
