@@ -1,21 +1,83 @@
-import { dashboardSummaryInfo } from "../common/dashboard";
+import { useMemo, useState, type ReactNode } from "react";
+import {
+  buildSummaryCards,
+  getThisWeekRange,
+  SUMMARY_CARD_ICON_CLASSES,
+  toChartDate,
+  type IDashboardDateRange,
+  type IDashboardSummaryCardProps,
+} from "../common/dashboard";
+import {
+  useGetDashboardSummaryQuery,
+  useGetOperationalInsightsQuery,
+  useGetWeeklyRevenueTrendsQuery,
+} from "../common/dashboardApi";
 import DashboardChart from "./DashboardChart";
 import DashboardGreetings from "./DashboardGreetings";
-import DashboardOutstanding from "./DashboardOutstanding";
+import DashboardOperationalInsights from "./DashboardOperationalInsights";
 import DashboardSummaryCard from "./DashboardSummaryCard";
 
+const summaryCardIcon = (className: string) => (
+  <span className={`${className} size-4 shrink-0 inline-block`} aria-hidden />
+);
+
+const CARD_ICONS: Record<string, ReactNode> = Object.fromEntries(
+  Object.entries(SUMMARY_CARD_ICON_CLASSES).map(([title, cls]) => [
+    title,
+    summaryCardIcon(cls),
+  ])
+);
+
+function withCardIcons(cards: IDashboardSummaryCardProps[]): IDashboardSummaryCardProps[] {
+  return cards.map((card) => ({ ...card, icon: CARD_ICONS[card.title] ?? card.icon }));
+}
+
 const Dashboard = () => {
+  const [dateRange, setDateRange] = useState<IDashboardDateRange>(() => getThisWeekRange());
+
+  const { data: summary, isError: summaryError } = useGetDashboardSummaryQuery(dateRange);
+  const {
+    data: revenueTrends,
+    isLoading: revenueLoading,
+    isError: revenueError,
+  } = useGetWeeklyRevenueTrendsQuery(toChartDate(dateRange));
+  const {
+    data: operationalInsights,
+    isLoading: insightsLoading,
+    isError: insightsError,
+  } = useGetOperationalInsightsQuery();
+
+  const summaryCards = useMemo(
+    () => withCardIcons(buildSummaryCards(summary ?? null)),
+    [summary]
+  );
+
   return (
     <div className="space-y-2 w-full">
       <DashboardGreetings />
+      {summaryError ? (
+        <p className="text-sm text-destructive">
+          Failed to load summary. Please try again.
+        </p>
+      ) : null}
       <div className="grid grid-cols-4 gap-4">
-        {dashboardSummaryInfo.map((summary, idx) => (
-          <DashboardSummaryCard key={idx} summary={summary} />
+        {summaryCards.map((card) => (
+          <DashboardSummaryCard key={card.title} summary={card} />
         ))}
       </div>
-      <div className="w-full flex min-h-60 gap-5">
-        <DashboardChart />
-        <DashboardOutstanding />
+      <div className="flex w-full min-h-60 gap-5 items-start">
+        <DashboardChart
+          data={revenueTrends ?? null}
+          isLoading={revenueLoading}
+          isError={revenueError}
+          dateRange={dateRange}
+          onDateRangeChange={setDateRange}
+        />
+        <DashboardOperationalInsights
+          data={operationalInsights ?? null}
+          isLoading={insightsLoading}
+          isError={insightsError}
+        />
       </div>
     </div>
   );

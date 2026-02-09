@@ -30,7 +30,7 @@ export function CustomSwitchComponent({
               checked={checked}
               onCheckedChange={field.onChange}
               disabled={disabled}
-              className={cn("relative inline-flex h-6 w-11 shrink-0 items-center rounded-full bg-gray-200 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-700",className)}>
+              className={cn("relative inline-flex h-6 w-11 shrink-0 items-center rounded-full !bg-primary outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",className)}>
               <span className={cn("absolute left-1 flex size-4 items-center justify-center", !checked ? "text-gray-400" : "text-transparent")}>
                 <Check className="size-2.5" strokeWidth={3} />
               </span>

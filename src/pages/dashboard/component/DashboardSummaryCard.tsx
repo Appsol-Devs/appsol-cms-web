@@ -1,38 +1,38 @@
 import CardComponent from "@/components/CardComponent";
 import { formatToCurrency } from "@/lib/helpers";
-import { ArrowUp } from "lucide-react";
-import type { SVGProps } from "react";
+import type { IDashboardSummaryCardProps } from "../common/dashboard";
 
-export interface IDashboardSummaryCardProps {
-  title: string;
-  icon?: React.FC<SVGProps<SVGSVGElement>>;
-  value: number;
-  isCurrency?: boolean;
-}
 const DashboardSummaryCard = ({
-  summary: { title, value, isCurrency = true },
+  summary: { title, value, isCurrency = false, valueSuffix, icon },
 }: {
   summary: IDashboardSummaryCardProps;
 }) => {
+  const displayValue = valueSuffix
+    ? `${value}${valueSuffix}`
+    : isCurrency
+      ? formatToCurrency(value)
+      : String(value);
+
   return (
-    <>
-      <CardComponent
-        className="relative max-h-24"
-        headerTitle={<p className="text-xs uppercase font-semibold">{title}</p>}
-      >
-        <div className="">
-          <p className="font-bold text-lg">
-            {isCurrency ? `${formatToCurrency(value)}` : value}
-          </p>
-          <p className="absolute right-2 bottom-2 text-xs flex items-center gap-0.5">
-            <span>+32%</span>
-            <span>
-              <ArrowUp className="w-3 h-3 text-red-500" />
+    <CardComponent
+      className="relative overflow-hidden"
+      headerTitle={
+        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+          {title}
+        </p>
+      }
+    >
+      <div className="flex items-start justify-between gap-2 -mt-1">
+        <p className="font-bold text-xl text-foreground">{displayValue}</p>
+        <div className="shrink-0 flex items-center justify-center h-8 w-8">
+          {icon ? (
+            <span className="!size-8 shrink-0 flex items-center justify-center text-muted-foreground [&>*]:!size-8">
+              {icon}
             </span>
-          </p>
+          ) : null}
         </div>
-      </CardComponent>
-    </>
+      </div>
+    </CardComponent>
   );
 };
 

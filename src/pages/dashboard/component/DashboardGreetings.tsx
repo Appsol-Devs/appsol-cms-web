@@ -2,29 +2,19 @@ import type { ILoginResponse } from "@/pages/auth/login/common/login";
 import type { RootState } from "@/store";
 import { useSelector } from "react-redux";
 
+function getGreeting() {
+  const hours = new Date().getHours();
+  if (hours < 12) return "Good Morning!";
+  if (hours < 18) return "Good Afternoon!";
+  return "Good Evening!";
+}
+
 const DashboardGreetings = () => {
-  const getGreeting = () => {
-    const hours = new Date().getHours();
-    if (hours < 12) return "Good Morning!";
-    if (hours < 18) return "Good Afternoon!";
-    return "Good Evening!";
-  };
-
-  const user: ILoginResponse = useSelector(
-    (state: RootState) => state.user.user as ILoginResponse
+  const user = useSelector(
+    (state: RootState) => state.user.user as ILoginResponse | null
   );
-
-  const userName = user?.firstName + " " + user?.lastName;
-
-  //   const formatDate = () => {
-  //     const now = new Date();
-  //     return now.toLocaleDateString("en-US", {
-  //       weekday: "long",
-  //       month: "long",
-  //       day: "numeric",
-  //       year: "numeric",
-  //     });
-  //   };
+  const userName =
+    [user?.firstName, user?.lastName].filter(Boolean).join(" ") || "Guest";
 
   return (
     <div>
