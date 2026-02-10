@@ -1,3 +1,4 @@
+
 export const allRoutes = Object.freeze({
   HOME: "/",
   PORTAL: "/portal",

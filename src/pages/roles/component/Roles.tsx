@@ -50,9 +50,9 @@ const Roles = () => {
         accessorKey: "permissions",
         meta: { icon: <Shield size={14} /> },
         cell: ({ row }) => (
-          <div className=" flex flex-col items-start gap-1">
+          <div className="flex flex-col items-start gap-1">
             <span className="font-semibold p-0.5 text-xs">
-              <Badge>{row.original?.permissions.length ?? ""}</Badge>
+              <Badge>{Number(row.original?.permissions.length ?? 0)}</Badge>
             </span>
           </div>
         ),
