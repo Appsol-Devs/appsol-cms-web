@@ -32,6 +32,7 @@ import CustomerRoutes from "./CustomerRoutes";
 import Customers from "@/pages/customer/component/core/Customers";
 import CustomersForm from "@/pages/customer/component/core/CustomersForm";
 import RolesForm from "@/pages/roles/component/RolesForm";
+import RolesView from "@/pages/roles/component/RolesView";
 
 const PrivateRoutes = () => {
   return (
@@ -142,6 +143,8 @@ const PrivateRoutes = () => {
       <Route path={allRoutes.UPDATE_ROLE(":id")} element={<RolesForm />} />
       <Route path={allRoutes.ADD_ROLE} element={<RolesForm />} />
       <Route path={allRoutes.DELETE_ROLE(":id")} element={<RolesForm />} />
+      <Route path={allRoutes.VIEW_ROLE(":id")} element={<RolesView />} />
+
 
 
 

@@ -55,6 +55,7 @@ export const rolesApi = createApi({
       query: (id) => ({
         url: `roles/${id}`,
       }),
+      transformResponse: async (response: Response) => response.json(),
     }),
     deleteRole: builder.mutation<void, { id: string }>({
       query: ({ id }) => ({
@@ -62,7 +63,7 @@ export const rolesApi = createApi({
         method: "DELETE",
       }),
     }),
-   getPermissions: builder.query<IPermission[], void>({
+    getPermissions: builder.query<IPermission[], void>({
       query: () => ({
         url: "permissions",
       }),
