@@ -43,6 +43,15 @@ export interface IUser {
   createdBy?: string;
 }
 
+export interface IOutReachType{
+  outreachTypeCode?: string
+  name: string
+  description: string
+  isActive: boolean
+  colorCode?: string
+  _id?: string
+}
+
 export interface IRequestOTPPayload {
   userId: string;
   email: string;

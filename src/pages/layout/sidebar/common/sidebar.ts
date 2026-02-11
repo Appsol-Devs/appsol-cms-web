@@ -145,6 +145,11 @@ export const sidebarMainMenus: ISidebar[] = [
         path: `${allRoutes.LEAD_NEXT_STEPS}`,
         icon: StepForward,
       },
+       {
+        name: "OutReach Types",
+        path: `${allRoutes.OUT_REACH_TYPES}`,
+        icon: User,
+      },
     ],
   },
 ];
