@@ -33,6 +33,9 @@ import Customers from "@/pages/customer/component/core/Customers";
 import CustomersForm from "@/pages/customer/component/core/CustomersForm";
 import RolesForm from "@/pages/roles/component/RolesForm";
 import RolesView from "@/pages/roles/component/RolesView";
+import OutReach from "@/pages/outreach/component/OutReach";
+import OutReachForm from "@/pages/outreach/component/OutReacForm";
+import ViewOutReach from "@/pages/outreach/component/ViewOutReach";
 
 const PrivateRoutes = () => {
   return (
@@ -135,11 +138,30 @@ const PrivateRoutes = () => {
       <Route
         path={`${allRoutes.VIEW_CUSTOMER(":id")}/*`}
         element={<CustomerRoutes />}
-      />     
+      />
       <Route path={allRoutes.UPDATE_ROLE(":id")} element={<RolesForm />} />
       <Route path={allRoutes.ADD_ROLE} element={<RolesForm />} />
       <Route path={allRoutes.DELETE_ROLE(":id")} element={<RolesForm />} />
       <Route path={allRoutes.VIEW_ROLE(":id")} element={<RolesView />} />
+
+
+      <Route path={allRoutes.OUT_REACH_TYPES} element={<OutReach />} />
+      <Route
+        path={allRoutes.ADD_OUTREACH_TYPE}
+        element={<OutReachForm />}
+      />
+      <Route
+        path={allRoutes.UPDATE_OUTREACH_TYPE(":id")}
+        element={<OutReachForm />}
+      />
+      <Route
+        path={allRoutes.DELETE_OUTREACH_TYPE(":id")}
+        element={<OutReachForm />}
+      />
+      <Route
+        path={allRoutes.VIEW_OUTREACH_TYPE(":id")}
+        element={<ViewOutReach />}
+      />
 
 
 
