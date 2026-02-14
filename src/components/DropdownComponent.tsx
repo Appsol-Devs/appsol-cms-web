@@ -78,74 +78,83 @@ const DropDownComponent = <T,>({
   > = {
     menu: (base) => ({
       ...base,
-      backgroundColor: "var(--rx-secondary)",
-      color: "var(--rx-secondary-foreground)",
-      boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
-      borderRadius: "5px",
-      zIndex: zIndex, // Use the configurable z-index
+      backgroundColor: "var(--popover)",
+      color: "var(--popover-foreground)",
+      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)",
+      borderRadius: "var(--radius)",
+      zIndex: zIndex,
+      marginTop: "4px",
     }),
-    // CRITICAL FIX: Set z-index for menuPortal
     menuPortal: (base) => ({
       ...base,
-      zIndex: zIndex, // This is the most important fix
-      color: "var(--on-card)",
+      zIndex: zIndex,
     }),
     placeholder: (base) => ({
       ...base,
-      fontSize: "14px",
-      color: "var(--on-surface)",
+      fontSize: fontSize ?? "12px",
+      color: "var(--muted-foreground)",
     }),
     singleValue: (base) => ({
       ...base,
-      fontSize: "12px",
-      color: controlColor ?? "var(--on-surface)",
-      fontWeight: "semibold",
+      fontSize: fontSize ?? "12px",
+      color: controlColor ?? "var(--foreground)",
+      fontWeight: "500",
     }),
     option: (base, state) => ({
       ...base,
       cursor: "pointer",
-      fontSize: "12px",
+      fontSize: fontSize ?? "12px",
+      padding: "8px 12px",
+      backgroundColor: state.isSelected
+        ? optionsActiveBgColor ?? "var(--primary)"
+        : state.isFocused
+          ? "color-mix(in srgb, var(--primary) 12%, var(--popover))"
+          : "transparent",
       color:
         optionsColor ??
-        (state.isSelected ? "var(--on-card)" : "var(--on-surface)"),
-      "&:active": {
-        backgroundColor: optionsActiveBgColor ?? "var(--card)",
-        color: optionActiveColor ?? "var(--on-card)",
-      },
-      // Ensure option is clickable
+        (state.isSelected
+          ? optionActiveColor ?? "var(--on-primary)"
+          : "var(--foreground)"),
       pointerEvents: "auto",
+      "&:active": {
+        backgroundColor: optionsActiveBgColor ?? "var(--primary)",
+      },
     }),
     input: (base) => ({
       ...base,
-      color: "var(--on-surface)",
+      color: "var(--foreground)",
     }),
     dropdownIndicator: (base) => ({
       ...base,
-      color: "var(--on-surface)",
+      color: "var(--muted-foreground)",
+      padding: "0 8px",
     }),
-    indicatorSeparator: (base) => ({
-      ...base,
-      color: "var(--on-surface)",
+    indicatorSeparator: () => ({
+      display: "none",
     }),
     clearIndicator: (base) => ({
       ...base,
-      color: "var(--on-surface)",
+      color: "var(--muted-foreground)",
+      padding: "0 4px",
     }),
-    control: (baseStyles) => ({
+    control: (baseStyles, state) => ({
       ...baseStyles,
-      borderRadius: borderRadius ?? "10px",
-      height: height ? height : "39px",
-      border: "1px solid #e9e9e9",
-      borderColor: required
-        ? "var(--error)"
-        : borderColor
-        ? borderColor
-        : "transparent",
-      borderWidth: required ? "3px" : "2px",
-      fontSize: fontSize ? fontSize : "12px",
-      color: controlColor ?? "var(--on-surface)",
+      borderRadius: borderRadius ?? "0.375rem",
+      minHeight: height ?? "36px",
+      fontSize: fontSize ?? "12px",
+      color: controlColor ?? "var(--foreground)",
       backgroundColor: controlBgColor ?? "var(--surface)",
-      width: width ?? "max-content",
+      width: width ?? "100%",
+      border: "1px solid",
+      borderColor: state.isFocused
+        ? "var(--ring)"
+        : required
+          ? "var(--destructive)"
+          : borderColor ?? "var(--input)",
+      boxShadow: state.isFocused ? "0 0 0 2px var(--ring)" : "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+      "&:hover": {
+        borderColor: !state.isFocused && !required ? "var(--input)" : undefined,
+      },
     }),
   };
 
@@ -156,13 +165,12 @@ const DropDownComponent = <T,>({
     isDisabled: disabled,
     theme: (theme: any) => ({
       ...theme,
-      borderRadius: 0,
-      border: 1,
+      borderRadius: 8,
       cursor: disabled ? "not-allowed" : "pointer",
       colors: {
         ...theme.colors,
-        primary25: "#adadaa",
-        primary: "#444444",
+        primary: "var(--primary)",
+        primary25: "var(--accent)",
       },
     }),
     styles,
@@ -182,12 +190,12 @@ const DropDownComponent = <T,>({
 
   return (
     <div
-      className={disabled ? "opacity-50 cursor-not-allowed" : ""}
+      className={`space-y-1 ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
       style={{ position: "relative", zIndex: 1 }}
     >
       {title && (
-        <p className="text-xs">
-          {title} {required && <span className="text-destructive ml-1">*</span>}
+        <p className="text-xs text-onCard font-medium">
+          {title} {required && <span className="text-destructive ml-0.5">*</span>}
         </p>
       )}
       {control ? (

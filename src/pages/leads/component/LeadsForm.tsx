@@ -97,8 +97,8 @@ const LeadsForm = () => {
         showToast({
           title: "Success",
           message: id
-            ? "Customer updated successfully."
-            : "Customer created successfully.",
+            ? "Lead updated successfully."
+            : "Lead created successfully.",
           type: "success",
         });
         navigate(-1);
@@ -134,10 +134,13 @@ const LeadsForm = () => {
       phone: data.phone,
       notes: data.notes,
       location: data.location,
+      leadSource: data.leadSource,
+      leadStage: data.leadStage?.value,
+      nextStep: data.nextStep?.value,
+      priority: data.priority?.value,
+      leadStatus: data.leadStatus?.value,
     });
 
-    console.log(payload);
-    return;
     handleDataSubmission(payload);
   };
 
