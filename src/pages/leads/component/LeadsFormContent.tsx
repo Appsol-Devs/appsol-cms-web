@@ -175,6 +175,7 @@ const LeadsFormContent = ({ isLoading, form }: IField) => {
               title="Current stage"
               label="Select the current negotiation stage"
               options={leadNextStepOptions}
+              disabled={isLoading}
             />
             <DropDownComponent
               control={control}
@@ -182,6 +183,7 @@ const LeadsFormContent = ({ isLoading, form }: IField) => {
               title="Next Step"
               label="Select the lead next step"
               options={leadNextStepOptions}
+              disabled={isLoading}
             />
             <CustomInputField<ILeadFields>
               type="text"
@@ -218,6 +220,7 @@ const LeadsFormContent = ({ isLoading, form }: IField) => {
               title="Lead Priority"
               label="Select the lead priority"
               options={leadPriorityOptions}
+              disabled={isLoading}
             />
             <DropDownComponent
               control={control}
@@ -225,6 +228,7 @@ const LeadsFormContent = ({ isLoading, form }: IField) => {
               title="Lead Status"
               label="Select the lead status"
               options={leadStatusOptions}
+              disabled={isLoading}
             />
           </div>
         </div>
