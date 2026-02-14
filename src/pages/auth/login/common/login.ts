@@ -14,6 +14,11 @@ export type IRole = {
   __v: number;
 };
 
+export interface IPermission {
+  _id: number;
+  name: string;
+}
+
 export type ILoginResponse = {
   _id: string;
   firstName: string;

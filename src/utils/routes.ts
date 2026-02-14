@@ -1,3 +1,4 @@
+
 export const allRoutes = Object.freeze({
   HOME: "/",
   PORTAL: "/portal",
@@ -35,6 +36,8 @@ export const allRoutes = Object.freeze({
   ROLES: "/roles",
   ADD_ROLE: "/roles/new",
   UPDATE_ROLE: (id: string) => `/roles/${id}`,
+  DELETE_ROLE: (id: string) => `/roles/${id}`,
+  VIEW_ROLE: (id: string) => `/roles/${id}/view`,
   USERS: "/users",
   ADD_USER: "/users/new",
   VIEW_USER: (id: string) => `/users/${id}/view`,

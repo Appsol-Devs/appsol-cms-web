@@ -5,7 +5,7 @@ import {
   type IPagination,
   type PaginatedResponse,
 } from "@/lib/pagination";
-import type { IRole } from "@/pages/auth/login/common/login";
+import type { IPermission, IRole } from "@/pages/auth/login/common/login";
 
 export const rolesApi = createApi({
   reducerPath: "rolesApi",
@@ -51,16 +51,33 @@ export const rolesApi = createApi({
         method: "PUT",
       }),
     }),
+    getARole: builder.query<IRole, string>({
+      query: (id) => ({
+        url: `roles/${id}`,
+      }),
+      transformResponse: async (response: Response) => response.json(),
+    }),
     deleteRole: builder.mutation<void, { id: string }>({
       query: ({ id }) => ({
         url: `roles/${id}`,
         method: "DELETE",
       }),
     }),
+    getPermissions: builder.query<IPermission[], void>({
+      query: () => ({
+        url: "permissions",
+      }),
+      transformResponse: async (response: Response) => {
+        const data = await response.json();
+        return data as IPermission[];
+      },
+    }),
   }),
 });
 
 export const {
+  useLazyGetPermissionsQuery,
+  useLazyGetARoleQuery,
   useLazyGetRolesQuery,
   useAddRoleMutation,
   useUpdateRoleMutation,

@@ -14,18 +14,29 @@ import {
   XCircle,
   Info,
   Trash2,
-  Check,
-  Ban,
+  RefreshCcw,
+  PlusCircle,
+  Save,
 } from "lucide-react";
 
-type AlertType = "success" | "warning" | "error" | "info" | "delete";
+type AlertType = "success" | "warning" | "error" | "info" | "delete" | "update" | "add" | "reset";
+
+type MaxWidth = "xs" | "sm" | "md" | "lg" | "xl";
+
+const maxWidthMap: Record<MaxWidth, string> = {
+  xs: "max-w-xs",
+  sm: "max-w-sm",
+  md: "max-w-md",
+  lg: "max-w-lg",
+  xl: "max-w-xl",
+};
 
 interface IConfirmationDialog {
   title?: string;
   content: ReactNode;
   trigger?: ReactNode;
-  triggerClassName?: string; // Optional styling for the trigger
-  maxWidth?: "xs" | "sm" | "md" | "lg" | "xl" | "fullscreen";
+  triggerClassName?: string;
+  maxWidth?: MaxWidth;
   leftActionTitle?: string;
   rightActionTitle?: string;
   disableOutsideClick?: boolean;
@@ -37,21 +48,80 @@ interface IConfirmationDialog {
 }
 
 const variantConfigs = {
-  success: { icon: CheckCircle, color: "text-green-600", btn: "bg-green-600 hover:bg-green-700" },
-  warning: { icon: AlertTriangle, color: "text-yellow-600", btn: "bg-yellow-600 hover:bg-yellow-700" },
-  error: { icon: XCircle, color: "text-red-600", btn: "bg-red-600 hover:bg-red-700" },
-  info: { icon: Info, color: "text-blue-600", btn: "bg-blue-600 hover:bg-blue-700" },
-  delete: { icon: Trash2, color: "text-red-600", btn: "bg-red-600 hover:bg-red-700" },
+  success: {
+    icon: CheckCircle,
+    color: "text-green-600",
+    bgColor: "bg-green-100",
+    btn: "bg-green-600 hover:bg-green-700 focus:ring-green-600",
+    rightDefault: "Confirm",
+    leftDefault: "Cancel",
+  },
+  warning: {
+    icon: AlertTriangle,
+    color: "text-amber-600",
+    bgColor: "bg-amber-100",
+    btn: "bg-amber-600 hover:bg-amber-700 focus:ring-amber-600",
+    rightDefault: "Continue",
+    leftDefault: "Cancel",
+  },
+  error: {
+    icon: XCircle,
+    color: "text-red-600",
+    bgColor: "bg-red-100",
+    btn: "bg-red-600 hover:bg-red-700 focus:ring-red-600",
+    rightDefault: "Try Again",
+    leftDefault: "Close",
+  },
+  info: {
+    icon: Info,
+    color: "text-blue-600",
+    bgColor: "bg-blue-100",
+    btn: "bg-blue-600 hover:bg-blue-700 focus:ring-blue-600",
+    rightDefault: "OK",
+    leftDefault: "Cancel",
+  },
+  delete: {
+    icon: Trash2,
+    color: "text-red-600",
+    bgColor: "bg-red-100",
+    btn: "bg-red-600 hover:bg-red-700 focus:ring-red-600",
+    rightDefault: "Yes, Delete",
+    leftDefault: "No, Keep it",
+  },
+  update: {
+    icon: Save,
+    color: "text-indigo-600",
+    bgColor: "bg-indigo-100",
+    btn: "bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-600",
+    rightDefault: "Update Now",
+    leftDefault: "Cancel",
+  },
+  add: {
+    icon: PlusCircle,
+    color: "text-emerald-600",
+    bgColor: "bg-emerald-100",
+    btn: "bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-600",
+    rightDefault: "Add Item",
+    leftDefault: "Cancel",
+  },
+  reset: {
+    icon: RefreshCcw,
+    color: "text-orange-600",
+    bgColor: "bg-orange-100",
+    btn: "bg-orange-600 hover:bg-orange-700 focus:ring-orange-600",
+    rightDefault: "Reset Data",
+    leftDefault: "Cancel",
+  },
 };
 
 const ConfirmationDialog = ({
   title = "Are you sure?",
   trigger,
   triggerClassName,
-  maxWidth = "md",
+  maxWidth = "sm",
   content,
-  leftActionTitle = "Cancel",
-  rightActionTitle = "Yes",
+  leftActionTitle,
+  rightActionTitle,
   disableOutsideClick = true,
   onConfirmClicked,
   alertType = "info",
@@ -73,6 +143,11 @@ const ConfirmationDialog = ({
   const config = variantConfigs[alertType];
   const Icon = config.icon;
 
+  const finalRightTitle = rightActionTitle || config.rightDefault;
+  const finalLeftTitle = leftActionTitle || config.leftDefault;
+
+  const maxWidthClass = maxWidthMap[maxWidth];
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       {trigger && (
@@ -84,47 +159,48 @@ const ConfirmationDialog = ({
       <DialogContent
         onInteractOutside={(e) => disableOutsideClick && e.preventDefault()}
         className={cn(
-          "gap-0",
-          maxWidth === "fullscreen" ? "max-w-[95vw] h-[95vh]" : `max-w-${maxWidth}`,
-          "[&>button]:text-white [&>button]:opacity-100 [&>button]:hover:opacity-80"
+          "p-6 gap-0 rounded-xl overflow-hidden bg-white",
+          maxWidthClass,
+          "[&>button]:bg-transparent [&>button]:border-none [&>button]:hover:bg-transparent [&>button]:text-gray-400 [&>button]:top-4 [&>button]:right-4"
         )}
       >
-        <div className="pt-6">
-          <div className="flex flex-col items-center gap-4 text-center">
-            <Icon className={cn("w-12 h-12", config.color)} />
-            <DialogTitle className="text-xl font-semibold">{title}</DialogTitle>
+        <div className="flex flex-col items-center text-center">
+          <div className={cn("rounded-full p-3 mb-4", config.bgColor)}>
+            <Icon className={cn("w-6 h-6", config.color)} />
           </div>
 
-          <div className="py-6 flex items-center justify-center text-muted-foreground text-sm">
+          <DialogTitle className="text-xl font-bold text-gray-900 mb-2">
+            {title}
+          </DialogTitle>
+
+          <div className="text-sm text-gray-500 mb-8 max-w-[90%] leading-relaxed">
             {content}
           </div>
+
+          <DialogFooter className="w-full grid grid-cols-2 gap-3 sm:space-x-0">
+            <Button
+              variant="outline"
+              onClick={() => handleOpenChange(false)}
+              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 border-none font-medium rounded-lg h-11"
+            >
+              {finalLeftTitle}
+            </Button>
+
+            <Button
+              className={cn(
+                "w-full text-white font-medium rounded-lg h-11 shadow-none transition-colors",
+                config.btn
+              )}
+              disabled={disabled}
+              onClick={() => {
+                onConfirmClicked?.();
+                handleOpenChange(false);
+              }}
+            >
+              {finalRightTitle}
+            </Button>
+          </DialogFooter>
         </div>
-
-        <DialogFooter className="sm:justify-center gap-2">
-          <Button 
-            variant="outline" 
-            onClick={() => handleOpenChange(false)}
-            className="text-white bg-slate-500 hover:bg-slate-600 hover:text-white border-none"
-          >
-            <Ban className="mr-2 h-4 w-4" />
-            {leftActionTitle}
-          </Button>
-
-          <Button
-            className={cn(
-              "min-w-24 text-white", 
-              alertType === "delete" ? "bg-red-600 hover:bg-red-700" : config.btn
-            )}
-            disabled={disabled}
-            onClick={() => {
-              onConfirmClicked?.();
-              handleOpenChange(false);
-            }}
-          >
-            <Check className="mr-2 h-4 w-4" />
-            {rightActionTitle}
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

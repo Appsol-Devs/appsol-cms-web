@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { Briefcase, NotepadText, Pen, Shield } from "lucide-react";
+import { Briefcase, NotepadText, Shield, Eye } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useLazyGetRolesQuery } from "../common/rolesApi";
 import ActionButton from "@/components/ActionButtons";
@@ -20,6 +20,7 @@ const Roles = () => {
       setTimeout(() => setExecuted(false), 2000);
     }
   }, [executed]);
+
   const columns = useMemo<ColumnDef<IRole>[]>(
     () => [
       {
@@ -44,14 +45,14 @@ const Roles = () => {
           </div>
         ),
       },
-      {
+     {
         header: "Permissions",
         accessorKey: "permissions",
         meta: { icon: <Shield size={14} /> },
         cell: ({ row }) => (
-          <div className=" flex flex-col items-start gap-1">
+          <div className="flex flex-col items-start gap-1">
             <span className="font-semibold p-0.5 text-xs">
-              <Badge>{row.original?.permissions.length ?? ""}</Badge>
+              <Badge>{Number(row.original?.permissions.length ?? 0)}</Badge>
             </span>
           </div>
         ),
@@ -62,7 +63,7 @@ const Roles = () => {
         meta: { icon: <NotepadText size={14} /> },
         cell: ({ row }) => (
           <div className=" flex flex-col items-start gap-1">
-            <span className="font-semibold p-0.5 text-xs">
+            <span className="font-semibold p-0.5 text-xs text-muted-foreground line-clamp-1">
               {row.original.description ?? ""}
             </span>
           </div>
@@ -70,16 +71,16 @@ const Roles = () => {
       },
       {
         header: "Action",
-        meta: { icon: <Pen size={14} /> },
+        meta: { icon: <Eye size={14} /> },
         accessorKey: "action",
         cell: ({ row }) => (
           <div className="flex items-center space-x-2">
             <ActionButton
-              type="edit"
+              type="view" 
               onClick={() =>
                 navigate(
                   allRoutes.PORTAL +
-                    allRoutes.UPDATE_ROLE(row.original._id as string)
+                  allRoutes.VIEW_ROLE(row.original._id as string)
                 )
               }
             />
@@ -96,12 +97,11 @@ const Roles = () => {
         tableAddComponent={() => (
           <ActionButton
             type="add"
+            useText="Add Role"
             onClick={() => navigate(allRoutes.PORTAL + allRoutes.ADD_ROLE)}
           />
         )}
         columns={columns}
-        // isSetting
-        // filters={["company", "location", "role", "gender"]}
         refetchData={executed}
         title="Roles"
         lazyFetchQuery={[fetchQuery, fetchState]}
