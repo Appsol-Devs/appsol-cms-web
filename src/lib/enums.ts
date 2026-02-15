@@ -15,7 +15,7 @@ export enum LEAD_PRIORITY_ENUM {
 export enum LEAD_STATUS_ENUM {
   NEW = "new",
   EVALUATING = "evaluating",
-  BUILDING_PROPOSAL = "building_proposal",
+  BUILDING_PROPOSAL = "buildingProposal",
   QUALIFIED = "qualified",
   NEGOTIATION = "negotiation",
 }

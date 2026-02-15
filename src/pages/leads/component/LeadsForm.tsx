@@ -15,9 +15,10 @@ import type { ILead } from "../common/leads";
 import LeadsFormContent from "./LeadsFormContent";
 import type { DropDownOption } from "@/components/DropdownComponent";
 
-export type ILeadFields = Omit<ILead, "_id"> & {
+export type ILeadFields = Omit<ILead, "_id" | "leadStage" | "nextStep"> & {
   nextStep?: DropDownOption<string>;
   leadStage?: DropDownOption<string>;
+  software?: DropDownOption<string>;
   priority?: DropDownOption<string>;
   leadStatus?: DropDownOption<string>;
 };
@@ -59,6 +60,7 @@ const LeadsForm = () => {
       leadSource: data.leadSource,
       location: data.location,
       notes: data.notes,
+      initialEnquiryDate: data.initialEnquiryDate,
       leadStage: data.leadStage
         ? { label: data.leadStage.name ?? "", value: data.leadStage._id ?? "" }
         : undefined,
@@ -70,6 +72,12 @@ const LeadsForm = () => {
         : undefined,
       leadStatus: data.leadStatus
         ? { label: data.leadStatus, value: data.leadStatus }
+        : undefined,
+      software: data.softwareId
+        ? {
+            label: data.software?.name ?? "",
+            value: data.softwareId,
+          }
         : undefined,
     });
   };
@@ -105,36 +113,68 @@ const LeadsForm = () => {
       }
     } catch (error) {
       console.error(error);
+      showToast({
+        title: "Error",
+        message: id ? "Failed to update lead." : "Failed to create lead.",
+        type: "error",
+      });
     }
   };
 
   const submitData = () => {
     const data = getValues();
+    const phone = typeof data.phone === "string" ? data.phone.trim() : "";
 
-    const requiredFields = [
+    const requiredFields: { field: unknown; message: string }[] = [
       { field: data.name, message: "Name is required." },
+      { field: data.email, message: "Email is required." },
       { field: data.companyName, message: "Company Name is required." },
-      { field: data.phone, message: "Phone Number is required." },
-      // { field: data.email, message: "Email is required." },
+      { field: data.leadSource, message: "Lead Source is required." },
+      { field: data.software?.value, message: "Software is required." },
+      { field: data.initialEnquiryDate, message: "Initial Enquiry Date is required." },
+      { field: data.nextStep?.value, message: "Next Step is required." },
+      { field: data.leadStatus?.value, message: "Lead Status is required." },
+      { field: data.priority?.value, message: "Priority is required." },
     ];
 
     for (const { field, message } of requiredFields) {
-      //   if (!field && !skip) {
       if (!field) {
-        showToast({ title: "Info", message, type: "info", duration: 1000 });
+        showToast({ title: "Validation", message, type: "info", duration: 2000 });
         return;
       }
+    }
+
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+    if (data.email && !emailRegex.test(data.email)) {
+      showToast({
+        title: "Validation",
+        message: "Please enter a valid email address.",
+        type: "info",
+        duration: 2000,
+      });
+      return;
+    }
+
+    if (phone.length < 10 || phone.length > 13) {
+      showToast({
+        title: "Validation",
+        message: "Phone number must be between 10 and 13 characters.",
+        type: "info",
+        duration: 2000,
+      });
+      return;
     }
 
     const payload: ILead = cleanPayload({
       name: data.name,
       companyName: data.companyName,
-      //   dateConverted: data.dateConverted,
       email: data.email,
       phone: data.phone,
       notes: data.notes,
       location: data.location,
       leadSource: data.leadSource,
+      softwareId: data.software?.value,
+      initialEnquiryDate: data.initialEnquiryDate,
       leadStage: data.leadStage?.value,
       nextStep: data.nextStep?.value,
       priority: data.priority?.value,
@@ -159,6 +199,12 @@ const LeadsForm = () => {
         {
           label: "Lead Source",
           value: values?.leadSource,
+          required: true,
+        },
+        {
+          label: "Software",
+          value: values?.software?.label as string,
+          required: true,
         },
       ],
     },
@@ -174,6 +220,11 @@ const LeadsForm = () => {
         {
           label: "Location",
           value: values?.location as string,
+          required: false,
+        },
+        {
+          label: "Initial Enquiry Date",
+          value: values?.initialEnquiryDate as string,
           required: true,
         },
         // {
@@ -189,7 +240,7 @@ const LeadsForm = () => {
         {
           label: "Current Stage",
           value: values?.leadStage?.label as string,
-          required: true,
+          required: false,
         },
         {
           label: "Next Stage",

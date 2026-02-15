@@ -1,5 +1,6 @@
 import type { IUser } from "@/pages/customer/common/customers";
 import type { ILeadNextStep } from "@/pages/settings/common/settings";
+import type { ISoftware } from "@/pages/settings/common/settings";
 
 export type ILead = {
   leadCode?: string;
@@ -8,6 +9,8 @@ export type ILead = {
   phone?: string;
   companyName?: string;
   leadSource?: string;
+  softwareId?: string;
+  software?: ISoftware;
   initialEnquiryDate?: string;
   leadStatus?: string;
   loggedBy?: IUser;

@@ -1,0 +1,221 @@
+import ActionButton from "@/components/ActionButtons";
+import ConfirmationDialog from "@/components/ConfirmationDialog";
+import PageSummary from "@/components/PageSummary";
+import PageTitle from "@/components/PageTitle";
+import DetailItem from "@/components/ui/DetailItem";
+import { showToast } from "@/components/ui/CustomToast";
+import { formatDate } from "@/lib/helpers";
+import {
+  Briefcase,
+  Mail,
+  MapPin,
+  Phone,
+  Sparkles,
+  Trash2,
+  User,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { allRoutes } from "@/utils/routes";
+import type { ILead } from "../common/leads";
+import {
+  useDeleteLeadMutation,
+  useLazyGetALeadQuery,
+} from "../common/leadsApi";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+
+const LeadsView = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  const [deleteLead] = useDeleteLeadMutation();
+  const [getLeadDetails, { isLoading: isFetching }] = useLazyGetALeadQuery();
+  const [selectedLead, setSelectedLead] = useState<ILead | null>(null);
+
+  useEffect(() => {
+    if (id) {
+      getLeadDetails(id)
+        .unwrap()
+        .then((res) => {
+          if (res) {
+            setSelectedLead(res);
+          }
+        })
+        .catch((err) => console.error("Failed to fetch lead", err));
+    }
+  }, [id, getLeadDetails]);
+
+  const handleDelete = async () => {
+    if (!id) return;
+    try {
+      await deleteLead({ id }).unwrap();
+      showToast({
+        title: "Success",
+        message: "Lead deleted successfully.",
+        type: "success",
+      });
+      navigate(allRoutes.PORTAL + allRoutes.LEADS);
+    } catch (error) {
+      console.error("Failed to delete lead", error);
+      showToast({
+        title: "Error",
+        message: "Failed to delete lead",
+        type: "error",
+      });
+    }
+  };
+
+  const handleConvert = () => {
+    showToast({
+      title: "Info",
+      message: "Convert lead to customer – coming soon.",
+      type: "info",
+    });
+    // TODO: Navigate to add customer with pre-filled lead data
+    // navigate(allRoutes.PORTAL + allRoutes.ADD_CUSTOMER, { state: { leadId: id } });
+  };
+
+  if (isFetching || !selectedLead) {
+    return (
+      <div className="p-8 text-center text-muted-foreground">
+        Loading lead details...
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <PageTitle showBack title="Leads Details" />
+
+      <PageSummary
+        icon={User}
+        title={selectedLead.name ?? "Unknown"}
+        description={`Lead from ${selectedLead.companyName ?? "Unknown company"}`}
+        actionComponent={
+          <div className="flex items-center gap-2 flex-wrap">
+            <ActionButton
+              onClick={() =>
+                navigate(allRoutes.PORTAL + allRoutes.UPDATE_LEAD(id as string))
+              }
+              type="edit"
+              useText="Edit"
+            />
+            <Button
+              onClick={handleConvert}
+              className="bg-primary text-xs rounded-md text-primary-foreground hover:opacity-90"
+            >
+              <Sparkles className="w-3 h-3" />
+              <span className="text-xs ml-1">Convert</span>
+            </Button>
+            <ConfirmationDialog
+              alertType="delete"
+              title="Delete Lead?"
+              rightActionTitle="Delete"
+              content={
+                <p className="text-muted-foreground text-center">
+                  This action cannot be undone. This will permanently delete the
+                  lead{" "}
+                  <strong>{selectedLead.name ?? selectedLead.companyName}</strong>
+                  .
+                </p>
+              }
+              onConfirmClicked={handleDelete}
+              trigger={
+                <Button
+                  variant="destructive"
+                  className="bg-red-700! text-white"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  <span className="text-xs">Delete</span>
+                </Button>
+              }
+            />
+          </div>
+        }
+      />
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-1 space-y-3">
+          <div className="bg-card p-6 rounded-xl border shadow-sm flex flex-col items-center text-center">
+            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+              <User className="w-10 h-10 text-primary" />
+            </div>
+            <h2 className="text-lg font-bold text-card-foreground mb-1">
+              {selectedLead.name ?? "—"}
+            </h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              {selectedLead.companyName ?? "—"}
+            </p>
+            <div className="flex flex-wrap gap-2 justify-center w-full">
+              <Badge variant="secondary">{selectedLead.leadStatus ?? "—"}</Badge>
+              <Badge variant="outline">{selectedLead.priority ?? "—"}</Badge>
+            </div>
+          </div>
+
+          <div className="bg-card p-6 rounded-xl border shadow-sm">
+            <h3 className="font-semibold text-card-foreground mb-2 flex items-center gap-2">
+              <Briefcase className="w-4 h-4 text-muted-foreground" />
+              Stage
+            </h3>
+            <div className="space-y-2 text-sm">
+              <p className="text-muted-foreground">Current</p>
+              <p className="font-medium">{selectedLead.leadStage?.name ?? "—"}</p>
+              <p className="text-muted-foreground mt-2">Next Step</p>
+              <p className="font-medium">{selectedLead.nextStep?.name ?? "—"}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="lg:col-span-2 space-y-4">
+          <div className="bg-card rounded-xl border shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b bg-muted/30">
+              <h3 className="font-semibold text-card-foreground">
+                Contact & Business Details
+              </h3>
+            </div>
+            <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+              <DetailItem
+                icon={<Mail className="w-4 h-4" />}
+                label="Email"
+                value={selectedLead.email}
+              />
+              <DetailItem
+                icon={<Phone className="w-4 h-4" />}
+                label="Phone"
+                value={selectedLead.phone}
+              />
+              <DetailItem
+                icon={<Briefcase className="w-4 h-4" />}
+                label="Company Name"
+                value={selectedLead.companyName}
+              />
+              <DetailItem
+                icon={<MapPin className="w-4 h-4" />}
+                label="Location"
+                value={selectedLead.location}
+              />
+              <DetailItem label="Lead Source" value={selectedLead.leadSource} />
+              <div className="md:col-span-2 border-t pt-4 mt-2">
+                <DetailItem label="Notes" value={selectedLead.notes} />
+              </div>
+              <div className="md:col-span-2 border-t border-border my-2" />
+              <DetailItem
+                icon={<span className="text-muted-foreground">📅</span>}
+                label="Created"
+                value={formatDate(selectedLead.createdAt)}
+              />
+              <DetailItem
+                icon={<span className="text-muted-foreground">📅</span>}
+                label="Last Updated"
+                value={formatDate(selectedLead.updatedAt)}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default LeadsView;

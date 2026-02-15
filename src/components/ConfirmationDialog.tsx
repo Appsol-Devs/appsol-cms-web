@@ -84,9 +84,9 @@ const variantConfigs = {
     icon: Trash2,
     color: "text-red-600",
     bgColor: "bg-red-100",
-    btn: "bg-red-600 hover:bg-red-700 focus:ring-red-600",
-    rightDefault: "Yes, Delete",
-    leftDefault: "No, Keep it",
+    btn: "!bg-red-700 hover:!bg-red-800 !text-white",
+    rightDefault: "Yes, Delete It!",
+    leftDefault: "No, Keep it.",
   },
   update: {
     icon: Save,
@@ -177,18 +177,18 @@ const ConfirmationDialog = ({
             {content}
           </div>
 
-          <DialogFooter className="w-full grid grid-cols-2 gap-3 sm:space-x-0">
+          <DialogFooter className="w-full grid grid-cols-2 gap-3 pt-2">
             <Button
-              variant="outline"
+              variant="ghost"
               onClick={() => handleOpenChange(false)}
-              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 border-none font-medium rounded-lg h-11"
+              className="!w-full !bg-gray-100 hover:!bg-gray-200 !text-gray-900 !border-0 !rounded-full !h-11 !px-6 font-medium"
             >
               {finalLeftTitle}
             </Button>
 
             <Button
               className={cn(
-                "w-full text-white font-medium rounded-lg h-11 shadow-none transition-colors",
+                "!w-full !text-white !font-medium !rounded-full !h-11 !px-6 !shadow-none !border-0",
                 config.btn
               )}
               disabled={disabled}
