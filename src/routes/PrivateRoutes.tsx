@@ -25,6 +25,7 @@ import ComplaintsForm from "@/pages/complaint/component/ComplaintsForm";
 import ComplaintsView from "@/pages/complaint/component/ComplaintsView";
 import Leads from "@/pages/leads/component/Leads";
 import LeadsForm from "@/pages/leads/component/LeadsForm";
+import LeadsView from "@/pages/leads/component/LeadsView";
 import CallStatusesForm from "@/pages/settings/components/call-status/CallStatusesForm";
 import SetupStatusesForm from "@/pages/settings/components/setup-status/SetupStatusesForm";
 import LeadNextStepsForm from "@/pages/settings/components/lead-next-step/LeadNextStepsForm";
@@ -56,6 +57,7 @@ const PrivateRoutes = () => {
       <Route path={allRoutes.LEADS} element={<Leads />} />
       <Route path={allRoutes.ADD_LEAD} element={<LeadsForm />} />
       <Route path={allRoutes.UPDATE_LEAD(":id")} element={<LeadsForm />} />
+      <Route path={allRoutes.VIEW_LEAD(":id")} element={<LeadsView />} />
       <Route path={allRoutes.COMPLAINT_TYPES} element={<ComplaintTypes />} />
       <Route
         path={allRoutes.ADD_COMPLAINT_TYPE}

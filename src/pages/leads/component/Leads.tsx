@@ -4,12 +4,11 @@ import {
   Map,
   MapPin,
   NotepadText,
-  Pen,
   Phone,
   User,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
 import ActionButton from "@/components/ActionButtons";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import FeatureContentRenderer from "@/components/table/component/FeatureContentRenderer";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -116,24 +115,6 @@ const Leads = () => {
           </div>
         ),
       },
-      {
-        header: "Action",
-        meta: { icon: <Pen size={14} /> },
-        accessorKey: "action",
-        cell: ({ row }) => (
-          <div className="flex items-center space-x-2">
-            <ActionButton
-              type="edit"
-              onClick={() =>
-                navigate(
-                  allRoutes.PORTAL +
-                    allRoutes.UPDATE_LEAD(row.original._id as string)
-                )
-              }
-            />
-          </div>
-        ),
-      },
     ],
     [executed]
   );
@@ -148,6 +129,9 @@ const Leads = () => {
             onClick={() => navigate(allRoutes.PORTAL + allRoutes.ADD_LEAD)}
           />
         )}
+        pathOnRowSelected={(row) =>
+          navigate(allRoutes.PORTAL + allRoutes.VIEW_LEAD(row._id as string))
+        }
         columns={columns}
         // filters={["company", "location", "role", "gender"]}
         refetchData={executed}
