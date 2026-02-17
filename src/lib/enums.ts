@@ -19,3 +19,16 @@ export enum LEAD_STATUS_ENUM {
   QUALIFIED = "qualified",
   NEGOTIATION = "negotiation",
 }
+
+export const LEAD_STATUS_COLORS: Record<string, string> = {
+  new: "#3B82F6",
+  evaluating: "#EAB308",
+  buildingproposal: "#A855F7",
+  qualified: "#0E9F6E",
+  negotiation: "#EF4444",
+  closed: "#D4A574",
+  won: "#14B8A6",
+};
+
+export const getLeadStatusColor = (status?: string) =>
+  status ? LEAD_STATUS_COLORS[status.toLowerCase()] ?? undefined : undefined;

@@ -22,4 +22,5 @@ export type ILead = {
   location?: string;
   notes?: string;
   _id?: string;
+  isConverted?: boolean;
 };
