@@ -14,7 +14,10 @@ import { useEffect, useState } from "react";
 import { lookup_params } from "@/lib/api";
 import DropDownComponent from "@/components/DropdownComponent";
 import { useGenerateDropdownOptionsFromEnum } from "@/lib/helpers";
-import { LEAD_PRIORITY_ENUM, LEAD_STATUS_ENUM } from "@/lib/enums";
+import {
+  LEAD_PRIORITY_ENUM,
+  LEAD_STATUS_ENUM,
+} from "@/lib/enums";
 
 interface IField {
   isLoading?: boolean;

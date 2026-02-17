@@ -24,7 +24,7 @@ import {
   useLazyGetALeadQuery,
 } from "../common/leadsApi";
 import { Badge } from "@/components/ui/badge";
-import { getLeadStatusColor } from "@/lib/enums";
+import { getLeadPriorityColor, getLeadStatusColor } from "@/lib/enums";
 import { Button } from "@/components/ui/button";
 
 const LeadsView = () => {
@@ -166,7 +166,6 @@ const LeadsView = () => {
                 {(() => {
                   const status = selectedLead.leadStatus ?? "";
                   const bg = getLeadStatusColor(status);
-                  const isLight = ["#EAB308", "#D4A574"].includes(bg ?? "");
                   return (
                     <Badge
                       variant={bg ? undefined : "secondary"}
@@ -175,7 +174,7 @@ const LeadsView = () => {
                         bg
                           ? {
                               backgroundColor: bg,
-                              color: isLight ? "#1a1a1a" : "#fff",
+                              color: "#FFFFFF",
                             }
                           : undefined
                       }
@@ -189,9 +188,27 @@ const LeadsView = () => {
                 <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
                   Priority
                 </p>
-                <Badge variant="outline" className="capitalize">
-                  {selectedLead.priority ?? "—"}
-                </Badge>
+                {(() => {
+                  const priority = selectedLead.priority ?? "";
+                  const bg = getLeadPriorityColor(priority);
+                  const isLight = ["#F97316"].includes(bg ?? "");
+                  return (
+                    <Badge
+                      variant={bg ? undefined : "outline"}
+                      className="capitalize border-0"
+                      style={
+                        bg
+                          ? {
+                              backgroundColor: bg,
+                              color: isLight ? "#1a1a1a" : "#fff",
+                            }
+                          : undefined
+                      }
+                    >
+                      {priority || "—"}
+                    </Badge>
+                  );
+                })()}
               </div>
             </div>
           </div>
@@ -222,14 +239,29 @@ const LeadsView = () => {
               </div>
             </div>
           ) : (
-            <Button
-              onClick={handleConvert}
+            <ConfirmationDialog
+              alertType="update"
+              title="Convert Lead?"
+              rightActionTitle="Yes, Convert"
+              content={
+                <p className="text-muted-foreground text-center">
+                  This will convert{" "}
+                  <strong>{selectedLead.name ?? selectedLead.companyName}</strong>{" "}.
+                  You won't be able to change its status afterwards.
+                </p>
+              }
+              onConfirmClicked={handleConvert}
               disabled={isConverting}
-              className="w-full bg-primary! text-xs rounded-md text-primary-foreground hover:opacity-90 disabled:opacity-50"
-            >
-              <Sparkles className="w-3 h-3" />
-              <span className="text-xs ml-1">Convert</span>
-            </Button>
+              trigger={
+                <Button
+                  disabled={isConverting}
+                  className="w-full bg-primary! text-xs rounded-md text-primary-foreground hover:opacity-90 disabled:opacity-50"
+                >
+                  <Sparkles className="w-3 h-3" />
+                  <span className="text-xs ml-1">Convert</span>
+                </Button>
+              }
+            />
           )}
         </div>
 
