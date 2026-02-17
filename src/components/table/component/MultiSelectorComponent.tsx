@@ -1,5 +1,5 @@
 import { type ReactNode } from "react";
-import { Controller } from "react-hook-form"; 
+import { Controller } from "react-hook-form";
 import Select, {
   type ActionMeta,
   type GroupBase,
@@ -13,7 +13,7 @@ export interface DropDownOption<T = string | number> {
 }
 
 interface MultiSelectorComponentProps<T = string | number> {
-  label: ReactNode;
+  label?: ReactNode;
   options: DropDownOption<T>[];
   required?: boolean;
   onChanged?: (
@@ -30,7 +30,7 @@ interface MultiSelectorComponentProps<T = string | number> {
   controlColor?: string;
   emptyMessage?: string;
   disabled?: boolean;
-  name?: string; // FIXED: Changed from Path<T> | string to just string
+  name?: string;
   borderRadius?: string;
   optionsColor?: string;
   optionActiveColor?: string;
@@ -60,12 +60,10 @@ const MultiSelectorComponent = <T,>({
   controlColor,
   borderRadius,
   optionsColor,
-  optionActiveColor,
   control,
   name,
   defaultValue,
   formatOptionLabel,
-  isClearable = true,
   height,
   fontSize,
   handleInputChange,
@@ -80,89 +78,95 @@ const MultiSelectorComponent = <T,>({
   > = {
     menu: (base) => ({
       ...base,
-      backgroundColor: "var(--rx-secondary)",
-      color: "var(--rx-secondary-foreground)",
-      boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
-      borderRadius: "5px",
+      backgroundColor: "var(--rx-secondary, #ffffff)",
+      color: "var(--rx-secondary-foreground, #333)",
+      boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+      borderRadius: "8px",
       zIndex: zIndex,
+      marginTop: "4px",
     }),
     menuPortal: (base) => ({
       ...base,
       zIndex: zIndex,
-      color: "var(--on-card)",
     }),
     placeholder: (base) => ({
       ...base,
       fontSize: "14px",
-      color: "var(--on-surface)",
+      color: "var(--on-surface, #666)",
     }),
     multiValue: (base) => ({
       ...base,
-      backgroundColor: optionsActiveBgColor ?? "var(--surface-border)",
-      borderRadius: "4px",
+      backgroundColor: optionsActiveBgColor ?? "var(--surface-border, #e5e7eb)",
+      borderRadius: "20px",
+      margin: "2px",
+      display: "flex",
+      alignItems: "center",
     }),
     multiValueLabel: (base) => ({
       ...base,
       fontSize: "12px",
-      color: controlColor ?? "var(--on-surface)",
+      color: controlColor ?? "var(--on-surface, #333)",
       fontWeight: "500",
+      padding: "2px 8px",
+      paddingRight: "6px",
     }),
     multiValueRemove: (base) => ({
       ...base,
-      color: "var(--on-surface)",
+      color: "var(--on-surface, #555)",
       cursor: "pointer",
+      borderRadius: "0 20px 20px 0",
+      paddingLeft: "4px",
+      paddingRight: "8px",
       ":hover": {
-        backgroundColor: "var(--destructive)",
+        backgroundColor: "var(--destructive, #ff4d4f)",
         color: "white",
       },
     }),
     option: (base, state) => ({
       ...base,
       cursor: "pointer",
-      fontSize: "12px",
+      fontSize: "13px",
       color:
         optionsColor ??
-        (state.isSelected ? "var(--on-card)" : "var(--on-surface)"),
+        (state.isSelected ? "var(--on-card, #fff)" : "var(--on-surface, #333)"),
       backgroundColor: state.isSelected
-        ? "var(--primary)"
+        ? "var(--primary, #3b82f6)"
         : base.backgroundColor,
       "&:active": {
-        backgroundColor: optionsActiveBgColor ?? "var(--card)",
-        color: optionActiveColor ?? "var(--on-card)",
+        backgroundColor: optionsActiveBgColor ?? "var(--card, #f3f4f6)",
       },
-      pointerEvents: "auto",
     }),
     input: (base) => ({
       ...base,
-      color: "var(--on-surface)",
-    }),
-    dropdownIndicator: (base) => ({
-      ...base,
-      color: "var(--on-surface)",
-    }),
-    indicatorSeparator: (base) => ({
-      ...base,
-      color: "var(--on-surface)",
-    }),
-    clearIndicator: (base) => ({
-      ...base,
-      color: "var(--on-surface)",
+      color: "var(--on-surface, #333)",
+      margin: "0px",
+      padding: "0px",
     }),
     control: (baseStyles) => ({
       ...baseStyles,
       borderRadius: borderRadius ?? "10px",
-      minHeight: height ? height : "39px",
+      minHeight: height ? height : "38px",
+      height: "auto",
       border: "1px solid #e9e9e9",
       borderColor: required
-        ? "var(--error)"
+        ? "var(--error, red)"
         : borderColor
         ? borderColor
-        : "transparent",
-      borderWidth: required ? "3px" : "2px",
+        : "#e2e8f0",
+      boxShadow: "none",
+      "&:hover": {
+        borderColor: "var(--primary, #3b82f6)",
+      },
       fontSize: fontSize ? fontSize : "12px",
       color: controlColor ?? "var(--on-surface)",
-      backgroundColor: controlBgColor ?? "var(--surface)",
-      width: width ?? "max-content",
+      backgroundColor: controlBgColor ?? "var(--surface, white)",
+      width: width,
+      flexWrap: "wrap",
+    }),
+    valueContainer: (base) => ({
+      ...base,
+      padding: "2px 8px",
+      gap: "4px",
     }),
   };
 
@@ -173,17 +177,6 @@ const MultiSelectorComponent = <T,>({
     isMulti: true as const,
     closeMenuOnSelect: false,
     hideSelectedOptions: false,
-    theme: (theme: any) => ({
-      ...theme,
-      borderRadius: 0,
-      border: 1,
-      cursor: disabled ? "not-allowed" : "pointer",
-      colors: {
-        ...theme.colors,
-        primary25: "#adadaa",
-        primary: "#444444",
-      },
-    }),
     styles,
     options,
     placeholder: label || placeholder,
@@ -199,41 +192,77 @@ const MultiSelectorComponent = <T,>({
     onInputChange: handleInputChange,
   };
 
+  const ClearAllLink = ({ onClick }: { onClick: () => void }) => (
+    <div className="flex justify-end mt-1">
+      <span
+        onClick={onClick}
+        className="text-xs font-medium text-red-500 cursor-pointer hover:underline select-none"
+      >
+        Clear All
+      </span>
+    </div>
+  );
+
   return (
     <div
       className={disabled ? "opacity-50 cursor-not-allowed" : ""}
-      style={{ position: "relative", zIndex: 1 }}
+      style={{ position: "relative", zIndex: 1, width: width }}
     >
       {title && (
-        <p className="text-xs mb-1">
-          {title} {required && <span className="text-destructive ml-1">*</span>}
+        <p className="text-xs mb-1 font-medium text-gray-700">
+          {title} {required && <span className="text-red-500 ml-1">*</span>}
         </p>
       )}
+
       {control && name ? (
         <Controller
-          name={name as any} 
+          name={name as any}
           control={control}
-          defaultValue={defaultValue ?? [] as any}
-          render={({ field }) => (
-            <Select
-              {...commonSelectProps}
-              isClearable={isClearable}
-              value={field.value as unknown as MultiValue<DropDownOption<T>>}
-              onChange={(val, actionMeta) => {
-                field.onChange(val);
-                onChanged?.(val, actionMeta);
+          defaultValue={(defaultValue ?? []) as any}
+          render={({ field }) => {
+            const currentValues = field.value as MultiValue<DropDownOption<T>>;
+            const hasValues = currentValues && currentValues.length > 0;
+
+            return (
+              <>
+                <Select
+                  {...commonSelectProps}
+                  isClearable={false}
+                  value={currentValues}
+                  onChange={(val, actionMeta) => {
+                    field.onChange(val);
+                    onChanged?.(val, actionMeta);
+                  }}
+                />
+                {hasValues && !disabled && (
+                  <ClearAllLink
+                    onClick={() => {
+                      field.onChange([]);
+                      onChanged?.([], { action: "clear" } as any);
+                    }}
+                  />
+                )}
+              </>
+            );
+          }}
+        />
+      ) : (
+        <>
+          <Select
+            {...commonSelectProps}
+            isClearable={false}
+            value={defaultValue}
+            name={name}
+            onChange={(val, actionMeta) => onChanged?.(val, actionMeta)}
+          />
+          {defaultValue && defaultValue.length > 0 && !disabled && (
+            <ClearAllLink
+              onClick={() => {
+                onChanged?.([], { action: "clear" } as any);
               }}
             />
           )}
-        />
-      ) : (
-        <Select
-          {...commonSelectProps}
-          isClearable={isClearable}
-          value={defaultValue}
-          name={name}
-          onChange={(val, actionMeta) => onChanged?.(val, actionMeta)}
-        />
+        </>
       )}
     </div>
   );

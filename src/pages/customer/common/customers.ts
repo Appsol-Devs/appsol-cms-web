@@ -52,6 +52,8 @@ export interface IOutReachType{
   _id?: string
 }
 
+
+
 export interface IRequestOTPPayload {
   userId: string;
   email: string;

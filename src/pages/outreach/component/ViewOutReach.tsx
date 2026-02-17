@@ -156,7 +156,6 @@ const ViewOutReach = () => {
           </div>
         </div>
 
-        {/* Right Column: Detailed Info */}
         <div className="lg:col-span-2 space-y-4">
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">

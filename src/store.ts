@@ -22,6 +22,7 @@ import { complaintsApi } from "./pages/complaint/common/complaintsApi";
 import { leadsApi } from "./pages/leads/common/leadsApi";
 import { dashboardApi } from "./pages/dashboard/common/dashboardApi";
 import { outReachApi } from "./pages/outreach/common/OutReachApi";
+import { customerOutreachApi } from "./pages/customer-outreaches/common/customerOutreachApi";
 
 const persistConfig = {
   key: "root",
@@ -42,6 +43,7 @@ export const store = configureStore({
     [leadsApi.reducerPath]: leadsApi.reducer,
     [dashboardApi.reducerPath]: dashboardApi.reducer,
     [outReachApi.reducerPath]: outReachApi.reducer,
+    [customerOutreachApi.reducerPath]: customerOutreachApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -61,6 +63,7 @@ export const store = configureStore({
         leadsApi.middleware,
         dashboardApi.middleware,
         outReachApi.middleware,
+        customerOutreachApi.middleware,
       )
       .concat(apiErrorMiddleware),
 });

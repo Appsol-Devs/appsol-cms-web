@@ -3,9 +3,7 @@ import CustomInputField from "@/components/CustomInputField";
 import { Separator } from "@/components/ui/separator";
 import { BookOpenText } from "lucide-react";
 import type { UseFormReturn } from "react-hook-form";
-import {
-  type DropDownOption,
-} from "@/components/DropdownComponent";
+import { type DropDownOption } from "@/components/DropdownComponent"; 
 import { useLazyGetPermissionsQuery } from "@/pages/roles/common/rolesApi";
 import { useEffect, useState } from "react";
 import type { IRoleFields } from "./RolesForm";
@@ -17,31 +15,29 @@ interface IField {
   isUpdate?: boolean;
 }
 
-const RolesFormContent = ({ isLoading, form, }: IField) => {
+const RolesFormContent = ({ isLoading, form }: IField) => {
   const [getPermissions] = useLazyGetPermissionsQuery();
   const [permissions, setPermissions] = useState<DropDownOption[]>([]);
 
- const fetchPermissions = async () => {
-  try {
-    const response = await getPermissions().unwrap();
-      const options: DropDownOption[] = response.map(
-        (permission: any) => ({
-          value: permission._id, 
-          label: permission.name,
-        })
-      );
+  const fetchPermissions = async () => {
+    try {
+      const response = await getPermissions().unwrap();
+      const options: DropDownOption[] = response.map((permission: any) => ({
+        value: permission._id,
+        label: permission.name,
+      }));
       setPermissions(options);
-    
-  } catch (error) {
-    console.error("Error fetching permissions:", error);
-  }
-};
+    } catch (error) {
+      console.error("Error fetching permissions:", error);
+    }
+  };
 
   useEffect(() => {
     fetchPermissions();
   }, []);
 
   const { control, register } = form;
+
   return (
     <div className="space-y-2">
       <CardComponent
@@ -81,6 +77,7 @@ const RolesFormContent = ({ isLoading, form, }: IField) => {
                 },
               }}
             />
+            
             <CustomInputField<IRoleFields>
               type="text"
               label="Description"
@@ -102,24 +99,24 @@ const RolesFormContent = ({ isLoading, form, }: IField) => {
                 },
               }}
             />
-            <MultiSelectorComponent
-              options={permissions} 
-              control={control}
-              name="permissions"
-              label="Permissions"
-              title="Permissions"
-              required
-              disabled={isLoading}
-            />
+
+            <div className="col-span-2">
+              <MultiSelectorComponent
+                options={permissions}
+                control={control}
+                name="permissions"
+                label="Permissions"
+                title="Permissions"
+                required
+                disabled={isLoading}
+                width="100%" 
+              />
+            </div>
           </div>
         </div>
       </CardComponent>
-
-
-
     </div>
   );
 };
-
 
 export default RolesFormContent;

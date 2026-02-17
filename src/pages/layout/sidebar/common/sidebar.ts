@@ -90,6 +90,12 @@ export const sidebarMainMenus: ISidebar[] = [
     icon: Lock,
     path: allRoutes.USERS,
   },
+    {
+    mainPath: `${allRoutes.PORTAL}${allRoutes.CUSTOMER_OUTREACHS}`,
+    name: "Customer OutReaches",
+    icon: Headset,
+    path: allRoutes.CUSTOMER_OUTREACHS,
+  },
   {
     mainPath: `${allRoutes.PORTAL}${allRoutes.ANALYTICS}`,
     name: "Analytics",

@@ -37,6 +37,9 @@ import RolesView from "@/pages/roles/component/RolesView";
 import OutReach from "@/pages/outreach/component/OutReach";
 import OutReachForm from "@/pages/outreach/component/OutReacForm";
 import ViewOutReach from "@/pages/outreach/component/ViewOutReach";
+import CustomerOutReaches from "@/pages/customer-outreaches/component/CustomerOutReaches";
+import CustomerOutReachView from "@/pages/customer-outreaches/component/CustomerOutReachView";
+import CustomerOutreachForm from "@/pages/customer-outreaches/component/CustomerOutReachForm";
 
 const PrivateRoutes = () => {
   return (
@@ -163,6 +166,22 @@ const PrivateRoutes = () => {
       <Route
         path={allRoutes.VIEW_OUTREACH_TYPE(":id")}
         element={<ViewOutReach />}
+      />
+      <Route
+        path={allRoutes.UPDATE_CUSTOMER_OUTREACH(":id")}
+        element={<CustomerOutreachForm />}
+      />
+      <Route
+        path={allRoutes.ADD_CUSTOMER_OUTREACH}
+        element={<CustomerOutreachForm />}
+      />
+      <Route
+        path={allRoutes.CUSTOMER_OUTREACHS}
+        element={<CustomerOutReaches />}
+      />
+      <Route
+        path={allRoutes.VIEW_CUSTOMER_OUTREACH(":id")}
+        element={<CustomerOutReachView />}
       />
 
 

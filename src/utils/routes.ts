@@ -64,6 +64,10 @@ export const allRoutes = Object.freeze({
   SETTINGS: "/settings",
   UNAUTHORIZED: "/unauthorized",
   NOT_FOUND: "/not-found",
+  CUSTOMER_OUTREACHS: "/customer-outreachs",
+  ADD_CUSTOMER_OUTREACH: "/customer-outreachs/new",
+  UPDATE_CUSTOMER_OUTREACH: (id: string) => `/customer-outreachs/${id}`,
+  VIEW_CUSTOMER_OUTREACH: (id: string) => `/customer-outreachs/${id}/view`,
 });
 
 export const customerRoutes = Object.freeze({
