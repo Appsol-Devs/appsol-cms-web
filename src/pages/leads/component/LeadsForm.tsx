@@ -121,15 +121,18 @@ const LeadsForm = () => {
     }
   };
 
+  const trim = (v: unknown) =>
+    typeof v === "string" ? v.trim() : v;
+
   const submitData = () => {
     const data = getValues();
     const phone = typeof data.phone === "string" ? data.phone.trim() : "";
 
     const requiredFields: { field: unknown; message: string }[] = [
-      { field: data.name, message: "Name is required." },
-      { field: data.email, message: "Email is required." },
-      { field: data.companyName, message: "Company Name is required." },
-      { field: data.leadSource, message: "Lead Source is required." },
+      { field: trim(data.name), message: "Name is required." },
+      { field: trim(data.email), message: "Email is required." },
+      { field: trim(data.companyName), message: "Company Name is required." },
+      { field: trim(data.leadSource), message: "Lead Source is required." },
       { field: data.software?.value, message: "Software is required." },
       { field: data.initialEnquiryDate, message: "Initial Enquiry Date is required." },
       { field: data.nextStep?.value, message: "Next Step is required." },
@@ -145,7 +148,8 @@ const LeadsForm = () => {
     }
 
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-    if (data.email && !emailRegex.test(data.email)) {
+    const emailTrimmed = trim(data.email);
+    if (typeof emailTrimmed === "string" && emailTrimmed && !emailRegex.test(emailTrimmed)) {
       showToast({
         title: "Validation",
         message: "Please enter a valid email address.",
@@ -165,20 +169,23 @@ const LeadsForm = () => {
       return;
     }
 
+    const shouldSendLeadStatus = !selectedData?.isConverted;
+    const leadStatusValue = data.leadStatus?.value;
+
     const payload: ILead = cleanPayload({
-      name: data.name,
-      companyName: data.companyName,
-      email: data.email,
-      phone: data.phone,
-      notes: data.notes,
-      location: data.location,
-      leadSource: data.leadSource,
+      name: trim(data.name),
+      companyName: trim(data.companyName),
+      email: trim(data.email),
+      phone: trim(data.phone),
+      notes: trim(data.notes),
+      location: trim(data.location),
+      leadSource: trim(data.leadSource),
       softwareId: data.software?.value,
       initialEnquiryDate: data.initialEnquiryDate,
       leadStage: data.leadStage?.value,
       nextStep: data.nextStep?.value,
       priority: data.priority?.value,
-      leadStatus: data.leadStatus?.value,
+      ...(shouldSendLeadStatus && leadStatusValue && { leadStatus: leadStatusValue }),
     });
 
     handleDataSubmission(payload);
@@ -289,7 +296,12 @@ const LeadsForm = () => {
           icon: Spotlight,
         }}
         formContent={
-          <LeadsFormContent isUpdate={!!id} form={form} isLoading={isLoading} />
+          <LeadsFormContent
+            isUpdate={!!id}
+            form={form}
+            isLoading={isLoading}
+            isConverted={selectedData?.isConverted}
+          />
         }
         submitData={submitData}
         pageTitle={

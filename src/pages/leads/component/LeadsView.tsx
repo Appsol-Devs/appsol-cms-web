@@ -19,10 +19,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import { allRoutes } from "@/utils/routes";
 import type { ILead } from "../common/leads";
 import {
+  useConvertLeadMutation,
   useDeleteLeadMutation,
   useLazyGetALeadQuery,
 } from "../common/leadsApi";
 import { Badge } from "@/components/ui/badge";
+import { getLeadStatusColor } from "@/lib/enums";
 import { Button } from "@/components/ui/button";
 
 const LeadsView = () => {
@@ -30,6 +32,7 @@ const LeadsView = () => {
   const navigate = useNavigate();
 
   const [deleteLead] = useDeleteLeadMutation();
+  const [convertLead, { isLoading: isConverting }] = useConvertLeadMutation();
   const [getLeadDetails, { isLoading: isFetching }] = useLazyGetALeadQuery();
   const [selectedLead, setSelectedLead] = useState<ILead | null>(null);
 
@@ -66,14 +69,24 @@ const LeadsView = () => {
     }
   };
 
-  const handleConvert = () => {
-    showToast({
-      title: "Info",
-      message: "Convert lead to customer – coming soon.",
-      type: "info",
-    });
-    // TODO: Navigate to add customer with pre-filled lead data
-    // navigate(allRoutes.PORTAL + allRoutes.ADD_CUSTOMER, { state: { leadId: id } });
+  const handleConvert = async () => {
+    if (!id) return;
+    try {
+      const res = await convertLead(id).unwrap();
+      showToast({
+        title: "Success",
+        message: "Lead converted successfully.",
+        type: "success",
+      });
+      if (res) setSelectedLead(res);
+    } catch (error) {
+      console.error("Failed to convert lead", error);
+      showToast({
+        title: "Error",
+        message: "Failed to convert lead.",
+        type: "error",
+      });
+    }
   };
 
   if (isFetching || !selectedLead) {
@@ -101,13 +114,6 @@ const LeadsView = () => {
               type="edit"
               useText="Edit"
             />
-            <Button
-              onClick={handleConvert}
-              className="bg-primary text-xs rounded-md text-primary-foreground hover:opacity-90"
-            >
-              <Sparkles className="w-3 h-3" />
-              <span className="text-xs ml-1">Convert</span>
-            </Button>
             <ConfirmationDialog
               alertType="delete"
               title="Delete Lead?"
@@ -147,9 +153,46 @@ const LeadsView = () => {
             <p className="text-sm text-muted-foreground mb-4">
               {selectedLead.companyName ?? "—"}
             </p>
-            <div className="flex flex-wrap gap-2 justify-center w-full">
-              <Badge variant="secondary">{selectedLead.leadStatus ?? "—"}</Badge>
-              <Badge variant="outline">{selectedLead.priority ?? "—"}</Badge>
+            {selectedLead.isConverted && (
+              <Badge className="mb-4 bg-primary/90 text-primary-foreground hover:bg-primary/90">
+                Converted to customer
+              </Badge>
+            )}
+            <div className="w-full space-y-3 border-t pt-4">
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
+                  Lead Status
+                </p>
+                {(() => {
+                  const status = selectedLead.leadStatus ?? "";
+                  const bg = getLeadStatusColor(status);
+                  const isLight = ["#EAB308", "#D4A574"].includes(bg ?? "");
+                  return (
+                    <Badge
+                      variant={bg ? undefined : "secondary"}
+                      className="capitalize border-0"
+                      style={
+                        bg
+                          ? {
+                              backgroundColor: bg,
+                              color: isLight ? "#1a1a1a" : "#fff",
+                            }
+                          : undefined
+                      }
+                    >
+                      {status || "—"}
+                    </Badge>
+                  );
+                })()}
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
+                  Priority
+                </p>
+                <Badge variant="outline" className="capitalize">
+                  {selectedLead.priority ?? "—"}
+                </Badge>
+              </div>
             </div>
           </div>
 
@@ -165,6 +208,29 @@ const LeadsView = () => {
               <p className="font-medium">{selectedLead.nextStep?.name ?? "—"}</p>
             </div>
           </div>
+
+          {selectedLead.isConverted ? (
+            <div className="w-full rounded-md border border-primary/30 bg-primary/5 px-3 py-2.5 flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-primary shrink-0" />
+              <div>
+                <p className="text-xs font-medium text-card-foreground">
+                  Converted
+                </p>
+                <p className="text-[10px] text-muted-foreground">
+                  This lead has been converted to a customer.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <Button
+              onClick={handleConvert}
+              disabled={isConverting}
+              className="w-full bg-primary! text-xs rounded-md text-primary-foreground hover:opacity-90 disabled:opacity-50"
+            >
+              <Sparkles className="w-3 h-3" />
+              <span className="text-xs ml-1">Convert</span>
+            </Button>
+          )}
         </div>
 
         <div className="lg:col-span-2 space-y-4">

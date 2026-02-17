@@ -63,6 +63,14 @@ export const leadsApi = createApi({
         method: "DELETE",
       }),
     }),
+    convertLead: builder.mutation<ILead, string>({
+      query: (id) => ({
+        url: `leads/${id}/convert`,
+        method: "PATCH",
+      }),
+      transformResponse: async (response: Response) => response.json(),
+      invalidatesTags: ["ILead"],
+    }),
   }),
 });
 
@@ -72,4 +80,5 @@ export const {
   useLazyGetALeadQuery,
   useUpdateLeadMutation,
   useDeleteLeadMutation,
+  useConvertLeadMutation,
 } = leadsApi;

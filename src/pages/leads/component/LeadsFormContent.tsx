@@ -20,9 +20,10 @@ interface IField {
   isLoading?: boolean;
   form: UseFormReturn<ILeadFields, any, ILeadFields>;
   isUpdate?: boolean;
+  isConverted?: boolean;
 }
 
-const LeadsFormContent = ({ isLoading, form }: IField) => {
+const LeadsFormContent = ({ isLoading, form, isConverted }: IField) => {
   // const isVerified = form.watch("isVerified");
   const [getleadNextStages] = useLazyGetLeadNextStepsQuery();
   const [getSoftwares] = useLazyGetSoftwaresQuery();
@@ -286,7 +287,7 @@ const LeadsFormContent = ({ isLoading, form }: IField) => {
               label="Select the lead status"
               options={leadStatusOptions}
               required
-              disabled={isLoading}
+              disabled={isLoading || isConverted}
             />
           </div>
         </div>

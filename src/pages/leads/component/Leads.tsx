@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { allRoutes } from "@/utils/routes";
 import type { ILead } from "../common/leads";
 import { useLazyGetLeadsQuery } from "../common/leadsApi";
+import { getLeadStatusColor } from "@/lib/enums";
 
 const Leads = () => {
   const [fetchQuery, fetchState] = useLazyGetLeadsQuery();
@@ -95,13 +96,29 @@ const Leads = () => {
       {
         header: "Status",
         accessorKey: "status",
-        cell: ({ row }) => (
-          <div className=" flex flex-col items-start gap-1">
-            <span className="font-semibold p-0.5 capitalize text-xs">
-              <Badge>{row.original.leadStatus ?? ""}</Badge>
-            </span>
-          </div>
-        ),
+        cell: ({ row }) => {
+          const status = row.original.leadStatus ?? "";
+          const bg = getLeadStatusColor(status);
+          const isLight = ["#EAB308", "#D4A574"].includes(bg ?? "");
+          return (
+            <div className="flex flex-col items-start gap-1">
+              <Badge
+                variant={bg ? undefined : "default"}
+                className="capitalize border-0"
+                style={
+                  bg
+                    ? {
+                        backgroundColor: bg,
+                        color: isLight ? "#1a1a1a" : "#fff",
+                      }
+                    : undefined
+                }
+              >
+                {status || "—"}
+              </Badge>
+            </div>
+          );
+        },
       },
       {
         header: "Priority",
