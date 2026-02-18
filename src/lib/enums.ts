@@ -37,12 +37,23 @@ export const LEAD_STATUS_COLORS: Record<string, string> = {
   buildingproposal: "#64748B",
   qualified: "#22C55E",
   negotiation: "#EF4444",
-  closed: "#D4A574",
+  closed: "#16A34A",
   won: "#14B8A6",
 };
 
 export const getLeadStatusColor = (status?: string) =>
   status ? LEAD_STATUS_COLORS[status.toLowerCase()] ?? undefined : undefined;
+
+export const getLookupBadgeStyle = (
+  colorCode?: string
+): { color: string; backgroundColor: string; borderColor: string } | undefined =>
+  colorCode
+    ? {
+        color: colorCode,
+        backgroundColor: `color-mix(in srgb, ${colorCode} 12%, transparent)`,
+        borderColor: colorCode,
+      }
+    : undefined;
 
 export enum CUSTOMER_OUTREACH_STATUS {
   PENDING = "pending",

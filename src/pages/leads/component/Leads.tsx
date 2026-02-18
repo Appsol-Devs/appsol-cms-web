@@ -98,17 +98,18 @@ const Leads = () => {
         accessorKey: "status",
         cell: ({ row }) => {
           const status = row.original.leadStatus ?? "";
-          const bg = getLeadStatusColor(status);
+          const color = getLeadStatusColor(status);
           return (
             <div className="flex flex-col items-start gap-1">
               <Badge
-                variant={bg ? undefined : "default"}
-                className="capitalize border-0"
+                variant={color ? undefined : "default"}
+                className="capitalize border"
                 style={
-                  bg
+                  color
                     ? {
-                        backgroundColor: bg,
-                        color: "#FFFFFF",
+                        color,
+                        backgroundColor: `color-mix(in srgb, ${color} 12%, transparent)`,
+                        borderColor: color,
                       }
                     : undefined
                 }
@@ -125,18 +126,18 @@ const Leads = () => {
         meta: { icon: <NotepadText size={14} /> },
         cell: ({ row }) => {
           const priority = row.original.priority ?? "";
-          const bg = getLeadPriorityColor(priority);
-          const isLight = ["#F97316"].includes(bg ?? "");
+          const color = getLeadPriorityColor(priority);
           return (
             <div className="flex flex-col items-start gap-1">
               <Badge
-                variant={bg ? undefined : "outline"}
-                className="capitalize border-0"
+                variant={color ? undefined : "outline"}
+                className="capitalize border"
                 style={
-                  bg
+                  color
                     ? {
-                        backgroundColor: bg,
-                        color: isLight ? "#1a1a1a" : "#fff",
+                        color,
+                        backgroundColor: `color-mix(in srgb, ${color} 12%, transparent)`,
+                        borderColor: color,
                       }
                     : undefined
                 }
