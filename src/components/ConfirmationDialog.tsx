@@ -92,7 +92,7 @@ const variantConfigs = {
     icon: Save,
     color: "text-indigo-600",
     bgColor: "bg-indigo-100",
-    btn: "bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-600",
+    btn: "!bg-primary hover:bg-primary/90 focus:ring-primary",
     rightDefault: "Update Now",
     leftDefault: "Cancel",
   },
