@@ -175,17 +175,15 @@ const UsersView = () => {
 
         <div className="lg:col-span-2">
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+            <div className="px-4 py-2 border-b border-gray-100 bg-gray-50/50">
               <h3 className="font-semibold text-gray-900">Account Details</h3>
             </div>
 
-            <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-
+            <div className="p-3 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
               <DetailItem label="First Name" value={selectedUser.firstName} />
               <DetailItem label="Last Name" value={selectedUser.lastName} />
 
-
-              <div className="md:col-span-2 border-t border-gray-100 my-2"></div>
+              <div className="md:col-span-2 border-t border-gray-100"></div>
 
               <DetailItem
                 icon={<Mail className="w-4 h-4" />}
@@ -198,15 +196,14 @@ const UsersView = () => {
                 value={selectedUser.phone}
               />
 
-              <div className="md:col-span-2 border-t border-gray-100 my-2"></div>
-
+              <div className="md:col-span-2 border-t border-gray-100"></div>
 
               <DetailItem
                 label="Role"
                 value={selectedUser.role?.name}
               />
 
-              <div className="md:col-span-2 border-t border-gray-100 my-2"></div>
+              <div className="md:col-span-2 border-t border-gray-100"></div>
 
               <DetailItem
                 icon={<Calendar className="w-4 h-4" />}

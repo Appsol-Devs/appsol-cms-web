@@ -110,7 +110,7 @@ const OutReachForm = () => {
       ...data,
       name: data.name,
       description: data.description,
-      isActive: id ? data.isActive : false,
+      isActive: id ? data.isActive : true,
       colorCode: data.colorCode
 
 

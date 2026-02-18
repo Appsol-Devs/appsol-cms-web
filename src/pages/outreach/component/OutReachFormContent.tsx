@@ -14,7 +14,7 @@ interface IField {
 }
 
 const OutReachFormContent = ({ isLoading, form, isUpdate }: IField) => {
-  const { register,control } = form;
+  const { register, control } = form;
 
   return (
     <div className="space-y-2">

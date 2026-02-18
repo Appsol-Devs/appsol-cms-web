@@ -43,3 +43,10 @@ export const LEAD_STATUS_COLORS: Record<string, string> = {
 
 export const getLeadStatusColor = (status?: string) =>
   status ? LEAD_STATUS_COLORS[status.toLowerCase()] ?? undefined : undefined;
+
+export enum CUSTOMER_OUTREACH_STATUS {
+  PENDING = "pending",
+  COMPLETED = "completed",
+  RESCHEDULED = "rescheduled",
+  FAILED = "failed",
+  CANCELLED = "cancelled",}
