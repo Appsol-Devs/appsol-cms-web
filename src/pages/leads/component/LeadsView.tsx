@@ -24,7 +24,11 @@ import {
   useLazyGetALeadQuery,
 } from "../common/leadsApi";
 import { Badge } from "@/components/ui/badge";
-import { getLeadPriorityColor, getLeadStatusColor } from "@/lib/enums";
+import {
+  getLeadPriorityColor,
+  getLeadStatusColor,
+  getLookupBadgeStyle,
+} from "@/lib/enums";
 import { Button } from "@/components/ui/button";
 
 const LeadsView = () => {
@@ -165,16 +169,17 @@ const LeadsView = () => {
                 </p>
                 {(() => {
                   const status = selectedLead.leadStatus ?? "";
-                  const bg = getLeadStatusColor(status);
+                  const color = getLeadStatusColor(status);
                   return (
                     <Badge
-                      variant={bg ? undefined : "secondary"}
-                      className="capitalize border-0"
+                      variant={color ? undefined : "secondary"}
+                      className="capitalize border"
                       style={
-                        bg
+                        color
                           ? {
-                              backgroundColor: bg,
-                              color: "#FFFFFF",
+                              color,
+                              backgroundColor: `color-mix(in srgb, ${color} 12%, transparent)`,
+                              borderColor: color,
                             }
                           : undefined
                       }
@@ -190,17 +195,17 @@ const LeadsView = () => {
                 </p>
                 {(() => {
                   const priority = selectedLead.priority ?? "";
-                  const bg = getLeadPriorityColor(priority);
-                  const isLight = ["#F97316"].includes(bg ?? "");
+                  const color = getLeadPriorityColor(priority);
                   return (
                     <Badge
-                      variant={bg ? undefined : "outline"}
-                      className="capitalize border-0"
+                      variant={color ? undefined : "outline"}
+                      className="capitalize border"
                       style={
-                        bg
+                        color
                           ? {
-                              backgroundColor: bg,
-                              color: isLight ? "#1a1a1a" : "#fff",
+                              color,
+                              backgroundColor: `color-mix(in srgb, ${color} 12%, transparent)`,
+                              borderColor: color,
                             }
                           : undefined
                       }
@@ -220,9 +225,21 @@ const LeadsView = () => {
             </h3>
             <div className="space-y-2 text-sm">
               <p className="text-muted-foreground">Current</p>
-              <p className="font-medium">{selectedLead.leadStage?.name ?? "—"}</p>
+              <Badge
+                variant={selectedLead.leadStage?.colorCode ? undefined : "secondary"}
+                className="capitalize border"
+                style={getLookupBadgeStyle(selectedLead.leadStage?.colorCode)}
+              >
+                {selectedLead.leadStage?.name ?? "—"}
+              </Badge>
               <p className="text-muted-foreground mt-2">Next Step</p>
-              <p className="font-medium">{selectedLead.nextStep?.name ?? "—"}</p>
+              <Badge
+                variant={selectedLead.nextStep?.colorCode ? undefined : "secondary"}
+                className="capitalize border"
+                style={getLookupBadgeStyle(selectedLead.nextStep?.colorCode)}
+              >
+                {selectedLead.nextStep?.name ?? "—"}
+              </Badge>
             </div>
           </div>
 
