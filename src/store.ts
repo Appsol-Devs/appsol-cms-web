@@ -23,6 +23,7 @@ import { leadsApi } from "./pages/leads/common/leadsApi";
 import { dashboardApi } from "./pages/dashboard/common/dashboardApi";
 import { outReachApi } from "./pages/outreach/common/OutReachApi";
 import { customerOutreachApi } from "./pages/customer-outreaches/common/customerOutreachApi";
+import { sidebarReducer } from "./pages/layout/sidebar/common/sidebarSlice";
 
 const persistConfig = {
   key: "root",
@@ -30,10 +31,12 @@ const persistConfig = {
 };
 
 const persistedUser = persistReducer(persistConfig, userReducer);
+const persistedSidebar = persistReducer(persistConfig, sidebarReducer);
 
 export const store = configureStore({
   reducer: {
     user: persistedUser,
+    sidebar: persistedSidebar,
     [loginApi.reducerPath]: loginApi.reducer,
     [rolesApi.reducerPath]: rolesApi.reducer,
     [settingsApi.reducerPath]: settingsApi.reducer,
