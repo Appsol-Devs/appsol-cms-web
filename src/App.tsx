@@ -2,6 +2,9 @@ import { Outlet } from "react-router-dom";
 import Sidebar from "./pages/layout/sidebar/component/Sidebar";
 import Header from "./pages/layout/header/component/Header";
 import { isUserLoggedIn } from "./lib/utils";
+import { useToggleSidebarForNotLargeScreens } from "./lib/hooks";
+import { useSelector } from "react-redux";
+import type { RootState } from "./store";
 
 function App() {
   // const navigate = useNavigate();
@@ -12,16 +15,31 @@ function App() {
   if (!isUserLoggedIn) return null;
   // if (!isUserVerified) navigate(`${allRoutes.PORTAL}${allRoutes.VERIFICATION}`);
 
+  useToggleSidebarForNotLargeScreens();
+  const sidebarToggleState: boolean = useSelector(
+    (state: RootState) => state.sidebar.isSidebarToggled,
+  );
+
   return (
-    <div className="w-full min-h-screen bg-surface text-onSurface flex ">
-      <div className="w-1/5">
-        <Sidebar />
+    <div className="h-screen bg-surface text-onSurface flex relative">
+      <div
+        className={`lg:block transition-all duration-300 ease-in-out ${
+          !sidebarToggleState ? "lg:w-1/5" : "w-[70px] overflow-hidden"
+        } `}
+      >
+        <div className="h-screen shadow-md">
+          <Sidebar />
+        </div>
       </div>
-      <div className=" w-4/5">
-        <div className="w-full sticky top-0">
+      <div
+        className={`w-full h-screen relative overflow-y-auto hide-scrollbar ${
+          sidebarToggleState ? "lg:w-[calc(100%-50px)]" : "lg:w-4/5"
+        }`}
+      >
+        <div className="w-full sticky top-0 z-20">
           <Header />
         </div>
-        <div className="overflow-y-scroll min-h-[calc(100vh-56px)] p-5">
+        <div className="min-h-[calc(100vh-56px)] p-5">
           <Outlet />
         </div>
       </div>

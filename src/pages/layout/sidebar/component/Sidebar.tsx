@@ -1,5 +1,6 @@
 import { useState } from "react";
 import {
+  ArrowLeft,
   ChevronRight,
   Cog,
   Dot,
@@ -16,6 +17,10 @@ import {
   type ISidebar,
 } from "../common/sidebar";
 import { allRoutes } from "@/utils/routes";
+import { toggleSidebar } from "../common/sidebarSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { Button } from "@/components/ui/button";
+import type { RootState } from "@/store";
 
 export default function Sidebar() {
   const [activeView, setActiveView] = useState<
@@ -25,9 +30,12 @@ export default function Sidebar() {
     useState<ISidebar[]>(sidebarMainMenus);
   const [parentName, setParentName] = useState<string>("");
   const navigate = useNavigate();
-
+  const dispatch = useDispatch();
   const location = useLocation();
   const currentPath = location.pathname;
+  const sidebarToggleState: boolean = useSelector(
+    (state: RootState) => state.sidebar.isSidebarToggled,
+  );
 
   const handleOpenSubRoutes = (route: ISidebar) => {
     if (route.subMenu) {
@@ -68,15 +76,32 @@ export default function Sidebar() {
     return false;
   };
 
+  const handleToggleSidebar = () => {
+    dispatch(toggleSidebar());
+  };
+
+  const isCollapsed = sidebarToggleState;
+
   return (
-    <div className="relative h-full bg-card text-onCard shadow-sm">
+    <div className="relative h-full bg-card text-onCard shadow-md border-2">
       <div className="flex flex-col h-full">
-        <div className="h-14 p-2">
-          <img
-            className="h-9"
-            src="/assets/images/logo/appsol_cmslight.png"
-            alt="Appsol Logo Light mode"
-          />
+        <div className="h-14 p-2 flex items-center justify-between transition-all duration-300 ease-in-out">
+          {!sidebarToggleState && (
+            <img
+              className="h-9"
+              src="/assets/images/logo/appsol_cmslight.png"
+              alt="Appsol Logo Light mode"
+            />
+          )}
+          <div className={` ${sidebarToggleState ? "left-2" : ""}`}>
+            <Button size={"icon-sm"} onClick={handleToggleSidebar}>
+              <ArrowLeft
+                className={`bg-primary text-white rounded-md p-1 text-2xl transition-all ease-in-out ${
+                  sidebarToggleState ? "rotate-180" : ""
+                }`}
+              />
+            </Button>
+          </div>
         </div>
         {/* Header with Back Button */}
 
@@ -122,7 +147,7 @@ export default function Sidebar() {
                     ) : (
                       <StretchHorizontal className="w-4 h-4" />
                     )}
-                    {route.name}
+                    {!isCollapsed && route.name}
                   </div>
                   <div className="flex gap-1 items-center">
                     {isActiveLink(route) ||
