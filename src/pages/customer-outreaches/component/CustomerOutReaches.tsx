@@ -77,7 +77,7 @@ const CustomerOutReaches = () => {
         meta: { icon: <NotepadText size={14} /> },
         cell: ({ row }) => (
           <div className=" flex flex-col items-start gap-1">
-            <span className="font-semibold p-0.5 text-xs">
+            <span className="font-semibold p-0.5 text-xs w-32 truncate">
               {row.original.purpose ?? "N/A"}
             </span>
           </div>
