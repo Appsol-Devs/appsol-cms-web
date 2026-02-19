@@ -1,7 +1,6 @@
 import ActionButton from "@/components/ActionButtons";
 import PageSummary from "@/components/PageSummary";
 import PageTitle from "@/components/PageTitle";
-import { Badge } from "@/components/ui/badge";
 import DetailItem from "@/components/ui/DetailItem";
 import {
   Building2,
@@ -15,10 +14,14 @@ import {
   Globe,
   Trash2,
   Activity,
+  CalendarCheck,
+  Monitor,
+  Target,
+  AlertCircle, 
+  
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useForm } from "react-hook-form";
 
 import type { ICustomer } from "../../common/customers";
 import {
@@ -33,8 +36,9 @@ import { showToast } from "@/components/ui/CustomToast";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { Button } from "@/components/ui/button";
 import { allRoutes } from "@/utils/routes";
-import { CustomSwitchComponent } from "@/components/CustomSwitchComponent";
-import type { ICustomerFields } from "../core/CustomersForm";
+import StatusBadge from "@/components/ui/StatusBadge";
+import { useLazyGetALeadQuery } from "@/pages/leads/common/leadsApi";
+import type { ILead } from "@/pages/leads/common/leads";
 
 const CustomerSummary = () => {
   const { id } = useParams();
@@ -46,19 +50,26 @@ const CustomerSummary = () => {
 
   const [updateCustomer, { isLoading: isUpdating }] = useUpdateCustomerMutation();
   const [deleteCustomer] = useDeleteCustomerMutation();
+  const [getLeadByCustomer] = useLazyGetALeadQuery();
+  const [lead, setLead] = useState<ILead>();
 
-  const form = useForm<ICustomerFields>({
-    defaultValues: { status: false as any },
-  });
-  const { control, setValue, watch } = form;
+  const fetchLeadDetails = async (leadId: string) => {
+    try {
+      const res = await getLeadByCustomer(leadId).unwrap();
+      if (res) {
+        setLead(res);
+      }
+    } catch (error) {
+      console.error("Failed to fetch lead details", error);
+      return null;
+    }
+  }
 
   const fetchCustomerDetails = async (customerId: string) => {
     try {
       const res = await getCustomerDetails(customerId).unwrap();
       if (res) {
         setCustomerDetails(res);
-        // Map the API string into a boolean for the Switch component
-        setValue("status", (res.status === "active") as any);
       }
     } catch (error) {
       console.error("Failed to fetch customer", error);
@@ -69,27 +80,37 @@ const CustomerSummary = () => {
     if (id) {
       fetchCustomerDetails(id);
     }
-  }, [id]);
+    if(customerDetails?.leadId) {
+      fetchLeadDetails(customerDetails.leadId);
+    }
+  }, [id,customerDetails]);
 
-  const handleStatusToggle = async (newIsActive: boolean) => {
+  const handleStatusToggle = async () => {
     if (!customerDetails || !id) return;
 
     const previousStatus = customerDetails.status;
-    const newStatus = newIsActive ? "active" : "inactive";
+    const newStatus = previousStatus === "active" ? "inactive" : "active";
 
-    setCustomerDetails({ ...customerDetails, status: newStatus as any });
+    setCustomerDetails((prevDetails) => {
+      if (!prevDetails) return prevDetails;
+      return { ...prevDetails, status: newStatus };
+    });
 
     try {
       await updateCustomer({ _id: id, status: newStatus }).unwrap();
+
       showToast({
         title: "Success",
         message: `Customer status updated to ${newStatus}`,
         type: "success",
       });
     } catch {
-      // 3. Rollback UI on failure
-      setCustomerDetails({ ...customerDetails, status: previousStatus });
-      setValue("status", (previousStatus === "active") as any);
+      // 2. Rollback 
+      setCustomerDetails((prevDetails) => {
+        if (!prevDetails) return prevDetails;
+        return { ...prevDetails, status: previousStatus };
+      });
+
       showToast({
         title: "Error",
         message: "Failed to update customer status",
@@ -97,15 +118,6 @@ const CustomerSummary = () => {
       });
     }
   };
-
-  useEffect(() => {
-    const subscription = watch((value, { name, type }) => {
-      if (name === "status" && type === "change") {
-        handleStatusToggle(Boolean(value.status));
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [watch, customerDetails, id]);
 
   const handleNavigateToEdit = () => {
     if (!id) return;
@@ -157,6 +169,30 @@ const CustomerSummary = () => {
               useText="Edit Customer"
             />
             <ConfirmationDialog
+              alertType="update"
+              title={customerDetails.status === "active" ? "Set Customer Inactive?" : "Set Customer Active?"}
+              rightActionTitle={customerDetails.status === "active" ? "Set Inactive" : "Set Active"}
+              content={
+                <p className="text-gray-500 text-center">
+                  This action will change the customer's status to {customerDetails.status === "active" ? "inactive" : "active"}.
+                </p>
+              }
+              onConfirmClicked={handleStatusToggle}
+              disabled={isUpdating}
+              trigger={
+                <Button
+                  disabled={isUpdating}
+                  variant="destructive"
+                  className="bg-surface! border-gray-700! text-onSurface"
+                >
+                  <Activity className="w-4 h-4 mr-2" />
+                  <span className="text-xs ">
+                    {customerDetails.status === "active" ? "Set Inactive" : "Set Active"}
+                  </span>
+                </Button>
+              }
+            />
+            <ConfirmationDialog
               alertType="delete"
               title="Delete Customer?"
               rightActionTitle="Delete"
@@ -170,7 +206,7 @@ const CustomerSummary = () => {
               trigger={
                 <Button
                   variant="destructive"
-                  className="bg-red-700 text-white hover:bg-red-800"
+                  className="bg-red-700! text-white hover:bg-red-800!"
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
                   <span className="text-xs">Delete</span>
@@ -191,44 +227,14 @@ const CustomerSummary = () => {
             <h2 className="text-lg font-bold text-gray-900 mb-1">
               {customerDetails.name}
             </h2>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 mb-1">
               {customerDetails.companyName || "Individual"}
             </p>
-          </div>
 
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-            <div className="px-5 py-3 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
-              <Activity className="w-4 h-4 text-gray-500" />
-              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Account Status
-              </h3>
-            </div>
-            <div className="p-5 flex flex-col items-center space-y-4">
-              <div className="flex flex-wrap justify-center gap-2 w-full">
-                {customerDetails.status && (
-                  <Badge
-                    variant="secondary"
-                    className={`px-4 py-1.5 uppercase tracking-wider text-[10px] ${customerDetails.status === "active"
-                        ? "bg-green-100 text-green-700 border-green-200"
-                        : "bg-red-100 text-red-700 border-red-200"
-                      }`}
-                  >
-                    {typeof customerDetails.status === "string"
-                      ? customerDetails.status
-                      : "Active"}
-                  </Badge>
-                )}
-              </div>
-
-              <div className="w-full pt-2 border-t border-gray-100 flex justify-center">
-                <CustomSwitchComponent
-                  control={control}
-                  name="status"
-                  label={customerDetails.status === "active" ? "Set Inactive" : "Set Active"}
-                  disabled={isUpdating}
-                />
-              </div>
-            </div>
+            <StatusBadge
+              active={customerDetails.status === "active"}
+            >
+            </StatusBadge>
           </div>
 
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
@@ -242,10 +248,8 @@ const CustomerSummary = () => {
                 <DetailItem
                   label="Registered By"
                   value={
-                    typeof customerDetails.loggedBy === "string"
-                      ? customerDetails.loggedBy
-                      : `${customerDetails.loggedBy.firstName || ""} ${customerDetails.loggedBy.lastName || ""
-                      }`
+                    `${customerDetails.loggedBy.firstName || ""} ${customerDetails.loggedBy.lastName || ""
+                    }`
                   }
                   icon={<UserCircle className="w-4 h-4 text-gray-400" />}
                 />
@@ -258,6 +262,15 @@ const CustomerSummary = () => {
                     : "N/A"
                 }
                 icon={<Calendar className="w-4 h-4 text-gray-400" />}
+              />
+              <DetailItem
+                label="Date Converted"
+                value={
+                  customerDetails.dateConverted
+                    ? formatDate(customerDetails.dateConverted)
+                    : "Not Converted"
+                }
+                icon={<CalendarCheck className="w-4 h-4 text-gray-400" />}
               />
               <DetailItem
                 label="Last Updated"
@@ -276,7 +289,7 @@ const CustomerSummary = () => {
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
               <Globe className="w-4 h-4 text-gray-500" />
-              <h3 className="font-semibold text-gray-900">Contact Information</h3>
+              <h3 className="font-semibold text-gray-900">Contact & Business Details</h3>
             </div>
 
             <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
@@ -300,9 +313,49 @@ const CustomerSummary = () => {
                 value={customerDetails.location}
                 icon={<MapPin className="w-4 h-4 text-gray-400" />}
               />
+              <DetailItem
+                label="Software"
+                value={customerDetails.software?.name || "None Associated"}
+                icon={<Monitor className="w-4 h-4 text-gray-400" />}
+              />
             </div>
           </div>
 
+          {lead && (
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
+                <Target className="w-4 h-4 text-gray-500" />
+                <h3 className="font-semibold text-gray-900">Lead Details</h3>
+              </div>
+
+              <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+             
+           
+                <DetailItem
+                  label="Lead Source"
+                  value={lead.leadSource}
+                  icon={<Globe className="w-4 h-4 text-gray-400" />}
+                />
+                <DetailItem
+                  label="Priority"
+                  value={lead.priority}
+                  icon={<AlertCircle className="w-4 h-4 text-gray-400" />}
+                />
+                <DetailItem
+                  label="Initial Enquiry"
+                  value={lead.initialEnquiryDate ? formatDate(lead.initialEnquiryDate) : "N/A"}
+                  icon={<Calendar className="w-4 h-4 text-gray-400" />}
+                />
+                <DetailItem
+                  label="Final Lead Status"
+                  value={lead.leadStatus}
+                  icon={<Activity className="w-4 h-4 text-gray-400" />}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Notes */}
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
               <FileText className="w-4 h-4 text-gray-500" />

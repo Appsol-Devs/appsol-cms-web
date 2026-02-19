@@ -1,19 +1,25 @@
+import type { ISoftware } from '@/pages/settings/common/settings';
 import type { ILoginResponse, IRole } from "@/pages/auth/login/common/login";
 
 export interface ICustomer {
-  _id?: string;
-  name?: string;
-  email?: string;
-  phone?: string;
-  companyName?: string;
-  dateConverted?: string;
-  notes?: string;
-  geolocation?: IGeolocation;
-  location?: string;
-  status?: CustomerStatus;
-  loggedBy?: IUser | string;
-  createdAt?: string;
-  updatedAt?: string;
+  customerCode?: string
+  name?: string
+  email?: string
+  phone?: string
+  companyName?: string
+  status?: string
+  loggedBy?: IUser
+  softwareId?: string
+  software?: ISoftware
+  location?: string
+  notes?: string
+  geolocation?: Geolocation
+  image?: string
+  _id?: string
+  createdAt?: string
+  updatedAt?: string
+  dateConverted?: string
+  leadId?: string
 }
 
 export interface IGeolocation {
