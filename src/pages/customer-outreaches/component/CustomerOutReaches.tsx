@@ -2,13 +2,12 @@ import ActionButton from "@/components/ActionButtons";
 import FeatureContentRenderer from "@/components/table/component/FeatureContentRenderer";
 import { allRoutes } from "@/utils/routes";
 import type { ColumnDef } from "@tanstack/react-table";
-import { NotepadText, File, Pen, User } from "lucide-react";
+import { NotepadText, Pen, User,  } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { useLazyGetCustomerOutReachesQuery } from "../common/customerOutreachApi";
 import type { ICustomerOutreach } from "../common/customer-outreach";
-import { format } from "date-fns";
 
 const CustomerOutReaches = () => {
   const [fetchQuery, fetchState] = useLazyGetCustomerOutReachesQuery();
@@ -28,27 +27,27 @@ const CustomerOutReaches = () => {
         accessorKey: "index",
         cell: ({ row }) => row.index + 1,
       },
-      {
-        header: "User",
-        accessorKey: "name",
-        meta: { icon: <User size={14} /> },
-        cell: ({ row }) => (
-          <div className=" flex flex-col items-start gap-1">
-            <span className="font-semibold text-xs">
-              {row.original?.loggedBy?.firstName || ""} {row.original?.loggedBy?.lastName || ""}
-            </span>
-            <span className="font-semibold text-muted-foreground text-xs">
-              {row.original?.createdAt
-                ? format(row.original.createdAt, "do MMM y hh:mm aa")
-                : ""}
-            </span>
-          </div>
-        ),
-      },
+      // {
+      //   header: "User",
+      //   accessorKey: "name",
+      //   meta: { icon: <User size={14} /> },
+      //   cell: ({ row }) => (
+      //     <div className=" flex flex-col items-start gap-1">
+      //       <span className="font-semibold text-xs">
+      //         {row.original?.loggedBy?.firstName || ""} {row.original?.loggedBy?.lastName || ""}
+      //       </span>
+      //       <span className="font-semibold text-muted-foreground text-xs">
+      //         {row.original?.createdAt
+      //           ? format(row.original.createdAt, "do MMM y hh:mm aa")
+      //           : ""}
+      //       </span>
+      //     </div>
+      //   ),
+      // },
       {
         header: "Customer",
         accessorKey: "customer",
-        meta: { icon: <File size={14} /> },
+        meta: { icon: <User size={14} /> },
         cell: ({ row }) => (
           <div className=" flex flex-col items-start gap-1">
             <span className="">
@@ -61,8 +60,8 @@ const CustomerOutReaches = () => {
       },
 
       {
-        header: "Description",
-        accessorKey: "description",
+        header: "Outreach Type",
+        accessorKey: "outreachType",
         meta: { icon: <NotepadText size={14} /> },
         cell: ({ row }) => (
           <div className=" flex flex-col items-start gap-1">
@@ -85,8 +84,8 @@ const CustomerOutReaches = () => {
         ),
       },
       {
-        header: "Status",
-        accessorKey: "status",
+        header: "Call Status",
+        accessorKey: "callStatus",
         meta: { icon: <NotepadText size={14} /> },
         cell: ({ row }) => (
           <div className=" flex flex-col items-start gap-1">
