@@ -25,7 +25,7 @@ const CustomersForm = () => {
     useUpdateCustomerMutation();
   const [getACustomer, { isLoading: isGetting }] = useLazyGetACustomerQuery();
   const form = useForm<ICustomerFields>();
-  const { watch, getValues } = form;
+  const { watch, getValues, reset } = form;
   const values = watch();
 
   const navigate = useNavigate();
@@ -49,16 +49,16 @@ const CustomersForm = () => {
 
   const resetFormWithData = (data: ICustomer) => {
     if (!data) return;
-    // reset({
-    //   ...data,
-    //   firstName: data.firstName,
-    //   lastName: data.lastName,
-    //   email: data.email,
-    //   phone: data.phone,
-    //   role: data.role
-    //     ? { label: data.role.name, value: data.role._id as string }
-    //     : undefined,
-    // });
+    reset({
+      ...data,
+      name: data.name,
+      companyName: data.companyName,
+      email: data.email,
+      phone: data.phone,
+      location: data.location,
+      dateConverted: data.dateConverted,
+      notes: data.notes,
+    });
   };
 
   useEffect(() => {
