@@ -1,14 +1,15 @@
+import { format } from "date-fns";
+import { NotepadText, User } from "lucide-react";
 import ActionButton from "@/components/ActionButtons";
-import FeatureContentRenderer from "@/components/table/component/FeatureContentRenderer";
-import { Badge } from "@/components/ui/badge";
-import { allRoutes } from "@/utils/routes";
-import type { ColumnDef } from "@tanstack/react-table";
-import { Calendar, NotepadText, Pen, User } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import FeatureContentRenderer from "@/components/table/component/FeatureContentRenderer";
+import type { ColumnDef } from "@tanstack/react-table";
+import { Badge } from "@/components/ui/badge";
+import { allRoutes } from "@/utils/routes";
 import type { IComplaint } from "../common/complaints";
 import { useLazyGetComplaintsQuery } from "../common/complaintsApi";
-import { format } from "date-fns";
+import { getComplaintStatusColor, getLookupBadgeStyle } from "@/lib/enums";
 
 const Complaints = () => {
   const [fetchQuery, fetchState] = useLazyGetComplaintsQuery();
@@ -29,57 +30,60 @@ const Complaints = () => {
         cell: ({ row }) => row.index + 1,
       },
       {
-        header: "Date",
-        accessorKey: "createdAt",
-        meta: { icon: <Calendar size={14} /> },
-        cell: ({ row }) => (
-          <div className=" flex flex-col items-start gap-1">
-            <span className="">
-              {row.original?.complaintType?.name ?? "N/A"}
-            </span>
-            <Badge>{row.original.complaintCode}</Badge>
-            <span className="font-semibold text-muted-foreground text-xs">
-              {row.original?.createdAt
-                ? format(row.original.createdAt, "do MMM y hh:mm aa")
-                : ""}
-            </span>
-          </div>
-        ),
-      },
-      {
         header: "Customer",
         accessorKey: "customerId",
         meta: { icon: <User size={14} /> },
         cell: ({ row }) => (
           <div className=" flex flex-col items-start gap-1">
-            <p className="font-semibold p-0.5 text-xs flex flex-col gap-0.5">
-              <span className="">{row.original?.customer?.name ?? "N/A"}</span>
-              <span className="">{row.original?.customer?.phone ?? "N/A"}</span>
-            </p>
+            <span className="font-semibold text-xs">
+              {row.original?.customer?.name ?? "N/A"}
+            </span>
+            <span className="font-semibold text-muted-foreground text-xs">
+              {row.original?.customer?.phone ?? "N/A"}
+            </span>
           </div>
         ),
       },
       {
-        header: "Logged By",
-        accessorKey: "loggedBy",
-        meta: { icon: <User size={14} /> },
+        header: "Complaint Type",
+        accessorKey: "complaintType",
+        meta: { icon: <NotepadText size={14} /> },
         cell: ({ row }) => {
-          const loggerName =
-            row.original?.loggedBy?.firstName +
-            " " +
-            row.original?.loggedBy?.lastName;
+          const color = row.original.complaintType?.colorCode;
+          const style = getLookupBadgeStyle(color);
 
           return (
             <div className=" flex flex-col items-start gap-1">
-              <p className="font-semibold p-0.5 text-xs flex flex-col gap-0.5">
-                <span className="">{loggerName ?? "N/A"}</span>
-                <span className="">
-                  {row.original?.loggedBy?.email ?? "N/A"}
-                </span>
-              </p>
+              <span className="font-semibold p-0.5 text-xs">
+                {row.original.complaintType?.name ?? "N/A"}
+              </span>
+              <Badge
+                variant={color ? undefined : "secondary"}
+                className="capitalize border text-[11px] font-medium px-2 py-0 rounded-full bg-primary"
+                style={style}
+              >
+                {row.original.complaintCode ?? "-"}
+              </Badge>
+              <span className="font-semibold text-muted-foreground text-xs">
+                {row.original?.createdAt
+                  ? format(row.original.createdAt, "do MMM y hh:mm aa")
+                  : ""}
+              </span>
             </div>
           );
         },
+      },
+      {
+        header: "Related Software",
+        accessorKey: "relatedSoftware",
+        meta: { icon: <NotepadText size={14} /> },
+        cell: ({ row }) => (
+          <div className=" flex flex-col items-start gap-1">
+            <span className="font-semibold p-0.5 text-xs">
+              {row.original.relatedSoftware?.name ?? "N/A"}
+            </span>
+          </div>
+        ),
       },
       {
         header: "Description",
@@ -94,34 +98,45 @@ const Complaints = () => {
         ),
       },
       {
+        header: "Category",
+        accessorKey: "complaintCategory",
+        meta: { icon: <NotepadText size={14} /> },
+        cell: ({ row }) => {
+          const color = row.original.complaintCategory?.colorCode;
+          const style = getLookupBadgeStyle(color);
+
+          return (
+            <div className=" flex flex-col items-start gap-1">
+              <Badge
+                variant={color ? undefined : "secondary"}
+                className="capitalize border text-[11px] font-medium px-2 py-0 rounded-full"
+                style={style}
+              >
+                {row.original.complaintCategory?.name ?? "N/A"}
+              </Badge>
+            </div>
+          );
+        },
+      },
+      {
         header: "Status",
         accessorKey: "status",
         meta: { icon: <NotepadText size={14} /> },
-        cell: ({ row }) => (
-          <div className=" flex flex-col items-start gap-1">
-            <span className="font-semibold p-0.5 text-xs">
-              {row.original.status ?? ""}
-            </span>
-          </div>
-        ),
-      },
-      {
-        header: "Action",
-        meta: { icon: <Pen size={14} /> },
-        accessorKey: "action",
-        cell: ({ row }) => (
-          <div className="flex items-center space-x-2">
-            <ActionButton
-              type="view"
-              onClick={() =>
-                navigate(
-                  allRoutes.PORTAL +
-                    allRoutes.VIEW_COMPLAINT(row.original._id as string)
-                )
-              }
-            />
-          </div>
-        ),
+        cell: ({ row }) => {
+          const status = row.original.status ?? "";
+          const color = getComplaintStatusColor(status);
+          const style = getLookupBadgeStyle(color);
+
+          return (
+            <Badge
+              variant={color ? undefined : "secondary"}
+              className="capitalize border text-xs font-medium px-2 py-0 rounded-full"
+              style={style}
+            >
+              {status || "N/A"}
+            </Badge>
+          );
+        },
       },
     ],
     [executed]
@@ -138,6 +153,12 @@ const Complaints = () => {
           />
         )}
         columns={columns}
+        pathOnRowSelected={(row) =>
+          navigate(
+            allRoutes.PORTAL +
+              allRoutes.VIEW_COMPLAINT((row as IComplaint)._id as string)
+          )
+        }
         // filters={["company", "location", "role", "gender"]}
         refetchData={executed}
         title="Complaints"

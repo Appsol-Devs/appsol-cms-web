@@ -14,6 +14,8 @@ import { useEffect, useState } from "react";
 import type { DropDownOption } from "@/components/DropdownComponent";
 import { lookup_params } from "@/lib/api";
 import DropDownComponent from "@/components/DropdownComponent";
+import { useGenerateDropdownOptionsFromEnum } from "@/lib/helpers";
+import { COMPLAINT_STATUS_ENUM } from "@/lib/enums";
 
 interface IField {
   isLoading?: boolean;
@@ -42,8 +44,11 @@ const ComplaintsFormContent = ({ isLoading, form }: IField) => {
     DropDownOption<string>[]
   >([]);
 
-  useEffect(() => {
-    getCustomers(lookup_params)
+  const statusOptions =
+    useGenerateDropdownOptionsFromEnum(COMPLAINT_STATUS_ENUM);
+
+  const fetchCustomers = (search?: string) => {
+    getCustomers({ ...lookup_params, search })
       .unwrap()
       .then((res) => {
         if (res && res.contents) {
@@ -56,6 +61,10 @@ const ComplaintsFormContent = ({ isLoading, form }: IField) => {
           setCustomerOptions(options);
         }
       });
+  };
+
+  useEffect(() => {
+    fetchCustomers();
 
     getComplaintTypes(lookup_params)
       .unwrap()
@@ -127,6 +136,7 @@ const ComplaintsFormContent = ({ isLoading, form }: IField) => {
               required
               title="Customer"
               options={customerOptions}
+              handleInputChange={(value) => fetchCustomers(value || undefined)}
             />
           </div>
         </div>
@@ -155,6 +165,7 @@ const ComplaintsFormContent = ({ isLoading, form }: IField) => {
               title="Complaint Type"
               label="Select the complaint type"
               options={complaintTypeOptions}
+              required
             />
             <DropDownComponent
               control={control}
@@ -162,6 +173,7 @@ const ComplaintsFormContent = ({ isLoading, form }: IField) => {
               title="Complaint Category"
               label="Select the complaint category"
               options={complaintCategoryOptions}
+              required
             />
             <DropDownComponent
               control={control}
@@ -169,6 +181,15 @@ const ComplaintsFormContent = ({ isLoading, form }: IField) => {
               title="Related Software"
               label="Select the related software"
               options={softwareOptions}
+              required
+            />
+            <DropDownComponent
+              control={control}
+              name="status"
+              title="Status"
+              label="Select the complaint status"
+              options={statusOptions}
+              required
             />
           </div>
         </div>
@@ -198,6 +219,7 @@ const ComplaintsFormContent = ({ isLoading, form }: IField) => {
               name="description"
               disabled={isLoading}
               register={register}
+              required
             />
             {/* {isUpdate && (
               <CheckboxComponent

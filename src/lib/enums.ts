@@ -6,6 +6,19 @@ export enum COMPLAINT_STATUS_ENUM {
   Rescheduled = "rescheduled",
 }
 
+export const COMPLAINT_STATUS_COLORS: Record<string, string> = {
+  open: "#ef4444",
+  "in-progress": "#f97316",
+  rescheduled: "#eab308",
+  resolved: "#22c55e",
+  closed: "#6b7280",
+};
+
+export const getComplaintStatusColor = (status?: string) =>
+  status
+    ? COMPLAINT_STATUS_COLORS[status.toLowerCase()] ?? undefined
+    : undefined;
+
 export enum LEAD_PRIORITY_ENUM {
   LOW = "low",
   MEDIUM = "medium",
