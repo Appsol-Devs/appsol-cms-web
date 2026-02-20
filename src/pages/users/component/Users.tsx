@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+import { formatDateTime } from "@/lib/helpers";
 import {
   Briefcase,
   Mail,
@@ -47,7 +47,7 @@ const Users = () => {
             </span>
             <span className="font-semibold text-muted-foreground text-xs">
               {row.original?.createdAt
-                ? format(row.original.createdAt, "do MMM y hh:mm aa")
+                ? formatDateTime(row.original.createdAt)
                 : ""}
             </span>
           </div>
