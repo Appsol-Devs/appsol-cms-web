@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { useLazyGetCustomerOutReachesQuery } from "../common/customerOutreachApi";
 import type { ICustomerOutreach } from "../common/customer-outreach";
-import { format } from "date-fns";
+import { formatDateTime } from "@/lib/helpers";
 
 const CustomerOutReaches = () => {
   const [fetchQuery, fetchState] = useLazyGetCustomerOutReachesQuery();
@@ -39,7 +39,7 @@ const CustomerOutReaches = () => {
             </span>
             <span className="font-semibold text-muted-foreground text-xs">
               {row.original?.createdAt
-                ? format(row.original.createdAt, "do MMM y hh:mm aa")
+                ? formatDateTime(row.original.createdAt)
                 : ""}
             </span>
           </div>

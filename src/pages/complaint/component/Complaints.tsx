@@ -1,5 +1,12 @@
-import { format } from "date-fns";
-import { NotepadText, User } from "lucide-react";
+import { formatDateTime } from "@/lib/helpers";
+import {
+  CircleDot,
+  FileWarning,
+  FolderOpen,
+  Monitor,
+  NotepadText,
+  User,
+} from "lucide-react";
 import ActionButton from "@/components/ActionButtons";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -47,7 +54,7 @@ const Complaints = () => {
       {
         header: "Complaint Type",
         accessorKey: "complaintType",
-        meta: { icon: <NotepadText size={14} /> },
+        meta: { icon: <FileWarning size={14} /> },
         cell: ({ row }) => {
           const color = row.original.complaintType?.colorCode;
           const style = getLookupBadgeStyle(color);
@@ -66,8 +73,8 @@ const Complaints = () => {
               </Badge>
               <span className="font-semibold text-muted-foreground text-xs">
                 {row.original?.createdAt
-                  ? format(row.original.createdAt, "do MMM y hh:mm aa")
-                  : ""}
+                ? formatDateTime(row.original.createdAt)
+                : ""}
               </span>
             </div>
           );
@@ -76,7 +83,7 @@ const Complaints = () => {
       {
         header: "Related Software",
         accessorKey: "relatedSoftware",
-        meta: { icon: <NotepadText size={14} /> },
+        meta: { icon: <Monitor size={14} /> },
         cell: ({ row }) => (
           <div className=" flex flex-col items-start gap-1">
             <span className="font-semibold p-0.5 text-xs">
@@ -100,7 +107,7 @@ const Complaints = () => {
       {
         header: "Category",
         accessorKey: "complaintCategory",
-        meta: { icon: <NotepadText size={14} /> },
+        meta: { icon: <FolderOpen size={14} /> },
         cell: ({ row }) => {
           const color = row.original.complaintCategory?.colorCode;
           const style = getLookupBadgeStyle(color);
@@ -121,7 +128,7 @@ const Complaints = () => {
       {
         header: "Status",
         accessorKey: "status",
-        meta: { icon: <NotepadText size={14} /> },
+        meta: { icon: <CircleDot size={14} /> },
         cell: ({ row }) => {
           const status = row.original.status ?? "";
           const color = getComplaintStatusColor(status);

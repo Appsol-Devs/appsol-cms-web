@@ -14,6 +14,7 @@ import {
   format,
   endOfDay,
 } from "date-fns";
+import { formatDateTime } from "@/lib/helpers";
 import { ScrollArea } from "./ui/scroll-area";
 import { DatePicker } from "./DatePicker";
 
@@ -199,15 +200,13 @@ const DateRangeComponent = ({
           <CalendarIcon className="h-4 w-2" />
           {selectedDateRange.start && selectedDateRange.end ? (
             <span className="text-xs">
-              {format(
-                selectedDateRange?.start,
-                dateOnly ? "do MMM y" : "do MMM y hh:mm aa"
-              )}{" "}
+              {dateOnly
+                ? format(selectedDateRange?.start, "do MMM y")
+                : formatDateTime(selectedDateRange?.start)}{" "}
               -{" "}
-              {format(
-                selectedDateRange?.end,
-                dateOnly ? "do MMM y" : "do MMM y hh:mm aa"
-              )}
+              {dateOnly
+                ? format(selectedDateRange?.end, "do MMM y")
+                : formatDateTime(selectedDateRange?.end)}
             </span>
           ) : (
             <span className="text-sm">

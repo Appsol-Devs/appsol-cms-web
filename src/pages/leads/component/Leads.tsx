@@ -1,9 +1,11 @@
-import { format } from "date-fns";
+import { formatDateTime } from "@/lib/helpers";
 import {
   Briefcase,
+  CircleDot,
+  Flag,
+  Globe,
   Map,
   MapPin,
-  NotepadText,
   Phone,
   User,
 } from "lucide-react";
@@ -46,7 +48,7 @@ const Leads = () => {
             </span>
             <span className="font-semibold text-muted-foreground text-xs">
               {row.original?.createdAt
-                ? format(row.original.createdAt, "do MMM y hh:mm aa")
+                ? formatDateTime(row.original.createdAt)
                 : ""}
             </span>
           </div>
@@ -70,6 +72,7 @@ const Leads = () => {
       {
         header: "Lead Source",
         accessorKey: "source",
+        meta: { icon: <Globe size={14} /> },
         cell: ({ row }) => (
           <div className=" flex flex-col items-start gap-1">
             <span className="font-semibold p-0.5 text-xs">
@@ -96,6 +99,7 @@ const Leads = () => {
       {
         header: "Status",
         accessorKey: "status",
+        meta: { icon: <CircleDot size={14} /> },
         cell: ({ row }) => {
           const status = row.original.leadStatus ?? "";
           const color = getLeadStatusColor(status);
@@ -123,7 +127,7 @@ const Leads = () => {
       {
         header: "Priority",
         accessorKey: "status",
-        meta: { icon: <NotepadText size={14} /> },
+        meta: { icon: <Flag size={14} /> },
         cell: ({ row }) => {
           const priority = row.original.priority ?? "";
           const color = getLeadPriorityColor(priority);

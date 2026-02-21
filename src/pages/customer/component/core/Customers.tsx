@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+import { formatDateTime } from "@/lib/helpers";
 import { Briefcase, NotepadText, User } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import ActionButton from "@/components/ActionButtons";
@@ -38,7 +38,7 @@ const Customers = () => {
             </span>
             <span className="font-semibold text-muted-foreground text-xs">
               {row.original?.createdAt
-                ? format(row.original.createdAt, "do MMM y hh:mm aa")
+                ? formatDateTime(row.original.createdAt)
                 : ""}
             </span>
           </div>

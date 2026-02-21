@@ -139,11 +139,17 @@ const ComplaintsView = () => {
             <h2 className="text-lg font-bold text-card-foreground mb-1">
               {selectedComplaint.customer?.name ?? "—"}
             </h2>
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-sm text-muted-foreground">
               {selectedComplaint.customer?.phone ?? "—"}
             </p>
-
-            <div className="w-full border-t pt-4" />
+            <div className="w-full mt-3 pt-3 border-t space-y-1 text-left">
+              <p className="text-xs text-muted-foreground uppercase font-semibold mb-1.5">
+                Company
+              </p>
+              <p className="text-sm text-card-foreground font-medium">
+                {selectedComplaint.customer?.companyName ?? "—"}
+              </p>
+            </div>
           </div>
 
           <div className="bg-card p-6 rounded-xl border shadow-sm space-y-3">

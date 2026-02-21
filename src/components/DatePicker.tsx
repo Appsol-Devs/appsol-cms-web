@@ -1,5 +1,6 @@
 import * as React from "react";
 import { format } from "date-fns";
+import { formatDateTime } from "@/lib/helpers";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -200,7 +201,7 @@ export function DatePicker({
             <p className="mr-1">{title}</p>
             {required ? <span className="text-destructive">*</span> : ""}
           </div>
-          {date && format(date, dateOnly ? "do MMM y" : "do MMM y hh:mm aa")}
+          {date && (dateOnly ? format(date, "do MMM y") : formatDateTime(date))}
         </div>
       ) : null}
       <div>
@@ -213,7 +214,7 @@ export function DatePicker({
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
                 {date ? (
-                  format(date, dateOnly ? "do MMM y" : "do MMM y hh:mm aa")
+                  dateOnly ? format(date, "do MMM y") : formatDateTime(date)
                 ) : (
                   <span className="text-muted-foreground">{placeholder}</span>
                 )}
