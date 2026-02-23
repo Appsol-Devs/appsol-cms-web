@@ -57,7 +57,6 @@ const CustomerSummary = () => {
       const res = await getCustomerDetails(customerId).unwrap();
       if (res) {
         setCustomerDetails(res);
-        // Map the API string into a boolean for the Switch component
         setValue("status", (res.status === "active") as any);
       }
     } catch (error) {
