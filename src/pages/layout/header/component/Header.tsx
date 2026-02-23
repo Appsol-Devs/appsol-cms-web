@@ -1,10 +1,4 @@
-// const Header = () => {
-//   return (
-//     <div className="h-14 shadow-md bg-card text-onCard">
-//       <div>Header</div>
-//     </div>
-//   );
-// };
+"use client";
 
 import { useState } from "react";
 import { Bell, Search, Menu, Settings, LogOut, User } from "lucide-react";
@@ -22,14 +16,28 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import Sidebar from "../../sidebar/component/Sidebar";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store";
 
 function Header() {
   const [notifications] = useState(3);
+  const activeUser = useSelector((state: RootState) => state.user);
+
+  const getInitials = () => {
+    const userData = activeUser;
+
+    if (!userData) return "U";
+
+    if (userData.user?.firstName && userData.user.lastName) {
+      return `${userData.user.firstName[0]}${userData.user.lastName[0]}`.toUpperCase();
+    }
+
+    return "U";
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div className="flex h-16 items-center justify-between px-4 md:px-6">
-        {/* Left Section */}
         <div className="flex items-center gap-3">
           <Sheet>
             <SheetTrigger asChild>
@@ -53,7 +61,6 @@ function Header() {
           </div>
         </div>
 
-        {/* Center Section */}
         <div className="hidden md:flex w-full max-w-md items-center gap-2">
           <div className="relative w-full">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -64,12 +71,14 @@ function Header() {
           </div>
         </div>
 
-        {/* Right Section */}
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" className="relative">
-            <Bell className="h-5 w-5" />
+            <Bell className="h-5 w-5 text-muted-foreground hover:text-foreground transition-colors" />
             {notifications > 0 && (
-              <Badge className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
+              <Badge
+                variant="destructive"
+                className="absolute -right-0.5 -top-0.5 h-4 w-4 rounded-full p-0 flex items-center justify-center text-[10px] border-2 border-background"
+              >
                 {notifications}
               </Badge>
             )}
@@ -79,11 +88,11 @@ function Header() {
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                className="relative h-10 w-10 rounded-full p-0"
+                className="relative h-9 w-9 rounded-full p-0 bg-black!" 
               >
-                <Avatar className="h-10 w-10">
+                <Avatar className="h-5 w-5">
                   <AvatarImage src="/avatar.png" alt="User" />
-                  <AvatarFallback>CM</AvatarFallback>
+                  <AvatarFallback className="text-white bg-black">{getInitials()}</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
@@ -97,7 +106,7 @@ function Header() {
                 <Settings className="mr-2 h-4 w-4" /> Settings
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-red-500">
+              <DropdownMenuItem className="text-red-500 cursor-pointer hover:bg-red-50 dark:hover:bg-red-950">
                 <LogOut className="mr-2 h-4 w-4" /> Logout
               </DropdownMenuItem>
             </DropdownMenuContent>
