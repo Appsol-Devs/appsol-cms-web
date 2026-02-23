@@ -6,7 +6,7 @@ import type { ICustomer } from "@/pages/customer/common/customers";
 import { BookOpenText, Home } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   useAddCustomerMutation,
   useLazyGetACustomerQuery,
@@ -23,15 +23,21 @@ const CustomersForm = () => {
     useAddCustomerMutation();
   const [updateCustomer, { isLoading: isUpdating }] =
     useUpdateCustomerMutation();
+  const location = useLocation();
   const [getACustomer, { isLoading: isGetting }] = useLazyGetACustomerQuery();
-  const form = useForm<ICustomerFields>();
+  // const form = useForm<ICustomerFields>();
+  const existingData = location.state?.customerData as ICustomer | undefined;
+  const form = useForm<ICustomerFields>({
+    defaultValues: existingData || {},
+  });
   const { watch, getValues, reset } = form;
   const values = watch();
-
   const navigate = useNavigate();
   const [selectedCustomer, setSelectedCustomer] = useState<ICustomer | null>(
     null,
   );
+
+  // console.log("Selected Customer:", existingData);
 
   const fetchCustomerData = async (id: string) => {
     if (!id) return;
@@ -40,6 +46,7 @@ const CustomersForm = () => {
       const res = await getACustomer(id).unwrap();
       if (res) {
         setSelectedCustomer(res);
+        resetFormWithData(res);
       }
     } catch (err) {
       if (!err) return;
@@ -58,6 +65,8 @@ const CustomersForm = () => {
       location: data.location,
       dateConverted: data.dateConverted,
       notes: data.notes,
+      status: data.status,
+      geolocation: data.geolocation,
     });
   };
 
@@ -121,6 +130,8 @@ const CustomersForm = () => {
       phone: data.phone,
       notes: data.notes,
       location: data.location,
+      geolocation: data.geolocation,
+      status: data.status,
     });
 
     // console.log(payload);
@@ -159,6 +170,14 @@ const CustomersForm = () => {
           label: "Date Converted",
           value: values?.dateConverted as string,
         },
+        {
+          label: "Notes",
+          value: values?.notes as string,
+        },
+        // {
+        //   label:"Geolocation",
+        //   value: values?.geolocation as string,
+        // }
       ],
     },
   ];
@@ -171,9 +190,8 @@ const CustomersForm = () => {
         form={form}
         pageSummary={{
           title: id ? "Update Customer" : "Create New Customer",
-          description: `Enter all the details of the customer you want to ${
-            id ? "update" : "create"
-          }.`,
+          description: `Enter all the details of the customer you want to ${id ? "update" : "create"
+            }.`,
           icon: BookOpenText,
         }}
         formContent={
