@@ -13,7 +13,8 @@ import type { DropDownOption } from "@/components/DropdownComponent";
 import { useEffect, useState } from "react";
 import { lookup_params } from "@/lib/api";
 import DropDownComponent from "@/components/DropdownComponent";
-import { useGenerateDropdownOptionsFromEnum } from "@/lib/helpers";
+import { useGenerateDropdownOptionsFromEnum, useDebouncedSearch } from "@/lib/helpers";
+import type { ISoftware } from "@/pages/settings/common/settings";
 import {
   LEAD_PRIORITY_ENUM,
   LEAD_STATUS_ENUM,
@@ -29,7 +30,7 @@ interface IField {
 const LeadsFormContent = ({ isLoading, form, isConverted }: IField) => {
   // const isVerified = form.watch("isVerified");
   const [getleadNextStages] = useLazyGetLeadNextStepsQuery();
-  const [getSoftwares] = useLazyGetSoftwaresQuery();
+  const [getSoftwares, { isFetching: softwareLoading }] = useLazyGetSoftwaresQuery();
 
   const [leadNextStepOptions, setLeadNextStepOptions] = useState<
     DropDownOption<string>[]
@@ -46,6 +47,26 @@ const LeadsFormContent = ({ isLoading, form, isConverted }: IField) => {
   const leadStatusOptions =
     useGenerateDropdownOptionsFromEnum(LEAD_STATUS_ENUM);
 
+  const fetchSoftwares = (search?: string) => {
+    getSoftwares({ ...lookup_params, search })
+      .unwrap()
+      .then((res) => {
+        if (res?.contents) {
+          const options: DropDownOption<string>[] = res.contents.map(
+            (item: ISoftware) => ({
+              label: item.name ?? "",
+              value: item._id ?? "",
+            }),
+          );
+          setSoftwareOptions(options);
+        }
+      });
+  };
+
+  const debouncedSoftwareSearch = useDebouncedSearch((value) =>
+    fetchSoftwares(value || undefined)
+  );
+
   useEffect(() => {
     getleadNextStages(lookup_params)
       .unwrap()
@@ -58,19 +79,6 @@ const LeadsFormContent = ({ isLoading, form, isConverted }: IField) => {
             }),
           );
           setLeadNextStepOptions(options);
-        }
-      });
-    getSoftwares(lookup_params)
-      .unwrap()
-      .then((res) => {
-        if (res && res.contents) {
-          const options: DropDownOption<string>[] = res.contents.map(
-            (item) => ({
-              label: item.name ?? "",
-              value: item._id ?? "",
-            }),
-          );
-          setSoftwareOptions(options);
         }
       });
   }, []);
@@ -141,10 +149,14 @@ const LeadsFormContent = ({ isLoading, form, isConverted }: IField) => {
               control={control}
               name="software"
               title="Software"
-              label="Select software"
+              label="Type to search software..."
               options={softwareOptions}
               required
               disabled={isLoading}
+              handleInputChange={debouncedSoftwareSearch}
+              onMenuOpen={() => fetchSoftwares(undefined)}
+              isLoading={softwareLoading}
+              isAsyncSearch
             />
           </div>
         </div>

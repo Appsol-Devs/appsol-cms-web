@@ -1,5 +1,27 @@
 import type { DropDownOption } from "@/components/DropdownComponent";
 import { format, formatDistanceToNow } from "date-fns";
+import { useCallback, useRef } from "react";
+
+const DEBOUNCE_MS = 300;
+
+export function useDebouncedSearch(
+  fn: (search: string) => void,
+  delayMs: number = DEBOUNCE_MS
+): (search: string) => void {
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const fnRef = useRef(fn);
+  fnRef.current = fn;
+  return useCallback(
+    (search: string) => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => {
+        timeoutRef.current = null;
+        fnRef.current(search);
+      }, delayMs);
+    },
+    [delayMs]
+  );
+}
 
 export const formatToCurrency = (value: number) => {
   return new Intl.NumberFormat("gh-GH", {

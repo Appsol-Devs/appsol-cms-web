@@ -6,7 +6,7 @@ import DropDownComponent from "@/components/DropdownComponent";
 import { Separator } from "@/components/ui/separator";
 import { addMonths } from "date-fns";
 import { lookup_params } from "@/lib/api";
-import { useGenerateDropdownOptionsFromEnum } from "@/lib/helpers";
+import { useGenerateDropdownOptionsFromEnum, useDebouncedSearch } from "@/lib/helpers";
 import { SUBSCRIPTION_STATUS_ENUM } from "@/lib/enums";
 import { Calendar, Receipt, User } from "lucide-react";
 import { Controller, type UseFormReturn } from "react-hook-form";
@@ -33,8 +33,8 @@ interface IField {
 const SubscriptionsFormContent = ({ isLoading, form }: IField) => {
   const { control, register, watch, setValue } = form;
 
-  const [getCustomers] = useLazyGetCustomersQuery();
-  const [getSoftwares] = useLazyGetSoftwaresQuery();
+  const [getCustomers, { isFetching: customersLoading }] = useLazyGetCustomersQuery();
+  const [getSoftwares, { isFetching: softwareLoading }] = useLazyGetSoftwaresQuery();
   const [getSubscriptionTypes] = useLazyGetSubscriptionTypesQuery();
 
   const [customerOptions, setCustomerOptions] = useState<
@@ -69,12 +69,15 @@ const SubscriptionsFormContent = ({ isLoading, form }: IField) => {
       });
   };
 
-  useEffect(() => {
-    fetchCustomers();
-    getSoftwares(lookup_params)
+  const debouncedCustomerSearch = useDebouncedSearch((value) =>
+    fetchCustomers(value || undefined)
+  );
+
+  const fetchSoftwares = (search?: string) => {
+    getSoftwares({ ...lookup_params, search })
       .unwrap()
       .then((res: { contents?: ISoftware[] }) => {
-        if (res && res.contents) {
+        if (res?.contents) {
           const options: DropDownOption<string>[] = res.contents.map(
             (item: ISoftware) => ({
               label: item.name ?? "",
@@ -84,6 +87,13 @@ const SubscriptionsFormContent = ({ isLoading, form }: IField) => {
           setSoftwareOptions(options);
         }
       });
+  };
+
+  const debouncedSoftwareSearch = useDebouncedSearch((value) =>
+    fetchSoftwares(value || undefined)
+  );
+
+  useEffect(() => {
     getSubscriptionTypes(lookup_params)
       .unwrap()
       .then((res: { contents?: ISubscriptionType[] }) => {
@@ -140,19 +150,28 @@ const SubscriptionsFormContent = ({ isLoading, form }: IField) => {
           <DropDownComponent
             control={control}
             name="customerId"
-            label="Select customer"
+            label="Type to search customers..."
             required
             title="Customer"
             options={customerOptions}
-            handleInputChange={(value) => fetchCustomers(value || undefined)}
+            handleInputChange={debouncedCustomerSearch}
+            onMenuOpen={() => fetchCustomers(undefined)}
+            isLoading={customersLoading}
+            isAsyncSearch
+            disabled={isLoading}
           />
           <DropDownComponent
             control={control}
             name="softwareId"
-            label="Select software"
+            label="Type to search software..."
             required
             title="Software"
             options={softwareOptions}
+            handleInputChange={debouncedSoftwareSearch}
+            onMenuOpen={() => fetchSoftwares(undefined)}
+            isLoading={softwareLoading}
+            isAsyncSearch
+            disabled={isLoading}
           />
           <DropDownComponent
             control={control}
