@@ -55,10 +55,10 @@ export const sidebarMainMenus: ISidebar[] = [
   //   path: allRoutes.AGENTS,
   // },
   {
-    mainPath: `${allRoutes.PORTAL}${allRoutes.BILLINGS}`,
-    name: "Billings",
+    mainPath: `${allRoutes.PORTAL}${allRoutes.SUBSCRIPTIONS}`,
+    name: "Subscriptions",
     icon: Receipt,
-    path: allRoutes.BILLINGS,
+    path: allRoutes.SUBSCRIPTIONS,
   },
   {
     name: "Tickets",

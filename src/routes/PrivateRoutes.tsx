@@ -40,6 +40,9 @@ import ViewOutReach from "@/pages/outreach/component/ViewOutReach";
 import CustomerOutReaches from "@/pages/customer-outreaches/component/CustomerOutReaches";
 import CustomerOutReachView from "@/pages/customer-outreaches/component/CustomerOutReachView";
 import CustomerOutreachForm from "@/pages/customer-outreaches/component/CustomerOutReachForm";
+import Subscriptions from "@/pages/subscriptions/component/Subscriptions";
+import SubscriptionsForm from "@/pages/subscriptions/component/SubscriptionsForm";
+import SubscriptionsView from "@/pages/subscriptions/component/SubscriptionsView";
 
 const PrivateRoutes = () => {
   return (
@@ -183,9 +186,16 @@ const PrivateRoutes = () => {
         path={allRoutes.VIEW_CUSTOMER_OUTREACH(":id")}
         element={<CustomerOutReachView />}
       />
-
-
-
+      <Route path={allRoutes.SUBSCRIPTIONS} element={<Subscriptions />} />
+      <Route path={allRoutes.ADD_SUBSCRIPTION} element={<SubscriptionsForm />} />
+      <Route
+        path={allRoutes.UPDATE_SUBSCRIPTION(":id")}
+        element={<SubscriptionsForm />}
+      />
+      <Route
+        path={allRoutes.VIEW_SUBSCRIPTION(":id")}
+        element={<SubscriptionsView />}
+      />
 
       <Route
         path={`${allRoutes.SETTINGS}/*`}

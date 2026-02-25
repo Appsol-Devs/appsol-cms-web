@@ -73,4 +73,49 @@ export enum CUSTOMER_OUTREACH_STATUS {
   COMPLETED = "completed",
   RESCHEDULED = "rescheduled",
   FAILED = "failed",
-  CANCELLED = "cancelled",}
+  CANCELLED = "cancelled",
+}
+
+export enum SUBSCRIPTION_STATUS_ENUM {
+  ACTIVE = "active",
+  EXPIRED = "expired",
+  CANCELLED = "cancelled",
+  PENDING = "pending",
+}
+
+export const SUBSCRIPTION_STATUS_COLORS: Record<string, string> = {
+  active: "#22c55e",
+  expired: "#6b7280",
+  cancelled: "#ef4444",
+  pending: "#f97316",
+};
+
+export const getSubscriptionStatusColor = (status?: string) =>
+  status
+    ? SUBSCRIPTION_STATUS_COLORS[status.toLowerCase()] ?? undefined
+    : undefined;
+
+export type DueStatus = "overdue" | "due-today" | "due-soon" | "upcoming";
+
+export const DUE_STATUS_COLORS: Record<DueStatus, string> = {
+  overdue: "#ef4444",
+  "due-today": "#f97316",
+  "due-soon": "#eab308",
+  upcoming: "#22c55e",
+};
+
+export const getDueStatus = (
+  nextBillingDate?: string
+): { status: DueStatus; label: string; color: string } | null => {
+  if (!nextBillingDate) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const dueDate = new Date(nextBillingDate);
+  dueDate.setHours(0, 0, 0, 0);
+  const diffDays = Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+  if (diffDays < 0) return { status: "overdue", label: "Overdue", color: DUE_STATUS_COLORS.overdue };
+  if (diffDays === 0) return { status: "due-today", label: "Due Today", color: DUE_STATUS_COLORS["due-today"] };
+  if (diffDays <= 7) return { status: "due-soon", label: "Due Soon", color: DUE_STATUS_COLORS["due-soon"] };
+  return { status: "upcoming", label: "Upcoming", color: DUE_STATUS_COLORS.upcoming };
+};

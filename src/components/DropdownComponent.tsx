@@ -43,6 +43,8 @@ interface DropDownComponentProps<T = string | number> {
   handleInputChange?: (value: string) => void;
   isLoading?: boolean;
   zIndex?: number; // New prop for custom z-index
+  isAsyncSearch?: boolean;
+  onMenuOpen?: () => void;
 }
 
 const DropDownComponent = <T,>({
@@ -70,6 +72,8 @@ const DropDownComponent = <T,>({
   handleInputChange,
   isLoading,
   zIndex = 9999, // Default high z-index
+  isAsyncSearch,
+  onMenuOpen,
 }: DropDownComponentProps<T>) => {
   const styles: StylesConfig<
     DropDownOption<T>,
@@ -186,6 +190,8 @@ const DropDownComponent = <T,>({
       option.label?.toString() || "",
     isLoading: isLoading ? isLoading : undefined,
     onInputChange: handleInputChange,
+    filterOption: isAsyncSearch ? () => true : undefined,
+    onMenuOpen,
   };
 
   return (

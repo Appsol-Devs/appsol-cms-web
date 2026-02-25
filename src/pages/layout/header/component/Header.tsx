@@ -6,8 +6,6 @@
 //   );
 // };
 
-"use client";
-
 import { useState } from "react";
 import { Bell, Search, Menu, Settings, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";

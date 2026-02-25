@@ -14,8 +14,10 @@ import { useEffect, useState } from "react";
 import type { DropDownOption } from "@/components/DropdownComponent";
 import { lookup_params } from "@/lib/api";
 import DropDownComponent from "@/components/DropdownComponent";
-import { useGenerateDropdownOptionsFromEnum } from "@/lib/helpers";
+import { useGenerateDropdownOptionsFromEnum, useDebouncedSearch } from "@/lib/helpers";
 import { COMPLAINT_STATUS_ENUM } from "@/lib/enums";
+import type { ICustomer } from "@/pages/customer/common/customers";
+import type { ISoftware } from "@/pages/settings/common/settings";
 
 interface IField {
   isLoading?: boolean;
@@ -26,10 +28,10 @@ interface IField {
 const ComplaintsFormContent = ({ isLoading, form }: IField) => {
   const { control, register } = form;
 
-  const [getCustomers] = useLazyGetCustomersQuery();
+  const [getCustomers, { isFetching: customersLoading }] = useLazyGetCustomersQuery();
   const [getComplaintTypes] = useLazyGetComplaintTypesQuery();
   const [getComplaintCategories] = useLazyGetComplaintCategoriesQuery();
-  const [getSoftwares] = useLazyGetSoftwaresQuery();
+  const [getSoftwares, { isFetching: softwareLoading }] = useLazyGetSoftwaresQuery();
 
   const [customerOptions, setCustomerOptions] = useState<
     DropDownOption<string>[]
@@ -53,7 +55,7 @@ const ComplaintsFormContent = ({ isLoading, form }: IField) => {
       .then((res) => {
         if (res && res.contents) {
           const options: DropDownOption<string>[] = res.contents.map(
-            (item) => ({
+            (item: ICustomer) => ({
               label: item.name ?? "",
               value: item._id ?? "",
             }),
@@ -63,9 +65,31 @@ const ComplaintsFormContent = ({ isLoading, form }: IField) => {
       });
   };
 
-  useEffect(() => {
-    fetchCustomers();
+  const debouncedCustomerSearch = useDebouncedSearch((value) =>
+    fetchCustomers(value || undefined)
+  );
 
+  const fetchSoftwares = (search?: string) => {
+    getSoftwares({ ...lookup_params, search })
+      .unwrap()
+      .then((res) => {
+        if (res?.contents) {
+          const options: DropDownOption<string>[] = res.contents.map(
+            (item: ISoftware) => ({
+              label: item.name ?? "",
+              value: item._id ?? "",
+            }),
+          );
+          setSoftwareOptions(options);
+        }
+      });
+  };
+
+  const debouncedSoftwareSearch = useDebouncedSearch((value) =>
+    fetchSoftwares(value || undefined)
+  );
+
+  useEffect(() => {
     getComplaintTypes(lookup_params)
       .unwrap()
       .then((res) => {
@@ -93,20 +117,6 @@ const ComplaintsFormContent = ({ isLoading, form }: IField) => {
           setComplaintCategoryOptions(options);
         }
       });
-
-    getSoftwares(lookup_params)
-      .unwrap()
-      .then((res) => {
-        if (res && res.contents) {
-          const options: DropDownOption<string>[] = res.contents.map(
-            (item) => ({
-              label: item.name ?? "",
-              value: item._id ?? "",
-            }),
-          );
-          setSoftwareOptions(options);
-        }
-      });
   }, []);
 
   return (
@@ -132,11 +142,15 @@ const ComplaintsFormContent = ({ isLoading, form }: IField) => {
             <DropDownComponent
               control={control}
               name="customerId"
-              label="Select the customer"
+              label="Type to search customers..."
               required
               title="Customer"
               options={customerOptions}
-              handleInputChange={(value) => fetchCustomers(value || undefined)}
+              handleInputChange={debouncedCustomerSearch}
+              onMenuOpen={() => fetchCustomers(undefined)}
+              isLoading={customersLoading}
+              isAsyncSearch
+              disabled={isLoading}
             />
           </div>
         </div>
@@ -179,9 +193,14 @@ const ComplaintsFormContent = ({ isLoading, form }: IField) => {
               control={control}
               name="relatedSoftwareId"
               title="Related Software"
-              label="Select the related software"
+              label="Type to search software..."
               options={softwareOptions}
               required
+              handleInputChange={debouncedSoftwareSearch}
+              onMenuOpen={() => fetchSoftwares(undefined)}
+              isLoading={softwareLoading}
+              isAsyncSearch
+              disabled={isLoading}
             />
             <DropDownComponent
               control={control}

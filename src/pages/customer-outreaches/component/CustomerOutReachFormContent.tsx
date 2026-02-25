@@ -11,7 +11,7 @@ import { useLazyGetCustomersQuery } from "@/pages/customer/common/customersApi";
 import { useLazyGetOutReachTypesQuery } from "@/pages/outreach/common/OutReachApi";
 import { useLazyGetCallStatusesQuery } from "@/pages/settings/common/settingsApi";
 import { CustomSwitchComponent } from "@/components/CustomSwitchComponent";
-import { useGenerateDropdownOptionsFromEnum } from "@/lib/helpers";
+import { useGenerateDropdownOptionsFromEnum, useDebouncedSearch } from "@/lib/helpers";
 import { CUSTOMER_OUTREACH_STATUS } from "@/lib/enums";
 
 
@@ -24,7 +24,7 @@ interface IField {
 const CustomerOutreachFormContent = ({ isLoading, form }: IField) => {
     const { control, register } = form;
 
-    const [getCustomers] = useLazyGetCustomersQuery();
+    const [getCustomers, { isFetching: customersLoading }] = useLazyGetCustomersQuery();
     const [getOutreachTypes] = useLazyGetOutReachTypesQuery();
     const [getCallStatusOptions] = useLazyGetCallStatusesQuery();
      const OutreachStatusOptions =
@@ -34,19 +34,25 @@ const CustomerOutreachFormContent = ({ isLoading, form }: IField) => {
     const [typeOptions, setTypeOptions] = useState<DropDownOption<string>[]>([]);
     const [statusOptions, setStatusOptions] = useState<DropDownOption<string>[]>([]);
 
-    useEffect(() => {
-        getCustomers(lookup_params)
+    const fetchCustomers = (search?: string) => {
+        getCustomers({ ...lookup_params, search })
             .unwrap()
             .then((res) => {
                 if (res && res.contents) {
-                    const options = res.contents.map((c: any) => ({
-                        label: c.name,
-                        value: c._id,
+                    const options = res.contents.map((c: { name?: string; _id?: string }) => ({
+                        label: c.name ?? "",
+                        value: c._id ?? "",
                     }));
                     setCustomerOptions(options);
                 }
             });
+    };
 
+    const debouncedCustomerSearch = useDebouncedSearch((value) =>
+        fetchCustomers(value || undefined)
+    );
+
+    useEffect(() => {
         getOutreachTypes(lookup_params)
             .unwrap()
             .then((res) => {
@@ -95,10 +101,14 @@ const CustomerOutreachFormContent = ({ isLoading, form }: IField) => {
                             control={control}
                             name="customer"
                             title="Customer"
-                            label="Select a customer"
+                            label="Type to search customers..."
                             options={customerOptions}
                             required
                             disabled={isLoading}
+                            handleInputChange={debouncedCustomerSearch}
+                            onMenuOpen={() => fetchCustomers(undefined)}
+                            isLoading={customersLoading}
+                            isAsyncSearch
                         />
 
                         <CustomInputField<ICustomerOutreachFields>

@@ -1,0 +1,366 @@
+import CardComponent from "@/components/CardComponent";
+import { CustomSwitchComponent } from "@/components/CustomSwitchComponent";
+import CustomInputField from "@/components/CustomInputField";
+import { DatePicker } from "@/components/DatePicker";
+import DropDownComponent from "@/components/DropdownComponent";
+import { Separator } from "@/components/ui/separator";
+import { addMonths } from "date-fns";
+import { lookup_params } from "@/lib/api";
+import { useGenerateDropdownOptionsFromEnum, useDebouncedSearch } from "@/lib/helpers";
+import { SUBSCRIPTION_STATUS_ENUM } from "@/lib/enums";
+import { Calendar, Receipt, User } from "lucide-react";
+import { Controller, type UseFormReturn } from "react-hook-form";
+import { useEffect, useState } from "react";
+import type { DropDownOption } from "@/components/DropdownComponent";
+import type { ICustomer } from "@/pages/customer/common/customers";
+import { useLazyGetCustomersQuery } from "@/pages/customer/common/customersApi";
+import type {
+  ISoftware,
+  ISubscriptionType,
+} from "@/pages/settings/common/settings";
+import {
+  useLazyGetSoftwaresQuery,
+  useLazyGetSubscriptionTypesQuery,
+} from "@/pages/settings/common/settingsApi";
+import type { ISubscriptionFields } from "../common/subscriptions";
+
+interface IField {
+  isLoading?: boolean;
+  form: UseFormReturn<ISubscriptionFields, any, ISubscriptionFields>;
+  isUpdate?: boolean;
+}
+
+const SubscriptionsFormContent = ({ isLoading, form }: IField) => {
+  const { control, register, watch, setValue } = form;
+
+  const [getCustomers, { isFetching: customersLoading }] = useLazyGetCustomersQuery();
+  const [getSoftwares, { isFetching: softwareLoading }] = useLazyGetSoftwaresQuery();
+  const [getSubscriptionTypes] = useLazyGetSubscriptionTypesQuery();
+
+  const [customerOptions, setCustomerOptions] = useState<
+    DropDownOption<string>[]
+  >([]);
+  const [softwareOptions, setSoftwareOptions] = useState<
+    DropDownOption<string>[]
+  >([]);
+  const [subscriptionTypeOptions, setSubscriptionTypeOptions] = useState<
+    DropDownOption<string>[]
+  >([]);
+  const [subscriptionTypesMap, setSubscriptionTypesMap] = useState<
+    Map<string, ISubscriptionType>
+  >(new Map());
+
+  const statusOptions =
+    useGenerateDropdownOptionsFromEnum(SUBSCRIPTION_STATUS_ENUM);
+
+  const fetchCustomers = (search?: string) => {
+    getCustomers({ ...lookup_params, search })
+      .unwrap()
+      .then((res: { contents?: ICustomer[] }) => {
+        if (res && res.contents) {
+          const options: DropDownOption<string>[] = res.contents.map(
+            (item: ICustomer) => ({
+              label: item.name ?? "",
+              value: item._id ?? "",
+            })
+          );
+          setCustomerOptions(options);
+        }
+      });
+  };
+
+  const debouncedCustomerSearch = useDebouncedSearch((value) =>
+    fetchCustomers(value || undefined)
+  );
+
+  const fetchSoftwares = (search?: string) => {
+    getSoftwares({ ...lookup_params, search })
+      .unwrap()
+      .then((res: { contents?: ISoftware[] }) => {
+        if (res?.contents) {
+          const options: DropDownOption<string>[] = res.contents.map(
+            (item: ISoftware) => ({
+              label: item.name ?? "",
+              value: item._id ?? "",
+            })
+          );
+          setSoftwareOptions(options);
+        }
+      });
+  };
+
+  const debouncedSoftwareSearch = useDebouncedSearch((value) =>
+    fetchSoftwares(value || undefined)
+  );
+
+  useEffect(() => {
+    getSubscriptionTypes(lookup_params)
+      .unwrap()
+      .then((res: { contents?: ISubscriptionType[] }) => {
+        if (res && res.contents) {
+          const options: DropDownOption<string>[] = res.contents.map(
+            (item: ISubscriptionType) => ({
+              label: item.name ?? "",
+              value: item._id ?? "",
+            })
+          );
+          setSubscriptionTypeOptions(options);
+          const map = new Map<string, ISubscriptionType>();
+          res.contents.forEach((item) => {
+            if (item._id) map.set(item._id, item);
+          });
+          setSubscriptionTypesMap(map);
+        }
+      });
+  }, []);
+
+  const subscriptionTypeId = watch("subscriptionTypeId")?.value;
+  const startDate = watch("startDate");
+
+  useEffect(() => {
+    if (!subscriptionTypeId || !startDate) return;
+    const subscriptionType = subscriptionTypesMap.get(subscriptionTypeId);
+    const durationInMonths = subscriptionType?.durationInMonths ?? 1;
+    const start = new Date(startDate);
+    const periodEnd = addMonths(start, durationInMonths);
+    setValue("currentPeriodStart", startDate);
+    setValue("currentPeriodEnd", periodEnd.toISOString());
+    setValue("nextBillingDate", periodEnd.toISOString());
+  }, [subscriptionTypeId, startDate, subscriptionTypesMap, setValue]);
+
+  return (
+    <div className="space-y-2">
+      <CardComponent
+        headerTitle={
+          <>
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <p className="flex items-center gap-2">
+                <User className="w-4 h-4" />
+                Subscription Information
+              </p>
+              <p className="text-xs text-rx-secondary">
+                Required Information <span className="text-red-500">*</span>
+              </p>
+            </div>
+            <Separator orientation="horizontal" />
+          </>
+        }
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <DropDownComponent
+            control={control}
+            name="customerId"
+            label="Type to search customers..."
+            required
+            title="Customer"
+            options={customerOptions}
+            handleInputChange={debouncedCustomerSearch}
+            onMenuOpen={() => fetchCustomers(undefined)}
+            isLoading={customersLoading}
+            isAsyncSearch
+            disabled={isLoading}
+          />
+          <DropDownComponent
+            control={control}
+            name="softwareId"
+            label="Type to search software..."
+            required
+            title="Software"
+            options={softwareOptions}
+            handleInputChange={debouncedSoftwareSearch}
+            onMenuOpen={() => fetchSoftwares(undefined)}
+            isLoading={softwareLoading}
+            isAsyncSearch
+            disabled={isLoading}
+          />
+          <DropDownComponent
+            control={control}
+            name="subscriptionTypeId"
+            label="Select subscription type"
+            required
+            title="Subscription Type"
+            options={subscriptionTypeOptions}
+          />
+          <DropDownComponent
+            control={control}
+            name="status"
+            label="Select status"
+            required
+            title="Status"
+            options={statusOptions}
+          />
+        </div>
+      </CardComponent>
+
+      <CardComponent
+        headerTitle={
+          <>
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <p className="flex items-center gap-2">
+                <Calendar className="w-4 h-4" />
+                Billing Period
+              </p>
+              <p className="text-xs text-rx-secondary">
+                Required Information <span className="text-red-500">*</span>
+              </p>
+            </div>
+            <Separator orientation="horizontal" />
+          </>
+        }
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Controller
+            control={control}
+            name="startDate"
+            render={({ field }) => (
+              <div className="space-y-1 max-w-[200px]">
+                <p className="text-xs text-onCard font-medium">
+                  Start Date <span className="text-destructive ml-0.5">*</span>
+                </p>
+                <DatePicker
+                  title=""
+                  placeholder="Select start date"
+                  dateOnly
+                  required
+                  disabled={isLoading}
+                  defaultDate={
+                    field.value ? new Date(field.value) : undefined
+                  }
+                  onChange={(date) =>
+                    field.onChange(date ? date.toISOString() : "")
+                  }
+                />
+              </div>
+            )}
+          />
+          <Controller
+            control={control}
+            name="currentPeriodStart"
+            render={({ field }) => (
+              <div className="space-y-1 max-w-[200px]" key={field.value ?? "empty"}>
+                <p className="text-xs text-onCard font-medium">
+                  Current Period Start{" "}
+                  <span className="text-destructive ml-0.5">*</span>
+                </p>
+                <DatePicker
+                  title=""
+                  placeholder="Select date"
+                  dateOnly
+                  required
+                  disabled={isLoading}
+                  defaultDate={
+                    field.value ? new Date(field.value) : undefined
+                  }
+                  onChange={(date) =>
+                    field.onChange(date ? date.toISOString() : "")
+                  }
+                />
+              </div>
+            )}
+          />
+          <Controller
+            control={control}
+            name="currentPeriodEnd"
+            render={({ field }) => (
+              <div className="space-y-1 max-w-[200px]" key={field.value ?? "empty"}>
+                <p className="text-xs text-onCard font-medium">
+                  Current Period End{" "}
+                  <span className="text-destructive ml-0.5">*</span>
+                  <span className="text-muted-foreground text-[10px] ml-1">
+                    (auto from subscription type)
+                  </span>
+                </p>
+                <DatePicker
+                  title=""
+                  placeholder="Select subscription type & start date"
+                  dateOnly
+                  required
+                  disabled
+                  defaultDate={
+                    field.value ? new Date(field.value) : undefined
+                  }
+                  onChange={(date) =>
+                    field.onChange(date ? date.toISOString() : "")
+                  }
+                />
+              </div>
+            )}
+          />
+          <Controller
+            control={control}
+            name="nextBillingDate"
+            render={({ field }) => (
+              <div className="space-y-1 max-w-[200px]" key={field.value ?? "empty"}>
+                <p className="text-xs text-onCard font-medium">
+                  Next Billing Date{" "}
+                  <span className="text-destructive ml-0.5">*</span>
+                  <span className="text-muted-foreground text-[10px] ml-1">
+                    (auto from subscription type)
+                  </span>
+                </p>
+                <DatePicker
+                  title=""
+                  placeholder="Select subscription type & start date"
+                  dateOnly
+                  required
+                  disabled
+                  defaultDate={
+                    field.value ? new Date(field.value) : undefined
+                  }
+                  onChange={(date) =>
+                    field.onChange(date ? date.toISOString() : "")
+                  }
+                />
+              </div>
+            )}
+          />
+        </div>
+      </CardComponent>
+
+      <CardComponent
+        headerTitle={
+          <>
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <p className="flex items-center gap-2">
+                <Receipt className="w-4 h-4" />
+                Amount & Settings
+              </p>
+            </div>
+            <Separator orientation="horizontal" />
+          </>
+        }
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <CustomInputField<ISubscriptionFields>
+            type="number"
+            label="Amount"
+            name="amount"
+            placeholder="0.00"
+            required
+            disabled={isLoading}
+            register={register}
+          />
+          <CustomSwitchComponent
+            control={control}
+            name="autoRenew"
+            label="Auto Renew"
+            disabled={isLoading}
+          />
+        </div>
+        <div className="mt-4">
+          <CustomInputField<ISubscriptionFields>
+            type="text"
+            multipleLines
+            label="Notes"
+            name="notes"
+            placeholder="Any additional notes"
+            disabled={isLoading}
+            register={register}
+          />
+        </div>
+      </CardComponent>
+    </div>
+  );
+};
+
+export default SubscriptionsFormContent;
