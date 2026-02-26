@@ -44,6 +44,7 @@ const CustomerSummary = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
+
   const [getCustomerDetails, { isFetching, isLoading, isError, isSuccess }] =
     useLazyGetACustomerQuery();
   const [customerDetails, setCustomerDetails] = useState<ICustomer | null>(null);
@@ -125,6 +126,33 @@ const CustomerSummary = () => {
       state: { customerData: customerDetails },
     });
   };
+
+  const handleDeleteCustomer = async (customerId: string) => {
+    if (!customerId) return;
+
+    try {
+      await deleteCustomer({ id: customerId }).unwrap();
+      showToast({
+        title: "Success",
+        message: "Customer deleted successfully.",
+        type: "success",
+      });
+      navigate(-1);
+    } catch (error) {
+      console.error("Failed to delete customer", error);
+      showToast({
+        title: "Error",
+        message: "Failed to delete customer",
+        type: "error",
+      });
+    }
+  };
+
+  const loading = isFetching || isLoading;
+
+  if (loading) return <LoadingComponent loading={loading} />;
+  if (isError) return <FetchingError />;
+  if (!isSuccess || !customerDetails) return null;
 
   const handleDeleteCustomer = async (customerId: string) => {
     if (!customerId) return;

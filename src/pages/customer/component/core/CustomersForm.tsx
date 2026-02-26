@@ -7,6 +7,7 @@ import { BookOpenText, Home } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   useAddCustomerMutation,
   useLazyGetACustomerQuery,
@@ -34,6 +35,7 @@ const CustomersForm = () => {
     useAddCustomerMutation();
   const [updateCustomer, { isLoading: isUpdating }] =
     useUpdateCustomerMutation();
+  const location = useLocation();
   const location = useLocation();
   const [getACustomer, { isLoading: isGetting }] = useLazyGetACustomerQuery();
   // const form = useForm<ICustomerFields>();

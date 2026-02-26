@@ -2,6 +2,7 @@ import CardComponent from "@/components/CardComponent";
 import CustomInputField from "@/components/CustomInputField";
 import { Separator } from "@/components/ui/separator";
 import { BookOpenText, MapPin, StickyNote } from "lucide-react";
+import { BookOpenText, MapPin, StickyNote } from "lucide-react";
 import { Controller, type UseFormReturn } from "react-hook-form";
 import { DatePicker } from "@/components/DatePicker";
 import { useLazyGetSoftwaresQuery } from "@/pages/settings/common/settingsApi";
