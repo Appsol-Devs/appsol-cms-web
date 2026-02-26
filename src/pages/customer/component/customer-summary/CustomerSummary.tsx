@@ -127,26 +127,7 @@ const CustomerSummary = () => {
     });
   };
 
-  const handleDeleteCustomer = async (customerId: string) => {
-    if (!customerId) return;
-
-    try {
-      await deleteCustomer({ id: customerId }).unwrap();
-      showToast({
-        title: "Success",
-        message: "Customer deleted successfully.",
-        type: "success",
-      });
-      navigate(-1);
-    } catch (error) {
-      console.error("Failed to delete customer", error);
-      showToast({
-        title: "Error",
-        message: "Failed to delete customer",
-        type: "error",
-      });
-    }
-  };
+ 
 
   const loading = isFetching || isLoading;
 
@@ -175,7 +156,6 @@ const CustomerSummary = () => {
     }
   };
 
-  const loading = isFetching || isLoading;
 
   if (loading) return <LoadingComponent loading={loading} />;
   if (isError) return <FetchingError />;
