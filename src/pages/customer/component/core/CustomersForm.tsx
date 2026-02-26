@@ -2,7 +2,7 @@ import type { ISummarySection } from "@/components/form/MutationFormSummary";
 import MutationFormTemplate from "@/components/form/MutationFormTemplate";
 import { showToast } from "@/components/ui/CustomToast";
 import { cleanPayload } from "@/lib/helpers";
-import type { ICustomer } from "@/pages/customer/common/customers";
+import { customerSchema, type ICustomer, type ICustomerFields } from "@/pages/customer/common/customers";
 import { BookOpenText, Home } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -13,8 +13,19 @@ import {
   useUpdateCustomerMutation,
 } from "../../common/customersApi";
 import CustomersFormContent from "./CustomersFormContent";
-
-export type ICustomerFields = Omit<ICustomer, "_id"> & {};
+import { zodResolver } from "@hookform/resolvers/zod";
+// export type ICustomerFields = Omit<ICustomer, "_id"> & {
+//   name?: string;
+//   companyName?: string;
+//   email?: string;
+//   phone?: string;
+//   location?: string;
+//   dateConverted?: string | null;
+//   notes?: string;
+//   status?: string;
+//   geolocation?: number;
+//   softwareId?: DropDownOption<string>;
+// };
 
 const CustomersForm = () => {
   const { id } = useParams();
@@ -27,10 +38,27 @@ const CustomersForm = () => {
   const [getACustomer, { isLoading: isGetting }] = useLazyGetACustomerQuery();
   // const form = useForm<ICustomerFields>();
   const existingData = location.state?.customerData as ICustomer | undefined;
+  const formattedDefaultValues: Partial<ICustomerFields> = existingData
+    ? {
+      name: existingData.name,
+      companyName: existingData.companyName,
+      email: existingData.email,
+      phone: existingData.phone,
+      location: existingData.location,
+      dateConverted: existingData.dateConverted,
+      notes: existingData.notes,
+      status: existingData.status,
+      geolocation: existingData.geolocation,
+      softwareId: existingData.software
+        ? { label: existingData.software.name || "", value: existingData.software._id || "" }
+        : undefined,
+    }
+    : {};
   const form = useForm<ICustomerFields>({
-    defaultValues: existingData || {},
+    resolver: zodResolver(customerSchema),
+    defaultValues: formattedDefaultValues || {},
   });
-  const { watch, getValues, reset } = form;
+  const { watch, handleSubmit, reset } = form;
   const values = watch();
   const navigate = useNavigate();
   const [selectedCustomer, setSelectedCustomer] = useState<ICustomer | null>(
@@ -67,6 +95,9 @@ const CustomersForm = () => {
       notes: data.notes,
       status: data.status,
       geolocation: data.geolocation,
+      softwareId: data.software
+        ? { label: data.software.name || "", value: data.software._id || "" }
+        : undefined,
     });
   };
 
@@ -86,7 +117,7 @@ const CustomersForm = () => {
     if (!payload) return;
     try {
       const res = id
-        ? await updateCustomer({ _id: id, ...payload }).unwrap()
+        ? await updateCustomer({ ...payload, _id: id }).unwrap()
         : await createNewCustomer(payload).unwrap();
 
       if (res) {
@@ -104,24 +135,8 @@ const CustomersForm = () => {
     }
   };
 
-  const submitData = () => {
-    const data = getValues();
-
-    const requiredFields = [
-      { field: data.name, message: "Name is required." },
-      { field: data.companyName, message: "Company Name is required." },
-      { field: data.phone, message: "Phone Number is required." },
-      { field: data.email, message: "Email is required." },
-    ];
-
-    for (const { field, message } of requiredFields) {
-      //   if (!field && !skip) {
-      if (!field) {
-        showToast({ title: "Info", message, type: "info", duration: 1000 });
-        return;
-      }
-    }
-
+const submitData = handleSubmit(
+  (data) => {
     const payload: ICustomer = cleanPayload({
       name: data.name,
       companyName: data.companyName,
@@ -132,11 +147,14 @@ const CustomersForm = () => {
       location: data.location,
       geolocation: data.geolocation,
       status: data.status,
+      softwareId: data.softwareId?.value,
     });
 
-    // console.log(payload);
     handleDataSubmission(payload);
-  };
+  },
+  
+
+);
 
   const summarySections: ISummarySection[] = [
     {
@@ -174,6 +192,10 @@ const CustomersForm = () => {
           label: "Notes",
           value: values?.notes as string,
         },
+        {
+          label: "Related Software",
+          value: values?.softwareId?.label as string,
+        }
         // {
         //   label:"Geolocation",
         //   value: values?.geolocation as string,

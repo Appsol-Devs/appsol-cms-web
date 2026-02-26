@@ -2,12 +2,13 @@ import ActionButton from "@/components/ActionButtons";
 import FeatureContentRenderer from "@/components/table/component/FeatureContentRenderer";
 import { allRoutes } from "@/utils/routes";
 import type { ColumnDef } from "@tanstack/react-table";
-import { NotepadText, Pen, User,  } from "lucide-react";
+import { CircleDot, Megaphone, Pen, Target, User, } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { useLazyGetCustomerOutReachesQuery } from "../common/customerOutreachApi";
 import type { ICustomerOutreach } from "../common/customer-outreach";
+import {  getLookupBadgeStyle } from "@/lib/enums";
 
 const CustomerOutReaches = () => {
   const [fetchQuery, fetchState] = useLazyGetCustomerOutReachesQuery();
@@ -62,7 +63,7 @@ const CustomerOutReaches = () => {
       {
         header: "Outreach Type",
         accessorKey: "outreachType",
-        meta: { icon: <NotepadText size={14} /> },
+        meta: { icon: <Megaphone size={14} /> },
         cell: ({ row }) => (
           <div className=" flex flex-col items-start gap-1">
             <span className="font-semibold p-0.5 text-xs">
@@ -74,7 +75,7 @@ const CustomerOutReaches = () => {
       {
         header: "Purpose",
         accessorKey: "purpose",
-        meta: { icon: <NotepadText size={14} /> },
+        meta: { icon: <Target size={14} /> },
         cell: ({ row }) => (
           <div className=" flex flex-col items-start gap-1">
             <span className="font-semibold p-0.5 text-xs w-32 truncate">
@@ -83,17 +84,25 @@ const CustomerOutReaches = () => {
           </div>
         ),
       },
+
       {
         header: "Call Status",
         accessorKey: "callStatus",
-        meta: { icon: <NotepadText size={14} /> },
-        cell: ({ row }) => (
-          <div className=" flex flex-col items-start gap-1">
-            <span className="font-semibold p-0.5 text-xs">
-              {row.original.callStatus.name ?? "N/A"}
-            </span>
-          </div>
-        ),
+        meta: { icon: <CircleDot size={14} /> },
+        cell: ({ row }) => {
+          const status = row.original.callStatus?.name ?? "N/A";
+          const colorCode = row.original.callStatus?.colorCode;
+            const style = getLookupBadgeStyle(colorCode);
+          return (
+            <Badge
+              variant={colorCode ? undefined : "secondary"}
+              className="capitalize border text-xs font-medium px-2 py-0 rounded-full"
+              style={style}
+            >
+              {status}
+            </Badge>
+          );
+        },
       },
       {
         header: "Action",

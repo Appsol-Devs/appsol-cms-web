@@ -15,8 +15,7 @@ import { Textarea } from "./ui/textarea";
 import { InputPassword } from "./ui/input-password";
 import type {
   Control,
-  DeepMap,
-  FieldError,
+  FieldErrors,
   Path,
   RegisterOptions,
   UseFormRegister,
@@ -52,7 +51,7 @@ const inputVariance = cva(
 
 interface CustomInputFiledProps<T extends Record<string, unknown>>
   extends InputHTMLAttributes<HTMLInputElement>,
-    VariantProps<typeof inputVariance> {
+  VariantProps<typeof inputVariance> {
   width?: string;
   suffixIcon?: ReactNode;
   prefixIcon?: ReactNode;
@@ -62,7 +61,7 @@ interface CustomInputFiledProps<T extends Record<string, unknown>>
   register?: UseFormRegister<T>;
   name?: Path<T>;
   rules?: RegisterOptions<T, Path<T>>;
-  errors?: Partial<DeepMap<T, FieldError>>;
+  errors?: FieldErrors<T>; 
   multipleLines?: boolean;
   isSwitch?: boolean;
   rows?: number;

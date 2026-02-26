@@ -1,5 +1,5 @@
 import { formatDateTime } from "@/lib/helpers";
-import { Briefcase, NotepadText, User } from "lucide-react";
+import { Briefcase, CircleDot, MapPin, Monitor, User } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import ActionButton from "@/components/ActionButtons";
 import { useNavigate } from "react-router-dom";
@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { allRoutes, customerRoutes } from "@/utils/routes";
 import { useLazyGetCustomersQuery } from "../../common/customersApi";
 import type { ICustomer } from "../../common/customers";
+import { getLookupBadgeStyle } from "@/lib/enums";
 
 const Customers = () => {
   const [fetchQuery, fetchState] = useLazyGetCustomersQuery();
@@ -59,9 +60,28 @@ const Customers = () => {
         ),
       },
       {
+        header: "Related Software",
+        accessorKey: "software",
+        meta: { icon: <Monitor size={14} /> },
+        cell: ({ row }) => {
+          const status = row.original.software?.name ?? "N/A";
+          const colorCode = row.original.software?.colorCode;
+          const style = getLookupBadgeStyle(colorCode);
+          return (
+            <Badge
+              variant={colorCode ? undefined : "secondary"}
+              className="capitalize border text-xs font-medium px-2 py-0 rounded-full"
+              style={style}
+            >
+              {status}
+            </Badge>
+          );
+        },
+      },
+      {
         header: "Location",
         accessorKey: "location",
-        meta: { icon: <NotepadText size={14} /> },
+        meta: { icon: <MapPin size={14} /> },
         cell: ({ row }) => (
           <div className=" flex flex-col items-start gap-1">
             <span className="font-semibold p-0.5 text-xs">
@@ -69,6 +89,26 @@ const Customers = () => {
             </span>
           </div>
         ),
+      },
+      {
+        header: "Status",
+        accessorKey: "status",
+        meta: { icon: <CircleDot size={14} /> },
+        cell: ({ row }) => {
+          const status = row.original.status ?? "N/A";
+          const colorCode = row.original.status === "active" ? "#16a34a" : row.original.status === "inactive" ? "#dc2626" : undefined;
+
+          const style = getLookupBadgeStyle(colorCode);
+          return (
+            <Badge
+              variant={colorCode ? undefined : "secondary"}
+              className="capitalize border text-xs font-medium px-2 py-0 rounded-full"
+              style={style}
+            >
+              {status}
+            </Badge>
+          );
+        },
       },
     ],
     [executed],

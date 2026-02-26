@@ -33,7 +33,7 @@ const ComplaintsForm = () => {
   const [getSelectedData, { isLoading: isGetting }] =
     useLazyGetAComplaintQuery();
   const form = useForm<IComplaintFields>();
-  const { watch, getValues, reset } = form;
+  const { watch, getValues } = form;
   const values = watch();
 
   const navigate = useNavigate();
@@ -55,57 +55,12 @@ const ComplaintsForm = () => {
 
   const resetFormWithData = (data: IComplaint) => {
     if (!data) return;
-
-    const mapStatusToLabel = (status?: string): string => {
-      switch (status) {
-        case "open":
-          return "Open";
-        case "in-progress":
-          return "In Progress";
-        case "resolved":
-          return "Resolved";
-        case "closed":
-          return "Closed";
-        case "rescheduled":
-          return "Rescheduled";
-        default:
-          return status ?? "";
-      }
-    };
-
-    reset({
-      ...data,
-      customerId: data.customerId
-        ? {
-            value: data.customerId,
-            label: data.customer?.name ?? "",
-          }
-        : undefined,
-      complaintTypeId: data.complaintTypeId
-        ? {
-            value: data.complaintTypeId,
-            label: data.complaintType?.name ?? "",
-          }
-        : undefined,
-      complaintCategoryId: data.complaintCategoryId
-        ? {
-            value: data.complaintCategoryId,
-            label: data.complaintCategory?.name ?? "",
-          }
-        : undefined,
-      relatedSoftwareId: data.relatedSoftwareId
-        ? {
-            value: data.relatedSoftwareId,
-            label: data.relatedSoftware?.name ?? "",
-          }
-        : undefined,
-      status: data.status
-        ? {
-            value: data.status,
-            label: mapStatusToLabel(data.status),
-          }
-        : undefined,
-    });
+    // reset({
+    //   ...data,
+    //   name: data.name,
+    //   description: data.description,
+    //   isActive: data.isActive,
+    // });
   };
 
   useEffect(() => {
@@ -157,12 +112,11 @@ const ComplaintsForm = () => {
         message: "Related Software is required.",
       },
       { field: data.description, message: "Description is required." },
-      { field: data.status?.value, message: "Status is required." },
     ];
 
     for (const { field, message } of requiredFields) {
       if (!field) {
-        showToast({ title: "Validation", message, type: "info", duration: 2000 });
+        showToast({ title: "Info", message, type: "info", duration: 1000 });
         return;
       }
     }
@@ -173,7 +127,6 @@ const ComplaintsForm = () => {
       complaintTypeId: data.complaintTypeId?.value,
       complaintCategoryId: data.complaintCategoryId?.value,
       relatedSoftwareId: data.relatedSoftwareId?.value,
-      status: data.status?.value,
       //   isActive: id ? data.isActive : undefined,
     });
 
@@ -210,11 +163,6 @@ const ComplaintsForm = () => {
         {
           label: "Related Software",
           value: values?.relatedSoftwareId?.label as string,
-          required: true,
-        },
-        {
-          label: "Status",
-          value: values?.status?.label as string,
           required: true,
         },
       ],

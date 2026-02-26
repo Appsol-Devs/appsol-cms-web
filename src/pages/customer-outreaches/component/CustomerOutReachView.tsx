@@ -112,7 +112,7 @@ const CustomerOutReachView = () => {
               trigger={
                 <Button
                   variant="destructive"
-                  className="bg-red-700 text-white hover:bg-red-800"
+                  className="bg-red-700! text-white hover:bg-red-800"
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
                   <span className="text-xs">Delete</span>

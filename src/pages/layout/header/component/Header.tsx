@@ -72,12 +72,12 @@ function Header() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="h-5 w-5 text-muted-foreground hover:text-foreground transition-colors" />
+          <Button variant="ghost" size="icon" className="relative bg-transparent! border-onSurface!">
+            <Bell className="h-5 w-5 text-onSurface hover:text-foreground transition-colors" />
             {notifications > 0 && (
               <Badge
                 variant="destructive"
-                className="absolute -right-0.5 -top-0.5 h-4 w-4 rounded-full p-0 flex items-center justify-center text-[10px] border-2 border-background"
+                className="absolute -right-0.5 -top-0.5 h-4 w-4 rounded-full p-0 flex items-center justify-center text-[10px] border-2 border-background "
               >
                 {notifications}
               </Badge>
@@ -88,11 +88,11 @@ function Header() {
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                className="relative h-9 w-9 rounded-full p-0 bg-black!" 
+                className="relative h-9 w-9 rounded-full p-0 bg-primary!" 
               >
                 <Avatar className="h-5 w-5">
                   <AvatarImage src="/avatar.png" alt="User" />
-                  <AvatarFallback className="text-white bg-black">{getInitials()}</AvatarFallback>
+                  <AvatarFallback className="text-white bg-primary">{getInitials()}</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>

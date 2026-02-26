@@ -3,9 +3,12 @@ import CustomInputField from "@/components/CustomInputField";
 import { Separator } from "@/components/ui/separator";
 import { BookOpenText, MapPin, StickyNote } from "lucide-react";
 import { Controller, type UseFormReturn } from "react-hook-form";
-import type { ICustomerFields } from "./CustomersForm";
 import { DatePicker } from "@/components/DatePicker";
-// import { CustomSwitchComponent } from "@/components/CustomSwitchComponent";
+import { useLazyGetSoftwaresQuery } from "@/pages/settings/common/settingsApi";
+import { useEffect, useState } from "react";
+import DropDownComponent, { type DropDownOption } from "@/components/DropdownComponent";
+import { lookup_params } from "@/lib/api";
+import type { ICustomerFields } from "../../common/customers";
 
 interface IField {
   isLoading?: boolean;
@@ -14,10 +17,30 @@ interface IField {
 }
 
 const CustomersFormContent = ({ isLoading, form }: IField) => {
-  // const isVerified = form.watch("isVerified");
+  const [getSoftwares] = useLazyGetSoftwaresQuery();
+  const { control, register, formState: { errors } } = form;
 
-  const { control, register } = form;
+  const [softwareOptions, setSoftwareOptions] = useState<DropDownOption<string>[]>([]);
 
+  const fetchSoftwares = async () => {
+    try {
+      const res = await getSoftwares(lookup_params).unwrap();
+      if (res && res.contents) {
+        const options = res.contents.map((software) => ({
+          label: software.name ?? "",
+          value: software._id ?? "",
+        }));
+        setSoftwareOptions(options);
+      }
+    } catch (err) {
+      console.error("Error fetching softwares:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchSoftwares();
+  }, []);
+console.log(errors)
   return (
     <div className="space-y-4">
       <CardComponent
@@ -43,10 +66,12 @@ const CustomersFormContent = ({ isLoading, form }: IField) => {
             placeholder="e.g., Acheampong Ana"
             disabled={isLoading}
             register={register}
-            rules={{
-              required: "Name is required",
-              minLength: { value: 2, message: "Name must be at least 2 characters" },
-            }}
+            errors={errors}
+
+          // rules={{
+          //   required: "Name is required",
+          //   minLength: { value: 2, message: "Name must be at least 2 characters" },
+          // }}
           />
           <CustomInputField<ICustomerFields>
             type="email"
@@ -55,13 +80,14 @@ const CustomersFormContent = ({ isLoading, form }: IField) => {
             placeholder="e.g., mail@example.com"
             disabled={isLoading}
             register={register}
-            rules={{
-              required: "Email is required",
-              pattern: {
-                value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
-                message: "Please enter a valid email address.",
-              },
-            }}
+            errors={errors}
+          // rules={{
+          //   required: "Email is required",
+          //   pattern: {
+          //     value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+          //     message: "Please enter a valid email address.",
+          //   },
+          // }}
           />
           <CustomInputField<ICustomerFields>
             type="text"
@@ -70,22 +96,16 @@ const CustomersFormContent = ({ isLoading, form }: IField) => {
             placeholder="e.g., 0240000000"
             disabled={isLoading}
             register={register}
-            rules={{
-              required: "Phone number is required",
-              pattern: {
-                value: /^\+?[0-9]{10,15}$/,
-                message: "Please enter a valid phone number.",
-              },
-            }}
+            errors={errors}
+
+          // rules={{
+          //   required: "Phone number is required",
+          //   pattern: {
+          //     value: /^\+?[0-9]{10,15}$/,
+          //     message: "Please enter a valid phone number.",
+          //   },
+          // }}
           />
-          {/* {isUpdate && (
-            <CustomSwitchComponent
-              control={control}
-              name="status"
-              label="Is Active?"
-              disabled={isLoading}
-            />
-          )} */}
         </div>
       </CardComponent>
 
@@ -109,7 +129,9 @@ const CustomersFormContent = ({ isLoading, form }: IField) => {
             placeholder="e.g., Abi's Clothing Shop"
             disabled={isLoading}
             register={register}
-            rules={{ required: "Company Name is required" }}
+            errors={errors}
+
+          // rules={{ required: "Company Name is required" }}
           />
           <CustomInputField<ICustomerFields>
             type="text"
@@ -118,38 +140,20 @@ const CustomersFormContent = ({ isLoading, form }: IField) => {
             placeholder="e.g., Accra, Ghana"
             disabled={isLoading}
             register={register}
-            rules={{ required: "Location is required" }}
-          />
+            errors={errors}
 
-          {/* <div className="col-span-2 grid grid-cols-3 gap-4 border p-4 rounded-md bg-gray-50/50">
-            <p className="col-span-3 text-sm font-medium">Exact Geolocation (Optional)</p>
-            <CustomInputField<ICustomerFields>
-              type="text"
-              label="Address"
-              name="geolocation.address"
-              placeholder="e.g., 123 Main St"
-              disabled={isLoading}
-              register={register}
-            />
-            <CustomInputField<ICustomerFields>
-              type="number"
-              label="Longitude"
-              name="geolocation.long"
-              placeholder="e.g., -0.186964"
-              disabled={isLoading}
-              register={register}
-              rules={{ valueAsNumber: true }}
-            />
-            <CustomInputField<ICustomerFields>
-              type="number"
-              label="Latitude"
-              name="geolocation.lat"
-              placeholder="e.g., 5.603717"
-              disabled={isLoading}
-              register={register}
-              rules={{ valueAsNumber: true }}
-            />
-          </div> */}
+          // rules={{ required: "Location is required" }}
+          />
+          <DropDownComponent
+            control={control}
+            name="softwareId"
+            title="Associated Software"
+            label="Select software..."
+            options={softwareOptions}
+            disabled={isLoading}
+            isClearable={true}
+            required
+          />
         </div>
       </CardComponent>
 
