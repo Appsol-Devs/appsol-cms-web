@@ -1,6 +1,5 @@
 import type { ISoftware } from '@/pages/settings/common/settings';
 import type { ILoginResponse, IRole } from "@/pages/auth/login/common/login";
-import type { ISoftware } from "@/pages/settings/common/settings";
 
 export interface ICustomer {
   customerCode?: string
