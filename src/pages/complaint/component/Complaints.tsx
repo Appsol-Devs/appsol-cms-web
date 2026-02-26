@@ -160,12 +160,12 @@ const Complaints = () => {
           />
         )}
         columns={columns}
-        pathOnRowSelected={(row) =>
-          navigate(
-            allRoutes.PORTAL +
-              allRoutes.VIEW_COMPLAINT((row as IComplaint)._id as string)
-          )
-        }
+        pathOnRowSelected={(row) => {
+          const complaint = row as IComplaint;
+          navigate(allRoutes.PORTAL + allRoutes.VIEW_COMPLAINT(complaint._id as string), {
+            state: { initialData: complaint },
+          });
+        }}
         // filters={["company", "location", "role", "gender"]}
         refetchData={executed}
         title="Complaints"

@@ -1,5 +1,6 @@
 import ActionButton from "@/components/ActionButtons";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
+import LoadingComponent from "@/components/LoadingComponent";
 import PageSummary from "@/components/PageSummary";
 import PageTitle from "@/components/PageTitle";
 import { Button } from "@/components/ui/button";
@@ -19,7 +20,7 @@ import {
   UserCircle
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 import type { ICustomerOutreach } from "../common/customer-outreach";
 import { useDeleteCustomerOutReachMutation, useLazyGetCustomerOutReachQuery } from "../common/customerOutreachApi";
@@ -28,11 +29,15 @@ import { formatDate } from "@/lib/helpers";
 const CustomerOutReachView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const initialData = (location.state as { initialData?: ICustomerOutreach } | null)?.initialData;
 
   const [deleteOutreach] = useDeleteCustomerOutReachMutation();
   const [getOutreachDetails, { isLoading: isFetching }] = useLazyGetCustomerOutReachQuery();
 
-  const [selectedOutreach, setSelectedOutreach] = useState<ICustomerOutreach | null>(null);
+  const [selectedOutreach, setSelectedOutreach] = useState<ICustomerOutreach | null>(() =>
+    initialData && initialData._id === id ? initialData : null
+  );
 
   useEffect(() => {
     if (id) {
@@ -68,19 +73,24 @@ const CustomerOutReachView = () => {
     }
   };
 
-  if (isFetching || !selectedOutreach) {
+  if (!selectedOutreach) {
+    if (isFetching) {
+      return (
+        <div className="relative min-h-[40vh]">
+          <LoadingComponent loading />
+        </div>
+      );
+    }
     return (
-      <div className="p-8 text-center text-gray-500">
-        Loading outreach details...
+      <div className="p-8 text-center text-muted-foreground">
+        Outreach not found.
       </div>
     );
   }
 
-
-
   return (
     <div className="space-y-4">
-      <PageTitle title="Outreach Details" />
+      <PageTitle showBack title="Outreach Details" />
 
       <PageSummary
         icon={PhoneOutgoing}
@@ -105,7 +115,7 @@ const CustomerOutReachView = () => {
               content={
                 <p className="text-gray-500 text-center">
                   This action cannot be undone. This will permanently delete this
-                  interaction log with <strong>{selectedOutreach.customer.name}</strong>.
+                  interaction log with <strong>{selectedOutreach.customer?.name ?? "this customer"}</strong>.
                 </p>
               }
               onConfirmClicked={() => handleDeletion(id as string)}
@@ -137,13 +147,13 @@ const CustomerOutReachView = () => {
               <PhoneOutgoing
                 className="w-10 h-10"
                 style={{
-                  color: selectedOutreach.callStatus?.colorCode || "#2563eb",
+                  color: selectedOutreach.callStatus?.colorCode ?? "#2563eb",
                 }}
               />
             </div>
 
             <h2 className="text-lg font-bold text-gray-900 mb-1">
-              {selectedOutreach.customer.name}
+              {selectedOutreach.customer?.name ?? "—"}
             </h2>
             <p className="text-sm text-gray-500 mb-4">Customer</p>
 
@@ -152,21 +162,21 @@ const CustomerOutReachView = () => {
                 variant="outline"
                 className="px-3 py-1 bg-white"
                 style={{
-                  borderColor: selectedOutreach.outreachType.colorCode,
-                  color: selectedOutreach.outreachType.colorCode
+                  borderColor: selectedOutreach.outreachType?.colorCode,
+                  color: selectedOutreach.outreachType?.colorCode
                 }}
               >
-                {selectedOutreach.outreachType.name}
+                {selectedOutreach.outreachType?.name ?? "—"}
               </Badge>
 
               <Badge
                 variant="secondary"
                 style={{
-                  backgroundColor: selectedOutreach.callStatus.colorCode || '#e5e7eb',
-                  color: '#fff'
+                  backgroundColor: selectedOutreach.callStatus?.colorCode ?? "#e5e7eb",
+                  color: "#fff"
                 }}
               >
-                {selectedOutreach.callStatus.name}
+                {selectedOutreach.callStatus?.name ?? "—"}
               </Badge>
             </div>
           </div>
@@ -178,7 +188,11 @@ const CustomerOutReachView = () => {
             <div className="p-5 space-y-4">
               <DetailItem
                 label="Logged By"
-                value={`${selectedOutreach.loggedBy.firstName} ${selectedOutreach.loggedBy.lastName}`}
+                value={
+                  selectedOutreach.loggedBy && typeof selectedOutreach.loggedBy === "object"
+                    ? `${selectedOutreach.loggedBy.firstName ?? ""} ${selectedOutreach.loggedBy.lastName ?? ""}`.trim() || "—"
+                    : "—"
+                }
                 icon={<UserCircle className="w-4 h-4 text-gray-400" />}
               />
               <DetailItem
@@ -229,16 +243,16 @@ const CustomerOutReachView = () => {
             <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
               <DetailItem
                 label="Full Name"
-                value={selectedOutreach.customer.name}
+                value={selectedOutreach.customer?.name ?? "—"}
               />
               <DetailItem
                 label="Email Address"
-                value={selectedOutreach.customer.email}
+                value={selectedOutreach.customer?.email ?? "—"}
                 icon={<Mail className="w-4 h-4 text-gray-400" />}
               />
               <DetailItem
                 label="Phone Number"
-                value={selectedOutreach.customer.phone}
+                value={selectedOutreach.customer?.phone ?? "—"}
                 icon={<Phone className="w-4 h-4 text-gray-400" />}
               />
             </div>

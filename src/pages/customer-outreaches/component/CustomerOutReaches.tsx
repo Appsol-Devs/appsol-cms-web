@@ -107,7 +107,8 @@ const CustomerOutReaches = () => {
               onClick={() =>
                 navigate(
                   allRoutes.PORTAL +
-                  allRoutes.VIEW_CUSTOMER_OUTREACH(row.original._id as string)
+                    allRoutes.VIEW_CUSTOMER_OUTREACH(row.original._id as string),
+                  { state: { initialData: row.original } }
                 )
               }
             />

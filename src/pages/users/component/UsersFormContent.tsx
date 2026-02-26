@@ -7,12 +7,10 @@ import DropDownComponent, {
   type DropDownOption,
 } from "@/components/DropdownComponent";
 import { useLazyGetRolesQuery } from "@/pages/roles/common/rolesApi";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { IUserFields } from "./UsersForm";
 import { lookup_params } from "@/lib/api";
-import { useDebouncedSearch } from "@/lib/helpers";
 import type { IRole } from "@/pages/auth/login/common/login";
-
 interface IField {
   isLoading?: boolean;
   form: UseFormReturn<IUserFields, any, IUserFields>;
@@ -20,31 +18,25 @@ interface IField {
 }
 
 const UsersFormContent = ({ isLoading, form, isUpdate }: IField) => {
-  const [getRoles, { isFetching: rolesLoading }] = useLazyGetRolesQuery();
-
-  const isVerified = form.watch("isVerified");
-
+  const [getRoles] = useLazyGetRolesQuery();
   const [roleOptions, setRoleOptions] = useState<DropDownOption[]>([]);
+  const isVerified = form.watch("isVerified");
+  const { control, register } = form;
 
-  const fetchRoles = (search?: string) => {
-    getRoles({ ...lookup_params, search })
+  useEffect(() => {
+    getRoles(lookup_params)
       .unwrap()
       .then((res) => {
         if (res?.contents) {
-          const options: DropDownOption[] = res.contents.map((role: IRole) => ({
-            value: role._id ?? "",
-            label: role.name ?? "",
-          }));
-          setRoleOptions(options);
+          setRoleOptions(
+            res.contents.map((role: IRole) => ({
+              value: role._id ?? "",
+              label: role.name ?? "",
+            }))
+          );
         }
       });
-  };
-
-  const debouncedRoleSearch = useDebouncedSearch((value) =>
-    fetchRoles(value || undefined)
-  );
-
-  const { control, register } = form;
+  }, [getRoles]);
   return (
     <div className="space-y-2">
       <CardComponent
@@ -141,11 +133,7 @@ const UsersFormContent = ({ isLoading, form, isUpdate }: IField) => {
               control={control}
               options={roleOptions}
               name="role"
-              label="Type to search roles..."
-              handleInputChange={debouncedRoleSearch}
-              onMenuOpen={() => fetchRoles(undefined)}
-              isLoading={rolesLoading}
-              isAsyncSearch
+              label="Select role"
             />
             <CustomInputField<IUserFields>
               register={register}

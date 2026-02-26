@@ -1,3 +1,4 @@
+import { useCallback, useState } from "react";
 import { type ReactNode } from "react";
 import { Controller, type Path } from "react-hook-form";
 import Select, {
@@ -6,6 +7,7 @@ import Select, {
   type SingleValue,
   type StylesConfig,
 } from "react-select";
+import { useDebouncedSearch } from "@/lib/helpers";
 
 export interface DropDownOption<T = string | number> {
   value: T;
@@ -14,7 +16,8 @@ export interface DropDownOption<T = string | number> {
 
 interface DropDownComponentProps<T = string | number> {
   label: ReactNode;
-  options: DropDownOption<T>[];
+  options?: DropDownOption<T>[];
+  loadOptions?: (inputValue: string) => Promise<DropDownOption<T>[]>;
   required?: boolean;
   onChanged?: (
     value: SingleValue<DropDownOption<T>>,
@@ -49,7 +52,8 @@ interface DropDownComponentProps<T = string | number> {
 
 const DropDownComponent = <T,>({
   label,
-  options,
+  options: optionsProp = [],
+  loadOptions: loadOptionsProp,
   onChanged,
   width = "100%",
   controlBgColor,
@@ -69,12 +73,45 @@ const DropDownComponent = <T,>({
   isClearable,
   height,
   fontSize,
-  handleInputChange,
-  isLoading,
+  handleInputChange: handleInputChangeProp,
+  isLoading: isLoadingProp,
   zIndex = 9999, // Default high z-index
-  isAsyncSearch,
-  onMenuOpen,
+  isAsyncSearch: isAsyncSearchProp,
+  onMenuOpen: onMenuOpenProp,
 }: DropDownComponentProps<T>) => {
+  const isAsyncMode = typeof loadOptionsProp === "function";
+
+  const [asyncOptions, setAsyncOptions] = useState<DropDownOption<T>[]>([]);
+  const [asyncLoading, setAsyncLoading] = useState(false);
+
+  const fetchOptions = useCallback(
+    async (search: string) => {
+      if (!loadOptionsProp) return;
+      setAsyncLoading(true);
+      try {
+        const result = await loadOptionsProp(search);
+        setAsyncOptions((result ?? []) as DropDownOption<T>[]);
+      } finally {
+        setAsyncLoading(false);
+      }
+    },
+    [loadOptionsProp]
+  );
+
+  const debouncedSearch = useDebouncedSearch((value) =>
+    fetchOptions(value || "")
+  );
+
+  const handleMenuOpenAsync = useCallback(() => {
+    fetchOptions("");
+  }, [fetchOptions]);
+
+  const options = isAsyncMode ? asyncOptions : optionsProp;
+  const isLoading = isAsyncMode ? asyncLoading : isLoadingProp;
+  const handleInputChange = isAsyncMode ? debouncedSearch : handleInputChangeProp;
+  const isAsyncSearch = isAsyncMode ? true : isAsyncSearchProp;
+  const onMenuOpen = isAsyncMode ? handleMenuOpenAsync : onMenuOpenProp;
+
   const styles: StylesConfig<
     DropDownOption<T>,
     false,

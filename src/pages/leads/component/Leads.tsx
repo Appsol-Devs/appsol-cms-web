@@ -166,9 +166,12 @@ const Leads = () => {
             onClick={() => navigate(allRoutes.PORTAL + allRoutes.ADD_LEAD)}
           />
         )}
-        pathOnRowSelected={(row) =>
-          navigate(allRoutes.PORTAL + allRoutes.VIEW_LEAD(row._id as string))
-        }
+        pathOnRowSelected={(row) => {
+          const lead = row as ILead;
+          navigate(allRoutes.PORTAL + allRoutes.VIEW_LEAD(lead._id as string), {
+            state: { initialData: lead },
+          });
+        }}
         columns={columns}
         // filters={["company", "location", "role", "gender"]}
         refetchData={executed}

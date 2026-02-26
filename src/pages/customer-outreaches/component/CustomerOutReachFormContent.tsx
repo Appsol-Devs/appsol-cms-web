@@ -4,14 +4,14 @@ import DropDownComponent, { type DropDownOption } from "@/components/DropdownCom
 import { Separator } from "@/components/ui/separator";
 import { lookup_params } from "@/lib/api";
 import { FileText, Megaphone, User } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { type UseFormReturn } from "react-hook-form";
 import type { ICustomerOutreachFields } from "./CustomerOutReachForm";
 import { useLazyGetCustomersQuery } from "@/pages/customer/common/customersApi";
 import { useLazyGetOutReachTypesQuery } from "@/pages/outreach/common/OutReachApi";
 import { useLazyGetCallStatusesQuery } from "@/pages/settings/common/settingsApi";
 import { CustomSwitchComponent } from "@/components/CustomSwitchComponent";
-import { useGenerateDropdownOptionsFromEnum, useDebouncedSearch } from "@/lib/helpers";
+import { useGenerateDropdownOptionsFromEnum } from "@/lib/helpers";
 import { CUSTOMER_OUTREACH_STATUS } from "@/lib/enums";
 
 
@@ -24,32 +24,25 @@ interface IField {
 const CustomerOutreachFormContent = ({ isLoading, form }: IField) => {
     const { control, register } = form;
 
-    const [getCustomers, { isFetching: customersLoading }] = useLazyGetCustomersQuery();
+    const [getCustomers] = useLazyGetCustomersQuery();
     const [getOutreachTypes] = useLazyGetOutReachTypesQuery();
     const [getCallStatusOptions] = useLazyGetCallStatusesQuery();
-     const OutreachStatusOptions =
+    const OutreachStatusOptions =
         useGenerateDropdownOptionsFromEnum(CUSTOMER_OUTREACH_STATUS);
 
-    const [customerOptions, setCustomerOptions] = useState<DropDownOption<string>[]>([]);
     const [typeOptions, setTypeOptions] = useState<DropDownOption<string>[]>([]);
     const [statusOptions, setStatusOptions] = useState<DropDownOption<string>[]>([]);
 
-    const fetchCustomers = (search?: string) => {
-        getCustomers({ ...lookup_params, search })
-            .unwrap()
-            .then((res) => {
-                if (res && res.contents) {
-                    const options = res.contents.map((c: { name?: string; _id?: string }) => ({
-                        label: c.name ?? "",
-                        value: c._id ?? "",
-                    }));
-                    setCustomerOptions(options);
-                }
-            });
-    };
-
-    const debouncedCustomerSearch = useDebouncedSearch((value) =>
-        fetchCustomers(value || undefined)
+    const loadCustomerOptions = useCallback(
+        async (inputValue: string): Promise<DropDownOption<string>[]> => {
+            const res = await getCustomers({ ...lookup_params, search: inputValue || undefined }).unwrap();
+            if (!res?.contents) return [];
+            return res.contents.map((c: { name?: string; _id?: string }) => ({
+                label: c.name ?? "",
+                value: c._id ?? "",
+            }));
+        },
+        [getCustomers]
     );
 
     useEffect(() => {
@@ -102,13 +95,9 @@ const CustomerOutreachFormContent = ({ isLoading, form }: IField) => {
                             name="customer"
                             title="Customer"
                             label="Type to search customers..."
-                            options={customerOptions}
                             required
                             disabled={isLoading}
-                            handleInputChange={debouncedCustomerSearch}
-                            onMenuOpen={() => fetchCustomers(undefined)}
-                            isLoading={customersLoading}
-                            isAsyncSearch
+                            loadOptions={loadCustomerOptions}
                         />
 
                         <CustomInputField<ICustomerOutreachFields>

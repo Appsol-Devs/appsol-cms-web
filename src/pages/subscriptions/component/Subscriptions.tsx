@@ -150,12 +150,12 @@ const Subscriptions = () => {
           />
         )}
         columns={columns}
-        pathOnRowSelected={(row) =>
-          navigate(
-            allRoutes.PORTAL +
-              allRoutes.VIEW_SUBSCRIPTION((row as ISubscription)._id as string)
-          )
-        }
+        pathOnRowSelected={(row) => {
+          const subscription = row as ISubscription;
+          navigate(allRoutes.PORTAL + allRoutes.VIEW_SUBSCRIPTION(subscription._id as string), {
+            state: { initialData: subscription },
+          });
+        }}
         refetchData={executed}
         title="Subscriptions"
         lazyFetchQuery={[fetchQuery, fetchState]}

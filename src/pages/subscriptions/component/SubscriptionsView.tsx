@@ -1,5 +1,6 @@
 import ActionButton from "@/components/ActionButtons";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
+import LoadingComponent from "@/components/LoadingComponent";
 import PageSummary from "@/components/PageSummary";
 import PageTitle from "@/components/PageTitle";
 import DetailItem from "@/components/ui/DetailItem";
@@ -9,7 +10,7 @@ import { formatDate, formatToCurrency } from "@/lib/helpers";
 import { allRoutes } from "@/utils/routes";
 import { Calendar, Info, Receipt, Trash2, User } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import type { ISubscription } from "../common/subscriptions";
 import {
   useDeleteSubscriptionMutation,
@@ -25,16 +26,18 @@ import {
 const SubscriptionsView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const initialData = (location.state as { initialData?: ISubscription } | null)?.initialData;
 
   const [deleteSubscription] = useDeleteSubscriptionMutation();
   const [getSubscriptionDetails, { isLoading: isFetching }] =
     useLazyGetASubscriptionQuery();
 
   const [selectedSubscription, setSelectedSubscription] =
-    useState<ISubscription | null>(null);
+    useState<ISubscription | null>(() =>
+      initialData && initialData._id === id ? initialData : null
+    );
   const [loggedByName, setLoggedByName] = useState<string>("—");
-  const [lastPaymentLoggedByName, setLastPaymentLoggedByName] =
-    useState<string>("—");
   const [getAUser] = useLazyGetAUserQuery();
 
   useEffect(() => {
@@ -75,22 +78,6 @@ const SubscriptionsView = () => {
       .catch(() => setLoggedByName("—"));
   }, [selectedSubscription, getAUser]);
 
-  useEffect(() => {
-    const loggedBy = selectedSubscription?.lastPayment?.loggedBy;
-    if (!loggedBy) {
-      setLastPaymentLoggedByName("—");
-      return;
-    }
-    getAUser(loggedBy as string)
-      .unwrap()
-      .then((user) => {
-        setLastPaymentLoggedByName(
-          `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "—"
-        );
-      })
-      .catch(() => setLastPaymentLoggedByName("—"));
-  }, [selectedSubscription, getAUser]);
-
   const handleDelete = async () => {
     if (!id) return;
 
@@ -112,10 +99,17 @@ const SubscriptionsView = () => {
     }
   };
 
-  if (isFetching || !selectedSubscription) {
+  if (!selectedSubscription) {
+    if (isFetching) {
+      return (
+        <div className="relative min-h-[40vh]">
+          <LoadingComponent loading />
+        </div>
+      );
+    }
     return (
       <div className="p-8 text-center text-muted-foreground">
-        Loading subscription details...
+        Subscription not found.
       </div>
     );
   }
@@ -294,7 +288,9 @@ const SubscriptionsView = () => {
                     Subscription Type
                   </p>
                   <p className="text-sm text-card-foreground">
-                    {selectedSubscription.subscriptionType?.name ?? "—"}
+                    {selectedSubscription.subscriptionType?.name ??
+                      selectedSubscription.lastPayment?.subscriptionType?.name ??
+                      "—"}
                   </p>
                 </div>
               </div>
@@ -350,20 +346,8 @@ const SubscriptionsView = () => {
                       {formatDate(selectedSubscription.lastPayment.paymentDate)}
                     </p>
                     <p>
-                      <span className="font-medium">Reference:</span>{" "}
-                      {selectedSubscription.lastPayment.paymentReference ?? "—"}
-                    </p>
-                    {selectedSubscription.lastPayment.notes && (
-                      <p>
-                        <span className="font-medium">Notes:</span>{" "}
-                        <span className="whitespace-pre-wrap">
-                          {selectedSubscription.lastPayment.notes}
-                        </span>
-                      </p>
-                    )}
-                    <p>
-                      <span className="font-medium">Logged By:</span>{" "}
-                      {lastPaymentLoggedByName}
+                      <span className="font-medium">Payment Code:</span>{" "}
+                      {selectedSubscription.lastPayment.paymentCode ?? "—"}
                     </p>
                   </div>
                 </div>

@@ -1,8 +1,9 @@
 import ActionButton from "@/components/ActionButtons";
+import LoadingComponent from "@/components/LoadingComponent";
 import PageSummary from "@/components/PageSummary";
 import PageTitle from "@/components/PageTitle";
 import { Shield, Trash2, Briefcase, KeyRound, Calendar } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useDeleteRoleMutation, useLazyGetARoleQuery } from "../common/rolesApi";
 import { useEffect, useState } from "react";
 import { allRoutes } from "@/utils/routes";
@@ -17,10 +18,14 @@ import ConfirmationDialog from "@/components/ConfirmationDialog";
 const RolesView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const initialData = (location.state as { initialData?: IRole } | null)?.initialData;
 
   const [deleteRole] = useDeleteRoleMutation();
   const [getRoleDetails, { isLoading: isFetching }] = useLazyGetARoleQuery();
-  const [selectedRole, setSelectedRole] = useState<IRole | null>(null);
+  const [selectedRole, setSelectedRole] = useState<IRole | null>(() =>
+    initialData && initialData._id === id ? initialData : null
+  );
 
   useEffect(() => {
     if (id) {
@@ -52,8 +57,19 @@ const RolesView = () => {
     }
   };
 
-  if (isFetching || !selectedRole) {
-    return <div className="p-8 text-center text-gray-500">Loading role details...</div>;
+  if (!selectedRole) {
+    if (isFetching) {
+      return (
+        <div className="relative min-h-[40vh]">
+          <LoadingComponent loading />
+        </div>
+      );
+    }
+    return (
+      <div className="p-8 text-center text-muted-foreground">
+        Role not found.
+      </div>
+    );
   }
 
   return (

@@ -88,10 +88,9 @@ const OutReach = () => {
             <ActionButton
               type="view"
               onClick={() =>
-                navigate(
-                  allRoutes.PORTAL +
-                  allRoutes.VIEW_OUTREACH_TYPE(row.original._id as string)
-                )
+                navigate(allRoutes.PORTAL + allRoutes.VIEW_OUTREACH_TYPE(row.original._id as string), {
+                  state: { initialData: row.original },
+                })
               }
             />
           </div>

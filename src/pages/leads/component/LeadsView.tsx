@@ -1,5 +1,6 @@
 import ActionButton from "@/components/ActionButtons";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
+import LoadingComponent from "@/components/LoadingComponent";
 import PageSummary from "@/components/PageSummary";
 import PageTitle from "@/components/PageTitle";
 import DetailItem from "@/components/ui/DetailItem";
@@ -15,7 +16,7 @@ import {
   User,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { allRoutes } from "@/utils/routes";
 import type { ILead } from "../common/leads";
 import {
@@ -34,11 +35,15 @@ import { Button } from "@/components/ui/button";
 const LeadsView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const initialData = (location.state as { initialData?: ILead } | null)?.initialData;
 
   const [deleteLead] = useDeleteLeadMutation();
   const [convertLead, { isLoading: isConverting }] = useConvertLeadMutation();
   const [getLeadDetails, { isLoading: isFetching }] = useLazyGetALeadQuery();
-  const [selectedLead, setSelectedLead] = useState<ILead | null>(null);
+  const [selectedLead, setSelectedLead] = useState<ILead | null>(() =>
+    initialData && initialData._id === id ? initialData : null
+  );
 
   useEffect(() => {
     if (id) {
@@ -93,10 +98,17 @@ const LeadsView = () => {
     }
   };
 
-  if (isFetching || !selectedLead) {
+  if (!selectedLead) {
+    if (isFetching) {
+      return (
+        <div className="relative min-h-[40vh]">
+          <LoadingComponent loading />
+        </div>
+      );
+    }
     return (
       <div className="p-8 text-center text-muted-foreground">
-        Loading lead details...
+        Lead not found.
       </div>
     );
   }
