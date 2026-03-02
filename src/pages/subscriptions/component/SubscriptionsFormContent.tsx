@@ -3,6 +3,7 @@ import { CustomSwitchComponent } from "@/components/CustomSwitchComponent";
 import CustomInputField from "@/components/CustomInputField";
 import { DatePicker } from "@/components/DatePicker";
 import DropDownComponent from "@/components/DropdownComponent";
+import AsyncDropDownComponent from "@/components/AsyncDropDownComponent";
 import { Separator } from "@/components/ui/separator";
 import { addMonths } from "date-fns";
 import { lookup_params } from "@/lib/api";
@@ -131,14 +132,15 @@ const SubscriptionsFormContent = ({ isLoading, form }: IField) => {
         }
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <DropDownComponent
+          <AsyncDropDownComponent
             control={control}
             name="customerId"
-            label="Type to search customers..."
-            title="Customer"
+            placeholder="Type to search customers..."
+            label="Customer"
             required
             disabled={isLoading}
-            loadOptions={loadCustomerOptions}
+            options={loadCustomerOptions}
+            width="100%"
           />
           <DropDownComponent
             control={control}

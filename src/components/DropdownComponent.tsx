@@ -1,4 +1,3 @@
-import { useCallback, useState } from "react";
 import { type ReactNode } from "react";
 import { Controller, type Path } from "react-hook-form";
 import Select, {
@@ -7,7 +6,7 @@ import Select, {
   type SingleValue,
   type StylesConfig,
 } from "react-select";
-import { useDebouncedSearch } from "@/lib/helpers";
+
 
 export interface DropDownOption<T = string | number> {
   value: T;
@@ -17,7 +16,6 @@ export interface DropDownOption<T = string | number> {
 interface DropDownComponentProps<T = string | number> {
   label: ReactNode;
   options?: DropDownOption<T>[];
-  loadOptions?: (inputValue: string) => Promise<DropDownOption<T>[]>;
   required?: boolean;
   onChanged?: (
     value: SingleValue<DropDownOption<T>>,
@@ -43,17 +41,14 @@ interface DropDownComponentProps<T = string | number> {
   isClearable?: boolean;
   height?: string;
   fontSize?: string;
-  handleInputChange?: (value: string) => void;
   isLoading?: boolean;
   zIndex?: number; // New prop for custom z-index
-  isAsyncSearch?: boolean;
   onMenuOpen?: () => void;
 }
 
 const DropDownComponent = <T,>({
   label,
   options: optionsProp = [],
-  loadOptions: loadOptionsProp,
   onChanged,
   width = "100%",
   controlBgColor,
@@ -73,44 +68,13 @@ const DropDownComponent = <T,>({
   isClearable,
   height,
   fontSize,
-  handleInputChange: handleInputChangeProp,
   isLoading: isLoadingProp,
   zIndex = 9999, // Default high z-index
-  isAsyncSearch: isAsyncSearchProp,
   onMenuOpen: onMenuOpenProp,
 }: DropDownComponentProps<T>) => {
-  const isAsyncMode = typeof loadOptionsProp === "function";
-
-  const [asyncOptions, setAsyncOptions] = useState<DropDownOption<T>[]>([]);
-  const [asyncLoading, setAsyncLoading] = useState(false);
-
-  const fetchOptions = useCallback(
-    async (search: string) => {
-      if (!loadOptionsProp) return;
-      setAsyncLoading(true);
-      try {
-        const result = await loadOptionsProp(search);
-        setAsyncOptions((result ?? []) as DropDownOption<T>[]);
-      } finally {
-        setAsyncLoading(false);
-      }
-    },
-    [loadOptionsProp]
-  );
-
-  const debouncedSearch = useDebouncedSearch((value) =>
-    fetchOptions(value || "")
-  );
-
-  const handleMenuOpenAsync = useCallback(() => {
-    fetchOptions("");
-  }, [fetchOptions]);
-
-  const options = isAsyncMode ? asyncOptions : optionsProp;
-  const isLoading = isAsyncMode ? asyncLoading : isLoadingProp;
-  const handleInputChange = isAsyncMode ? debouncedSearch : handleInputChangeProp;
-  const isAsyncSearch = isAsyncMode ? true : isAsyncSearchProp;
-  const onMenuOpen = isAsyncMode ? handleMenuOpenAsync : onMenuOpenProp;
+  const options = optionsProp;
+  const isLoading = isLoadingProp;
+  const onMenuOpen = onMenuOpenProp;
 
   const styles: StylesConfig<
     DropDownOption<T>,
@@ -226,8 +190,6 @@ const DropDownComponent = <T,>({
     getOptionLabel: (option: DropDownOption<T>) =>
       option.label?.toString() || "",
     isLoading: isLoading ? isLoading : undefined,
-    onInputChange: handleInputChange,
-    filterOption: isAsyncSearch ? () => true : undefined,
     onMenuOpen,
   };
 

@@ -14,6 +14,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { DropDownOption } from "@/components/DropdownComponent";
 import { lookup_params } from "@/lib/api";
 import DropDownComponent from "@/components/DropdownComponent";
+import AsyncDropDownComponent from "@/components/AsyncDropDownComponent";
 import { useGenerateDropdownOptionsFromEnum } from "@/lib/helpers";
 import { COMPLAINT_STATUS_ENUM } from "@/lib/enums";
 import type { ICustomer } from "@/pages/customer/common/customers";
@@ -123,14 +124,15 @@ const ComplaintsFormContent = ({ isLoading, form }: IField) => {
       >
         <div>
           <div className="grid grid-cols-1 gap-4">
-            <DropDownComponent
+            <AsyncDropDownComponent
               control={control}
               name="customerId"
-              label="Type to search customers..."
-              title="Customer"
+              placeholder="Type to search customers..."
+              label="Customer"
               required
               disabled={isLoading}
-              loadOptions={loadCustomerOptions}
+              options={loadCustomerOptions}
+              width="100%"
             />
           </div>
         </div>

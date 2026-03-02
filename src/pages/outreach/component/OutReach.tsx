@@ -33,10 +33,12 @@ const OutReach = () => {
         meta: { icon: <File size={14} /> },
         cell: ({ row }) => (
           <div className=" flex flex-col items-start gap-1">
-            <span className="">
+            <span className="font-semibold text-xs">
               {row.original?.name ?? "N/A"}
             </span>
-            <Badge>{row.original.outreachTypeCode}</Badge>
+            <Badge className="text-[11px] font-medium px-2 py-0 rounded-full">
+              {row.original.outreachTypeCode}
+            </Badge>
 
           </div>
         ),
