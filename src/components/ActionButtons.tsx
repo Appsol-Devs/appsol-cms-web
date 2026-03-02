@@ -36,7 +36,7 @@ const ActionButton = ({
           onClick={onClick}
           disabled={disabled}
           // size="icon"
-          className="bg-secondary rounded-md text-xs text-secondary-foreground"
+          className="bg-surface! border-gray-700! text-onSurface rounded-md text-xs"
         >
           <Edit className="w-2 h-2" />
           <span className="text-xs">{useText ? useText : "Edit"}</span>

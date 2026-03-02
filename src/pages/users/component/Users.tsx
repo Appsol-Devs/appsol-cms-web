@@ -1,9 +1,10 @@
 import { formatDateTime } from "@/lib/helpers";
 import {
   Briefcase,
+  CircleDot,
   Mail,
   MailX,
-  NotepadText,
+
   Pen,
   User,
   VerifiedIcon,
@@ -17,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { allRoutes } from "@/utils/routes";
 import type { IUser } from "@/pages/customer/common/customers";
 import { useLazyGetUsersQuery } from "../common/usersApi";
+import { getLookupBadgeStyle } from "@/lib/enums";
 
 const Users = () => {
   const [fetchQuery, fetchState] = useLazyGetUsersQuery();
@@ -93,14 +95,22 @@ const Users = () => {
       {
         header: "Status",
         accessorKey: "status",
-        meta: { icon: <NotepadText size={14} /> },
-        cell: ({ row }) => (
-          <div className=" flex flex-col items-start gap-1">
-            <span className="font-semibold p-0.5 text-xs">
-              {row.original.status ?? ""}
-            </span>
-          </div>
-        ),
+        meta: { icon: <CircleDot size={14} /> },
+        cell: ({ row }) => {
+          const status = row.original.status ?? "";
+          const colorCode = row.original.status === "active" ? "#16a34a" : row.original.status === "inactive" ? "#dc2626" : undefined;
+          const style = getLookupBadgeStyle(colorCode);
+
+          return (
+            <Badge
+              variant={colorCode ? undefined : "secondary"}
+              className="capitalize border text-xs font-medium px-2 py-0 rounded-full"
+              style={style}
+            >
+              {status || "N/A"}
+            </Badge>
+          );
+        },
       },
       {
         header: "Action",
