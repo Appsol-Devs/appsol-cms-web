@@ -51,10 +51,12 @@ const CustomerOutReaches = () => {
         meta: { icon: <User size={14} /> },
         cell: ({ row }) => (
           <div className=" flex flex-col items-start gap-1">
-            <span className="">
+            <span className="font-semibold text-xs">
               {row.original?.customer?.name ?? "N/A"}
             </span>
-            <Badge>{row.original.outreachCode}</Badge>
+            <Badge className="text-[11px] font-medium px-2 py-0 rounded-full">
+              {row.original.outreachCode}
+            </Badge>
 
           </div>
         ),
@@ -115,7 +117,8 @@ const CustomerOutReaches = () => {
               onClick={() =>
                 navigate(
                   allRoutes.PORTAL +
-                  allRoutes.VIEW_CUSTOMER_OUTREACH(row.original._id as string)
+                    allRoutes.VIEW_CUSTOMER_OUTREACH(row.original._id as string),
+                  { state: { initialData: row.original } }
                 )
               }
             />

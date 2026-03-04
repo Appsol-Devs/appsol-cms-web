@@ -76,12 +76,11 @@ const Roles = () => {
         cell: ({ row }) => (
           <div className="flex items-center space-x-2">
             <ActionButton
-              type="view" 
+              type="view"
               onClick={() =>
-                navigate(
-                  allRoutes.PORTAL +
-                  allRoutes.VIEW_ROLE(row.original._id as string)
-                )
+                navigate(allRoutes.PORTAL + allRoutes.VIEW_ROLE(row.original._id as string), {
+                  state: { initialData: row.original },
+                })
               }
             />
           </div>

@@ -1,8 +1,9 @@
 import ActionButton from "@/components/ActionButtons";
+import LoadingComponent from "@/components/LoadingComponent";
 import PageSummary from "@/components/PageSummary";
 import PageTitle from "@/components/PageTitle";
 import { User, Mail, Phone, Calendar, Shield, VerifiedIcon, BadgeX, Trash2, } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useDeleteUserMutation, useLazyGetAUserQuery } from "../common/usersApi";
 import { useEffect, useState } from "react";
 import { allRoutes } from "@/utils/routes";
@@ -22,10 +23,14 @@ import ConfirmationDialog from "@/components/ConfirmationDialog";
 const UsersView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const initialData = (location.state as { initialData?: IUser } | null)?.initialData;
 
   const [deleteUser,] = useDeleteUserMutation();
   const [getUserDetails, { isLoading: isFetching }] = useLazyGetAUserQuery();
-  const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
+  const [selectedUser, setSelectedUser] = useState<IUser | null>(() =>
+    initialData && initialData._id === id ? initialData : null
+  );
   const [getUser] = useLazyGetAUserQuery();
   const [creator, setCreator] = useState("");
 
@@ -75,14 +80,25 @@ const UsersView = () => {
 
 
 
-  if (isFetching || !selectedUser) {
-    return <div className="p-8 text-center text-gray-500">Loading user details...</div>;
+  if (!selectedUser) {
+    if (isFetching) {
+      return (
+        <div className="relative min-h-[40vh]">
+          <LoadingComponent loading />
+        </div>
+      );
+    }
+    return (
+      <div className="p-8 text-center text-muted-foreground">
+        User not found.
+      </div>
+    );
   }
 
 
   return (
     <div className="space-y-2">
-      <PageTitle title="User Management" />
+      <PageTitle showBack title="User Management" />
 
       <PageSummary
         icon={User}

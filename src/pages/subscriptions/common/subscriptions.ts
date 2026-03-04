@@ -8,16 +8,15 @@ import type {
 export interface ILastPayment {
   _id?: string;
   customerId?: string;
-  customer?: string;
+  customer?: ICustomer;
   softwareId?: string;
-  software?: string;
+  software?: ISoftware;
   amount?: number;
   subscriptionTypeId?: string;
-  subscriptionType?: string;
+  subscriptionType?: ISubscriptionType;
   notes?: string;
   paymentDate?: string;
   renewalDate?: string;
-  loggedBy?: IUser | string;
   status?: string;
   paymentReference?: string;
   isDeleted?: boolean;
@@ -51,7 +50,7 @@ export interface ISubscription {
   cancelledBy?: IUser;
   cancellationReason?: string;
   notes?: string;
-  loggedBy?: string;
+  loggedBy?: IUser | string;
   createdAt?: string;
   updatedAt?: string;
 }

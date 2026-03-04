@@ -1,5 +1,6 @@
 import ActionButton from "@/components/ActionButtons";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
+import LoadingComponent from "@/components/LoadingComponent";
 import PageSummary from "@/components/PageSummary";
 import PageTitle from "@/components/PageTitle";
 import DetailItem from "@/components/ui/DetailItem";
@@ -15,7 +16,7 @@ import {
   User,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import type { IComplaint } from "../common/complaints";
 import {
   useDeleteComplaintMutation,
@@ -27,13 +28,15 @@ import { getComplaintStatusColor, getLookupBadgeStyle } from "@/lib/enums";
 const ComplaintsView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const initialData = (location.state as { initialData?: IComplaint } | null)?.initialData;
 
   const [deleteComplaint] = useDeleteComplaintMutation();
   const [getComplaintDetails, { isLoading: isFetching }] =
     useLazyGetAComplaintQuery();
 
   const [selectedComplaint, setSelectedComplaint] = useState<IComplaint | null>(
-    null,
+    () => (initialData && initialData._id === id ? initialData : null),
   );
 
   useEffect(() => {
@@ -70,10 +73,17 @@ const ComplaintsView = () => {
     }
   };
 
-  if (isFetching || !selectedComplaint) {
+  if (!selectedComplaint) {
+    if (isFetching) {
+      return (
+        <div className="relative min-h-[40vh]">
+          <LoadingComponent loading />
+        </div>
+      );
+    }
     return (
       <div className="p-8 text-center text-muted-foreground">
-        Loading complaint details...
+        Complaint not found.
       </div>
     );
   }

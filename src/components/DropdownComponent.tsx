@@ -7,6 +7,7 @@ import Select, {
   type StylesConfig,
 } from "react-select";
 
+
 export interface DropDownOption<T = string | number> {
   value: T;
   label: ReactNode;
@@ -14,7 +15,7 @@ export interface DropDownOption<T = string | number> {
 
 interface DropDownComponentProps<T = string | number> {
   label: ReactNode;
-  options: DropDownOption<T>[];
+  options?: DropDownOption<T>[];
   required?: boolean;
   onChanged?: (
     value: SingleValue<DropDownOption<T>>,
@@ -40,16 +41,14 @@ interface DropDownComponentProps<T = string | number> {
   isClearable?: boolean;
   height?: string;
   fontSize?: string;
-  handleInputChange?: (value: string) => void;
   isLoading?: boolean;
   zIndex?: number; // New prop for custom z-index
-  isAsyncSearch?: boolean;
   onMenuOpen?: () => void;
 }
 
 const DropDownComponent = <T,>({
   label,
-  options,
+  options: optionsProp = [],
   onChanged,
   width = "100%",
   controlBgColor,
@@ -69,12 +68,14 @@ const DropDownComponent = <T,>({
   isClearable,
   height,
   fontSize,
-  handleInputChange,
-  isLoading,
+  isLoading: isLoadingProp,
   zIndex = 9999, // Default high z-index
-  isAsyncSearch,
-  onMenuOpen,
+  onMenuOpen: onMenuOpenProp,
 }: DropDownComponentProps<T>) => {
+  const options = optionsProp;
+  const isLoading = isLoadingProp;
+  const onMenuOpen = onMenuOpenProp;
+
   const styles: StylesConfig<
     DropDownOption<T>,
     false,
@@ -189,8 +190,6 @@ const DropDownComponent = <T,>({
     getOptionLabel: (option: DropDownOption<T>) =>
       option.label?.toString() || "",
     isLoading: isLoading ? isLoading : undefined,
-    onInputChange: handleInputChange,
-    filterOption: isAsyncSearch ? () => true : undefined,
     onMenuOpen,
   };
 

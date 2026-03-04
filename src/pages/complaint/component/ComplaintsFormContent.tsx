@@ -10,11 +10,12 @@ import {
   useLazyGetComplaintTypesQuery,
   useLazyGetSoftwaresQuery,
 } from "@/pages/settings/common/settingsApi";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { DropDownOption } from "@/components/DropdownComponent";
 import { lookup_params } from "@/lib/api";
 import DropDownComponent from "@/components/DropdownComponent";
-import { useGenerateDropdownOptionsFromEnum, useDebouncedSearch } from "@/lib/helpers";
+import AsyncDropDownComponent from "@/components/AsyncDropDownComponent";
+import { useGenerateDropdownOptionsFromEnum } from "@/lib/helpers";
 import { COMPLAINT_STATUS_ENUM } from "@/lib/enums";
 import type { ICustomer } from "@/pages/customer/common/customers";
 import type { ISoftware } from "@/pages/settings/common/settings";
@@ -28,14 +29,11 @@ interface IField {
 const ComplaintsFormContent = ({ isLoading, form }: IField) => {
   const { control, register } = form;
 
-  const [getCustomers, { isFetching: customersLoading }] = useLazyGetCustomersQuery();
+  const [getCustomers] = useLazyGetCustomersQuery();
   const [getComplaintTypes] = useLazyGetComplaintTypesQuery();
   const [getComplaintCategories] = useLazyGetComplaintCategoriesQuery();
-  const [getSoftwares, { isFetching: softwareLoading }] = useLazyGetSoftwaresQuery();
+  const [getSoftwares] = useLazyGetSoftwaresQuery();
 
-  const [customerOptions, setCustomerOptions] = useState<
-    DropDownOption<string>[]
-  >([]);
   const [complaintTypeOptions, setComplaintTypeOptions] = useState<
     DropDownOption<string>[]
   >([]);
@@ -49,45 +47,32 @@ const ComplaintsFormContent = ({ isLoading, form }: IField) => {
   const statusOptions =
     useGenerateDropdownOptionsFromEnum(COMPLAINT_STATUS_ENUM);
 
-  const fetchCustomers = (search?: string) => {
-    getCustomers({ ...lookup_params, search })
-      .unwrap()
-      .then((res) => {
-        if (res && res.contents) {
-          const options: DropDownOption<string>[] = res.contents.map(
-            (item: ICustomer) => ({
-              label: item.name ?? "",
-              value: item._id ?? "",
-            }),
-          );
-          setCustomerOptions(options);
-        }
-      });
-  };
-
-  const debouncedCustomerSearch = useDebouncedSearch((value) =>
-    fetchCustomers(value || undefined)
+  const loadCustomerOptions = useCallback(
+    async (inputValue: string): Promise<DropDownOption<string>[]> => {
+      const res = await getCustomers({ ...lookup_params, search: inputValue || undefined }).unwrap();
+      if (!res?.contents) return [];
+      return res.contents.map((item: ICustomer) => ({
+        label: item.name ?? "",
+        value: item._id ?? "",
+      }));
+    },
+    [getCustomers]
   );
 
-  const fetchSoftwares = (search?: string) => {
-    getSoftwares({ ...lookup_params, search })
+  useEffect(() => {
+    getSoftwares(lookup_params)
       .unwrap()
       .then((res) => {
         if (res?.contents) {
-          const options: DropDownOption<string>[] = res.contents.map(
-            (item: ISoftware) => ({
+          setSoftwareOptions(
+            res.contents.map((item: ISoftware) => ({
               label: item.name ?? "",
               value: item._id ?? "",
-            }),
+            }))
           );
-          setSoftwareOptions(options);
         }
       });
-  };
-
-  const debouncedSoftwareSearch = useDebouncedSearch((value) =>
-    fetchSoftwares(value || undefined)
-  );
+  }, [getSoftwares]);
 
   useEffect(() => {
     getComplaintTypes(lookup_params)
@@ -139,18 +124,15 @@ const ComplaintsFormContent = ({ isLoading, form }: IField) => {
       >
         <div>
           <div className="grid grid-cols-1 gap-4">
-            <DropDownComponent
+            <AsyncDropDownComponent
               control={control}
               name="customerId"
-              label="Type to search customers..."
+              placeholder="Type to search customers..."
+              label="Customer"
               required
-              title="Customer"
-              options={customerOptions}
-              handleInputChange={debouncedCustomerSearch}
-              onMenuOpen={() => fetchCustomers(undefined)}
-              isLoading={customersLoading}
-              isAsyncSearch
               disabled={isLoading}
+              options={loadCustomerOptions}
+              width="100%"
             />
           </div>
         </div>
@@ -193,13 +175,9 @@ const ComplaintsFormContent = ({ isLoading, form }: IField) => {
               control={control}
               name="relatedSoftwareId"
               title="Related Software"
-              label="Type to search software..."
+              label="Select software"
               options={softwareOptions}
               required
-              handleInputChange={debouncedSoftwareSearch}
-              onMenuOpen={() => fetchSoftwares(undefined)}
-              isLoading={softwareLoading}
-              isAsyncSearch
               disabled={isLoading}
             />
             <DropDownComponent
