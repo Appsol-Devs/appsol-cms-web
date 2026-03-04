@@ -1,3 +1,5 @@
+import type { IFilters } from "./pagination";
+
 export const prepareApiHeaders = (headers: Headers) => {
   if (localStorage.length > 2) {
     const authHeadersString: string | null =
@@ -21,7 +23,7 @@ export interface IBaseQueryParam {
   userId?: string;
   startDate?: string;
   endDate?: string;
-  //   filters?: IFilters;
+  filters?: IFilters;
 }
 
 export const lookup_params: IBaseQueryParam = {

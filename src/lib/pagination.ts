@@ -9,7 +9,7 @@ import { useState } from "react";
  */
 export const usePagination = (
   initialSize: number = 10,
-  page_count?: number
+  page_count?: number,
 ) => {
   const [pagination, setPagination] = useState<IMetaData>({
     page_size: initialSize,
@@ -46,12 +46,12 @@ export const getPaginationMetaData = (meta: FetchBaseQueryMeta | undefined) => {
         (Object.fromEntries(
           [...(meta?.response?.headers.entries() ?? {})]
             .filter(
-              ([key]) => key.startsWith("_meta_") || key.startsWith("_metal_")
+              ([key]) => key.startsWith("_meta_") || key.startsWith("_metal_"),
             ) // Filter headers that start with "_meta_  /#|_/g"
             .map(([key, value]) => [
               key.replace(/_meta_|_metal_/g, ""),
               Number(value),
-            ]) // Remove prefix and convert to number
+            ]), // Remove prefix and convert to number
         ) as unknown as IMetaData),
     };
   }
@@ -60,7 +60,7 @@ export const getPaginationMetaData = (meta: FetchBaseQueryMeta | undefined) => {
 };
 
 export const getPaginationMetaDataV2 = (
-  response: Response | undefined
+  response: Response | undefined,
 ): IPagination | null => {
   if (!response) return null;
 
@@ -129,27 +129,34 @@ export interface IMetaData {
 }
 
 export interface IFilters {
-  branchId?: string;
-  userId?: string;
-  userBranchId?: string;
-  roleId?: string;
-  permissionId?: string;
-  // "batch.outletId"?: string;
-  // "expense.outletId"?: string;
-  rolePermissionId?: string;
-  auditId?: string;
-  customerId?: string;
-  accountHolderId?: string;
-  accountTypeId?: string;
-  accountId?: string;
-  customerType?: string;
-  accountCustomerId?: string;
-  accountTransactionId?: string;
-  startDate?: string;
-  gender?: string;
-  transactionType?: string;
+  start?: string;
+  end?: string;
   status?: string;
-  performedBy?: string;
-  approvedBy?: string;
-  endDate?: string;
+  customerId?: string;
 }
+
+const ALL_FILTERS = [
+  "customerId",
+  "date",
+  "date_range",
+  "status",
+  "leadStatusId",
+] as const;
+
+export type IFilterArray = (typeof ALL_FILTERS)[number];
+
+export const getQueryRequestUrl = (url: string = "", filters?: IFilters) => {
+  if (!filters) return url;
+
+  const activeFilters = Object.entries(filters)
+    .filter(
+      ([_, value]) => value !== undefined && value !== null && value !== "",
+    )
+    .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+    .join("&");
+
+  if (!activeFilters) return url;
+
+  const separator = url.includes("?") ? "&" : "?";
+  return `${url}${separator}${activeFilters}`;
+};

@@ -42,7 +42,7 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  Filler
+  Filler,
 );
 
 const BUTTON_CLASS =
@@ -91,7 +91,9 @@ const CHART_OPTIONS = {
     tooltip: {
       callbacks: {
         label: (ctx: { parsed: { y: number | null } }) =>
-          ctx.parsed.y != null ? `Revenue: ${ctx.parsed.y.toLocaleString()}` : "",
+          ctx.parsed.y != null
+            ? `Revenue: ${ctx.parsed.y.toLocaleString()}`
+            : "",
       },
     },
   },
@@ -133,17 +135,22 @@ const GRADIENT_COLOR_STOPS = [
 
 function getGradientFill(
   ctx: CanvasRenderingContext2D,
-  chartArea: { top: number; bottom: number; left: number; right: number } | null
+  chartArea: {
+    top: number;
+    bottom: number;
+    left: number;
+    right: number;
+  } | null,
 ): string | CanvasGradient {
   if (!chartArea) return "rgba(34, 197, 94, 0.2)";
   const gradient = ctx.createLinearGradient(
     0,
     chartArea.top,
     0,
-    chartArea.bottom
+    chartArea.bottom,
   );
   GRADIENT_COLOR_STOPS.forEach(([pos, color]) =>
-    gradient.addColorStop(pos, color)
+    gradient.addColorStop(pos, color),
   );
   return gradient;
 }
@@ -151,7 +158,7 @@ function getGradientFill(
 function getLegendGradientFill(ctx: CanvasRenderingContext2D): CanvasGradient {
   const gradient = ctx.createLinearGradient(0, 0, 0, 48);
   GRADIENT_COLOR_STOPS.forEach(([pos, color]) =>
-    gradient.addColorStop(pos, color)
+    gradient.addColorStop(pos, color),
   );
   return gradient;
 }
@@ -162,8 +169,17 @@ function buildLineDataset(data: number[]) {
     data,
     fill: CHART_DATASET.fill,
     borderColor: CHART_DATASET.borderColor,
-    backgroundColor: (ctx: { chart: { ctx: CanvasRenderingContext2D; chartArea: { top: number; bottom: number; left: number; right: number } | null } }) =>
-      getGradientFill(ctx.chart.ctx, ctx.chart.chartArea ?? null),
+    backgroundColor: (ctx: {
+      chart: {
+        ctx: CanvasRenderingContext2D;
+        chartArea: {
+          top: number;
+          bottom: number;
+          left: number;
+          right: number;
+        } | null;
+      };
+    }) => getGradientFill(ctx.chart.ctx, ctx.chart.chartArea ?? null),
     tension: CHART_DATASET.tension,
     borderWidth: CHART_DATASET.borderWidth,
     pointRadius: CHART_DATASET.pointRadius,
@@ -190,11 +206,11 @@ export default function DashboardChart({
   onDateRangeChange,
 }: DashboardChartProps) {
   const [activePreset, setActivePreset] = useState<RangePreset>(() =>
-    getPresetFromRange(dateRange)
+    getPresetFromRange(dateRange),
   );
   const [customOpen, setCustomOpen] = useState(false);
   const [customDate, setCustomDate] = useState<Date | null>(() =>
-    dateRange.startDate ? new Date(dateRange.startDate) : null
+    dateRange.startDate ? new Date(dateRange.startDate) : null,
   );
 
   useEffect(() => {
@@ -230,7 +246,9 @@ export default function DashboardChart({
     try {
       const labels = data.dates.map((dateStr) => {
         const parsed = parseISO(dateStr);
-        return Number.isNaN(parsed.getTime()) ? dateStr : format(parsed, "yyyy-MM-dd");
+        return Number.isNaN(parsed.getTime())
+          ? dateStr
+          : format(parsed, "yyyy-MM-dd");
       });
       const revenues = data.revenues ?? [];
       const dataValues = labels.map((_, i) => {
@@ -250,8 +268,8 @@ export default function DashboardChart({
       size="sm"
       className={cn(
         BUTTON_CLASS,
-        activePreset !== d.id && "!bg-transparent !text-black",
-        activePreset === d.id && "!bg-primary !text-onPrimary"
+        activePreset !== d.id && "bg-transparent! text-black!",
+        activePreset === d.id && "bg-primary! text-onPrimary!",
       )}
       onClick={() => handlePreset(d.id)}
     >
@@ -268,7 +286,11 @@ export default function DashboardChart({
           <div className="flex items-center gap-2">
             {REVENUE_RANGE_PRESETS.map((d) =>
               d.id === "custom" ? (
-                <Popover key={d.id} open={customOpen} onOpenChange={setCustomOpen}>
+                <Popover
+                  key={d.id}
+                  open={customOpen}
+                  onOpenChange={setCustomOpen}
+                >
                   <PopoverTrigger asChild>{renderButton(d)}</PopoverTrigger>
                   <PopoverContent
                     className="w-auto max-h-[85vh] overflow-auto p-2"
@@ -288,7 +310,7 @@ export default function DashboardChart({
                       />
                       <Button
                         size="sm"
-                        className="!bg-primary hover:!bg-primary/80 w-full"
+                        className="bg-primary! hover:bg-primary/80! w-full"
                         onClick={handleCustomApply}
                         disabled={!customDate}
                       >
@@ -299,7 +321,7 @@ export default function DashboardChart({
                 </Popover>
               ) : (
                 <Fragment key={d.id}>{renderButton(d)}</Fragment>
-              )
+              ),
             )}
           </div>
         </div>
