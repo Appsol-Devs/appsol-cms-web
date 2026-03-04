@@ -2,6 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { prepareApiHeaders, type IBaseQueryParam } from "@/lib/api";
 import {
   getPaginationMetaDataV2,
+  getQueryRequestUrl,
   type IPagination,
   type PaginatedResponse,
 } from "@/lib/pagination";
@@ -17,16 +18,15 @@ export const leadsApi = createApi({
   tagTypes: ["ILead"],
   endpoints: (builder) => ({
     getLeads: builder.query<PaginatedResponse<ILead[]>, IBaseQueryParam>({
-      query: ({ pageIndex, search, pageSize }) => {
-        let url = `/leads?pageSize=${pageSize}`;
-        if (search) {
-          url += `&search=${search}`;
-        }
-        if (pageIndex) {
-          url += `&pageIndex=${pageIndex}`;
-        }
+      query: ({ pageIndex, search, pageSize, filters }) => {
+        const params = new URLSearchParams();
+
+        if (search) params.set("search", search);
+        if (pageSize !== undefined) params.set("pageSize", String(pageSize));
+        if (pageIndex !== undefined) params.set("pageIndex", String(pageIndex));
+
         return {
-          url: url,
+          url: getQueryRequestUrl(`/leads?${params.toString()}`, filters),
         };
       },
       transformResponse: async (response: Response) => {

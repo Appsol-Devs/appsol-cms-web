@@ -6,7 +6,12 @@ import LoadingComponent from "@/components/LoadingComponent";
 import PageTitle from "@/components/PageTitle";
 import SearchComponent from "@/components/SearchComponent";
 import type { IBaseQueryParam } from "@/lib/api";
-import { usePagination, type IMetaData } from "@/lib/pagination";
+import {
+  usePagination,
+  type IFilterArray,
+  type IFilters,
+  type IMetaData,
+} from "@/lib/pagination";
 import { isUserLoggedIn } from "@/lib/utils";
 import type { SerializedError } from "@reduxjs/toolkit";
 import type {
@@ -19,6 +24,9 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { LazyGetTriggerType } from "../common/table";
 import ReusableTable from "./ReusableTable";
+import { FilterIcon, FilterX } from "lucide-react";
+import ButtonComponent from "@/components/ButtonComponent";
+import FiltersTemplate from "./FilterTemplate";
 
 interface ITableTemplate<
   Q = any,
@@ -33,7 +41,8 @@ interface ITableTemplate<
   columns: ColumnDef<R>[];
   refetchData?: boolean;
   useDateFilters?: boolean;
-  // filters?: IFilterArray[];
+  pageSize?: number;
+  filters?: IFilterArray[];
   pathOnRowSelected?: (data: R) => void;
   tableAddComponent?: () => React.ReactNode;
   lazyFetchQuery: [
@@ -58,7 +67,7 @@ const FeatureContentRenderer = <
 >({
   title,
   columns,
-  // filters,
+  filters,
   data,
   tableAddComponent,
   lazyFetchQuery,
@@ -66,6 +75,7 @@ const FeatureContentRenderer = <
   id,
   userId,
   pathOnRowSelected,
+  pageSize,
   isSetting,
   useDateFilters,
   // initialQueryFilters,
@@ -73,17 +83,22 @@ const FeatureContentRenderer = <
 }: ITableTemplate<T>) => {
   const [allData, setAllData] = useState<R[]>([]);
   const [searchQuery, setSearchQuery] = useState<string | null>(null);
-  const { onPaginationChange, pagination, page_number = 1 } = usePagination();
+  const {
+    onPaginationChange,
+    pagination,
+    page_number = 1,
+    page_size = 10,
+  } = usePagination();
   // const navigate = useNavigate();
   const [fetchQuery, { isLoading, isFetching, isSuccess, isError }] =
     lazyFetchQuery;
   const navigate = useNavigate();
   const [totalCounts, setTotalCounts] = useState(0);
   const [refetch, setRefetch] = useState(false);
-  // const [queryFilters, setQueryFilters] = useState<IFilters | undefined>(
-  //   undefined
-  // );
-  // const [toggleFilters, setToggleFilters] = useState<boolean>(false);
+  const [queryFilters, setQueryFilters] = useState<IFilters | undefined>(
+    undefined,
+  );
+  const [toggleFilters, setToggleFilters] = useState<boolean>(false);
   const [initialFiltersApplied, setInitialFiltersApplied] = useState(false);
   const [dateRange, setDateRange] = useState<IDateRange | null>(null);
 
@@ -128,12 +143,12 @@ const FeatureContentRenderer = <
     setSearchQuery(searchParam ?? "");
 
     // Always apply date range
-    // let initialFilters: IFilters = {
-    //   startDate: start ? start.toISOString() : undefined,
-    //   endDate: end ? end.toISOString() : undefined,
-    // };
+    let initialFilters: IFilters = {
+      start: start ? start.toISOString() : undefined,
+      end: end ? end.toISOString() : undefined,
+    };
 
-    // setQueryFilters(initialFilters);
+    setQueryFilters(initialFilters);
     setInitialFiltersApplied(true);
   }, []);
 
@@ -159,14 +174,16 @@ const FeatureContentRenderer = <
   }, [refetchData]);
 
   const fetchData = async () => {
+    const applicablePageSize = pageSize ? pageSize : page_size;
+
     const params: IBaseQueryParam = {
       search: searchQuery as string,
       pageIndex: page_number,
-      // paginate: true,
-      pageSize: 10,
+      pageSize: applicablePageSize,
       id: id,
       userId: userId,
       // filters: { ...queryFilters, ...initialQueryFilters },
+      filters: queryFilters,
     };
 
     if ((isUserLoggedIn() && lazyFetchQuery) || refetchData || searchQuery) {
@@ -176,7 +193,6 @@ const FeatureContentRenderer = <
             .unwrap()
             .then((res) => {
               if (res) {
-                console.log("Res: ", res);
                 // DATA
                 setAllData(res.contents as R[]);
 
@@ -188,16 +204,6 @@ const FeatureContentRenderer = <
                   total_pages: Number(metaHeaders.total_pages ?? 0),
                   page_number: Number(metaHeaders.page_number ?? 1),
                   page_size: Number(metaHeaders.page_size ?? 10),
-                  // has_next_page: metaHeaders.has_next_page === "true",
-                  // has_prev_page: metaHeaders.has_prev_page === "true",
-                  // next_page:
-                  //   metaHeaders.next_page === "null"
-                  //     ? null
-                  //     : Number(metaHeaders.next_page),
-                  // prev_page:
-                  //   metaHeaders.prev_page === "null"
-                  //     ? null
-                  //     : Number(metaHeaders.prev_page),
                 };
 
                 onPaginationChange(meta);
@@ -214,10 +220,9 @@ const FeatureContentRenderer = <
 
   useEffect(() => {
     if (!initialFiltersApplied) return;
-    // if (useDateFilters && !queryFilters?.startDate && !queryFilters?.endDate)
-    //   return;
+    if (useDateFilters && !queryFilters?.start && !queryFilters?.end) return;
     fetchData();
-  }, [searchQuery, page_number, refetch, initialFiltersApplied]);
+  }, [searchQuery, page_number, refetch, initialFiltersApplied, queryFilters]);
 
   const handleSearchKeyReturn = (searchKey: string | null) => {
     if (searchKey) {
@@ -227,11 +232,13 @@ const FeatureContentRenderer = <
     }
   };
 
-  // const handleSelectedFilters = (filters: IFilters) => {
-  //   if (filters) {
-  //     setQueryFilters(filters);
-  //   }
-  // };
+  const handleSelectedFilters = (filters: IFilters) => {
+    setQueryFilters((prev) => ({
+      start: prev?.start,
+      end: prev?.end,
+      ...filters,
+    }));
+  };
 
   return (
     <>
@@ -261,16 +268,16 @@ const FeatureContentRenderer = <
                     <DateRangeComponent
                       dateRange={(newRange) => {
                         setDateRange(newRange);
-                        // setQueryFilters((prev) => ({
-                        //   ...prev,
-                        //   startDate: newRange.start?.toISOString(),
-                        //   endDate: newRange.end?.toISOString(),
-                        // }));
+                        setQueryFilters((prev) => ({
+                          ...prev,
+                          start: newRange.start?.toISOString(),
+                          end: newRange.end?.toISOString(),
+                        }));
                       }}
                       defaultDate={dateRange || undefined}
                     />
                   )}
-                  {/* {filters && (
+                  {filters && (
                     <ButtonComponent
                       onSubmit={() => setToggleFilters((prev) => !prev)}
                       className="w-max bg-rx-secondary text-rx-secondary-foreground rounded-full"
@@ -282,11 +289,11 @@ const FeatureContentRenderer = <
                         <FilterIcon width={8} />
                       )}
                     </ButtonComponent>
-                  )} */}
+                  )}
                   {/* <DateRangeComponent dateRange={() => {}} /> */}
                 </div>
               </div>
-              {/* {filters && (
+              {filters && (
                 <div>
                   <FiltersTemplate
                     toggleFilter={toggleFilters}
@@ -295,7 +302,7 @@ const FeatureContentRenderer = <
                     returnFilters={handleSelectedFilters}
                   />
                 </div>
-              )} */}
+              )}
             </div>
           }
         >

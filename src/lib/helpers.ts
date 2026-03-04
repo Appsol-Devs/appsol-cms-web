@@ -6,7 +6,7 @@ const DEBOUNCE_MS = 300;
 
 export function useDebouncedSearch(
   fn: (search: string) => void,
-  delayMs: number = DEBOUNCE_MS
+  delayMs: number = DEBOUNCE_MS,
 ): (search: string) => void {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const fnRef = useRef(fn);
@@ -19,7 +19,7 @@ export function useDebouncedSearch(
         fnRef.current(search);
       }, delayMs);
     },
-    [delayMs]
+    [delayMs],
   );
 }
 
@@ -34,7 +34,7 @@ export const formatToCurrency = (value: number) => {
 
 export const findActiveDropdownOption = (
   value?: string | number,
-  options?: DropDownOption[]
+  options?: DropDownOption[],
 ) => {
   if (value && options) {
     const active = options.find((option) => option.value === value);
@@ -49,20 +49,22 @@ export const generateRandomColor = (): string => {
 };
 
 export const useGenerateDropdownOptionsFromEnum = <
-  T extends Record<string, string>
+  T extends Record<string, string | number>,
 >(
-  enumObject: T
+  enumObject: T,
 ): DropDownOption[] => {
-  return Object.entries(enumObject).map(([key, value]) => ({
-    label: key,
-    value: value,
-  }));
+  return Object.entries(enumObject)
+    .filter(([key]) => isNaN(Number(key))) // removes reverse mapping ONLY when present
+    .map(([key, value]) => ({
+      label: key,
+      value,
+    }));
 };
 
 export const useGenerateDropdownOptions = <T extends Record<string, string>>(
   dataArray: T[],
   labelKey: string,
-  valueKey: string
+  valueKey: string,
 ): DropDownOption[] => {
   return dataArray.map((data) => ({
     label: data[labelKey],
@@ -73,8 +75,8 @@ export const useGenerateDropdownOptions = <T extends Record<string, string>>(
 export const cleanPayload = (obj: Record<string, any>) => {
   return Object.fromEntries(
     Object.entries(obj).filter(
-      ([_, v]) => v !== "" && v !== undefined && v !== null
-    )
+      ([_, v]) => v !== "" && v !== undefined && v !== null,
+    ),
   );
 };
 
@@ -86,7 +88,7 @@ export const formatDate = (date?: Date | string) => {
   if (!date) return "N/A";
   return format(new Date(date), "do MMM y h:mm a").replace(
     /\s(AM|PM)$/i,
-    (_, m) => m.toLowerCase()
+    (_, m) => m.toLowerCase(),
   );
 };
 
@@ -94,11 +96,11 @@ export const formatDateTime = (date?: Date | string) => {
   if (!date) return "—";
   return format(new Date(date), "do MMM y h:mm a").replace(
     /\s(AM|PM)$/i,
-    (_, m) => m.toLowerCase()
+    (_, m) => m.toLowerCase(),
   );
 };
 
-  export const getInitials = (firstName?: string, lastName?: string) => {
+export const getInitials = (firstName?: string, lastName?: string) => {
   const first = firstName?.charAt(0) || "";
   const last = lastName?.charAt(0) || "";
   return (first + last).toUpperCase() || "U"; // "U" as default if no name

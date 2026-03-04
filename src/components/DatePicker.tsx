@@ -44,7 +44,7 @@ export function DatePicker({
   rangeEnd,
 }: Props) {
   const [date, setDate] = React.useState<Date | undefined>(
-    defaultDate ? defaultDate : undefined
+    defaultDate ? defaultDate : undefined,
   );
   const hours = Array.from({ length: 12 }, (_, i) => i + 1);
 
@@ -56,20 +56,20 @@ export function DatePicker({
 
   const handleTimeChange = (
     type: "hour" | "minute" | "ampm",
-    value: string
+    value: string,
   ) => {
     if (date) {
       const newDate = new Date(date);
       if (type === "hour") {
         newDate.setHours(
-          (parseInt(value) % 12) + (newDate.getHours() >= 12 ? 12 : 0)
+          (parseInt(value) % 12) + (newDate.getHours() >= 12 ? 12 : 0),
         );
       } else if (type === "minute") {
         newDate.setMinutes(parseInt(value));
       } else if (type === "ampm") {
         const currentHours = newDate.getHours();
         newDate.setHours(
-          value === "PM" ? currentHours + 12 : currentHours - 12
+          value === "PM" ? currentHours + 12 : currentHours - 12,
         );
       }
       setDate(newDate);
@@ -88,8 +88,14 @@ export function DatePicker({
     rangeStart && rangeEnd
       ? {
           in_range: {
-            from: toDateOnly(rangeStart) <= toDateOnly(rangeEnd) ? toDateOnly(rangeStart) : toDateOnly(rangeEnd),
-            to: toDateOnly(rangeStart) <= toDateOnly(rangeEnd) ? toDateOnly(rangeEnd) : toDateOnly(rangeStart),
+            from:
+              toDateOnly(rangeStart) <= toDateOnly(rangeEnd)
+                ? toDateOnly(rangeStart)
+                : toDateOnly(rangeEnd),
+            to:
+              toDateOnly(rangeStart) <= toDateOnly(rangeEnd)
+                ? toDateOnly(rangeEnd)
+                : toDateOnly(rangeStart),
           },
         }
       : undefined;
@@ -123,7 +129,7 @@ export function DatePicker({
                       size="icon"
                       className={cn(
                         "sm:w-full shrink-0 aspect-square",
-                        !isActive && "bg-rx-neutral text-rx-neutral-foreground"
+                        !isActive && "bg-rx-neutral text-rx-neutral-foreground",
                       )}
                       onClick={() => handleTimeChange("hour", hour.toString())}
                     >
@@ -144,7 +150,7 @@ export function DatePicker({
                     size="icon"
                     className={cn(
                       "sm:w-full shrink-0 aspect-square",
-                      !isActive && "bg-rx-neutral text-rx-neutral-foreground"
+                      !isActive && "bg-rx-neutral text-rx-neutral-foreground",
                     )}
                     onClick={() =>
                       handleTimeChange("minute", minute.toString())
@@ -171,7 +177,7 @@ export function DatePicker({
                     size="icon"
                     className={cn(
                       "sm:w-full shrink-0 aspect-square",
-                      !isActive && "bg-rx-neutral text-rx-neutral-foreground"
+                      !isActive && "bg-rx-neutral text-rx-neutral-foreground",
                     )}
                     onClick={() => handleTimeChange("ampm", ampm)}
                   >
@@ -214,7 +220,11 @@ export function DatePicker({
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
                 {date ? (
-                  dateOnly ? format(date, "do MMM y") : formatDateTime(date)
+                  dateOnly ? (
+                    format(date, "do MMM y")
+                  ) : (
+                    formatDateTime(date)
+                  )
                 ) : (
                   <span className="text-muted-foreground">{placeholder}</span>
                 )}

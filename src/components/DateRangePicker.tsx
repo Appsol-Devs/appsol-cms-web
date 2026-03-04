@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { CalendarIcon, X } from "lucide-react";
+import { CalendarIcon, CalendarX } from "lucide-react";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -14,9 +14,9 @@ import {
   format,
   endOfDay,
 } from "date-fns";
-import { formatDateTime } from "@/lib/helpers";
 import { ScrollArea } from "./ui/scroll-area";
 import { DatePicker } from "./DatePicker";
+// import { useTranslation } from "react-i18next";
 
 export interface IDateRange {
   start: Date | null;
@@ -44,6 +44,7 @@ const DateRangeComponent = ({
   dateOnly,
   allowFuture,
 }: IRange) => {
+  //   const { t } = useTranslation();
   const allPresets: IPreset[] = [
     { label: "Today", value: "today" },
     { label: "Yesterday", value: "yesterday" },
@@ -62,7 +63,7 @@ const DateRangeComponent = ({
   ];
 
   const filteredPresets = allPresets.filter(
-    ({ show }) => allowFuture || show === undefined
+    ({ show }) => allowFuture || show === undefined,
   );
 
   const midnight = new Date();
@@ -75,7 +76,7 @@ const DateRangeComponent = ({
     return null;
   });
   const [showCalendars, setShowCalendars] = React.useState<boolean | null>(
-    null
+    null,
   );
 
   const [selectedDateRange, setSelectedDateRange] = React.useState<IDateRange>({
@@ -195,38 +196,44 @@ const DateRangeComponent = ({
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          className={cn("w-max justify-start text-left font-normal")}
+          className={cn(
+            "w-max justify-start text-left font-normal bg-card! text-onCard! hover:bg-surfaceVariant hover:text-onSurfaceVariant outline-0! ring-0!",
+          )}
         >
           <CalendarIcon className="h-4 w-2" />
           {selectedDateRange.start && selectedDateRange.end ? (
             <span className="text-xs">
-              {dateOnly
-                ? format(selectedDateRange?.start, "do MMM y")
-                : formatDateTime(selectedDateRange?.start)}{" "}
+              {format(
+                selectedDateRange?.start,
+                dateOnly ? "do MMM y" : "do MMM y hh:mm aa",
+              )}{" "}
               -{" "}
-              {dateOnly
-                ? format(selectedDateRange?.end, "do MMM y")
-                : formatDateTime(selectedDateRange?.end)}
+              {format(
+                selectedDateRange?.end,
+                dateOnly ? "do MMM y" : "do MMM y hh:mm aa",
+              )}
             </span>
           ) : (
             <span className="text-sm">
-              {placeholder || "Choose Preferred Date"}
+              {placeholder || "Choose preferred date range"}
             </span>
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className=" w-auto space-y-2 bg-rx-card text-rx-card-foreground">
-        <div className="flex items-start justify-start gap-2">
+      <PopoverContent className=" w-auto space-y-2 bg-card text-onCard">
+        <div className="flex items-start justify-start">
           <ScrollArea className="h-72">
             <div className="flex justify-between items-center">
-              <div className="flex flex-col gap-0.5">
+              <div className="flex flex-col">
                 {filteredPresets.map(({ label, value }) => {
                   return (
                     <Button
                       key={value}
                       variant={preset === value ? "default" : "ghost"}
-                      className={`px-2 py-1 text-xs text-rx-neutral-foreground bg-rx-neutral hover:cursor-pointer hover:opacity-60 ${
-                        preset === value ? "bg-secondary text-onSecondary" : ""
+                      className={`px-2 py-1 text-xs! hover:cursor-pointer ring-0! outline-0! hover:opacity-60 ${
+                        preset === value
+                          ? "bg-surfaceVariant! text-onSurfaceVariant!"
+                          : "bg-card! text-onCard!"
                       }`}
                       onClick={() => handleDateQuickSelect(value)}
                     >
@@ -249,14 +256,12 @@ const DateRangeComponent = ({
                     setSelectedDateRange({ ...selectedDateRange, start: date })
                   }
                   allowFuture={allowFuture}
-                  showInPopover={false}
                 />
                 <DatePicker
                   title="To"
                   dateOnly={dateOnly}
                   defaultDate={selectedDateRange?.end}
                   disabled={!selectedDateRange.start}
-                  showInPopover={false}
                   placeholder="End Date"
                   onChange={(date) =>
                     setSelectedDateRange({ ...selectedDateRange, end: date })
@@ -272,13 +277,13 @@ const DateRangeComponent = ({
                   onClick={handleClearDate}
                   disabled={!selectedDateRange.start || !selectedDateRange.end}
                 >
-                  <X className="mr-2 h-4 w-4" />
+                  <CalendarX className="mr-2 h-4 w-4" />
                   Clear
                 </Button>
                 <p></p>
                 <Button
                   onClick={handleDateSubmit}
-                  className="bg-rx-secondary text-rx-secondary-foreground"
+                  className="text-sm! bg-primary! text-onPrimary!"
                   disabled={!selectedDateRange.start || !selectedDateRange.end}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />

@@ -126,7 +126,7 @@ const Leads = () => {
       },
       {
         header: "Priority",
-        accessorKey: "status",
+        accessorKey: "priority",
         meta: { icon: <Flag size={14} /> },
         cell: ({ row }) => {
           const priority = row.original.priority ?? "";
@@ -153,12 +153,13 @@ const Leads = () => {
         },
       },
     ],
-    [executed]
+    [executed],
   );
 
   return (
     <>
       <FeatureContentRenderer
+        useDateFilters
         tableAddComponent={() => (
           <ActionButton
             type="add"
