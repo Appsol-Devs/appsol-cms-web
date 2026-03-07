@@ -11,7 +11,7 @@ import { useGenerateDropdownOptionsFromEnum } from "@/lib/helpers";
 import type { IFilterArray, IFilters } from "@/lib/pagination";
 import type { ICustomer } from "@/pages/customer/common/customers";
 import { useLazyGetCustomersQuery } from "@/pages/customer/common/customersApi";
-import { BASE_STATUS_ENUM } from "@/lib/enums";
+import { PAYMENT_STATUS_ENUM } from "@/lib/enums";
 import { useLazyGetLeadStatusesQuery } from "@/pages/settings/common/settingsApi";
 
 interface IFiltersTemplate {
@@ -34,7 +34,7 @@ type IFilterFields = Omit<
 
 const FiltersTemplate = ({
   filters,
-  // selectedFilters,
+  selectedFilters,
   returnFilters,
   toggleFilter,
   returnOnFilterChange,
@@ -65,8 +65,8 @@ const FiltersTemplate = ({
   //   --------------------------------------------------------
 
   //   Dropdown options from enums
-  const baseStatusOptions =
-    useGenerateDropdownOptionsFromEnum(BASE_STATUS_ENUM);
+  const statusOptions =
+    useGenerateDropdownOptionsFromEnum(PAYMENT_STATUS_ENUM);
 
   // -------------------------------------------------------
 
@@ -122,6 +122,8 @@ const FiltersTemplate = ({
     if (returnOnFilterChange) {
       const subscription = watch((values) => {
         const payload: IFilters = {
+          startDate: selectedFilters?.startDate,
+          endDate: selectedFilters?.endDate,
           customerId: values.customerId?.value?._id,
           status: values.status?.value,
         };
@@ -129,12 +131,14 @@ const FiltersTemplate = ({
       });
       return () => subscription.unsubscribe();
     }
-  }, [returnOnFilterChange, watch]);
+  }, [returnOnFilterChange, watch, selectedFilters]);
 
   const handleSubmitFilters = () => {
     const data: IFilterFields = getValues();
 
     const payload: IFilters = {
+      startDate: selectedFilters?.startDate,
+      endDate: selectedFilters?.endDate,
       customerId: data.customerId?.value?._id,
       status: data.status?.value,
     };
@@ -165,7 +169,7 @@ const FiltersTemplate = ({
   return (
     <>
       {toggleFilter ? (
-        <Card className="space-y-2">
+        <Card className="gap-3">
           <CardHeader>
             <div className="flex  flex-col md:flex-row space-y-2 md:space-y-0 items-center justify-between">
               <p>Filters</p>
@@ -173,7 +177,7 @@ const FiltersTemplate = ({
                 {!returnOnFilterChange && (
                   <Button
                     onClick={handleSubmitFilters}
-                    className="flex items-center justify-end w-max text-xs! rounded-full bg-primary text-onPrimary"
+                    className="flex items-center justify-end w-max text-xs! rounded-full !bg-primary text-onPrimary"
                   >
                     <Check /> Apply Filters
                   </Button>
@@ -212,7 +216,7 @@ const FiltersTemplate = ({
                 <DropDownComponent
                   title="Status"
                   control={control}
-                  options={baseStatusOptions}
+                  options={statusOptions}
                   name="status"
                   label="Select status"
                 />

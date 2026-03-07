@@ -45,6 +45,7 @@ interface IConfirmationDialog {
   visible?: boolean;
   onClose?: () => void;
   disabled?: boolean;
+  confirmButtonClassName?: string;
 }
 
 const variantConfigs = {
@@ -128,6 +129,7 @@ const ConfirmationDialog = ({
   visible = false,
   onClose,
   disabled = false,
+  confirmButtonClassName,
 }: IConfirmationDialog) => {
   const [open, setOpen] = useState<boolean>(visible);
 
@@ -189,7 +191,8 @@ const ConfirmationDialog = ({
             <Button
               className={cn(
                 "!w-full !text-white !font-medium !rounded-full !h-11 !px-6 !shadow-none !border-0",
-                config.btn
+                config.btn,
+                confirmButtonClassName
               )}
               disabled={disabled}
               onClick={() => {

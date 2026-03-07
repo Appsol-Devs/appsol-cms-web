@@ -4,6 +4,7 @@ import {
   CalendarCheck2,
   ChartBar,
   Computer,
+  CreditCard,
   Headset,
   LayoutDashboardIcon,
   Lock,
@@ -59,6 +60,12 @@ export const sidebarMainMenus: ISidebar[] = [
     name: "Subscriptions",
     icon: Receipt,
     path: allRoutes.SUBSCRIPTIONS,
+  },
+  {
+    mainPath: `${allRoutes.PORTAL}${allRoutes.PAYMENTS}`,
+    name: "Payments",
+    icon: CreditCard,
+    path: allRoutes.PAYMENTS,
   },
   {
     name: "Tickets",

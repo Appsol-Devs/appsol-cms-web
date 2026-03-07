@@ -116,7 +116,7 @@ export function DatePicker({
       {dateOnly ? null : (
         <div className="flex flex-col sm:flex-row sm:h-[300px] divide-y sm:divide-y-0 sm:divide-x">
           <ScrollArea className="w-64 sm:w-auto">
-            <div className="flex sm:flex-col p-2 gap-0.5">
+            <div className="flex sm:flex-col p-2 gap-1">
               {hours
                 .slice()
                 .reverse()
@@ -126,10 +126,12 @@ export function DatePicker({
                   return (
                     <Button
                       key={hour}
-                      size="icon"
+                      size="icon-sm"
                       className={cn(
-                        "sm:w-full shrink-0 aspect-square",
-                        !isActive && "bg-rx-neutral text-rx-neutral-foreground",
+                        "shrink-0 border border-input !text-xs",
+                        isActive
+                          ? "!bg-primary text-primary-foreground"
+                          : "!bg-card text-card-foreground hover:bg-primary/60! hover:text-primary-foreground!",
                       )}
                       onClick={() => handleTimeChange("hour", hour.toString())}
                     >
@@ -141,16 +143,18 @@ export function DatePicker({
             <ScrollBar orientation="horizontal" className="sm:hidden" />
           </ScrollArea>
           <ScrollArea className="w-64 sm:w-auto">
-            <div className="flex sm:flex-col p-2 gap-0.5">
+            <div className="flex sm:flex-col p-2 gap-1">
               {Array.from({ length: 12 }, (_, i) => i * 5).map((minute) => {
                 const isActive = date && date.getMinutes() === minute;
                 return (
                   <Button
                     key={minute}
-                    size="icon"
+                    size="icon-sm"
                     className={cn(
-                      "sm:w-full shrink-0 aspect-square",
-                      !isActive && "bg-rx-neutral text-rx-neutral-foreground",
+                      "shrink-0 border border-input !text-xs",
+                      isActive
+                        ? "!bg-primary text-primary-foreground"
+                        : "!bg-card text-card-foreground hover:bg-primary/60! hover:text-primary-foreground!",
                     )}
                     onClick={() =>
                       handleTimeChange("minute", minute.toString())
@@ -164,7 +168,7 @@ export function DatePicker({
             <ScrollBar orientation="horizontal" className="sm:hidden" />
           </ScrollArea>
           <ScrollArea>
-            <div className="flex sm:flex-col p-2 gap-0.5">
+            <div className="flex sm:flex-col p-2 gap-1">
               {["AM", "PM"].map((ampm) => {
                 const isActive =
                   date &&
@@ -174,10 +178,12 @@ export function DatePicker({
                 return (
                   <Button
                     key={ampm}
-                    size="icon"
+                    size="icon-sm"
                     className={cn(
-                      "sm:w-full shrink-0 aspect-square",
-                      !isActive && "bg-rx-neutral text-rx-neutral-foreground",
+                      "shrink-0 border border-input !text-xs",
+                      isActive
+                        ? "!bg-primary text-primary-foreground"
+                        : "!bg-card text-card-foreground hover:bg-primary/60! hover:text-primary-foreground!",
                     )}
                     onClick={() => handleTimeChange("ampm", ampm)}
                   >

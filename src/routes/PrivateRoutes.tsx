@@ -43,6 +43,9 @@ import CustomerOutreachForm from "@/pages/customer-outreaches/component/Customer
 import Subscriptions from "@/pages/subscriptions/component/Subscriptions";
 import SubscriptionsForm from "@/pages/subscriptions/component/SubscriptionsForm";
 import SubscriptionsView from "@/pages/subscriptions/component/SubscriptionsView";
+import PaymentForm from "@/pages/payments/component/PaymentForm";
+import Payments from "@/pages/payments/component/Payments";
+import PaymentsView from "@/pages/payments/component/PaymentsView";
 
 const PrivateRoutes = () => {
   return (
@@ -195,6 +198,15 @@ const PrivateRoutes = () => {
       <Route
         path={allRoutes.VIEW_SUBSCRIPTION(":id")}
         element={<SubscriptionsView />}
+      />
+      <Route
+        path={allRoutes.ADD_SUBSCRIPTION_PAYMENT(":subscriptionId")}
+        element={<PaymentForm />}
+      />
+      <Route path={allRoutes.PAYMENTS} element={<Payments />} />
+      <Route
+        path={allRoutes.VIEW_PAYMENT(":id")}
+        element={<PaymentsView />}
       />
 
       <Route

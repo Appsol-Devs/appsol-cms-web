@@ -10,6 +10,12 @@ export enum BASE_STATUS_ENUM {
   ACTIVE = "active",
   INACTIVE = "inactive",
 }
+
+export enum PAYMENT_STATUS_ENUM {
+  PENDING = "pending",
+  APPROVED = "approved",
+  REJECTED = "rejected",
+}
 export const COMPLAINT_STATUS_COLORS: Record<string, string> = {
   open: "#ef4444",
   "in-progress": "#f97316",
@@ -109,6 +115,17 @@ export const DUE_STATUS_COLORS: Record<DueStatus, string> = {
   "due-soon": "#eab308",
   upcoming: "#22c55e",
 };
+
+export const PAYMENT_STATUS_COLORS: Record<string, string> = {
+  pending: "#f97316",
+  approved: "#22c55e",
+  rejected: "#ef4444",
+};
+
+export const getPaymentStatusColor = (status?: string) =>
+  status
+    ? PAYMENT_STATUS_COLORS[status.toLowerCase()] ?? undefined
+    : undefined;
 
 export const getDueStatus = (
   nextBillingDate?: string,

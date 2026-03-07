@@ -4,6 +4,7 @@ import {
   Banknote,
   Calendar,
   CircleDot,
+  Hash,
   Monitor,
   User,
 } from "lucide-react";
@@ -39,6 +40,23 @@ const Subscriptions = () => {
         header: "#",
         accessorKey: "index",
         cell: ({ row }) => row.index + 1,
+      },
+      {
+        header: "Code",
+        accessorKey: "subscriptionCode",
+        meta: { icon: <Hash size={14} /> },
+        cell: ({ row }) => (
+          <div className="flex flex-col items-start gap-0.5">
+            <span className="font-semibold text-xs">
+              {row.original?.subscriptionCode ?? "—"}
+            </span>
+            <span className="font-semibold text-muted-foreground text-xs">
+              {row.original?.createdAt
+                ? formatDateTime(row.original.createdAt)
+                : "—"}
+            </span>
+          </div>
+        ),
       },
       {
         header: "Customer",
