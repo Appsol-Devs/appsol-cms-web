@@ -232,8 +232,8 @@ const DateRangeComponent = ({
                       variant={preset === value ? "default" : "ghost"}
                       className={`px-2 py-1 text-xs! hover:cursor-pointer ring-0! outline-0! hover:opacity-60 ${
                         preset === value
-                          ? "bg-surfaceVariant! text-onSurfaceVariant!"
-                          : "bg-card! text-onCard!"
+                          ? "bg-primary! text-primary-foreground!"
+                          : "bg-card! text-onCard! hover:bg-primary/60! hover:text-primary-foreground!"
                       }`}
                       onClick={() => handleDateQuickSelect(value)}
                     >

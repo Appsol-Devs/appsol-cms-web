@@ -129,8 +129,8 @@ export interface IMetaData {
 }
 
 export interface IFilters {
-  start?: string;
-  end?: string;
+  startDate?: string;
+  endDate?: string;
   status?: string;
   customerId?: string;
 }

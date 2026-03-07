@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { showToast } from "@/components/ui/CustomToast";
 import { formatDate, formatToCurrency } from "@/lib/helpers";
 import { allRoutes } from "@/utils/routes";
-import { Calendar, Info, Receipt, Trash2, User } from "lucide-react";
+import { Calendar, CreditCard, Info, Receipt, Trash2, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import type { ISubscription } from "../common/subscriptions";
@@ -126,6 +126,18 @@ const SubscriptionsView = () => {
         } - ${selectedSubscription.software?.name ?? "Unknown software"}`}
         actionComponent={
           <div className="flex items-center gap-2 flex-wrap">
+            <Button
+              onClick={() =>
+                navigate(
+                  allRoutes.PORTAL +
+                    allRoutes.ADD_SUBSCRIPTION_PAYMENT(id as string)
+                )
+              }
+              className="!bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              <CreditCard className="mr-2 h-4 w-4" />
+              <span className="text-xs">Make Payment</span>
+            </Button>
             <ActionButton
               onClick={() =>
                 navigate(

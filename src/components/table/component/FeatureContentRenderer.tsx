@@ -122,8 +122,8 @@ const FeatureContentRenderer = <
   // Parse URL params on mount
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const startDateParam = params.get("start_date");
-    const endDateParam = params.get("end_date");
+    const startDateParam = params.get("startDate");
+    const endDateParam = params.get("endDate");
     const searchParam = params.get("search");
 
     const today = new Date();
@@ -144,8 +144,8 @@ const FeatureContentRenderer = <
 
     // Always apply date range
     let initialFilters: IFilters = {
-      start: start ? start.toISOString() : undefined,
-      end: end ? end.toISOString() : undefined,
+      startDate: start ? start.toISOString() : undefined,
+      endDate: end ? end.toISOString() : undefined,
     };
 
     setQueryFilters(initialFilters);
@@ -220,7 +220,7 @@ const FeatureContentRenderer = <
 
   useEffect(() => {
     if (!initialFiltersApplied) return;
-    if (useDateFilters && !queryFilters?.start && !queryFilters?.end) return;
+    if (useDateFilters && !queryFilters?.startDate && !queryFilters?.endDate) return;
     fetchData();
   }, [searchQuery, page_number, refetch, initialFiltersApplied, queryFilters]);
 
@@ -234,8 +234,8 @@ const FeatureContentRenderer = <
 
   const handleSelectedFilters = (filters: IFilters) => {
     setQueryFilters((prev) => ({
-      start: prev?.start,
-      end: prev?.end,
+      startDate: prev?.startDate,
+      endDate: prev?.endDate,
       ...filters,
     }));
   };
@@ -270,8 +270,8 @@ const FeatureContentRenderer = <
                         setDateRange(newRange);
                         setQueryFilters((prev) => ({
                           ...prev,
-                          start: newRange.start?.toISOString(),
-                          end: newRange.end?.toISOString(),
+                          startDate: newRange.start?.toISOString(),
+                          endDate: newRange.end?.toISOString(),
                         }));
                       }}
                       defaultDate={dateRange || undefined}
@@ -280,7 +280,7 @@ const FeatureContentRenderer = <
                   {filters && (
                     <ButtonComponent
                       onSubmit={() => setToggleFilters((prev) => !prev)}
-                      className="w-max bg-rx-secondary text-rx-secondary-foreground rounded-full"
+                      className="w-max !bg-primary text-primary-foreground rounded-full"
                       size="icon"
                     >
                       {toggleFilters ? (
