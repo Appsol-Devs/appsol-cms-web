@@ -2,6 +2,7 @@ import type { ISummarySection } from "@/components/form/MutationFormSummary";
 import MutationFormTemplate from "@/components/form/MutationFormTemplate";
 import { showToast } from "@/components/ui/CustomToast";
 import type { DropDownOption } from "@/components/DropdownComponent";
+import { addMonths } from "date-fns";
 import { CreditCard, Calendar, FileText } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -22,8 +23,9 @@ const PaymentForm = () => {
   const form = useForm<IPaymentFormFields>({
     defaultValues: {},
   });
-  const { watch, getValues, reset } = form;
+  const { watch, getValues, reset, setValue } = form;
   const values = watch();
+  const paymentDate = watch("paymentDate");
 
   const [subscription, setSubscription] = useState<ISubscription | null>(null);
   const [prefillOptions, setPrefillOptions] = useState<{
@@ -82,11 +84,19 @@ const PaymentForm = () => {
       subscriptionTypeId: opts.subscriptionTypeOptions[0],
       amount: subscription.amount ?? 0,
       paymentDate: "",
-      renewalDate: subscription.nextBillingDate ?? subscription.currentPeriodEnd ?? "",
+      renewalDate: "",
       notes: "",
       paymentReference: "",
     });
   }, [subscription, reset]);
+
+  useEffect(() => {
+    if (!paymentDate || !subscription?.subscriptionType?.durationInMonths) return;
+    const durationInMonths = subscription.subscriptionType.durationInMonths ?? 1;
+    const start = new Date(paymentDate);
+    const renewal = addMonths(start, durationInMonths);
+    setValue("renewalDate", renewal.toISOString());
+  }, [paymentDate, subscription?.subscriptionType?.durationInMonths, setValue]);
 
   const submitData = () => {
     const data = getValues();

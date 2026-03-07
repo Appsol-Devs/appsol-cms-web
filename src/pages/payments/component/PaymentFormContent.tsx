@@ -134,10 +134,15 @@ const PaymentFormContent = ({
               <div className="space-y-1 max-w-[200px]" key={field.value ?? "empty"}>
                 <p className="text-xs text-onCard font-medium">
                   Renewal Date <span className="text-destructive ml-0.5">*</span>
+                  {prefillFromSubscription && (
+                    <span className="text-muted-foreground text-[10px] ml-1 font-normal">
+                      (auto from payment date + subscription type)
+                    </span>
+                  )}
                 </p>
                 <DatePicker
                   title=""
-                  placeholder="Select renewal date"
+                  placeholder={prefillFromSubscription ? "Set payment date first" : "Select renewal date"}
                   dateOnly
                   required
                   disabled={isLoading}

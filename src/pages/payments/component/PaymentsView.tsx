@@ -116,14 +116,15 @@ const PaymentsView = () => {
     if (!id) return;
 
     try {
-      const res = await approveOrRejectPayment({ id, status }).unwrap();
+      await approveOrRejectPayment({ id, status }).unwrap();
       setExecuted(true);
       showToast({
         title: "Success",
         message: `Payment ${status} successfully.`,
         type: "success",
       });
-      if (res) setSelectedPayment(res);
+      const updated = await getPayment(id).unwrap();
+      if (updated) setSelectedPayment(updated);
     } catch (error) {
       console.error("Failed to update payment", error);
       showToast({
@@ -171,6 +172,7 @@ const PaymentsView = () => {
                   </p>
                 }
                 onConfirmClicked={() => handleApproveOrReject("approved")}
+                confirmButtonClassName="!bg-primary hover:!bg-primary/90 !text-primary-foreground"
                 trigger={
                   <Button className="!bg-primary hover:bg-primary/90 text-white">
                     <Check className="mr-2 h-4 w-4" />

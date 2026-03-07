@@ -1,5 +1,5 @@
 import { formatDateTime, formatToCurrency } from "@/lib/helpers";
-import { Banknote, Calendar, Monitor, User, CreditCard } from "lucide-react";
+import { Banknote, Calendar, FileText, Monitor, User, CreditCard } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import FeatureContentRenderer from "@/components/table/component/FeatureContentRenderer";
@@ -29,16 +29,23 @@ const Payments = () => {
         cell: ({ row }) => row.index + 1,
       },
       {
-        header: "Code",
-        accessorKey: "paymentCode",
-        meta: { icon: <CreditCard size={14} /> },
+        header: "Date",
+        accessorKey: "paymentDate",
+        meta: { icon: <Calendar size={14} /> },
         cell: ({ row }) => (
-          <Badge
-            variant="secondary"
-            className="capitalize border text-[11px] font-medium px-2 py-0 rounded-full bg-primary"
-          >
-            {row.original?.paymentCode ?? "—"}
-          </Badge>
+          <div className="flex flex-col items-start gap-1">
+            <Badge
+              variant="secondary"
+              className="capitalize border text-[11px] font-medium px-2 py-0 rounded-full bg-primary text-primary-foreground w-fit"
+            >
+              {row.original?.paymentCode ?? "—"}
+            </Badge>
+            <span className="font-semibold text-muted-foreground text-xs">
+              {row.original?.paymentDate
+                ? formatDateTime(row.original.paymentDate)
+                : "—"}
+            </span>
+          </div>
         ),
       },
       {
@@ -61,9 +68,14 @@ const Payments = () => {
         accessorKey: "softwareId",
         meta: { icon: <Monitor size={14} /> },
         cell: ({ row }) => (
-          <span className="font-semibold text-xs">
-            {row.original?.software?.name ?? "N/A"}
-          </span>
+          <div className="flex flex-col items-start gap-0.5">
+            <span className="font-semibold text-xs">
+              {row.original?.software?.name ?? "—"}
+            </span>
+            <span className="font-semibold text-muted-foreground text-xs">
+              {row.original?.subscriptionType?.name ?? "—"}
+            </span>
+          </div>
         ),
       },
       {
@@ -73,6 +85,16 @@ const Payments = () => {
         cell: ({ row }) => (
           <span className="font-semibold text-xs">
             {formatToCurrency(row.original?.amount ?? 0)}
+          </span>
+        ),
+      },
+      {
+        header: "Reference",
+        accessorKey: "paymentReference",
+        meta: { icon: <FileText size={14} /> },
+        cell: ({ row }) => (
+          <span className="font-medium text-xs text-muted-foreground">
+            {row.original?.paymentReference ?? "—"}
           </span>
         ),
       },
@@ -94,18 +116,6 @@ const Payments = () => {
             </Badge>
           );
         },
-      },
-      {
-        header: "Payment Date",
-        accessorKey: "paymentDate",
-        meta: { icon: <Calendar size={14} /> },
-        cell: ({ row }) => (
-          <span className="font-semibold text-muted-foreground text-xs">
-            {row.original?.paymentDate
-              ? formatDateTime(row.original.paymentDate)
-              : "—"}
-          </span>
-        ),
       },
     ],
     [executed]
