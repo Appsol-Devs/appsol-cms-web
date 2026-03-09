@@ -78,6 +78,8 @@ export const allRoutes = Object.freeze({
   ADD_CUSTOMER_OUTREACH: "/customer-outreachs/new",
   UPDATE_CUSTOMER_OUTREACH: (id: string) => `/customer-outreachs/${id}`,
   VIEW_CUSTOMER_OUTREACH: (id: string) => `/customer-outreachs/${id}/view`,
+  ALL_NOTIFICATIONS: "/all-notifications",
+  VIEW_NOTIFICATION: (id: string) => `/notifications/${id}/view`,
 });
 
 export const customerRoutes = Object.freeze({
