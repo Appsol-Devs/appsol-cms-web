@@ -23,6 +23,9 @@ import SubscriptionTypesForm from "@/pages/settings/components/subscription-type
 import Complaints from "@/pages/complaint/component/Complaints";
 import ComplaintsForm from "@/pages/complaint/component/ComplaintsForm";
 import ComplaintsView from "@/pages/complaint/component/ComplaintsView";
+import Tickets from "@/pages/ticket/component/Tickets";
+import TicketForm from "@/pages/ticket/component/TicketForm";
+import TicketView from "@/pages/ticket/component/TicketView";
 import Leads from "@/pages/leads/component/Leads";
 import LeadsForm from "@/pages/leads/component/LeadsForm";
 import LeadsView from "@/pages/leads/component/LeadsView";
@@ -46,7 +49,6 @@ import SubscriptionsView from "@/pages/subscriptions/component/SubscriptionsView
 import PaymentForm from "@/pages/payments/component/PaymentForm";
 import Payments from "@/pages/payments/component/Payments";
 import PaymentsView from "@/pages/payments/component/PaymentsView";
-import AllNotifications from "@/pages/layout/notification/component/AllNotifications";
 
 const PrivateRoutes = () => {
   return (
@@ -86,6 +88,16 @@ const PrivateRoutes = () => {
       <Route
         path={allRoutes.VIEW_COMPLAINT(":id")}
         element={<ComplaintsView />}
+      />
+      <Route path={allRoutes.TICKETS} element={<Tickets />} />
+      <Route path={allRoutes.ADD_TICKET} element={<TicketForm />} />
+      <Route
+        path={allRoutes.UPDATE_TICKET(":id")}
+        element={<TicketForm />}
+      />
+      <Route
+        path={allRoutes.VIEW_TICKET(":id")}
+        element={<TicketView />}
       />
       <Route
         path={allRoutes.COMPLAINT_CATEGORIES}
@@ -209,12 +221,6 @@ const PrivateRoutes = () => {
         path={allRoutes.VIEW_PAYMENT(":id")}
         element={<PaymentsView />}
       />
-      <Route
-        path={allRoutes.ALL_NOTIFICATIONS}
-        element={<AllNotifications />}
-      />
-     
-
 
       <Route
         path={`${allRoutes.SETTINGS}/*`}

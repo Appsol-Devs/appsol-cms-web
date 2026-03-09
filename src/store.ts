@@ -19,6 +19,7 @@ import { settingsApi } from "./pages/settings/common/settingsApi";
 import { apiErrorMiddleware } from "./lib/apiErrorMiddleware";
 import { usersApi } from "./pages/users/common/usersApi";
 import { complaintsApi } from "./pages/complaint/common/complaintsApi";
+import { ticketsApi } from "./pages/ticket/common/ticketsApi";
 import { leadsApi } from "./pages/leads/common/leadsApi";
 import { dashboardApi } from "./pages/dashboard/common/dashboardApi";
 import { outReachApi } from "./pages/outreach/common/OutReachApi";
@@ -26,7 +27,6 @@ import { customerOutreachApi } from "./pages/customer-outreaches/common/customer
 import { subscriptionsApi } from "./pages/subscriptions/common/subscriptionsApi";
 import { paymentsApi } from "./pages/payments/common/paymentsApi";
 import { sidebarReducer } from "./pages/layout/sidebar/common/sidebarSlice";
-import { notificationsApi } from "./pages/layout/notification/common/notificationsApi";
 
 const persistConfig = {
   key: "root",
@@ -46,13 +46,13 @@ export const store = configureStore({
     [customersApi.reducerPath]: customersApi.reducer,
     [usersApi.reducerPath]: usersApi.reducer,
     [complaintsApi.reducerPath]: complaintsApi.reducer,
+    [ticketsApi.reducerPath]: ticketsApi.reducer,
     [leadsApi.reducerPath]: leadsApi.reducer,
     [dashboardApi.reducerPath]: dashboardApi.reducer,
     [outReachApi.reducerPath]: outReachApi.reducer,
     [customerOutreachApi.reducerPath]: customerOutreachApi.reducer,
     [subscriptionsApi.reducerPath]: subscriptionsApi.reducer,
     [paymentsApi.reducerPath]: paymentsApi.reducer,
-    [notificationsApi.reducerPath]: notificationsApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -69,13 +69,13 @@ export const store = configureStore({
         customersApi.middleware,
         usersApi.middleware,
         complaintsApi.middleware,
+        ticketsApi.middleware,
         leadsApi.middleware,
         dashboardApi.middleware,
         outReachApi.middleware,
         customerOutreachApi.middleware,
         subscriptionsApi.middleware,
         paymentsApi.middleware,
-        notificationsApi.middleware
       )
       .concat(apiErrorMiddleware),
 });

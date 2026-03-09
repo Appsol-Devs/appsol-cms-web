@@ -33,7 +33,7 @@ const ComplaintsForm = () => {
   const [getSelectedData, { isLoading: isGetting }] =
     useLazyGetAComplaintQuery();
   const form = useForm<IComplaintFields>();
-  const { watch, getValues } = form;
+  const { watch, getValues, reset } = form;
   const values = watch();
 
   const navigate = useNavigate();
@@ -55,12 +55,33 @@ const ComplaintsForm = () => {
 
   const resetFormWithData = (data: IComplaint) => {
     if (!data) return;
-    // reset({
-    //   ...data,
-    //   name: data.name,
-    //   description: data.description,
-    //   isActive: data.isActive,
-    // });
+    reset({
+      ...data,
+      customerId: data.customer
+        ? { label: data.customer.name ?? "", value: data.customer._id ?? "" }
+        : undefined,
+      complaintTypeId: data.complaintType
+        ? {
+            label: data.complaintType.name ?? "",
+            value: data.complaintType._id ?? "",
+          }
+        : undefined,
+      complaintCategoryId: data.complaintCategory
+        ? {
+            label: data.complaintCategory.name ?? "",
+            value: data.complaintCategory._id ?? "",
+          }
+        : undefined,
+      relatedSoftwareId: data.relatedSoftware
+        ? {
+            label: data.relatedSoftware.name ?? "",
+            value: data.relatedSoftware._id ?? "",
+          }
+        : undefined,
+      status: data.status
+        ? { label: data.status, value: data.status }
+        : undefined,
+    });
   };
 
   useEffect(() => {
@@ -127,7 +148,7 @@ const ComplaintsForm = () => {
       complaintTypeId: data.complaintTypeId?.value,
       complaintCategoryId: data.complaintCategoryId?.value,
       relatedSoftwareId: data.relatedSoftwareId?.value,
-      //   isActive: id ? data.isActive : undefined,
+      status: data.status?.value,
     });
 
     // console.log(payload);
