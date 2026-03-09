@@ -46,6 +46,7 @@ import SubscriptionsView from "@/pages/subscriptions/component/SubscriptionsView
 import PaymentForm from "@/pages/payments/component/PaymentForm";
 import Payments from "@/pages/payments/component/Payments";
 import PaymentsView from "@/pages/payments/component/PaymentsView";
+import AllNotifications from "@/pages/layout/notification/component/AllNotifications";
 
 const PrivateRoutes = () => {
   return (
@@ -208,6 +209,12 @@ const PrivateRoutes = () => {
         path={allRoutes.VIEW_PAYMENT(":id")}
         element={<PaymentsView />}
       />
+      <Route
+        path={allRoutes.ALL_NOTIFICATIONS}
+        element={<AllNotifications />}
+      />
+     
+
 
       <Route
         path={`${allRoutes.SETTINGS}/*`}
