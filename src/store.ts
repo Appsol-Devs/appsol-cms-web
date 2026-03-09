@@ -19,6 +19,7 @@ import { settingsApi } from "./pages/settings/common/settingsApi";
 import { apiErrorMiddleware } from "./lib/apiErrorMiddleware";
 import { usersApi } from "./pages/users/common/usersApi";
 import { complaintsApi } from "./pages/complaint/common/complaintsApi";
+import { ticketsApi } from "./pages/ticket/common/ticketsApi";
 import { leadsApi } from "./pages/leads/common/leadsApi";
 import { dashboardApi } from "./pages/dashboard/common/dashboardApi";
 import { outReachApi } from "./pages/outreach/common/OutReachApi";
@@ -46,6 +47,7 @@ export const store = configureStore({
     [customersApi.reducerPath]: customersApi.reducer,
     [usersApi.reducerPath]: usersApi.reducer,
     [complaintsApi.reducerPath]: complaintsApi.reducer,
+    [ticketsApi.reducerPath]: ticketsApi.reducer,
     [leadsApi.reducerPath]: leadsApi.reducer,
     [dashboardApi.reducerPath]: dashboardApi.reducer,
     [outReachApi.reducerPath]: outReachApi.reducer,
@@ -53,6 +55,7 @@ export const store = configureStore({
     [subscriptionsApi.reducerPath]: subscriptionsApi.reducer,
     [paymentsApi.reducerPath]: paymentsApi.reducer,
     [notificationsApi.reducerPath]: notificationsApi.reducer,
+
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -69,13 +72,14 @@ export const store = configureStore({
         customersApi.middleware,
         usersApi.middleware,
         complaintsApi.middleware,
+        ticketsApi.middleware,
         leadsApi.middleware,
         dashboardApi.middleware,
         outReachApi.middleware,
         customerOutreachApi.middleware,
         subscriptionsApi.middleware,
         paymentsApi.middleware,
-        notificationsApi.middleware
+        notificationsApi.middleware,
       )
       .concat(apiErrorMiddleware),
 });

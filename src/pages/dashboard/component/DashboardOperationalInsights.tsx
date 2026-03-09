@@ -1,4 +1,5 @@
 import CardComponent from "@/components/CardComponent";
+import { COMPLAINT_STATUS_COLORS, TICKET_STATUS_COLORS } from "@/lib/enums";
 import type { IOperationalInsights } from "../common/dashboard";
 import {
   ArcElement,
@@ -14,9 +15,21 @@ ChartJS.register(DoughnutController, ArcElement, Tooltip, Legend);
 const CARD_CLASS = "w-2/5";
 const HEADER_TITLE = <p className="font-bold">Operational Insights</p>;
 
-const COMPLAINTS_COLORS = ["#ef4444", "#f97316", "#eab308", "#22c55e", "#6b7280"];
+const COMPLAINTS_COLORS = [
+  COMPLAINT_STATUS_COLORS.open,
+  COMPLAINT_STATUS_COLORS["in-progress"],
+  COMPLAINT_STATUS_COLORS.rescheduled,
+  COMPLAINT_STATUS_COLORS.resolved,
+  COMPLAINT_STATUS_COLORS.closed,
+];
 
-const TICKETS_COLORS = ["#3b82f6", "#22c55e", "#6b7280", "#8b5cf6", "#ef4444"];
+const TICKETS_COLORS = [
+  TICKET_STATUS_COLORS.open,
+  TICKET_STATUS_COLORS.fixed,
+  TICKET_STATUS_COLORS.closed,
+  TICKET_STATUS_COLORS.assigned,
+  TICKET_STATUS_COLORS.rejected,
+];
 
 interface DashboardOperationalInsightsProps {
   data: IOperationalInsights | null;

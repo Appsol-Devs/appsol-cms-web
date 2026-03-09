@@ -103,6 +103,16 @@ const ComplaintsView = () => {
             <ActionButton
               onClick={() =>
                 navigate(
+                  allRoutes.PORTAL + allRoutes.ADD_TICKET,
+                  { state: { complaint: selectedComplaint, complaintId: selectedComplaint._id } },
+                )
+              }
+              type="add"
+              useText="Create Ticket"
+            />
+            <ActionButton
+              onClick={() =>
+                navigate(
                   allRoutes.PORTAL +
                     allRoutes.UPDATE_COMPLAINT(id as string),
                 )

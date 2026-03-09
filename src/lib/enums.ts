@@ -67,6 +67,38 @@ export const LEAD_STATUS_COLORS: Record<string, string> = {
 export const getLeadStatusColor = (status?: string) =>
   status ? (LEAD_STATUS_COLORS[status.toLowerCase()] ?? undefined) : undefined;
 
+export enum TICKET_PRIORITY_ENUM {
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  URGENT = "urgent",
+}
+
+export const TICKET_PRIORITY_COLORS: Record<string, string> = {
+  low: "#0E9F6E",
+  medium: "#F97316",
+  high: "#EF4444",
+  urgent: "#7C3AED",
+};
+
+export const getTicketPriorityColor = (priority?: string) =>
+  priority
+    ? (TICKET_PRIORITY_COLORS[priority.toLowerCase()] ?? undefined)
+    : undefined;
+
+export const TICKET_STATUS_COLORS: Record<string, string> = {
+  open: "#3b82f6",    
+  fixed: "#eab308",     
+  closed: "#22c55e",    
+  assigned: "#8b5cf6",  
+  rejected: "#ef4444",  
+};
+
+export const getTicketStatusColor = (status?: string) =>
+  status
+    ? (TICKET_STATUS_COLORS[status.toLowerCase()] ?? undefined)
+    : undefined;
+
 export const getLookupBadgeStyle = (
   colorCode?: string,
 ):
