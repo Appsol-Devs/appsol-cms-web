@@ -58,6 +58,21 @@ export interface IOutReachType {
   _id?: string;
 }
 
+export interface INotification {
+  notificationCode?: string
+  message?: string
+  targetEntityType?: string
+  userId?: string
+  user?: IUser
+  link?: string
+  isRead?: boolean
+  targetEntityId?: string
+  targetEntity?: string
+  _id?: string
+  createdAt?: string
+  updatedAt?: string
+}
+
 export interface IRequestOTPPayload {
   userId: string;
   email: string;

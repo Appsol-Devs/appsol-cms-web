@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { Bell, Search, Menu, Settings, LogOut, User } from "lucide-react";
+import { Search, Menu, Settings, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -14,13 +13,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Badge } from "@/components/ui/badge";
 import Sidebar from "../../sidebar/component/Sidebar";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
+import Notifications from "../../notification/component/Notifications";
 
 function Header() {
-  const [notifications] = useState(3);
   const activeUser = useSelector((state: RootState) => state.user);
 
   const getInitials = () => {
@@ -72,7 +70,7 @@ function Header() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" className="relative bg-transparent! border-onSurface!">
+          {/* <Button variant="ghost" size="icon" className="relative bg-transparent! border-onSurface!">
             <Bell className="h-5 w-5 text-onSurface hover:text-foreground transition-colors" />
             {notifications > 0 && (
               <Badge
@@ -82,7 +80,8 @@ function Header() {
                 {notifications}
               </Badge>
             )}
-          </Button>
+          </Button> */}
+          <Notifications/>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
