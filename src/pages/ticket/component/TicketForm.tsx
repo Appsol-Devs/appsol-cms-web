@@ -216,6 +216,8 @@ const TicketForm = () => {
             isLoading={isCreating}
             prefillComplaintId={prefillComplaintId}
             prefillComplaint={prefillComplaint}
+            isStatusDisabled={selectedTicket?.status?.toLowerCase() === "closed"}
+            isAssignedEngineerDisabled={!!id}
           />
         }
         submitData={submitData}

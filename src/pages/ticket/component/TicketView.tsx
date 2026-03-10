@@ -10,7 +10,9 @@ import { formatDate } from "@/lib/helpers";
 import { allRoutes } from "@/utils/routes";
 import {
   Calendar,
+  CheckCircle2,
   FileText,
+  RefreshCw,
   Ticket,
   Trash2,
   User,
@@ -22,8 +24,17 @@ import type { ITicket } from "../common/tickets";
 import {
   useLazyGetATicketQuery,
   useDeleteTicketMutation,
+  useReassignTicketMutation,
+  useCloseTicketMutation,
 } from "../common/ticketsApi";
 import { useLazyGetAUserQuery } from "@/pages/users/common/usersApi";
+import { useLazyGetUsersQuery } from "@/pages/users/common/usersApi";
+import type { IUser } from "@/pages/customer/common/customers";
+import type { DropDownOption } from "@/components/DropdownComponent";
+import DropDownComponent from "@/components/DropdownComponent";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { lookup_params } from "@/lib/api";
 import { Badge } from "@/components/ui/badge";
 import {
   getTicketPriorityColor,
@@ -40,8 +51,15 @@ const TicketView = () => {
   const [getTicketDetails, { isLoading: isFetching }] =
     useLazyGetATicketQuery();
   const [deleteTicket] = useDeleteTicketMutation();
+  const [reassignTicket, { isLoading: isReassigning }] =
+    useReassignTicketMutation();
+  const [closeTicket, { isLoading: isClosing }] = useCloseTicketMutation();
+  const [getUsers] = useLazyGetUsersQuery();
   const [getAUser] = useLazyGetAUserQuery();
   const [loggedByName, setLoggedByName] = useState<string>("—");
+  const [reassignTo, setReassignTo] = useState<DropDownOption<string> | null>(null);
+  const [reassignReason, setReassignReason] = useState("");
+  const [engineerOptions, setEngineerOptions] = useState<DropDownOption<string>[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<ITicket | null>(
     () => (initialData && initialData._id === id ? initialData : null),
   );
@@ -79,6 +97,95 @@ const TicketView = () => {
       })
       .catch(() => setLoggedByName("—"));
   }, [selectedTicket, getAUser]);
+
+  useEffect(() => {
+    getUsers(lookup_params)
+      .unwrap()
+      .then((res) => {
+        if (!res?.contents) return;
+        setEngineerOptions(
+          (res.contents as IUser[]).map((item) => ({
+            label: `${item.firstName ?? ""} ${item.lastName ?? ""} (${item.email ?? ""})`.trim(),
+            value: item._id ?? "",
+          })),
+        );
+      })
+      .catch(() => {});
+  }, [getUsers]);
+
+  const handleReassign = async () => {
+    if (!id || !reassignTo?.value || !reassignReason.trim()) {
+      showToast({
+        title: "Validation",
+        message: "Please select an engineer and enter a reason.",
+        type: "error",
+      });
+      return;
+    }
+    const fromId =
+      selectedTicket?.assignedEngineerId ??
+      selectedTicket?.assignedEngineer?._id;
+    if (!fromId) {
+      showToast({
+        title: "Cannot Reassign",
+        message: "No engineer is currently assigned. Use Edit to assign.",
+        type: "error",
+      });
+      return;
+    }
+    if (reassignTo.value === fromId) {
+      showToast({
+        title: "Validation",
+        message: "Select a different engineer to reassign to.",
+        type: "error",
+      });
+      return;
+    }
+    try {
+      await reassignTicket({
+        id,
+        from: fromId,
+        to: reassignTo.value,
+        reason: reassignReason.trim(),
+      }).unwrap();
+      setReassignTo(null);
+      setReassignReason("");
+      const refreshed = await getTicketDetails(id).unwrap();
+      if (refreshed) setSelectedTicket(refreshed);
+      showToast({
+        title: "Success",
+        message: "Ticket reassigned successfully.",
+        type: "success",
+      });
+    } catch (error) {
+      console.error("Failed to reassign ticket", error);
+      showToast({
+        title: "Error",
+        message: "Failed to reassign ticket.",
+        type: "error",
+      });
+    }
+  };
+
+  const handleClose = async () => {
+    if (!id) return;
+    try {
+      const updated = await closeTicket(id).unwrap();
+      if (updated) setSelectedTicket(updated);
+      showToast({
+        title: "Success",
+        message: "Ticket closed successfully.",
+        type: "success",
+      });
+    } catch (error) {
+      console.error("Failed to close ticket", error);
+      showToast({
+        title: "Error",
+        message: "Failed to close ticket.",
+        type: "error",
+      });
+    }
+  };
 
   const handleDelete = async () => {
     if (!id) return;
@@ -129,6 +236,26 @@ const TicketView = () => {
         description={selectedTicket.title ?? ""}
         actionComponent={
           <div className="flex items-center gap-2 flex-wrap">
+            {selectedTicket.status?.toLowerCase() !== "closed" && (
+              <ConfirmationDialog
+                title="Mark as Closed?"
+                rightActionTitle="Close"
+                content={
+                  <p className="text-muted-foreground text-center">
+                    Are you sure you want to close this ticket{" "}
+                    <strong>{selectedTicket.ticketCode ?? selectedTicket.title}</strong>?
+                  </p>
+                }
+                onConfirmClicked={handleClose}
+                confirmButtonClassName="!bg-primary hover:!bg-primary/90 !text-primary-foreground"
+                trigger={
+                  <Button variant="default" disabled={isClosing} className="bg-primary! text-primary-foreground! rounded-md! text-xs! hover:opacity-90! hover:bg-primary/90!">
+                    <CheckCircle2 className="mr-2 h-4 w-4" />
+                    <span className="text-xs">Mark as Closed</span>
+                  </Button>
+                }
+              />
+            )}
             <ActionButton
               onClick={() => {
                 const complaintId = selectedTicket.complaintId ?? selectedTicket.complaint?._id;
@@ -291,6 +418,65 @@ const TicketView = () => {
                     {selectedTicket.notes}
                   </div>
                 </div>
+              )}
+            </div>
+          </div>
+
+          <div className="bg-card rounded-xl border shadow-sm overflow-hidden mt-4">
+            <div className="px-6 py-4 border-b bg-muted/30 flex items-center gap-2">
+              <RefreshCw className="w-4 h-4 text-muted-foreground" />
+              <h3 className="font-semibold text-card-foreground">
+                Reassign Ticket
+              </h3>
+            </div>
+            <div className="p-6 space-y-4">
+              {selectedTicket.assignedEngineer || selectedTicket.assignedEngineerId ? (
+                <>
+                  <div className="space-y-2">
+                    <Label className="text-xs font-semibold">
+                      Reassign to
+                    </Label>
+                    <DropDownComponent
+                      label="Select engineer"
+                      title="Engineer"
+                      options={engineerOptions.filter(
+                        (o) =>
+                          o.value !==
+                          (selectedTicket.assignedEngineerId ??
+                            selectedTicket.assignedEngineer?._id),
+                      )}
+                      defaultValue={reassignTo ?? undefined}
+                      onChanged={(val) =>
+                        setReassignTo(val as DropDownOption<string> | null)
+                      }
+                      isClearable
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs font-semibold">
+                      Reason <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      placeholder="e.g. Mistake, Not available"
+                      value={reassignReason}
+                      onChange={(e) => setReassignReason(e.target.value)}
+                      disabled={isReassigning}
+                    />
+                  </div>
+                  <Button
+                    onClick={handleReassign}
+                    disabled={
+                      isReassigning || !reassignTo?.value || !reassignReason.trim()
+                    }
+                    className="bg-primary! text-primary-foreground! rounded-md! text-xs!"
+                  >
+                    {isReassigning ? "Reassigning..." : "Reassign"}
+                  </Button>
+                </>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  No engineer assigned. Use Edit to assign an engineer first.
+                </p>
               )}
             </div>
           </div>

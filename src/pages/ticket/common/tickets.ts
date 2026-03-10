@@ -30,6 +30,15 @@ export interface ITicketComplaint {
   complaintCode?: string;
 }
 
+export interface ITicketHistoryEntry {
+  _id?: string;
+  from?: string | IUser | null;
+  to?: string | IUser | null;
+  date?: string;
+  reason?: string;
+  createdAt?: string;
+}
+
 export interface ITicket {
   _id?: string;
   ticketCode?: string;
@@ -43,7 +52,7 @@ export interface ITicket {
   priority?: TicketPriority;
   status?: TicketStatus;
   loggedBy?: IUser;
-  history?: unknown[];
+  history?: ITicketHistoryEntry[];
   rejectionReason?: string;
   createdAt?: string;
   updatedAt?: string;
@@ -57,4 +66,10 @@ export interface ICreateTicketPayload {
   assignedEngineerId?: string;
   priority?: TicketPriority;
   status?: string;
+}
+
+export interface IReassignTicketPayload {
+  from: string;
+  to: string;
+  reason: string;
 }

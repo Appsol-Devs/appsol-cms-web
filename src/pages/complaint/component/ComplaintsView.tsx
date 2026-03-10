@@ -22,6 +22,8 @@ import {
   useDeleteComplaintMutation,
   useLazyGetAComplaintQuery,
 } from "../common/complaintsApi";
+import { useLazyGetTicketsByComplaintIdQuery } from "@/pages/ticket/common/ticketsApi";
+import type { ITicket } from "@/pages/ticket/common/tickets";
 import { Badge } from "@/components/ui/badge";
 import { getComplaintStatusColor, getLookupBadgeStyle } from "@/lib/enums";
 
@@ -34,6 +36,8 @@ const ComplaintsView = () => {
   const [deleteComplaint] = useDeleteComplaintMutation();
   const [getComplaintDetails, { isLoading: isFetching }] =
     useLazyGetAComplaintQuery();
+  const [getTicketsByComplaintId] = useLazyGetTicketsByComplaintIdQuery();
+  const [linkedTicket, setLinkedTicket] = useState<ITicket | null>(null);
 
   const [selectedComplaint, setSelectedComplaint] = useState<IComplaint | null>(
     () => (initialData && initialData._id === id ? initialData : null),
@@ -51,6 +55,24 @@ const ComplaintsView = () => {
       })
       .catch((err) => console.error("Failed to fetch complaint details", err));
   }, [id, getComplaintDetails]);
+
+  useEffect(() => {
+    if (!selectedComplaint) return;
+    const ticket = selectedComplaint.ticket;
+    if (ticket?._id) {
+      setLinkedTicket(ticket);
+      return;
+    }
+    const complaintId = selectedComplaint._id;
+    if (!complaintId) {
+      setLinkedTicket(null);
+      return;
+    }
+    getTicketsByComplaintId(complaintId)
+      .unwrap()
+      .then((tickets) => setLinkedTicket(tickets?.[0] ?? null))
+      .catch(() => setLinkedTicket(null));
+  }, [selectedComplaint, getTicketsByComplaintId]);
 
   const handleDelete = async () => {
     if (!id) return;
@@ -100,6 +122,17 @@ const ComplaintsView = () => {
         }`}
         actionComponent={
           <div className="flex items-center gap-2 flex-wrap">
+            {linkedTicket?._id && (
+              <ActionButton
+                onClick={() => {
+                  navigate(allRoutes.PORTAL + allRoutes.VIEW_TICKET(linkedTicket._id!), {
+                    state: { initialData: linkedTicket },
+                  });
+                }}
+                type="view"
+                useText="View Ticket"
+              />
+            )}
             <ActionButton
               onClick={() =>
                 navigate(

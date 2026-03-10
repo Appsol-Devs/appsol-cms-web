@@ -15,7 +15,8 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { allRoutes } from "@/utils/routes";
 import type { ITicket } from "../common/tickets";
-import { useLazyGetTicketsQuery } from "../common/ticketsApi";
+import { useLazyGetTicketsQuery, useLazyGetATicketQuery } from "../common/ticketsApi";
+import TicketPreviewDrawer from "./TicketPreviewDrawer";
 import { useLazyGetAComplaintQuery } from "@/pages/complaint/common/complaintsApi";
 import {
   getTicketPriorityColor,
@@ -64,7 +65,10 @@ const TicketCustomerCell = ({ ticket }: { ticket: ITicket }) => {
 
 const Tickets = () => {
   const [fetchQuery, fetchState] = useLazyGetTicketsQuery();
+  const [getATicket] = useLazyGetATicketQuery();
   const [executed, setExecuted] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [previewTicket, setPreviewTicket] = useState<ITicket | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -187,14 +191,27 @@ const Tickets = () => {
         columns={columns}
         pathOnRowSelected={(row) => {
           const ticket = row as ITicket;
-          navigate(
-            allRoutes.PORTAL + allRoutes.VIEW_TICKET(ticket._id as string),
-            { state: { initialData: ticket } },
-          );
+          setPreviewTicket(ticket);
+          setDrawerOpen(true);
+          const id = ticket._id;
+          if (id) {
+            getATicket(id)
+              .unwrap()
+              .then((full) => {
+                if (full) setPreviewTicket(full);
+              })
+              .catch(() => {});
+          }
         }}
         refetchData={executed}
         title="Tickets"
         lazyFetchQuery={[fetchQuery, fetchState]}
+      />
+      <TicketPreviewDrawer
+        ticket={previewTicket}
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        onTicketUpdated={setPreviewTicket}
       />
     </>
   );
