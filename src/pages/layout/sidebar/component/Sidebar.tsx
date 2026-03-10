@@ -1,12 +1,5 @@
 import { useState } from "react";
-import {
-  ArrowLeft,
-  ChevronRight,
-  Cog,
-  Dot,
-  Settings,
-  StretchHorizontal,
-} from "lucide-react";
+import { Cog, Settings } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import BackButton from "@/components/BackButton";
@@ -17,10 +10,10 @@ import {
   type ISidebar,
 } from "../common/sidebar";
 import { allRoutes } from "@/utils/routes";
-import { toggleSidebar } from "../common/sidebarSlice";
-import { useDispatch, useSelector } from "react-redux";
-import { Button } from "@/components/ui/button";
+import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
+import SidebarToggler from "./SidebarToggler";
+import SidebarMainMenu from "./SidebarMainMenu";
 
 export default function Sidebar() {
   const [activeView, setActiveView] = useState<
@@ -30,7 +23,6 @@ export default function Sidebar() {
     useState<ISidebar[]>(sidebarMainMenus);
   const [parentName, setParentName] = useState<string>("");
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const location = useLocation();
   const currentPath = location.pathname;
   const sidebarToggleState: boolean = useSelector(
@@ -76,31 +68,29 @@ export default function Sidebar() {
     return false;
   };
 
-  const handleToggleSidebar = () => {
-    dispatch(toggleSidebar());
-  };
-
-  const isCollapsed = sidebarToggleState;
+  const isSidebarCollapsed = sidebarToggleState;
 
   return (
     <div className="relative h-full bg-card text-onCard shadow-md border-2">
       <div className="flex flex-col h-full">
-        <div className="h-14 p-2 flex items-center justify-between transition-all duration-300 ease-in-out">
-          {!sidebarToggleState && (
-            <img
-              className="h-9"
-              src="/assets/images/logo/appsol_cmslight.png"
-              alt="Appsol Logo Light mode"
-            />
+        <div
+          className={cn(
+            "h-14 p-2 flex items-center transition-all duration-300 ease-in-out",
+            isSidebarCollapsed ? "justify-center" : "justify-between",
           )}
-          <div className={` ${sidebarToggleState ? "left-2" : ""}`}>
-            <Button size={"icon-sm"} onClick={handleToggleSidebar}>
-              <ArrowLeft
-                className={`bg-primary text-white rounded-md p-1 text-2xl transition-all ease-in-out ${
-                  sidebarToggleState ? "rotate-180" : ""
-                }`}
-              />
-            </Button>
+        >
+          <img
+            className="h-8"
+            src={
+              isSidebarCollapsed
+                ? "/assets/images/logo/appsol_cmslighticon.png"
+                : "/assets/images/logo/appsol_cmslight.png"
+            }
+            alt="Appsol Logo Light mode"
+          />
+
+          <div className={` ${isSidebarCollapsed ? "left-2" : ""}`}>
+            <SidebarToggler show={!isSidebarCollapsed} />
           </div>
         </div>
         {/* Header with Back Button */}
@@ -114,12 +104,19 @@ export default function Sidebar() {
             {activeView === "main" ? (
               <p className="text-xs uppercase font-bold mb-2">Main</p>
             ) : (
-              <div className="flex items-center gap-2 mb-2">
+              <div
+                className={cn(
+                  "flex items-center gap-2 mb-2",
+                  isSidebarCollapsed && "justify-center",
+                )}
+              >
                 <BackButton onClick={handleBack} />
-                <p className="text-xs uppercase font-bold">{parentName}</p>
+                {!isSidebarCollapsed && (
+                  <p className="text-xs uppercase font-bold">{parentName}</p>
+                )}
               </div>
             )}
-            {currentRoutes.map(({ icon: Icon, ...route }, idx) => {
+            {currentRoutes.map((route, idx) => {
               const isActiveParent =
                 route.subMenu &&
                 route.subMenu.some(
@@ -129,34 +126,14 @@ export default function Sidebar() {
                 );
 
               return (
-                <div
+                <SidebarMainMenu
                   key={idx}
-                  className={cn(
-                    `${
-                      isActiveLink(route) || isActiveParent
-                        ? "bg-primary/90 text-onPrimary hover:bg-primary/30 hover:text-primary"
-                        : "hover:bg-primary/30 hover:text-primary hover:opacity-90 text-card-foreground"
-                    } w-full text-sm text-left px-2 py-2 rounded-md font-semibold hover:cursor-pointer transition flex items-center justify-between
-                `,
-                  )}
-                  onClick={() => handleOpenSubRoutes(route)}
-                >
-                  <div className="flex items-center gap-1">
-                    {Icon ? (
-                      <Icon className="w-4 h-4" />
-                    ) : (
-                      <StretchHorizontal className="w-4 h-4" />
-                    )}
-                    {!isCollapsed && route.name}
-                  </div>
-                  <div className="flex gap-1 items-center">
-                    {isActiveLink(route) ||
-                      (isActiveParent && (
-                        <Dot className="w-5 h-5 animate-pulse" />
-                      ))}
-                    {route.subMenu && <ChevronRight className="w-4 h-4" />}
-                  </div>
-                </div>
+                  handleOpenSubRoutes={handleOpenSubRoutes}
+                  isActiveLink={isActiveLink}
+                  isActiveParent={isActiveParent}
+                  isSidebarCollapsed={isSidebarCollapsed}
+                  route={route}
+                />
               );
             })}
           </div>

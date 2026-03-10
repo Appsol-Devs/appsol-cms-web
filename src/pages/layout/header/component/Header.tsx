@@ -17,10 +17,13 @@ import Sidebar from "../../sidebar/component/Sidebar";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
 import Notifications from "../../notification/component/Notifications";
+import SidebarToggler from "../../sidebar/component/SidebarToggler";
 
 function Header() {
   const activeUser = useSelector((state: RootState) => state.user);
-
+  const isCollapsed: boolean = useSelector(
+    (state: RootState) => state.sidebar.isSidebarToggled,
+  );
   const getInitials = () => {
     const userData = activeUser;
 
@@ -47,6 +50,8 @@ function Header() {
               <Sidebar />
             </SheetContent>
           </Sheet>
+
+          <SidebarToggler show={isCollapsed} />
 
           <div className="text-xl lg:hidden font-bold tracking-tight animate-in fade-in slide-in-from-top-2 duration-500">
             <div className="p-2">
@@ -81,17 +86,19 @@ function Header() {
               </Badge>
             )}
           </Button> */}
-          <Notifications/>
+          <Notifications />
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                className="relative h-9 w-9 rounded-full p-0 bg-primary!" 
+                className="relative h-9 w-9 rounded-full p-0 bg-primary!"
               >
                 <Avatar className="h-5 w-5">
                   <AvatarImage src="/avatar.png" alt="User" />
-                  <AvatarFallback className="text-white bg-primary">{getInitials()}</AvatarFallback>
+                  <AvatarFallback className="text-white bg-primary">
+                    {getInitials()}
+                  </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
