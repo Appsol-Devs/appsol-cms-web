@@ -4,6 +4,7 @@ import type {
   IComplaintType,
   ISoftware,
 } from "@/pages/settings/common/settings";
+import type { ITicket } from "@/pages/ticket/common/tickets";
 
 export type IComplaint = {
   _id?: string;
@@ -19,6 +20,8 @@ export type IComplaint = {
   description?: string;
   status?: string;
   loggedBy?: IUser;
+  ticketId?: string;
+  ticket?: ITicket;
   createdAt?: string;
   updatedAt?: string;
 };

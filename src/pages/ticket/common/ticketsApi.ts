@@ -5,7 +5,7 @@ import {
   type IPagination,
   type PaginatedResponse,
 } from "@/lib/pagination";
-import type { ITicket, ICreateTicketPayload } from "./tickets";
+import type { ITicket, ICreateTicketPayload, IReassignTicketPayload } from "./tickets";
 
 export const ticketsApi = createApi({
   reducerPath: "ticketsApi",
@@ -44,6 +44,16 @@ export const ticketsApi = createApi({
       }),
       transformResponse: async (response: Response) => response.json(),
     }),
+    getTicketsByComplaintId: builder.query<ITicket[], string>({
+      query: (complaintId) => ({
+        url: `/tickets?complaintId=${complaintId}&pageSize=100`,
+      }),
+      transformResponse: async (response: Response) => {
+        const data = await response.json();
+        if (Array.isArray(data)) return data as ITicket[];
+        return (data as { contents?: ITicket[] }).contents ?? [];
+      },
+    }),
     addTicket: builder.mutation<ITicket, ICreateTicketPayload>({
       query: (payload) => ({
         url: "/tickets",
@@ -67,13 +77,34 @@ export const ticketsApi = createApi({
         method: "DELETE",
       }),
     }),
+    reassignTicket: builder.mutation<
+      ITicket,
+      { id: string } & IReassignTicketPayload
+    >({
+      query: ({ id, ...payload }) => ({
+        url: `/tickets/${id}`,
+        body: payload,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["ITicket"],
+    }),
+    closeTicket: builder.mutation<ITicket, string>({
+      query: (id) => ({
+        url: `/tickets/${id}/close`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["ITicket"],
+    }),
   }),
 });
 
 export const {
   useLazyGetTicketsQuery,
   useLazyGetATicketQuery,
+  useLazyGetTicketsByComplaintIdQuery,
   useAddTicketMutation,
   useUpdateTicketMutation,
   useDeleteTicketMutation,
+  useReassignTicketMutation,
+  useCloseTicketMutation,
 } = ticketsApi;

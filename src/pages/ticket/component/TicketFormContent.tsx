@@ -22,6 +22,8 @@ interface IField {
   form: UseFormReturn<ITicketFormFields, object, ITicketFormFields>;
   prefillComplaintId?: string;
   prefillComplaint?: IComplaint | null;
+  isStatusDisabled?: boolean;
+  isAssignedEngineerDisabled?: boolean;
 }
 
 const TicketFormContent = ({
@@ -29,6 +31,8 @@ const TicketFormContent = ({
   form,
   prefillComplaintId,
   prefillComplaint,
+  isStatusDisabled,
+  isAssignedEngineerDisabled,
 }: IField) => {
   const { control, register } = form;
 
@@ -43,7 +47,6 @@ const TicketFormContent = ({
   const statusOptions = [
     { label: "open", value: "open" },
     { label: "fixed", value: "fixed" },
-    { label: "closed", value: "closed" },
     { label: "assigned", value: "assigned" },
     { label: "rejected", value: "rejected" },
   ];
@@ -114,24 +117,21 @@ const TicketFormContent = ({
             control={control}
             name="requestedDate"
             render={({ field }) => (
-              <div className="space-y-1 max-w-[240px]" key={field.value ?? "empty"}>
+              <div className="space-y-1 max-w-[280px]" key={field.value ?? "empty"}>
                 <p className="text-xs text-onCard font-medium">
-                  Requested Date{" "}
+                  Requested Date & Time{" "}
                   <span className="text-destructive ml-0.5">*</span>
                 </p>
                 <DatePicker
                   title=""
-                  placeholder="Select date"
-                  dateOnly
+                  placeholder="Select date and time"
                   required
                   disabled={isLoading}
                   defaultDate={
                     field.value ? new Date(field.value) : undefined
                   }
                   onChange={(date) =>
-                    field.onChange(
-                      date ? date.toISOString().split("T")[0] : "",
-                    )
+                    field.onChange(date ? date.toISOString() : "")
                   }
                 />
               </div>
@@ -167,7 +167,7 @@ const TicketFormContent = ({
             title="Status"
             label="Select status"
             options={statusOptions}
-            disabled={isLoading}
+            disabled={isLoading || isStatusDisabled}
           />
           <DropDownComponent
             control={control}
@@ -175,7 +175,7 @@ const TicketFormContent = ({
             title="Assign Engineer"
             label="Select engineer"
             options={engineerOptions}
-            disabled={isLoading}
+            disabled={isLoading || isAssignedEngineerDisabled}
           />
         </div>
       </CardComponent>
