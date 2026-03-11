@@ -233,7 +233,6 @@ const Notifications = () => {
           )}
         </ScrollArea>
 
-        {/* Scaled down footer and buttons */}
         <div className="p-1.5 border-t flex items-center gap-1.5 bg-background z-10">
           {notifications.length > 0 && (
             <Button
