@@ -11,6 +11,7 @@ import { formatDate } from "@/lib/helpers";
 import { allRoutes } from "@/utils/routes";
 import { useNavigate } from "react-router-dom";
 import { getLookupBadgeStyle } from "@/lib/enums";
+import { showToast } from "@/components/ui/CustomToast";
 
 const AllNotifications = () => {
     const [fetchQuery, fetchState] = useLazyGetPaginatedNotificationsQuery();
@@ -28,8 +29,17 @@ const AllNotifications = () => {
         try {
             await markAsRead(id).unwrap();
             setExecuted(true);
-        } catch (error) {
-            console.error("Failed to mark read", error);
+            showToast({
+                title: "Success",
+                message: "Notification marked as read successfully",
+                type: "success",
+            });
+        } catch  {
+            showToast({
+                title: "Error",
+                message: "Failed to mark notification as read",
+                type: "error",
+            });
         }
     };
 
