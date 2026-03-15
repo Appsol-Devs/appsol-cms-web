@@ -51,7 +51,7 @@ const TicketForm = () => {
         : undefined,
     },
   });
-  const { watch, handleSubmit, reset, setValue } = form;
+  const { watch, handleSubmit, reset, setValue, trigger, formState } = form;
   const values = watch();
   const navigate = useNavigate();
   const [selectedTicket, setSelectedTicket] = useState<ITicket | null>(null);
@@ -81,11 +81,8 @@ const TicketForm = () => {
             notes: res.notes ?? "",
             complaintId: res.complaint
               ? {
-                  label:
-                    res.complaint.complaintCode ??
-                    res.complaint.customer?.name ??
-                    "",
-                  value: res.complaintId ?? res.complaint._id ?? "",
+                  label: `${res.complaint.complaintCode ?? "—"} — ${res.complaint.customer?.name ?? ""}`.trim(),
+                  value: res.complaint as unknown as string | Record<string, unknown>,
                 }
               : undefined,
             assignedEngineerId: res.assignedEngineer
@@ -134,19 +131,24 @@ const TicketForm = () => {
     }
   };
 
-  const submitData = handleSubmit((data) => {
-    const complaintId = data.complaintId?.value ?? prefillComplaintId;
-    if (!complaintId) {
-      showToast({
-        title: "Info",
-        message: "Complaint is required.",
-        type: "info",
-        duration: 1000,
-      });
-      return;
-    }
+  const submitData = handleSubmit(
+    (data) => {
+      const rawValue = data.complaintId?.value;
+      const complaintId =
+        typeof rawValue === "string"
+          ? rawValue
+          : (rawValue as { _id?: string })?._id ?? prefillComplaintId;
+      if (!complaintId) {
+        showToast({
+          title: "Validation",
+          message: "Complaint is required.",
+          type: "info",
+          duration: 2000,
+        });
+        return;
+      }
 
-    const payload = cleanPayload({
+      const payload = cleanPayload({
       title: data.title.trim(),
       requestedDate: data.requestedDate,
       notes: data.notes?.trim() || undefined,
@@ -156,8 +158,37 @@ const TicketForm = () => {
       status: (data.status?.value as string) ?? "open",
     }) as ICreateTicketPayload;
 
-    handleDataSubmission(payload);
-  });
+      handleDataSubmission(payload);
+    },
+    (errors) => {
+      const firstError = Object.values(errors)[0];
+      const message =
+        firstError?.message ?? "Please fix the form errors before submitting.";
+      showToast({
+        title: "Validation",
+        message,
+        type: "info",
+        duration: 2000,
+      });
+    }
+  );
+
+  const validateBeforeOpen = async () => {
+    const valid = await trigger();
+    if (!valid) {
+      const firstError = Object.values(formState.errors)[0];
+      const message =
+        firstError?.message ?? "Please fix the form errors before submitting.";
+      showToast({
+        title: "Validation",
+        message,
+        type: "info",
+        duration: 2000,
+      });
+      return false;
+    }
+    return true;
+  };
 
   const summarySections: ISummarySection[] = [
     {
@@ -226,6 +257,19 @@ const TicketForm = () => {
             ? `Update Ticket - ${selectedTicket?.ticketCode ?? ""}`
             : "Create Ticket"
         }
+        confirmOnSubmit
+        validateBeforeOpen={validateBeforeOpen}
+        confirmSubmitTitle={id ? "Confirm Ticket Update" : "Confirm Ticket Creation"}
+        confirmSubmitContent={
+          <div className="text-center">
+            <p>
+              {id
+                ? "Are you sure you want to save changes to this ticket?"
+                : "Are you sure you want to create this ticket?"}
+            </p>
+          </div>
+        }
+        confirmSubmitActionLabel={id ? "Save Changes" : "Create Ticket"}
         loading={isCreating || isUpdating || isGetting}
         mutationFormSummary={{
           summaryData: summarySections,

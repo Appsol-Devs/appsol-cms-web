@@ -17,7 +17,6 @@ import { allRoutes } from "@/utils/routes";
 import type { ITicket } from "../common/tickets";
 import { useLazyGetTicketsQuery, useLazyGetATicketQuery } from "../common/ticketsApi";
 import TicketPreviewDrawer from "./TicketPreviewDrawer";
-import { useLazyGetAComplaintQuery } from "@/pages/complaint/common/complaintsApi";
 import {
   getTicketPriorityColor,
   getTicketStatusColor,
@@ -25,33 +24,9 @@ import {
 } from "@/lib/enums";
 
 const TicketCustomerCell = ({ ticket }: { ticket: ITicket }) => {
-  const initialCustomer = ticket.complaint?.customer;
-  const [customerName, setCustomerName] = useState<string | null>(
-    initialCustomer?.name ?? null,
-  );
-  const [companyName, setCompanyName] = useState<string | null>(
-    initialCustomer?.companyName ?? null,
-  );
-
-  const [getComplaint] = useLazyGetAComplaintQuery();
-
-  useEffect(() => {
-    if (customerName || !ticket.complaintId) return;
-
-    getComplaint(ticket.complaintId)
-      .unwrap()
-      .then((complaint) => {
-        setCustomerName(complaint.customer?.name ?? null);
-        setCompanyName(complaint.customer?.companyName ?? null);
-      })
-      .catch(() => {
-      });
-  }, [customerName, ticket.complaintId, getComplaint]);
-
-  const nameToShow =
-    customerName ?? ticket.complaint?.customer?.name ?? "N/A";
-  const companyToShow =
-    companyName ?? ticket.complaint?.customer?.companyName ?? "";
+  const customer = ticket.complaint?.customer;
+  const nameToShow = customer?.name ?? "N/A";
+  const companyToShow = customer?.companyName ?? "";
 
   return (
     <div className="flex flex-col items-start gap-1">

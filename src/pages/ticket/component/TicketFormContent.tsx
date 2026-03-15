@@ -15,6 +15,7 @@ import type { DropDownOption } from "@/components/DropdownComponent";
 import type { IComplaint } from "@/pages/complaint/common/complaints";
 import type { IUser } from "@/pages/customer/common/customers";
 import { useLazyGetComplaintsQuery } from "@/pages/complaint/common/complaintsApi";
+import type { ReactNode } from "react";
 import { useLazyGetUsersQuery } from "@/pages/users/common/usersApi";
 
 interface IField {
@@ -52,18 +53,24 @@ const TicketFormContent = ({
   ];
 
   const loadComplaintOptions = useCallback(
-    async (inputValue: string): Promise<DropDownOption<string>[]> => {
+    async (inputValue: string): Promise<DropDownOption<IComplaint>[]> => {
       const res = await getComplaints({
         ...lookup_params,
         search: inputValue || undefined,
       }).unwrap();
       if (!res?.contents) return [];
       return (res.contents as IComplaint[]).map((item) => ({
-        label: `${item.complaintCode ?? "—"} - ${item.customer?.name ?? "Unknown"} - ${item.description ?? ""}`.slice(0, 80),
-        value: item._id ?? "",
+        label: `${item.complaintCode ?? "—"} - ${item.customer?.name ?? "Unknown"}`,
+        value: item,
       }));
     },
     [getComplaints],
+  );
+
+  const formatComplaintOptionLabel = (complaint: IComplaint): ReactNode => (
+    <p className="font-semibold text-xs">
+      {complaint.complaintCode ?? "—"} — {complaint.customer?.name ?? "Unknown"}
+    </p>
   );
 
   useEffect(() => {
@@ -137,7 +144,7 @@ const TicketFormContent = ({
               </div>
             )}
           />
-          <AsyncDropDownComponent
+          <AsyncDropDownComponent<IComplaint>
             control={control}
             name="complaintId"
             placeholder="Search complaints..."
@@ -145,6 +152,7 @@ const TicketFormContent = ({
             required
             disabled={isLoading || !!prefillComplaintId}
             options={loadComplaintOptions}
+            formatOptionLabel={(option) => formatComplaintOptionLabel(option.value)}
             width="100%"
           />
           {prefillComplaintId && prefillComplaint && (

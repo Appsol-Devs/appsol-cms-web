@@ -1,8 +1,9 @@
 import CardComponent from "@/components/CardComponent";
 import { Loader, Save } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import { type ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 import { Button } from "@/components/ui/button";
+import ConfirmationDialog from "@/components/ConfirmationDialog";
 
 interface Props {
   submitData: () => void;
@@ -10,6 +11,11 @@ interface Props {
   summaryData: ISummarySection[];
   summaryMainTitle: string;
   summarySaveButtonText?: string;
+  confirmOnSubmit?: boolean;
+  confirmSubmitTitle?: string;
+  confirmSubmitContent?: ReactNode;
+  confirmSubmitActionLabel?: string;
+  validateBeforeOpen?: () => Promise<boolean>;
 }
 
 interface ISummary {
@@ -30,7 +36,22 @@ const MutationFormSummary = ({
   submitData,
   isLoading,
   summarySaveButtonText,
+  confirmOnSubmit,
+  confirmSubmitTitle,
+  confirmSubmitContent,
+  confirmSubmitActionLabel,
+  validateBeforeOpen,
 }: Props) => {
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const handleSaveClick = async () => {
+    if (validateBeforeOpen) {
+      const ok = await validateBeforeOpen();
+      if (!ok) return;
+      setConfirmOpen(true);
+    }
+  };
+
   const required = (
     <span className="text-xs">
       <span className="text-red-500">(*)</span>
@@ -77,19 +98,91 @@ const MutationFormSummary = ({
           ))}
         </div>
       </CardComponent>
-      <Button
-        disabled={isLoading}
-        onClick={submitData}
-        className="rounded-full w-full bg-primary! text-primary-foreground! text-xs!"
-        type="submit"
-      >
-        {isLoading ? (
-          <Loader className="mr-2 h-4 w-4 animate-spin" />
+      {confirmOnSubmit ? (
+        validateBeforeOpen ? (
+          <>
+            <Button
+              disabled={isLoading}
+              onClick={handleSaveClick}
+              className="rounded-full w-full bg-primary! text-primary-foreground! text-xs!"
+              type="button"
+            >
+              {isLoading ? (
+                <Loader className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="mr-2 h-4 w-4" />
+              )}{" "}
+              {isLoading ? "Saving..." : summarySaveButtonText || "Save"}
+            </Button>
+            <ConfirmationDialog
+              visible={confirmOpen}
+              onClose={() => setConfirmOpen(false)}
+              onConfirmClicked={() => {
+                submitData();
+                setConfirmOpen(false);
+              }}
+              disabled={isLoading}
+              alertType="update"
+              title={confirmSubmitTitle || "Confirm Save"}
+              content={
+                confirmSubmitContent || (
+                  <div className="text-center">
+                    <p>Are you sure you want to save these changes?</p>
+                  </div>
+                )
+              }
+              rightActionTitle={
+                confirmSubmitActionLabel || summarySaveButtonText || "Save"
+              }
+            />
+          </>
         ) : (
-          <Save className="mr-2 h-4 w-4" />
-        )}{" "}
-        {isLoading ? "Saving..." : summarySaveButtonText || "Save"}
-      </Button>
+          <ConfirmationDialog
+            disabled={isLoading}
+            onConfirmClicked={submitData}
+            alertType="update"
+            title={confirmSubmitTitle || "Confirm Save"}
+            content={
+              confirmSubmitContent || (
+                <div className="text-center">
+                  <p>Are you sure you want to save these changes?</p>
+                </div>
+              )
+            }
+            rightActionTitle={
+              confirmSubmitActionLabel || summarySaveButtonText || "Save"
+            }
+            trigger={
+              <Button
+                disabled={isLoading}
+                className="rounded-full w-full bg-primary! text-primary-foreground! text-xs!"
+                type="button"
+              >
+                {isLoading ? (
+                  <Loader className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="mr-2 h-4 w-4" />
+                )}{" "}
+                {isLoading ? "Saving..." : summarySaveButtonText || "Save"}
+              </Button>
+            }
+          />
+        )
+      ) : (
+        <Button
+          disabled={isLoading}
+          onClick={submitData}
+          className="rounded-full w-full bg-primary! text-primary-foreground! text-xs!"
+          type="submit"
+        >
+          {isLoading ? (
+            <Loader className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Save className="mr-2 h-4 w-4" />
+          )}{" "}
+          {isLoading ? "Saving..." : summarySaveButtonText || "Save"}
+        </Button>
+      )}
     </div>
   );
 };

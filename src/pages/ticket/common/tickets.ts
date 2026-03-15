@@ -12,9 +12,21 @@ const dropdownOptionSchema = z.object({
 
 export const ticketFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
-  requestedDate: z.string().min(1, "Requested date is required"),
+  requestedDate: z.string().min(1, "Requested date and time is required"),
   notes: z.string().optional(),
-  complaintId: dropdownOptionSchema.optional(),
+  complaintId: z
+    .union([
+      z.undefined(),
+      z.object({
+        label: z.union([z.string(), z.number()]),
+        value: z.union([z.string(), z.record(z.string(), z.any())]),
+      }),
+    ])
+    .refine((v) => {
+      if (v == null) return false;
+      const val = (v as { value?: string | { _id?: string } }).value;
+      return typeof val === "string" ? !!val?.trim() : !!val?._id;
+    }, { message: "Complaint is required" }),
   assignedEngineerId: dropdownOptionSchema.optional(),
   priority: dropdownOptionSchema.optional(),
   status: dropdownOptionSchema.optional(),
