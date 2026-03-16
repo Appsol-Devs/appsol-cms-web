@@ -186,7 +186,10 @@ const Tickets = () => {
         ticket={previewTicket}
         open={drawerOpen}
         onOpenChange={setDrawerOpen}
-        onTicketUpdated={setPreviewTicket}
+        onTicketUpdated={(updated) => {
+          setPreviewTicket(updated);
+          setExecuted(true);
+        }}
       />
     </>
   );
