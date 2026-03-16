@@ -94,12 +94,9 @@ const TicketPreviewDrawer = ({
   const handleClose = async () => {
     if (!ticket?._id) return;
     try {
-      await closeTicket(ticket._id).unwrap();
-      if (ticket) {
-        onTicketUpdated?.({
-          ...ticket,
-          status: "closed",
-        });
+      const updated = await closeTicket(ticket._id).unwrap();
+      if (updated) {
+        onTicketUpdated?.(updated);
         showToast({
           title: "Success",
           message: "Ticket closed successfully.",
