@@ -31,10 +31,13 @@ export const ticketsApi = createApi({
         return { url };
       },
       transformResponse: async (response: Response) => {
-        const data: ITicket[] = await response.json();
+        const raw = await response.json();
+        const contents = Array.isArray(raw)
+          ? raw
+          : ((raw as { contents?: ITicket[] }).contents ?? []);
         return {
           pagination: getPaginationMetaDataV2(response) as IPagination,
-          contents: data as ITicket[],
+          contents: contents as ITicket[],
         };
       },
     }),

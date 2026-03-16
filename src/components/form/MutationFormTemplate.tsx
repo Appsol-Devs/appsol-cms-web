@@ -2,7 +2,7 @@ import ActionButton from "@/components/ActionButtons";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import PageSummary from "@/components/PageSummary";
 import PageTitle from "@/components/PageTitle";
-import { type FC, type ReactNode, type SVGProps } from "react";
+import { type FC, type ReactNode, type SVGProps, useState } from "react";
 import { type UseFormReturn } from "react-hook-form";
 import MutationForm from "./MutationForm";
 import MutationFormSummary, {
@@ -25,6 +25,11 @@ export interface IMutationFormTemplateProps<T extends Record<string, unknown>> {
     summaryMainTitle: string;
     summarySaveButtonText?: string;
   };
+  confirmOnSubmit?: boolean;
+  confirmSubmitTitle?: string;
+  confirmSubmitContent?: ReactNode;
+  confirmSubmitActionLabel?: string;
+  validateBeforeOpen?: () => Promise<boolean>;
 }
 
 const MutationFormTemplate = <T extends Record<string, unknown>>({
@@ -35,7 +40,22 @@ const MutationFormTemplate = <T extends Record<string, unknown>>({
   submitData,
   loading,
   mutationFormSummary,
+  confirmOnSubmit,
+  confirmSubmitTitle,
+  confirmSubmitContent,
+  confirmSubmitActionLabel,
+  validateBeforeOpen,
 }: IMutationFormTemplateProps<T>) => {
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const handleSaveClick = async () => {
+    if (validateBeforeOpen) {
+      const ok = await validateBeforeOpen();
+      if (!ok) return;
+      setConfirmOpen(true);
+    }
+  };
+
   return (
     <div className="space-y-2">
       <PageTitle showBack title={pageTitle} />
@@ -45,11 +65,76 @@ const MutationFormTemplate = <T extends Record<string, unknown>>({
         description={pageSummary.description}
         actionComponent={
           <div className="flex items-center gap-2">
-            <ActionButton
-              onClick={submitData}
-              type="save"
-              useText={mutationFormSummary.summarySaveButtonText || "Save"}
-            />
+            {confirmOnSubmit ? (
+              validateBeforeOpen ? (
+                <>
+                  <ActionButton
+                    type="save"
+                    onClick={handleSaveClick}
+                    disabled={loading}
+                    useText={
+                      mutationFormSummary.summarySaveButtonText || "Save"
+                    }
+                  />
+                  <ConfirmationDialog
+                    visible={confirmOpen}
+                    onClose={() => setConfirmOpen(false)}
+                    onConfirmClicked={() => {
+                      submitData();
+                      setConfirmOpen(false);
+                    }}
+                    disabled={loading}
+                    alertType="update"
+                    title={confirmSubmitTitle || "Confirm Save"}
+                    content={
+                      confirmSubmitContent || (
+                        <div className="text-center">
+                          <p>Are you sure you want to save these changes?</p>
+                        </div>
+                      )
+                    }
+                    rightActionTitle={
+                      confirmSubmitActionLabel ||
+                      mutationFormSummary.summarySaveButtonText ||
+                      "Save"
+                    }
+                  />
+                </>
+              ) : (
+                <ConfirmationDialog
+                  onConfirmClicked={submitData}
+                  disabled={loading}
+                  alertType="update"
+                  title={confirmSubmitTitle || "Confirm Save"}
+                  content={
+                    confirmSubmitContent || (
+                      <div className="text-center">
+                        <p>Are you sure you want to save these changes?</p>
+                      </div>
+                    )
+                  }
+                  rightActionTitle={
+                    confirmSubmitActionLabel ||
+                    mutationFormSummary.summarySaveButtonText ||
+                    "Save"
+                  }
+                  trigger={
+                    <ActionButton
+                      type="save"
+                      useText={
+                        mutationFormSummary.summarySaveButtonText || "Save"
+                      }
+                    />
+                  }
+                />
+              )
+            ) : (
+              <ActionButton
+                onClick={submitData}
+                type="save"
+                useText={mutationFormSummary.summarySaveButtonText || "Save"}
+              />
+            )}
             <ConfirmationDialog
               onConfirmClicked={() => form.reset()}
               disabled={loading}
@@ -74,6 +159,11 @@ const MutationFormTemplate = <T extends Record<string, unknown>>({
           isLoading={loading}
           submitData={submitData}
           summarySaveButtonText={mutationFormSummary.summarySaveButtonText}
+          confirmOnSubmit={confirmOnSubmit}
+          confirmSubmitTitle={confirmSubmitTitle}
+          confirmSubmitContent={confirmSubmitContent}
+          confirmSubmitActionLabel={confirmSubmitActionLabel}
+          validateBeforeOpen={validateBeforeOpen}
         />
       </div>
     </div>
