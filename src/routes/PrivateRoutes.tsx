@@ -50,6 +50,9 @@ import PaymentForm from "@/pages/payments/component/PaymentForm";
 import Payments from "@/pages/payments/component/Payments";
 import PaymentsView from "@/pages/payments/component/PaymentsView";
 import AllNotifications from "@/pages/layout/notification/component/AllNotifications";
+import FeatureRequest from "@/pages/feature-request-module/components/FeatureRequest";
+import ViewFeatureRequest from "@/pages/feature-request-module/components/ViewFeatureRequest";
+import FeatureRequestForm from "@/pages/feature-request-module/components/FeatureRequestForm";
 
 const PrivateRoutes = () => {
   return (
@@ -222,10 +225,18 @@ const PrivateRoutes = () => {
         path={allRoutes.VIEW_PAYMENT(":id")}
         element={<PaymentsView />}
       />
-            <Route
+      <Route
         path={allRoutes.ALL_NOTIFICATIONS}
         element={<AllNotifications />}
       />
+
+      <Route path={allRoutes.FEATURE_REQUESTS} element={<FeatureRequest />} />
+      <Route path={allRoutes.ADD_FEATURE_REQUEST} element={<FeatureRequestForm />} />
+      <Route
+        path={allRoutes.UPDATE_FEATURE_REQUEST(":id")}
+        element={<FeatureRequestForm />}
+      />
+      <Route path={allRoutes.VIEW_FEATURE_REQUEST(":id")} element={<ViewFeatureRequest />} />
 
       <Route
         path={`${allRoutes.SETTINGS}/*`}

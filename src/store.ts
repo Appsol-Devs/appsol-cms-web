@@ -28,6 +28,7 @@ import { subscriptionsApi } from "./pages/subscriptions/common/subscriptionsApi"
 import { paymentsApi } from "./pages/payments/common/paymentsApi";
 import { sidebarReducer } from "./pages/layout/sidebar/common/sidebarSlice";
 import { notificationsApi } from "./pages/layout/notification/common/notificationsApi";
+import { featureRequestApi } from "./pages/feature-request-module/common/featureRequestApi";
 
 const persistConfig = {
   key: "root",
@@ -55,6 +56,7 @@ export const store = configureStore({
     [subscriptionsApi.reducerPath]: subscriptionsApi.reducer,
     [paymentsApi.reducerPath]: paymentsApi.reducer,
     [notificationsApi.reducerPath]: notificationsApi.reducer,
+    [featureRequestApi.reducerPath]: featureRequestApi.reducer,
 
   },
   middleware: (getDefaultMiddleware) =>
@@ -80,6 +82,7 @@ export const store = configureStore({
         subscriptionsApi.middleware,
         paymentsApi.middleware,
         notificationsApi.middleware,
+        featureRequestApi.middleware
       )
       .concat(apiErrorMiddleware),
 });

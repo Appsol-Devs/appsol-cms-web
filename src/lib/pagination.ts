@@ -133,6 +133,10 @@ export interface IFilters {
   endDate?: string;
   status?: string;
   customerId?: string;
+  priority?: string;
+  featureStatus?: string;
+  softwareId?: string;
+  assignedTo?: string;
 }
 
 const ALL_FILTERS = [
@@ -141,6 +145,11 @@ const ALL_FILTERS = [
   "date_range",
   "status",
   "leadStatusId",
+  "priority",
+  "featureStatus",
+  "softwareId",
+  "assignedTo",
+  "featurePriority",
 ] as const;
 
 export type IFilterArray = (typeof ALL_FILTERS)[number];
