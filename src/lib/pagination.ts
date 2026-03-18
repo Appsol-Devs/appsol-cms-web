@@ -133,6 +133,13 @@ export interface IFilters {
   endDate?: string;
   status?: string;
   customerId?: string;
+  leadStatusId?: string;
+  targetEntityType?: string;
+  targetEntityId?: string;
+  loggedBy?: string;
+  originalDateTime?: string;
+  newDateTime?: string;
+  [key: string]: string | undefined;
 }
 
 const ALL_FILTERS = [
@@ -141,6 +148,9 @@ const ALL_FILTERS = [
   "date_range",
   "status",
   "leadStatusId",
+  "targetEntityType",
+  "targetEntityId",
+  "loggedBy",
 ] as const;
 
 export type IFilterArray = (typeof ALL_FILTERS)[number];
@@ -152,7 +162,7 @@ export const getQueryRequestUrl = (url: string = "", filters?: IFilters) => {
     .filter(
       ([_, value]) => value !== undefined && value !== null && value !== "",
     )
-    .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+    .map(([key, value]) => `${key}=${encodeURIComponent(String(value))}`)
     .join("&");
 
   if (!activeFilters) return url;

@@ -13,6 +13,8 @@ import type { ICustomer } from "@/pages/customer/common/customers";
 import { useLazyGetCustomersQuery } from "@/pages/customer/common/customersApi";
 import { PAYMENT_STATUS_ENUM } from "@/lib/enums";
 import { useLazyGetLeadStatusesQuery } from "@/pages/settings/common/settingsApi";
+import { useLazyGetUsersQuery } from "@/pages/users/common/usersApi";
+import CustomInputField from "@/components/CustomInputField";
 
 interface IFiltersTemplate {
   toggleFilter?: boolean;
@@ -25,11 +27,13 @@ interface IFiltersTemplate {
 
 type IFilterFields = Omit<
   IFilters,
-  "customerId" | "status" | "leadStatusId"
+  "customerId" | "status" | "leadStatusId" | "targetEntityType" | "loggedBy"
 > & {
   customerId?: DropDownOption<ICustomer>;
   status?: DropDownOption<string>;
   leadStatusId?: DropDownOption<string>;
+  targetEntityType?: DropDownOption<string>;
+  loggedBy?: DropDownOption<string>;
 };
 
 const FiltersTemplate = ({
@@ -44,8 +48,9 @@ const FiltersTemplate = ({
 
   const [getCustomers] = useLazyGetCustomersQuery();
   const [getLeadStatuses] = useLazyGetLeadStatusesQuery();
+  const [getUsers] = useLazyGetUsersQuery();
 
-  const { getValues, control, reset, watch } = useForm<IFilterFields>();
+  const { getValues, control, reset, watch, register } = useForm<IFilterFields>();
   //   const [dateFilters, setDateFilters] = useState<{
   //     from_date: string | undefined;
   //     to_date: string | undefined;
@@ -61,12 +66,23 @@ const FiltersTemplate = ({
   const [leadStatusOptions, setLeadStatusOptions] = useState<
     DropDownOption<string>[]
   >([]);
+  const [loggedByOptions, setLoggedByOptions] = useState<
+    DropDownOption<string>[]
+  >([]);
 
   //   --------------------------------------------------------
 
   //   Dropdown options from enums
   const statusOptions =
     useGenerateDropdownOptionsFromEnum(PAYMENT_STATUS_ENUM);
+  const targetEntityTypeOptions: DropDownOption<string>[] = [
+    { label: "CustomerSetup", value: "CustomerSetup" },
+    { label: "Generic", value: "Generic" },
+    { label: "Ticket", value: "Ticket" },
+    { label: "CustomerOutreach", value: "CustomerOutreach" },
+    { label: "CustomerComplaint", value: "CustomerComplaint" },
+    { label: "SubscriptionReminder", value: "SubscriptionReminder" },
+  ];
 
   // -------------------------------------------------------
 
@@ -116,6 +132,24 @@ const FiltersTemplate = ({
           }
         });
     }
+
+    if (checkIfHasString("loggedBy")) {
+      getUsers(queryParams)
+        .unwrap()
+        .then((res) => {
+          if (res && res.contents) {
+            setLoggedByOptions(
+              res.contents.map((user) => {
+                const name = `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim();
+                return {
+                  label: name || user.email || "User",
+                  value: user._id as string,
+                } as DropDownOption<string>;
+              }),
+            );
+          }
+        });
+    }
   }, [toggleFilter]);
 
   useEffect(() => {
@@ -126,6 +160,9 @@ const FiltersTemplate = ({
           endDate: selectedFilters?.endDate,
           customerId: values.customerId?.value?._id,
           status: values.status?.value,
+          targetEntityType: values.targetEntityType?.value,
+          targetEntityId: values.targetEntityId,
+          loggedBy: values.loggedBy?.value,
         };
         returnOnFilterChange(payload);
       });
@@ -141,6 +178,9 @@ const FiltersTemplate = ({
       endDate: selectedFilters?.endDate,
       customerId: data.customerId?.value?._id,
       status: data.status?.value,
+      targetEntityType: data.targetEntityType?.value,
+      targetEntityId: data.targetEntityId,
+      loggedBy: data.loggedBy?.value,
     };
 
     if (payload) {
@@ -152,6 +192,9 @@ const FiltersTemplate = ({
     reset({
       customerId: undefined,
       status: undefined,
+      targetEntityType: undefined,
+      targetEntityId: undefined,
+      loggedBy: undefined,
     });
     if (returnOnFilterChange) return;
     handleSubmitFilters();
@@ -202,6 +245,35 @@ const FiltersTemplate = ({
                   options={fetchCustomers}
                   width="100%"
                 />
+              )}
+              {checkIfHasString("loggedBy") && (
+                <DropDownComponent
+                  title="Logged By"
+                  control={control}
+                  options={loggedByOptions}
+                  name="loggedBy"
+                  label="Select user"
+                />
+              )}
+              {checkIfHasString("targetEntityType") && (
+                <DropDownComponent
+                  title="Target Entity Type"
+                  control={control}
+                  options={targetEntityTypeOptions}
+                  name="targetEntityType"
+                  label="Select entity type"
+                />
+              )}
+              {checkIfHasString("targetEntityId") && (
+                <div className="pt-4">
+                  <CustomInputField<IFilterFields>
+                    label="Target Entity ID"
+                    placeholder="e.g. 691378a26e2678086c163a96"
+                    register={register}
+                    name="targetEntityId"
+                    type="text"
+                  />
+                </div>
               )}
               {checkIfHasString("leadStatusId") && (
                 <DropDownComponent

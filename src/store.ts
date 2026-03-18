@@ -26,6 +26,7 @@ import { outReachApi } from "./pages/outreach/common/OutReachApi";
 import { customerOutreachApi } from "./pages/customer-outreaches/common/customerOutreachApi";
 import { subscriptionsApi } from "./pages/subscriptions/common/subscriptionsApi";
 import { paymentsApi } from "./pages/payments/common/paymentsApi";
+import { reschedulesApi } from "./pages/reschedules/common/reschedulesApi";
 import { sidebarReducer } from "./pages/layout/sidebar/common/sidebarSlice";
 import { notificationsApi } from "./pages/layout/notification/common/notificationsApi";
 
@@ -54,6 +55,7 @@ export const store = configureStore({
     [customerOutreachApi.reducerPath]: customerOutreachApi.reducer,
     [subscriptionsApi.reducerPath]: subscriptionsApi.reducer,
     [paymentsApi.reducerPath]: paymentsApi.reducer,
+    [reschedulesApi.reducerPath]: reschedulesApi.reducer,
     [notificationsApi.reducerPath]: notificationsApi.reducer,
 
   },
@@ -79,6 +81,7 @@ export const store = configureStore({
         customerOutreachApi.middleware,
         subscriptionsApi.middleware,
         paymentsApi.middleware,
+        reschedulesApi.middleware,
         notificationsApi.middleware,
       )
       .concat(apiErrorMiddleware),
