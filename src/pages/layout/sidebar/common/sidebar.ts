@@ -2,6 +2,7 @@ import { allRoutes } from "@/utils/routes";
 import {
   BriefcaseBusiness,
   CalendarCheck2,
+  CalendarClock,
   ChartBar,
   Computer,
   CreditCard,
@@ -72,6 +73,12 @@ export const sidebarMainMenus: ISidebar[] = [
     mainPath: `${allRoutes.PORTAL}${allRoutes.TICKETS}`,
     icon: Ticket,
     path: allRoutes.TICKETS,
+  },
+  {
+    name: "Reschedules",
+    mainPath: `${allRoutes.PORTAL}${allRoutes.RESCHEDULES}`,
+    icon: CalendarClock,
+    path: allRoutes.RESCHEDULES,
   },
   {
     name: "Leads",

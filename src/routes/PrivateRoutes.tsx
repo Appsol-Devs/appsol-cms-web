@@ -26,6 +26,10 @@ import ComplaintsView from "@/pages/complaint/component/ComplaintsView";
 import Tickets from "@/pages/ticket/component/Tickets";
 import TicketForm from "@/pages/ticket/component/TicketForm";
 import TicketView from "@/pages/ticket/component/TicketView";
+import Reschedules from "@/pages/reschedules/component/Reschedules";
+import RescheduleForm from "@/pages/reschedules/component/RescheduleForm";
+import ReschedulesScheduler from "@/pages/reschedules/component/ReschedulesScheduler";
+import RescheduleView from "@/pages/reschedules/component/RescheduleView";
 import Leads from "@/pages/leads/component/Leads";
 import LeadsForm from "@/pages/leads/component/LeadsForm";
 import LeadsView from "@/pages/leads/component/LeadsView";
@@ -99,6 +103,20 @@ const PrivateRoutes = () => {
       <Route
         path={allRoutes.VIEW_TICKET(":id")}
         element={<TicketView />}
+      />
+      <Route path={allRoutes.RESCHEDULES} element={<Reschedules />} />
+      <Route
+        path={allRoutes.RESCHEDULES_SCHEDULER}
+        element={<ReschedulesScheduler />}
+      />
+      <Route path={allRoutes.ADD_RESCHEDULE} element={<RescheduleForm />} />
+      <Route
+        path={allRoutes.UPDATE_RESCHEDULE(":id")}
+        element={<RescheduleForm />}
+      />
+      <Route
+        path={allRoutes.VIEW_RESCHEDULE(":id")}
+        element={<RescheduleView />}
       />
       <Route
         path={allRoutes.COMPLAINT_CATEGORIES}
