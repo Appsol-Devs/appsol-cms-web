@@ -53,7 +53,6 @@ const FiltersTemplate = ({
 
   const [getCustomers] = useLazyGetCustomersQuery();
   const [getLeadStatuses] = useLazyGetLeadStatusesQuery();
-  const [getUsers] = useLazyGetUsersQuery();
   const [getSoftwares] = useLazyGetSoftwaresQuery();
   const [getUsers] = useLazyGetUsersQuery();
 
@@ -81,7 +80,14 @@ const FiltersTemplate = ({
   //   Dropdown options from enums
   const statusOptions =
     useGenerateDropdownOptionsFromEnum(PAYMENT_STATUS_ENUM);
-  
+   const targetEntityTypeOptions: DropDownOption<string>[] = [
+    { label: "CustomerSetup", value: "CustomerSetup" },
+    { label: "Generic", value: "Generic" },
+    { label: "Ticket", value: "Ticket" },
+    { label: "CustomerOutreach", value: "CustomerOutreach" },
+    { label: "CustomerComplaint", value: "CustomerComplaint" },
+    { label: "SubscriptionReminder", value: "SubscriptionReminder" },
+  ];
   const featureStatusOptions =
     useGenerateDropdownOptionsFromEnum(REQUEST_FEATURE_STATUS_ENUM);
   // -------------------------------------------------------
