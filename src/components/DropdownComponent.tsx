@@ -7,7 +7,6 @@ import Select, {
   type StylesConfig,
 } from "react-select";
 
-
 export interface DropDownOption<T = string | number> {
   value: T;
   label: ReactNode;
@@ -42,7 +41,7 @@ interface DropDownComponentProps<T = string | number> {
   height?: string;
   fontSize?: string;
   isLoading?: boolean;
-  zIndex?: number; // New prop for custom z-index
+  zIndex?: number;
   onMenuOpen?: () => void;
 }
 
@@ -69,7 +68,7 @@ const DropDownComponent = <T,>({
   height,
   fontSize,
   isLoading: isLoadingProp,
-  zIndex = 9999, // Default high z-index
+  zIndex = 9999,
   onMenuOpen: onMenuOpenProp,
 }: DropDownComponentProps<T>) => {
   const options = optionsProp;
@@ -163,7 +162,6 @@ const DropDownComponent = <T,>({
     }),
   };
 
-  // Common Select props to avoid repetition
   const commonSelectProps = {
     menuPosition: "fixed" as const,
     menuPortalTarget: document.body,
@@ -207,25 +205,30 @@ const DropDownComponent = <T,>({
         <Controller
           name={name || ""}
           control={control}
-          defaultValue={defaultValue || null}
-          render={(field) => (
-            <Select
-              {...commonSelectProps}
-              isClearable={isClearable ? isClearable : true}
-              value={field.field.value}
-              onChange={(val, actionMeta) => {
-                field.field.onChange(val);
-                onChanged?.(val, actionMeta);
-              }}
-            />
-          )}
+          render={({ field }) => {
+            // TRANSLATION LAYER: Map the primitive value from RHF to the object react-select expects
+            const selectedOption = options.find((opt) => opt.value === field.value) || null;
+
+            return (
+              <Select
+                {...commonSelectProps}
+                isClearable={isClearable !== undefined ? isClearable : true}
+                value={selectedOption} // Pass the full object to react-select
+                onChange={(val, actionMeta) => {
+                  // Pass ONLY the primitive string/number back to react-hook-form
+                  field.onChange(val ? val.value : null);
+                  onChanged?.(val, actionMeta);
+                }}
+              />
+            );
+          }}
         />
       ) : (
         <Select
           {...commonSelectProps}
-          isClearable={isClearable ? isClearable : false}
+          isClearable={isClearable !== undefined ? isClearable : false}
           value={defaultValue}
-          name={name}
+          name={name as string}
           onChange={(val, actionMeta) => onChanged?.(val, actionMeta)}
         />
       )}

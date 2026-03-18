@@ -11,10 +11,10 @@ import { useGenerateDropdownOptionsFromEnum } from "@/lib/helpers";
 import type { IFilterArray, IFilters } from "@/lib/pagination";
 import type { ICustomer } from "@/pages/customer/common/customers";
 import { useLazyGetCustomersQuery } from "@/pages/customer/common/customersApi";
-import { PAYMENT_STATUS_ENUM } from "@/lib/enums";
-import { useLazyGetLeadStatusesQuery } from "@/pages/settings/common/settingsApi";
-import { useLazyGetUsersQuery } from "@/pages/users/common/usersApi";
+import { PAYMENT_STATUS_ENUM, REQUEST_FEATURE_PRIORITY_ENUM, REQUEST_FEATURE_STATUS_ENUM } from "@/lib/enums";
+import { useLazyGetLeadStatusesQuery, useLazyGetSoftwaresQuery } from "@/pages/settings/common/settingsApi";
 import CustomInputField from "@/components/CustomInputField";
+import { useLazyGetUsersQuery } from "@/pages/users/common/usersApi";
 
 interface IFiltersTemplate {
   toggleFilter?: boolean;
@@ -27,13 +27,18 @@ interface IFiltersTemplate {
 
 type IFilterFields = Omit<
   IFilters,
-  "customerId" | "status" | "leadStatusId" | "targetEntityType" | "loggedBy"
+  "customerId" | "status" | "leadStatusId" | "targetEntityType" | "loggedBy" | "priority" | "featureStatus" | "softwareId" | "assignedTo" | "featurePriority"
 > & {
   customerId?: DropDownOption<ICustomer>;
   status?: DropDownOption<string>;
   leadStatusId?: DropDownOption<string>;
   targetEntityType?: DropDownOption<string>;
   loggedBy?: DropDownOption<string>;
+  priority?: DropDownOption<string>;
+  featureStatus?: DropDownOption<string>;
+  softwareId?: DropDownOption<string>;
+  assignedTo?: DropDownOption<string>;
+  featurePriority?: DropDownOption<string>;
 };
 
 const FiltersTemplate = ({
@@ -49,24 +54,25 @@ const FiltersTemplate = ({
   const [getCustomers] = useLazyGetCustomersQuery();
   const [getLeadStatuses] = useLazyGetLeadStatusesQuery();
   const [getUsers] = useLazyGetUsersQuery();
+  const [getSoftwares] = useLazyGetSoftwaresQuery();
+  const [getUsers] = useLazyGetUsersQuery();
 
   const { getValues, control, reset, watch, register } = useForm<IFilterFields>();
-  //   const [dateFilters, setDateFilters] = useState<{
-  //     from_date: string | undefined;
-  //     to_date: string | undefined;
-  //   }>({
-  //     from_date: "",
-  //     to_date: "",
-  //   });
+
   const queryParams = { paginate: false, filters: initialQueryFilters };
 
   const checkIfHasString = (filter: IFilterArray) => filters.includes(filter);
 
   // Dropdown Options from query (Dropdown component)
+  const [engineOptions, setEngineOptions] = useState<DropDownOption<string>[]>([]);
   const [leadStatusOptions, setLeadStatusOptions] = useState<
     DropDownOption<string>[]
   >([]);
   const [loggedByOptions, setLoggedByOptions] = useState<
+    DropDownOption<string>[]
+  >([]);
+
+  const [softwareOptions, setSoftwareOptions] = useState<
     DropDownOption<string>[]
   >([]);
 
@@ -75,17 +81,12 @@ const FiltersTemplate = ({
   //   Dropdown options from enums
   const statusOptions =
     useGenerateDropdownOptionsFromEnum(PAYMENT_STATUS_ENUM);
-  const targetEntityTypeOptions: DropDownOption<string>[] = [
-    { label: "CustomerSetup", value: "CustomerSetup" },
-    { label: "Generic", value: "Generic" },
-    { label: "Ticket", value: "Ticket" },
-    { label: "CustomerOutreach", value: "CustomerOutreach" },
-    { label: "CustomerComplaint", value: "CustomerComplaint" },
-    { label: "SubscriptionReminder", value: "SubscriptionReminder" },
-  ];
-
+  
+  const featureStatusOptions =
+    useGenerateDropdownOptionsFromEnum(REQUEST_FEATURE_STATUS_ENUM);
   // -------------------------------------------------------
-
+  const featurePriorityOptions =
+    useGenerateDropdownOptionsFromEnum(REQUEST_FEATURE_PRIORITY_ENUM);
   // Dropdown options from query (Async dropdown component)
   const fetchCustomers = async (
     query: string,
@@ -150,6 +151,42 @@ const FiltersTemplate = ({
           }
         });
     }
+    if (checkIfHasString("softwareId")) {
+      getSoftwares(queryParams)
+        .unwrap()
+        .then((res) => {
+          if (res) {
+            setSoftwareOptions(() =>
+              res.contents.map((data) => {
+                const payload: DropDownOption<string> = {
+                  label: data.name,
+                  value: data?._id as string,
+                };
+                return payload;
+              }),
+            );
+          }
+        });
+    }
+
+    if (checkIfHasString("assignedTo")) {
+      getUsers({ pageIndex: 1, pageSize: 10 })
+        .unwrap()
+        .then((res) => {
+          if (res) {
+            setEngineOptions(() =>
+              res.contents.map((data) => {
+                const payload: DropDownOption<string> = {
+                  label: `${data.firstName} ${data.lastName}`,
+                  value: data?._id as string,
+                };
+                return payload;
+              }),
+            );
+          }
+        });
+    }
+
   }, [toggleFilter]);
 
   useEffect(() => {
@@ -159,7 +196,10 @@ const FiltersTemplate = ({
           startDate: selectedFilters?.startDate,
           endDate: selectedFilters?.endDate,
           customerId: values.customerId?.value?._id,
-          status: values.status?.value,
+          status: values.status?.value || values.featureStatus?.value,
+          priority: values.featurePriority?.value,
+          softwareId: values.softwareId?.value,
+          assignedTo: values.assignedTo?.value,
           targetEntityType: values.targetEntityType?.value,
           targetEntityId: values.targetEntityId,
           loggedBy: values.loggedBy?.value,
@@ -173,16 +213,23 @@ const FiltersTemplate = ({
   const handleSubmitFilters = () => {
     const data: IFilterFields = getValues();
 
+    const softwareIdVal = typeof data.softwareId === "string" ? data.softwareId : data.softwareId?.value;
+    const assignedToVal = typeof data.assignedTo === "string" ? data.assignedTo : data.assignedTo?.value;
+    const featureStatusVal = typeof data.featureStatus === "string" ? data.featureStatus : data.featureStatus?.value;
+    
     const payload: IFilters = {
       startDate: selectedFilters?.startDate,
       endDate: selectedFilters?.endDate,
       customerId: data.customerId?.value?._id,
-      status: data.status?.value,
+      status: data.status?.value || featureStatusVal,
+      priority: typeof data.featurePriority === "string" ? data.featurePriority as unknown as string : data.featurePriority?.value,
+      softwareId: softwareIdVal,
+      assignedTo: assignedToVal,
       targetEntityType: data.targetEntityType?.value,
       targetEntityId: data.targetEntityId,
       loggedBy: data.loggedBy?.value,
     };
-
+    console.log("payload", payload);
     if (payload) {
       returnFilters?.(payload);
     }
@@ -293,6 +340,46 @@ const FiltersTemplate = ({
                   label="Select status"
                 />
               )}
+              {checkIfHasString("featureStatus") && (
+                <DropDownComponent
+                  title="Feature Status"
+                  control={control}
+                  options={featureStatusOptions}
+                  name="featureStatus"
+                  label="Select feature status"
+                />
+              )}
+              {checkIfHasString("featurePriority") && (
+                <DropDownComponent
+                  title="Feature Priority"
+                  control={control}
+                  options={featurePriorityOptions}
+                  name="featurePriority"
+                  label="Select feature priority"
+                />
+              )}
+
+              {checkIfHasString("softwareId") && (
+                <DropDownComponent
+                  title="Software"
+                  control={control}
+                  options={softwareOptions}
+                  name="softwareId"
+                  label="Select software"
+                />
+              )}
+
+              {checkIfHasString("assignedTo") && (
+                <DropDownComponent
+                  title="Assigned To"
+                  control={control}
+                  options={engineOptions}
+                  name="assignedTo"
+                  label="Select assigned user"
+                />
+              )}
+
+
               {/* {checkIfHasString("date_range") && (
                 <div className="pt-4">
                   <DateTimeRangeComponent

@@ -104,6 +104,12 @@ export const sidebarMainMenus: ISidebar[] = [
     icon: Lock,
     path: allRoutes.USERS,
   },
+   {
+    mainPath: `${allRoutes.PORTAL}${allRoutes.FEATURE_REQUESTS}`,
+    name: "Feature Requests",
+    icon: Lock,
+    path: allRoutes.FEATURE_REQUESTS,
+  },
     {
     mainPath: `${allRoutes.PORTAL}${allRoutes.CUSTOMER_OUTREACHS}`,
     name: "Customer OutReaches",

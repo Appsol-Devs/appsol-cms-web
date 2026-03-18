@@ -26,6 +26,7 @@ export interface IBaseQueryParam {
   filters?: IFilters;
 }
 
+
 export const lookup_params: IBaseQueryParam = {
   pageSize: 1000,
   pageIndex: 1,

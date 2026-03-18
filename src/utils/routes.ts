@@ -1,4 +1,3 @@
-
 export const allRoutes = Object.freeze({
   HOME: "/",
   PORTAL: "/portal",
@@ -85,6 +84,10 @@ export const allRoutes = Object.freeze({
   VIEW_CUSTOMER_OUTREACH: (id: string) => `/customer-outreachs/${id}/view`,
   ALL_NOTIFICATIONS: "/all-notifications",
   VIEW_NOTIFICATION: (id: string) => `/notifications/${id}/view`,
+  FEATURE_REQUESTS: "/feature-requests",
+  ADD_FEATURE_REQUEST: "/feature-requests/new",
+  UPDATE_FEATURE_REQUEST: (id: string) => `/feature-requests/${id}`,
+  VIEW_FEATURE_REQUEST: (id: string) => `/feature-requests/${id}/view`,
 });
 
 export const customerRoutes = Object.freeze({
