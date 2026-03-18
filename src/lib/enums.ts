@@ -35,6 +35,21 @@ export enum LEAD_PRIORITY_ENUM {
   HIGH = "high",
 }
 
+export enum REQUEST_FEATURE_PRIORITY_ENUM {
+  low = "low",
+  medium = "medium",
+  high = "high",
+  critical = "critical",
+}
+
+export enum REQUEST_FEATURE_STATUS_ENUM {
+  NEW = "new",
+  "UNDER REVIEW" = "under-review",
+  PLANNED = "planned",
+  COMPLETE = "complete",
+  REJECTED = "rejected",
+}
+
 export const LEAD_PRIORITY_COLORS: Record<string, string> = {
   low: "#0E9F6E",
   medium: "#F97316",
@@ -87,11 +102,11 @@ export const getTicketPriorityColor = (priority?: string) =>
     : undefined;
 
 export const TICKET_STATUS_COLORS: Record<string, string> = {
-  open: "#3b82f6",    
-  fixed: "#eab308",     
-  closed: "#22c55e",    
-  assigned: "#8b5cf6",  
-  rejected: "#ef4444",  
+  open: "#3b82f6",
+  fixed: "#eab308",
+  closed: "#22c55e",
+  assigned: "#8b5cf6",
+  rejected: "#ef4444",
 };
 
 export const getTicketStatusColor = (status?: string) =>
@@ -156,7 +171,7 @@ export const PAYMENT_STATUS_COLORS: Record<string, string> = {
 
 export const getPaymentStatusColor = (status?: string) =>
   status
-    ? PAYMENT_STATUS_COLORS[status.toLowerCase()] ?? undefined
+    ? (PAYMENT_STATUS_COLORS[status.toLowerCase()] ?? undefined)
     : undefined;
 
 export const getDueStatus = (

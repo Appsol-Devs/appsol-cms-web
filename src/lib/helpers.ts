@@ -105,3 +105,20 @@ export const getInitials = (firstName?: string, lastName?: string) => {
   const last = lastName?.charAt(0) || "";
   return (first + last).toUpperCase() || "U"; // "U" as default if no name
 };
+
+
+export const FEATURE_STATUS_COLORS: Record<string, string> = {
+  "new": "#3b82f6",          
+  "under-review": "#f97316", 
+  "planned": "#8b5cf6",      
+  "complete": "#22c55e",    
+  "rejected": "#e11d48",     
+};
+
+
+export const FEATURE_PRIORITY_COLORS: Record<string, string> = {
+  "critical": "#b91c1c",    
+  "high": "#ef4444",         
+  "medium": "#f59e0b",      
+  "low": "#64748b",       
+};
