@@ -75,7 +75,7 @@ export const sidebarMainMenus: ISidebar[] = [
     path: allRoutes.TICKETS,
   },
   {
-    name: "Reschedules",
+    name: "Schedules",
     mainPath: `${allRoutes.PORTAL}${allRoutes.RESCHEDULES}`,
     icon: CalendarClock,
     path: allRoutes.RESCHEDULES,

@@ -9,30 +9,20 @@ import type { IFilters } from "@/lib/pagination";
 import {
   endOfDay,
   endOfMonth,
-  endOfWeek,
   isWithinInterval,
   startOfDay,
   startOfMonth,
-  startOfWeek,
 } from "date-fns";
-import moment from "moment";
-import { Calendar as BigCalendar, momentLocalizer, Views } from "react-big-calendar";
-import "react-big-calendar/lib/css/react-big-calendar.css";
+import "temporal-polyfill";
+import { Temporal } from "temporal-polyfill";
+import { ScheduleXCalendar, useCalendarApp } from "@schedule-x/react";
+import { viewDay, viewMonthGrid, viewWeek } from "@schedule-x/calendar";
+import "@schedule-x/theme-default/dist/index.css";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { IReschedule } from "../common/reschedules";
 import { useLazyGetReschedulesQuery } from "../common/reschedulesApi";
 import RescheduleDetailsDrawer from "./RescheduleDetailsDrawer";
-
-const localizer = momentLocalizer(moment);
-
-interface RescheduleEvent {
-  title: string;
-  start: Date;
-  end: Date;
-  allDay?: boolean;
-  reschedule: IReschedule;
-}
 
 function getNewDate(res: IReschedule): Date | null {
   if (!res?.newDateTime) return null;
@@ -48,10 +38,6 @@ export default function ReschedulesScheduler() {
   const navigate = useNavigate();
   const [fetchQuery, fetchState] = useLazyGetReschedulesQuery();
 
-  const [calendarView, setCalendarView] = useState<"month" | "week" | "day">(
-    "month",
-  );
-  const [calendarDate, setCalendarDate] = useState<Date>(new Date());
   const [searchQuery, setSearchQuery] = useState<string | null>(null);
 
   const today = new Date();
@@ -105,46 +91,124 @@ export default function ReschedulesScheduler() {
       .sort((a, b) => a.d.getTime() - b.d.getTime());
   }, [all, effectiveRange.start, effectiveRange.end]);
 
-  const calendarEvents: RescheduleEvent[] = useMemo(
-    () =>
-      eventsInRange.map(({ r, d }) => ({
-        title: r.title || r.rescheduleCode || "Reschedule",
-        start: d,
-        end: d,
-        allDay: false,
-        reschedule: r,
-      })),
-    [eventsInRange],
-  );
-
   const openDetails = (r: IReschedule) => {
     setSelected(r);
     setDrawerOpen(true);
   };
 
-  const handleNavigate = (newDate: Date) => {
-    setCalendarDate(newDate);
-    let start: Date;
-    let end: Date;
+  const defaultColor = "#2563eb";
 
-    if (calendarView === "week") {
-      start = startOfWeek(newDate, { weekStartsOn: 1 });
-      end = endOfWeek(newDate, { weekStartsOn: 1 });
-    } else if (calendarView === "day") {
-      start = startOfDay(newDate);
-      end = endOfDay(newDate);
-    } else {
-      start = startOfMonth(newDate);
-      end = endOfMonth(newDate);
+  const hexToOnContainer = (_hex: string) => "#000000";
+
+  const { scheduleXEvents, scheduleXCalendars } = useMemo(() => {
+    const uniqueColors = Array.from(
+      new Set([
+        defaultColor,
+        ...eventsInRange.map(({ r }) => r.colorCode || defaultColor),
+      ]),
+    );
+
+    const colorCodeToCalendarId = new Map<string, string>();
+    uniqueColors.forEach((colorCode, idx) =>
+      colorCodeToCalendarId.set(colorCode, `c${idx}`),
+    );
+
+    const calendars = uniqueColors.reduce<Record<string, any>>(
+      (acc, colorCode, idx) => {
+        const calendarId = `c${idx}`;
+        const onContainer = hexToOnContainer(colorCode);
+        acc[calendarId] = {
+          colorName: calendarId,
+          lightColors: {
+            main: colorCode,
+            container: colorCode,
+            onContainer,
+          },
+          darkColors: {
+            main: colorCode,
+            container: colorCode,
+            onContainer,
+          },
+        };
+        return acc;
+      },
+      {},
+    );
+
+    const dateToZoned = (d: Date) =>
+      Temporal.Instant.fromEpochMilliseconds(d.getTime()).toZonedDateTimeISO(
+        "UTC",
+      );
+
+    const events = eventsInRange.map(({ r, d }, idx) => {
+      const start = dateToZoned(d);
+      const end = start.add({ minutes: 30 });
+      const colorCode = r.colorCode || defaultColor;
+      const calendarId = colorCodeToCalendarId.get(colorCode) ?? "c0";
+      const eventId = r._id ?? r.rescheduleCode ?? `${calendarId}-${d.getTime()}-${idx}`;
+
+      return {
+        id: eventId,
+        title: r.title || r.rescheduleCode || "Reschedule",
+        start,
+        end,
+        calendarId,
+        reschedule: r,
+        _options: {
+          disableDND: true,
+          disableResize: true,
+        },
+      };
+    });
+
+    return { scheduleXEvents: events, scheduleXCalendars: calendars };
+  }, [eventsInRange]);
+
+  const selectedDate = useMemo(() => {
+    const isoDate = effectiveRange.start.toISOString().slice(0, 10);
+    return Temporal.PlainDate.from(isoDate);
+  }, [effectiveRange.start]);
+
+  const calendarApp = useCalendarApp({
+    defaultView: viewMonthGrid.name,
+    views: [viewMonthGrid, viewWeek, viewDay],
+    selectedDate,
+    timezone: "UTC",
+    events: scheduleXEvents as any,
+    calendars: scheduleXCalendars,
+    callbacks: {
+      onRangeUpdate: (range) => {
+        const startMs = range.start.toInstant().epochMilliseconds;
+        const endMs = range.end.toInstant().epochMilliseconds;
+        setDateRange({
+          start: new Date(startMs),
+          end: new Date(endMs),
+        });
+      },
+      onEventClick: (calendarEvent) => {
+        const reschedule = (calendarEvent as any)?.reschedule as
+          | IReschedule
+          | undefined;
+        if (reschedule) openDetails(reschedule);
+      },
+    },
+    skipValidation: true,
+  });
+
+
+  useEffect(() => {
+    if (!calendarApp) return;
+    calendarApp.events.set(scheduleXEvents as any);
+  }, [calendarApp, scheduleXEvents]);
+
+  useEffect(() => {
+    if (!calendarApp) return;
+
+    const app = (calendarApp as any).$app;
+    if (app?.config?.calendars) {
+      app.config.calendars.value = scheduleXCalendars;
     }
-
-    setDateRange({ start, end });
-    setFilters((prev) => ({
-      ...(prev ?? {}),
-      startDate: start.toISOString(),
-      endDate: end.toISOString(),
-    }));
-  };
+  }, [calendarApp, scheduleXCalendars]);
 
   return (
     <div className="space-y-2">
@@ -188,11 +252,6 @@ export default function ReschedulesScheduler() {
                   defaultDate={dateRange}
                   dateRange={(r) => {
                     setDateRange(r);
-                    setFilters((prev) => ({
-                      ...(prev ?? {}),
-                      startDate: r.start ? startOfDay(r.start).toISOString() : undefined,
-                      endDate: r.end ? endOfDay(r.end).toISOString() : undefined,
-                    }));
                   }}
                 />
               </div>
@@ -204,45 +263,14 @@ export default function ReschedulesScheduler() {
           <LoadingComponent loading />
         )}
 
-        <div className="bg-card rounded-md border p-3 scheduler-calendar">
-          <BigCalendar
-            localizer={localizer}
-            events={calendarEvents}
-            startAccessor="start"
-            endAccessor="end"
-            date={calendarDate}
-            view={
-              calendarView === "week"
-                ? Views.WEEK
-                : calendarView === "day"
-                  ? Views.DAY
-                  : Views.MONTH
-            }
-            defaultView={Views.MONTH}
-            onView={(nextView) => {
-              if (nextView === Views.WEEK) setCalendarView("week");
-              else if (nextView === Views.DAY) setCalendarView("day");
-              else setCalendarView("month");
-            }}
-            onNavigate={(newDate) => handleNavigate(newDate as Date)}
-            onSelectEvent={(event) =>
-              openDetails((event as RescheduleEvent).reschedule)
-            }
-            style={{ height: 600 }}
-            eventPropGetter={(event: RescheduleEvent) => {
-              const r = event.reschedule;
-              const backgroundColor = r.colorCode || "#2563eb";
-              return {
-                style: {
-                  backgroundColor,
-                  borderRadius: "4px",
-                  border: "none",
-                  color: "#fff",
-                  fontSize: "0.75rem",
-                },
-              };
-            }}
-          />
+        <div
+          className="bg-card rounded-md border p-3 scheduler-calendar"
+        >
+          {calendarApp ? (
+            <ScheduleXCalendar calendarApp={calendarApp} />
+          ) : (
+            <LoadingComponent loading />
+          )}
         </div>
       </CardComponent>
 

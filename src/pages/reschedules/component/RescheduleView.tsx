@@ -309,14 +309,6 @@ const RescheduleView = () => {
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground uppercase font-semibold mb-1.5">
-                    Target Entity ID
-                  </p>
-                  <p className="text-sm text-card-foreground">
-                    {selected.targetEntityId ?? "—"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase font-semibold mb-1.5">
                     Original Date & Time
                   </p>
                   <p className="text-sm text-card-foreground">
