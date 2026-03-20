@@ -18,7 +18,7 @@ import { allRoutes } from "@/utils/routes";
 import { X, Wrench, Calendar, History, Ticket, CheckCircle2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import type { ITicket, ITicketHistoryEntry } from "../common/tickets";
-import { useCloseTicketMutation } from "../common/ticketsApi";
+import { useCloseTicketMutation, useLazyGetATicketQuery } from "../common/ticketsApi";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { showToast } from "@/components/ui/CustomToast";
 
@@ -90,18 +90,29 @@ const TicketPreviewDrawer = ({
 }: TicketPreviewDrawerProps) => {
   const navigate = useNavigate();
   const [closeTicket, { isLoading: isClosing }] = useCloseTicketMutation();
+   const [getTicket] = useLazyGetATicketQuery();
 
   const handleClose = async () => {
     if (!ticket?._id) return;
     try {
-      const updated = await closeTicket(ticket._id).unwrap();
-      if (updated) {
-        onTicketUpdated?.(updated);
+      const id = ticket._id;
+      const closed = await closeTicket(id).unwrap();
+
+      let latest: ITicket | null = closed ?? null;
+      try {
+        const fresh = await getTicket(id).unwrap();
+        if (fresh) latest = fresh;
+      } catch {
+      }
+
+      if (latest) {
+        onTicketUpdated?.(latest);
         showToast({
           title: "Success",
           message: "Ticket closed successfully.",
           type: "success",
         });
+        onOpenChange(false);
       }
     } catch (error) {
       console.error("Failed to close ticket", error);

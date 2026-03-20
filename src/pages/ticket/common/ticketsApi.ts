@@ -96,6 +96,7 @@ export const ticketsApi = createApi({
         url: `/tickets/${id}/close`,
         method: "PATCH",
       }),
+      transformResponse: async (response: Response) => response.json(),
       invalidatesTags: ["ITicket"],
     }),
   }),

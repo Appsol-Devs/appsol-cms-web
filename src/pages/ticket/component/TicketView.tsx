@@ -172,9 +172,7 @@ const TicketView = () => {
     try {
       await closeTicket(id).unwrap();
       const refreshed = await getTicketDetails(id).unwrap();
-      if (refreshed) {
-        setSelectedTicket(refreshed);
-      }
+      if (refreshed) setSelectedTicket(refreshed);
       showToast({
         title: "Success",
         message: "Ticket closed successfully.",

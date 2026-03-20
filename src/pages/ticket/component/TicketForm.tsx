@@ -38,7 +38,7 @@ const TicketForm = () => {
     resolver: zodResolver(ticketFormSchema),
     defaultValues: {
       title: "",
-      requestedDate: "",
+      requestedDate: new Date().toISOString(),
       notes: "",
       complaintId: prefillComplaintId
         ? {
@@ -49,6 +49,10 @@ const TicketForm = () => {
                 : prefillComplaintId,
           }
         : undefined,
+      status: {
+        label: "open",
+        value: "open",
+      },
     },
   });
   const { watch, handleSubmit, reset, setValue, trigger, formState } = form;
