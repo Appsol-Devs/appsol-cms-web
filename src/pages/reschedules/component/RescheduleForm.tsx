@@ -30,7 +30,6 @@ const RescheduleForm = () => {
     defaultValues: {
       title: "",
       reason: "",
-      targetEntityId: "",
       colorCode: generateRandomColor(),
       originalDateTime: "",
       newDateTime: "",
@@ -135,21 +134,10 @@ const RescheduleForm = () => {
       }
     }
 
-    if (!data.targetEntityType?.value && data.targetEntityId?.trim()) {
-      showToast({
-        title: "Validation",
-        message: "Target Entity Type is required when Target Entity ID is provided.",
-        type: "info",
-        duration: 2000,
-      });
-      return;
-    }
-
     const payload = cleanPayload({
       title: data.title?.trim(),
       customerId: data.customerId?.value?._id,
       targetEntityType: data.targetEntityType?.value,
-      targetEntityId: data.targetEntityId?.trim(),
       reason: data.reason?.trim() || undefined,
       originalDateTime: data.originalDateTime,
       newDateTime: data.newDateTime,
@@ -180,16 +168,6 @@ const RescheduleForm = () => {
       }
     }
 
-    if (!data.targetEntityType?.value && data.targetEntityId?.trim()) {
-      showToast({
-        title: "Validation",
-        message: "Target Entity Type is required when Target Entity ID is provided.",
-        type: "info",
-        duration: 2000,
-      });
-      return false;
-    }
-
     return true;
   };
 
@@ -209,7 +187,6 @@ const RescheduleForm = () => {
           value: (values?.targetEntityType?.label as string) || "",
           required: true,
         },
-        { label: "Entity ID", value: values?.targetEntityId, required: false },
         { label: "Original Date", value: values?.originalDateTime, required: true },
         { label: "New Date", value: values?.newDateTime, required: true },
         { label: "Status", value: (values?.status?.label as string) || "", required: true },

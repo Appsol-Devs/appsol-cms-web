@@ -106,15 +106,6 @@ const RescheduleFormContent = ({ isLoading, form }: Props) => {
             disabled={isLoading}
           />
 
-          <CustomInputField<IRescheduleFormFields>
-            type="text"
-            label="Target Entity ID (optional)"
-            name="targetEntityId"
-            placeholder="e.g. 691378a26e2678086c163a96"
-            disabled={isLoading}
-            register={register}
-          />
-
           <Controller
             control={control}
             name="originalDateTime"

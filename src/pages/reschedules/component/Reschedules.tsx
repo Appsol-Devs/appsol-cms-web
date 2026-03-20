@@ -141,7 +141,7 @@ const Reschedules = () => {
     <>
       <FeatureContentRenderer
         useDateFilters
-        filters={["customerId", "status", "targetEntityType", "targetEntityId", "loggedBy"]}
+        filters={["customerId", "status", "targetEntityType", "loggedBy"]}
         columns={columns}
         tableAddComponent={() => (
           <div className="flex items-center gap-2">
@@ -171,7 +171,7 @@ const Reschedules = () => {
           }
         }}
         refetchData={executed}
-        title="Reschedules"
+        title="Schedules"
         lazyFetchQuery={[fetchQuery, fetchState]}
       />
     </>

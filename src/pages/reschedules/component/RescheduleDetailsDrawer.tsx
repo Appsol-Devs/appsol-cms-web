@@ -127,9 +127,6 @@ export default function RescheduleDetailsDrawer({
                   <span className="text-sm font-medium">
                     {reschedule.targetEntityType ?? "—"}
                   </span>
-                  <span className="text-xs text-muted-foreground">
-                    {reschedule.targetEntityId ?? "—"}
-                  </span>
                 </div>
               </div>
             </div>
