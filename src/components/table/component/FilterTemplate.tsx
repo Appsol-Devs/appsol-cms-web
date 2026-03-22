@@ -12,6 +12,8 @@ import type { IFilterArray, IFilters } from "@/lib/pagination";
 import type { ICustomer } from "@/pages/customer/common/customers";
 import { useLazyGetCustomersQuery } from "@/pages/customer/common/customersApi";
 import { PAYMENT_STATUS_ENUM, REQUEST_FEATURE_PRIORITY_ENUM, REQUEST_FEATURE_STATUS_ENUM } from "@/lib/enums";
+import type { TSubscriptionReminderType } from "@/pages/subscription-reminders/common/subscription-reminder";
+import { SUBSCRIPTION_REMINDER_TYPE_LABELS } from "@/pages/subscription-reminders/common/subscription-reminder";
 import { useLazyGetLeadStatusesQuery, useLazyGetSoftwaresQuery } from "@/pages/settings/common/settingsApi";
 import CustomInputField from "@/components/CustomInputField";
 import { useLazyGetUsersQuery } from "@/pages/users/common/usersApi";
@@ -27,7 +29,18 @@ interface IFiltersTemplate {
 
 type IFilterFields = Omit<
   IFilters,
-  "customerId" | "status" | "leadStatusId" | "targetEntityType" | "loggedBy" | "priority" | "featureStatus" | "softwareId" | "assignedTo" | "featurePriority"
+  | "customerId"
+  | "status"
+  | "leadStatusId"
+  | "targetEntityType"
+  | "loggedBy"
+  | "priority"
+  | "featureStatus"
+  | "softwareId"
+  | "assignedTo"
+  | "featurePriority"
+  | "reminderType"
+  | "isSent"
 > & {
   customerId?: DropDownOption<ICustomer>;
   status?: DropDownOption<string>;
@@ -39,6 +52,8 @@ type IFilterFields = Omit<
   softwareId?: DropDownOption<string>;
   assignedTo?: DropDownOption<string>;
   featurePriority?: DropDownOption<string>;
+  reminderType?: DropDownOption<string>;
+  isSent?: DropDownOption<string>;
 };
 
 const FiltersTemplate = ({
@@ -93,6 +108,18 @@ const FiltersTemplate = ({
   // -------------------------------------------------------
   const featurePriorityOptions =
     useGenerateDropdownOptionsFromEnum(REQUEST_FEATURE_PRIORITY_ENUM);
+
+  const reminderTypeOptions: DropDownOption<string>[] = (
+    Object.entries(SUBSCRIPTION_REMINDER_TYPE_LABELS) as [
+      TSubscriptionReminderType,
+      string,
+    ][]
+  ).map(([value, label]) => ({ label, value }));
+
+  const isSentOptions: DropDownOption<string>[] = [
+    { label: "Sent", value: "true" },
+    { label: "Not sent", value: "false" },
+  ];
   // Dropdown options from query (Async dropdown component)
   const fetchCustomers = async (
     query: string,
@@ -209,6 +236,8 @@ const FiltersTemplate = ({
           targetEntityType: values.targetEntityType?.value,
           targetEntityId: values.targetEntityId,
           loggedBy: values.loggedBy?.value,
+          reminderType: values.reminderType?.value,
+          isSent: values.isSent?.value,
         };
         returnOnFilterChange(payload);
       });
@@ -223,6 +252,13 @@ const FiltersTemplate = ({
     const assignedToVal = typeof data.assignedTo === "string" ? data.assignedTo : data.assignedTo?.value;
     const featureStatusVal = typeof data.featureStatus === "string" ? data.featureStatus : data.featureStatus?.value;
     
+    const reminderTypeVal =
+      typeof data.reminderType === "string"
+        ? data.reminderType
+        : data.reminderType?.value;
+    const isSentVal =
+      typeof data.isSent === "string" ? data.isSent : data.isSent?.value;
+
     const payload: IFilters = {
       startDate: selectedFilters?.startDate,
       endDate: selectedFilters?.endDate,
@@ -234,6 +270,8 @@ const FiltersTemplate = ({
       targetEntityType: data.targetEntityType?.value,
       targetEntityId: data.targetEntityId,
       loggedBy: data.loggedBy?.value,
+      reminderType: reminderTypeVal,
+      isSent: isSentVal,
     };
     console.log("payload", payload);
     if (payload) {
@@ -248,6 +286,8 @@ const FiltersTemplate = ({
       targetEntityType: undefined,
       targetEntityId: undefined,
       loggedBy: undefined,
+      reminderType: undefined,
+      isSent: undefined,
     });
     if (returnOnFilterChange) return;
     handleSubmitFilters();
@@ -385,6 +425,24 @@ const FiltersTemplate = ({
                 />
               )}
 
+              {checkIfHasString("reminderType") && (
+                <DropDownComponent
+                  title="Reminder type"
+                  control={control}
+                  options={reminderTypeOptions}
+                  name="reminderType"
+                  label="Select reminder type"
+                />
+              )}
+              {checkIfHasString("isSent") && (
+                <DropDownComponent
+                  title="Sent status"
+                  control={control}
+                  options={isSentOptions}
+                  name="isSent"
+                  label="Sent or not sent"
+                />
+              )}
 
               {/* {checkIfHasString("date_range") && (
                 <div className="pt-4">
