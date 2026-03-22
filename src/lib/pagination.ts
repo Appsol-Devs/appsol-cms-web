@@ -144,6 +144,8 @@ export interface IFilters {
   featureStatus?: string;
   softwareId?: string;
   assignedTo?: string;
+  reminderType?: string;
+  isSent?: string;
 }
 
 const ALL_FILTERS = [
@@ -160,6 +162,8 @@ const ALL_FILTERS = [
   "softwareId",
   "assignedTo",
   "featurePriority",
+  "reminderType",
+  "isSent",
 ] as const;
 
 export type IFilterArray = (typeof ALL_FILTERS)[number];

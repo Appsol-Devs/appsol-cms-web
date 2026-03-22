@@ -30,6 +30,7 @@ import { reschedulesApi } from "./pages/reschedules/common/reschedulesApi";
 import { sidebarReducer } from "./pages/layout/sidebar/common/sidebarSlice";
 import { notificationsApi } from "./pages/layout/notification/common/notificationsApi";
 import { featureRequestApi } from "./pages/feature-request-module/common/featureRequestApi";
+import { subscriptionRemindersApi } from "./pages/subscription-reminders/common/subscriptionRemindersApi";
 
 const persistConfig = {
   key: "root",
@@ -59,6 +60,7 @@ export const store = configureStore({
     [reschedulesApi.reducerPath]: reschedulesApi.reducer,
     [notificationsApi.reducerPath]: notificationsApi.reducer,
     [featureRequestApi.reducerPath]: featureRequestApi.reducer,
+    [subscriptionRemindersApi.reducerPath]: subscriptionRemindersApi.reducer,
 
   },
   middleware: (getDefaultMiddleware) =>
@@ -85,7 +87,8 @@ export const store = configureStore({
         paymentsApi.middleware,
         reschedulesApi.middleware,
         notificationsApi.middleware,
-        featureRequestApi.middleware
+        featureRequestApi.middleware,
+        subscriptionRemindersApi.middleware
       )
       .concat(apiErrorMiddleware),
 });

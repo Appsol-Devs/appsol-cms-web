@@ -57,6 +57,7 @@ import AllNotifications from "@/pages/layout/notification/component/AllNotificat
 import FeatureRequest from "@/pages/feature-request-module/components/FeatureRequest";
 import ViewFeatureRequest from "@/pages/feature-request-module/components/ViewFeatureRequest";
 import FeatureRequestForm from "@/pages/feature-request-module/components/FeatureRequestForm";
+import SubscriptionReminders from "@/pages/subscription-reminders/component/SubscriptionReminders";
 
 const PrivateRoutes = () => {
   return (
@@ -223,6 +224,10 @@ const PrivateRoutes = () => {
       <Route
         path={allRoutes.VIEW_CUSTOMER_OUTREACH(":id")}
         element={<CustomerOutReachView />}
+      />
+      <Route
+        path={allRoutes.SUBSCRIPTION_REMINDERS}
+        element={<SubscriptionReminders />}
       />
       <Route path={allRoutes.SUBSCRIPTIONS} element={<Subscriptions />} />
       <Route path={allRoutes.ADD_SUBSCRIPTION} element={<SubscriptionsForm />} />

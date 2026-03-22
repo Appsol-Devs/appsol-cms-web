@@ -58,6 +58,7 @@ export const allRoutes = Object.freeze({
   ENQUIRIES: "/enquiries",
   ANALYTICS: "/analytics",
   AGENTS: "/agents",
+  SUBSCRIPTION_REMINDERS: "/subscription-reminders",
   SUBSCRIPTIONS: "/subscriptions",
   ADD_SUBSCRIPTION: "/subscriptions/new",
   UPDATE_SUBSCRIPTION: (id: string) => `/subscriptions/${id}`,

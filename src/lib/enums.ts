@@ -174,6 +174,73 @@ export const getPaymentStatusColor = (status?: string) =>
     ? (PAYMENT_STATUS_COLORS[status.toLowerCase()] ?? undefined)
     : undefined;
 
+export const REMINDER_DELIVERY_COLORS = {
+  sent: "#22c55e",
+  notSent: "#6b7280",
+} as const;
+
+export const SUBSCRIPTION_AUTO_RENEW_COLORS = {
+  auto: "#3b82f6",
+  manual: "#64748b",
+} as const;
+
+export const getReminderDeliveryBadgeStyle = (
+  isSent: boolean,
+):
+  | { color: string; backgroundColor: string; borderColor: string }
+  | undefined =>
+  getLookupBadgeStyle(
+    isSent ? REMINDER_DELIVERY_COLORS.sent : REMINDER_DELIVERY_COLORS.notSent,
+  );
+
+export const getSubscriptionAutoRenewBadgeStyle = (
+  autoRenew?: boolean,
+):
+  | { color: string; backgroundColor: string; borderColor: string }
+  | undefined =>
+  getLookupBadgeStyle(
+    autoRenew
+      ? SUBSCRIPTION_AUTO_RENEW_COLORS.auto
+      : SUBSCRIPTION_AUTO_RENEW_COLORS.manual,
+  );
+
+export const getReminderDueUrgencyBadgeStyle = (
+  urgency: "overdue" | "soon" | "normal",
+):
+  | { color: string; backgroundColor: string; borderColor: string }
+  | undefined => {
+  const color =
+    urgency === "overdue"
+      ? DUE_STATUS_COLORS.overdue
+      : urgency === "soon"
+        ? "#f97316"
+        : "#64748b";
+  return getLookupBadgeStyle(color);
+};
+
+export const getReminderDueUrgencyLabel = (
+  urgency: "overdue" | "soon" | "normal",
+): string =>
+  urgency === "overdue"
+    ? "Overdue"
+    : urgency === "soon"
+      ? "Due Soon"
+      : "Upcoming";
+
+export const getReminderTypeBadgeStyle = (
+  reminderType?: string,
+):
+  | { color: string; backgroundColor: string; borderColor: string }
+  | undefined => {
+  const t = (reminderType ?? "").toLowerCase();
+  if (t === "overdue") return getLookupBadgeStyle(DUE_STATUS_COLORS.overdue);
+  if (t === "due_today") return getLookupBadgeStyle(DUE_STATUS_COLORS["due-today"]);
+  if (t === "7_days" || t === "14_days" || t === "30_days") {
+    return getLookupBadgeStyle("#eab308");
+  }
+  return getLookupBadgeStyle("#64748b");
+};
+
 export const getDueStatus = (
   nextBillingDate?: string,
 ): { status: DueStatus; label: string; color: string } | null => {
