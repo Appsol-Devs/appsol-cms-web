@@ -41,6 +41,7 @@ interface ITableTemplate<
   columns: ColumnDef<R>[];
   refetchData?: boolean;
   useDateFilters?: boolean;
+  dateFilterNoDefault?: boolean;
   pageSize?: number;
   filters?: IFilterArray[];
   pathOnRowSelected?: (data: R) => void;
@@ -78,6 +79,7 @@ const FeatureContentRenderer = <
   pageSize,
   isSetting,
   useDateFilters,
+  dateFilterNoDefault,
   // initialQueryFilters,
   refetchData,
 }: ITableTemplate<T>) => {
@@ -127,16 +129,21 @@ const FeatureContentRenderer = <
     const searchParam = params.get("search");
 
     const today = new Date();
+    const noDefault = Boolean(dateFilterNoDefault);
 
     const start = useDateFilters
       ? startDateParam
         ? new Date(startDateParam)
-        : startOfDay(today)
+        : noDefault
+          ? null
+          : startOfDay(today)
       : null;
     const end = useDateFilters
       ? endDateParam
         ? new Date(endDateParam)
-        : endOfDay(today)
+        : noDefault
+          ? null
+          : endOfDay(today)
       : null;
 
     setDateRange({ start, end });
@@ -220,7 +227,13 @@ const FeatureContentRenderer = <
 
   useEffect(() => {
     if (!initialFiltersApplied) return;
-    if (useDateFilters && !queryFilters?.startDate && !queryFilters?.endDate) return;
+    if (
+      useDateFilters &&
+      !dateFilterNoDefault &&
+      !queryFilters?.startDate &&
+      !queryFilters?.endDate
+    )
+      return;
     fetchData();
   }, [searchQuery, page_number, refetch, initialFiltersApplied, queryFilters]);
 

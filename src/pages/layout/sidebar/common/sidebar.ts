@@ -1,6 +1,5 @@
 import { allRoutes } from "@/utils/routes";
 import {
-  Bell,
   BriefcaseBusiness,
   CalendarCheck2,
   CalendarClock,
@@ -57,12 +56,6 @@ export const sidebarMainMenus: ISidebar[] = [
   //   icon: Users2,
   //   path: allRoutes.AGENTS,
   // },
-  {
-    mainPath: `${allRoutes.PORTAL}${allRoutes.SUBSCRIPTION_REMINDERS}`,
-    name: "Subscription reminders",
-    icon: Bell,
-    path: allRoutes.SUBSCRIPTION_REMINDERS,
-  },
   {
     mainPath: `${allRoutes.PORTAL}${allRoutes.SUBSCRIPTIONS}`,
     name: "Subscriptions",

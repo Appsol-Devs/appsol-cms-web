@@ -57,4 +57,7 @@ export const subscriptionRemindersApi = createApi({
   }),
 });
 
-export const { useLazyGetSubscriptionRemindersQuery } = subscriptionRemindersApi;
+export const {
+  useGetSubscriptionRemindersQuery,
+  useLazyGetSubscriptionRemindersQuery,
+} = subscriptionRemindersApi;
