@@ -12,7 +12,7 @@ import { Doughnut } from "react-chartjs-2";
 
 ChartJS.register(DoughnutController, ArcElement, Tooltip, Legend);
 
-const CARD_CLASS = "w-2/5";
+const CARD_CLASS = "w-full";
 const HEADER_TITLE = <p className="font-bold">Operational Insights</p>;
 
 const COMPLAINTS_COLORS = [

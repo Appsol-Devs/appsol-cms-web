@@ -279,7 +279,7 @@ export default function DashboardChart({
 
   return (
     <CardComponent
-      className="w-3/5"
+      className="w-full"
       headerTitle={
         <div className="flex w-full items-center justify-between gap-2 p-0.5 bg-white dark:bg-white">
           <p className="text-sm font-bold">Weekly Revenue Trends</p>

@@ -178,6 +178,7 @@ const SubscriptionReminders = () => {
     <>
       <FeatureContentRenderer
         useDateFilters
+        dateFilterNoDefault
         filters={[
           "customerId",
           "softwareId",

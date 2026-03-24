@@ -15,6 +15,7 @@ import {
 import DashboardChart from "./DashboardChart";
 import DashboardGreetings from "./DashboardGreetings";
 import DashboardOperationalInsights from "./DashboardOperationalInsights";
+import DashboardReminders from "./DashboardReminders";
 import DashboardSummaryCard from "./DashboardSummaryCard";
 
 const summaryCardIcon = (className: string) => (
@@ -65,14 +66,17 @@ const Dashboard = () => {
           <DashboardSummaryCard key={card.title} summary={card} />
         ))}
       </div>
-      <div className="flex w-full min-h-60 gap-5 items-start">
-        <DashboardChart
-          data={revenueTrends ?? null}
-          isLoading={revenueLoading}
-          isError={revenueError}
-          dateRange={dateRange}
-          onDateRangeChange={setDateRange}
-        />
+      <div className="grid w-full min-h-60 grid-cols-1 md:grid-cols-[1fr_1fr] gap-5 items-start">
+        <div className="flex flex-col gap-5">
+          <DashboardChart
+            data={revenueTrends ?? null}
+            isLoading={revenueLoading}
+            isError={revenueError}
+            dateRange={dateRange}
+            onDateRangeChange={setDateRange}
+          />
+          <DashboardReminders />
+        </div>
         <DashboardOperationalInsights
           data={operationalInsights ?? null}
           isLoading={insightsLoading}
