@@ -3,7 +3,7 @@ import CustomInputField from "@/components/CustomInputField";
 import { Separator } from "@/components/ui/separator";
 import { DatePicker } from "@/components/DatePicker";
 import { Controller, type UseFormReturn } from "react-hook-form";
-import { CalendarClock, ClipboardList, Tag } from "lucide-react";
+import { CalendarClock, ClipboardList } from "lucide-react";
 import DropDownComponent, { type DropDownOption } from "@/components/DropdownComponent";
 import AsyncDropDownComponent from "@/components/AsyncDropDownComponent";
 import { useGenerateDropdownOptionsFromEnum } from "@/lib/helpers";
@@ -12,20 +12,21 @@ import { useCallback } from "react";
 import { lookup_params } from "@/lib/api";
 import type { ICustomer } from "@/pages/customer/common/customers";
 import { useLazyGetCustomersQuery } from "@/pages/customer/common/customersApi";
-import type { IRescheduleFormFields } from "../common/reschedules";
+import type { IRescheduleFormFields, TargetEntityType } from "../common/reschedules";
+import { getTargetEntityTypeColor } from "@/lib/enums";
 
 interface Props {
   isLoading?: boolean;
   form: UseFormReturn<IRescheduleFormFields, object, IRescheduleFormFields>;
 }
 
-const targetEntityTypeOptions: DropDownOption<string>[] = [
-  { label: "CustomerSetup", value: "CustomerSetup" },
+export const TARGET_ENTITY_TYPE_OPTIONS: DropDownOption<TargetEntityType>[] = [
+  { label: "Customer Setup", value: "CustomerSetup" },
   { label: "Generic", value: "Generic" },
   { label: "Ticket", value: "Ticket" },
-  { label: "CustomerOutreach", value: "CustomerOutreach" },
-  { label: "CustomerComplaint", value: "CustomerComplaint" },
-  { label: "SubscriptionReminder", value: "SubscriptionReminder" },
+  { label: "Customer Outreach", value: "CustomerOutreach" },
+  { label: "Customer Complaint", value: "CustomerComplaint" },
+  { label: "Subscription Reminder", value: "SubscriptionReminder" },
 ];
 
 const RescheduleFormContent = ({ isLoading, form }: Props) => {
@@ -58,7 +59,7 @@ const RescheduleFormContent = ({ isLoading, form }: Props) => {
             <div className="flex items-center justify-between gap-2 mb-2">
               <p className="flex items-center gap-2">
                 <CalendarClock className="w-4 h-4" />
-                Reschedule Details
+                Schedule Details
               </p>
               <p className="text-xs text-rx-secondary">
                 Required <span className="text-red-500">*</span>
@@ -96,14 +97,26 @@ const RescheduleFormContent = ({ isLoading, form }: Props) => {
             )}
           />
 
-          <DropDownComponent
+          <DropDownComponent<TargetEntityType>
             control={control}
             name="targetEntityType"
             title="Target Entity Type"
             label="Select entity type"
             required
-            options={targetEntityTypeOptions}
+            options={TARGET_ENTITY_TYPE_OPTIONS}
             disabled={isLoading}
+            formatOptionLabel={(option) => (
+              <span className="inline-flex items-center gap-2 font-semibold text-xs">
+                <span
+                  className="h-2 w-2 shrink-0 rounded-full ring-1 ring-zinc-300/80"
+                  style={{
+                    backgroundColor:
+                      getTargetEntityTypeColor(String(option.value)) ?? "#64748b",
+                  }}
+                />
+                {option.label}
+              </span>
+            )}
           />
 
           <Controller
@@ -156,20 +169,6 @@ const RescheduleFormContent = ({ isLoading, form }: Props) => {
             disabled={isLoading}
           />
 
-          <div className="space-y-1">
-            <p className="text-xs text-onCard font-medium flex items-center gap-2">
-              <Tag className="w-3 h-3" />
-              Color
-            </p>
-            <CustomInputField<IRescheduleFormFields>
-              type="color"
-              label=""
-              name="colorCode"
-              disabled={isLoading}
-              register={register}
-              className="h-10 p-1"
-            />
-          </div>
         </div>
       </CardComponent>
 
@@ -192,7 +191,7 @@ const RescheduleFormContent = ({ isLoading, form }: Props) => {
             multipleLines
             label="Reason"
             name="reason"
-            placeholder="Why is this being rescheduled?"
+            placeholder="Why is this being scheduled?"
             required
             disabled={isLoading}
             register={register}

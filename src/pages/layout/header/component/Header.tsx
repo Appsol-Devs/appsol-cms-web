@@ -1,6 +1,8 @@
 "use client";
 
-import { Search, Menu, Settings, LogOut, User } from "lucide-react";
+import { Search, Menu, Settings, LogOut, User, CalendarClock } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { allRoutes } from "@/utils/routes";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -20,6 +22,7 @@ import Notifications from "../../notification/component/Notifications";
 import SidebarToggler from "../../sidebar/component/SidebarToggler";
 
 function Header() {
+  const navigate = useNavigate();
   const activeUser = useSelector((state: RootState) => state.user);
   const isCollapsed: boolean = useSelector(
     (state: RootState) => state.sidebar.isSidebarToggled,
@@ -86,6 +89,19 @@ function Header() {
               </Badge>
             )}
           </Button> */}
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="relative bg-transparent! border-onSurface!"
+            aria-label="Open calendar"
+            title="Calendar"
+            onClick={() =>
+              navigate(allRoutes.PORTAL + allRoutes.RESCHEDULES_SCHEDULER)
+            }
+          >
+            <CalendarClock className="h-5 w-5 text-onSurface hover:text-foreground transition-colors" />
+          </Button>
           <Notifications />
 
           <DropdownMenu>

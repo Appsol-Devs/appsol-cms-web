@@ -162,33 +162,6 @@ button:focus-visible {
   min-width: 0;
 }
 
-.scheduler-calendar .sx-react-calendar-wrapper {
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-  height: 500px;
-  max-height: 90vh;
-  box-sizing: border-box;
-}
-
-.scheduler-calendar .sx-react-calendar-wrapper,
-.scheduler-calendar .sx__calendar-wrapper {
-  --sx-color-primary: var(--primary);
-  --sx-color-on-primary: #000000;
-  --sx-color-primary-container: color-mix(in srgb, var(--primary) 20%, transparent);
-  --sx-color-on-primary-container: #000000;
-  --sx-color-surface-tint: var(--primary);
-}
-
-.scheduler-calendar .sx__time-grid-event:hover,
-.scheduler-calendar .sx__date-grid-event:hover,
-.scheduler-calendar .sx__month-grid-event:hover,
-.scheduler-calendar .sx__month-agenda-event:hover,
-.scheduler-calendar .sx__list-event:hover {
-  cursor: pointer;
-}
-
-
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);

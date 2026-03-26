@@ -174,6 +174,18 @@ export const getPaymentStatusColor = (status?: string) =>
     ? (PAYMENT_STATUS_COLORS[status.toLowerCase()] ?? undefined)
     : undefined;
 
+export const TARGET_ENTITY_TYPE_COLORS: Record<string, string> = {
+  CustomerSetup: "#a855f7",
+  Generic: "#94a3b8",
+  Ticket: "#6366f1",
+  CustomerOutreach: "#22c55e",
+  CustomerComplaint: "#ef4444",
+  SubscriptionReminder: "#ec4899",
+};
+
+export const getTargetEntityTypeColor = (type?: string) =>
+  type ? (TARGET_ENTITY_TYPE_COLORS[type] ?? "#64748b") : undefined;
+
 export const REMINDER_DELIVERY_COLORS = {
   sent: "#22c55e",
   notSent: "#6b7280",
