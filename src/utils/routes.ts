@@ -89,6 +89,10 @@ export const allRoutes = Object.freeze({
   ADD_FEATURE_REQUEST: "/feature-requests/new",
   UPDATE_FEATURE_REQUEST: (id: string) => `/feature-requests/${id}`,
   VIEW_FEATURE_REQUEST: (id: string) => `/feature-requests/${id}/view`,
+  CUSTOMER_SETUPS: "/customer-setups",
+  ADD_CUSTOMER_SETUP: "/customer-setups/new",
+  UPDATE_CUSTOMER_SETUP: (id: string) => `/customer-setups/${id}`,
+  VIEW_CUSTOMER_SETUP: (id: string) => `/customer-setups/${id}/view`,
 });
 
 export const customerRoutes = Object.freeze({

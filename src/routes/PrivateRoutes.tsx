@@ -58,6 +58,9 @@ import FeatureRequest from "@/pages/feature-request-module/components/FeatureReq
 import ViewFeatureRequest from "@/pages/feature-request-module/components/ViewFeatureRequest";
 import FeatureRequestForm from "@/pages/feature-request-module/components/FeatureRequestForm";
 import SubscriptionReminders from "@/pages/subscription-reminders/component/SubscriptionReminders";
+import CustomerSetups from "@/customer-setups/CustomerSetups";
+import CustomerSetupForm from "@/customer-setups/CustomerSetupForm";
+import CustomerSetupView from "@/customer-setups/CustomerSetupView";
 
 const PrivateRoutes = () => {
   return (
@@ -260,6 +263,12 @@ const PrivateRoutes = () => {
         element={<FeatureRequestForm />}
       />
       <Route path={allRoutes.VIEW_FEATURE_REQUEST(":id")} element={<ViewFeatureRequest />} />
+      
+      <Route path={allRoutes.CUSTOMER_SETUPS} element={<CustomerSetups />} />
+      <Route path={allRoutes.ADD_CUSTOMER_SETUP} element={<CustomerSetupForm />} />
+      <Route path={allRoutes.UPDATE_CUSTOMER_SETUP(":id")} element={<CustomerSetupForm />} />
+      <Route path={allRoutes.VIEW_CUSTOMER_SETUP(":id")} element={<CustomerSetupView />} />
+
 
       <Route
         path={`${allRoutes.SETTINGS}/*`}

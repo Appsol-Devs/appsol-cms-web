@@ -87,12 +87,6 @@ export const sidebarMainMenus: ISidebar[] = [
     path: allRoutes.LEADS,
   },
   {
-    name: "Enquiries",
-    icon: PhoneCall,
-    mainPath: `${allRoutes.PORTAL}${allRoutes.ENQUIRIES}`,
-    path: allRoutes.ENQUIRIES,
-  },
-  {
     name: "Complaints",
     mainPath: `${allRoutes.PORTAL}${allRoutes.COMPLAINTS}`,
     icon: Phone,
@@ -104,23 +98,23 @@ export const sidebarMainMenus: ISidebar[] = [
     icon: Lock,
     path: allRoutes.USERS,
   },
-   {
+  {
     mainPath: `${allRoutes.PORTAL}${allRoutes.FEATURE_REQUESTS}`,
     name: "Feature Requests",
     icon: Lock,
     path: allRoutes.FEATURE_REQUESTS,
   },
-    {
+  {
+    mainPath: `${allRoutes.PORTAL}${allRoutes.CUSTOMER_SETUPS}`,
+    name: "Customer Setups",
+    icon: Lock,
+    path: allRoutes.CUSTOMER_SETUPS,
+  },
+  {
     mainPath: `${allRoutes.PORTAL}${allRoutes.CUSTOMER_OUTREACHS}`,
     name: "Customer OutReaches",
     icon: Headset,
     path: allRoutes.CUSTOMER_OUTREACHS,
-  },
-  {
-    mainPath: `${allRoutes.PORTAL}${allRoutes.ANALYTICS}`,
-    name: "Analytics",
-    icon: ChartBar,
-    path: allRoutes.ANALYTICS,
   },
   {
     name: "Settings",
@@ -130,6 +124,12 @@ export const sidebarMainMenus: ISidebar[] = [
         name: "Roles",
         path: `${allRoutes.ROLES}`,
         icon: User,
+      },
+      {
+        name: "Enquiries",
+        icon: PhoneCall,
+        mainPath: `${allRoutes.PORTAL}${allRoutes.ENQUIRIES}`,
+        path: allRoutes.ENQUIRIES,
       },
       {
         name: "Softwares",
@@ -171,10 +171,16 @@ export const sidebarMainMenus: ISidebar[] = [
         path: `${allRoutes.LEAD_NEXT_STEPS}`,
         icon: StepForward,
       },
-       {
+      {
         name: "OutReach Types",
         path: `${allRoutes.OUT_REACH_TYPES}`,
         icon: User,
+      },
+      {
+        mainPath: `${allRoutes.PORTAL}${allRoutes.ANALYTICS}`,
+        name: "Analytics",
+        icon: ChartBar,
+        path: allRoutes.ANALYTICS,
       },
     ],
   },
