@@ -1,10 +1,7 @@
 import CardComponent from "@/components/CardComponent";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import {
-  getReminderDueUrgencyBadgeStyle,
-  getReminderDueUrgencyLabel,
-} from "@/lib/enums";
+import { getReminderTypeBadgeStyle } from "@/lib/enums";
 import { formatDateTime } from "@/lib/helpers";
 import { allRoutes } from "@/utils/routes";
 import { Building2, User } from "lucide-react";
@@ -13,27 +10,46 @@ import { Link } from "react-router-dom";
 import {
   useGetSubscriptionRemindersQuery,
 } from "@/pages/subscription-reminders/common/subscriptionRemindersApi";
-import type { ISubscriptionReminder } from "@/pages/subscription-reminders/common/subscription-reminder";
 import {
-  getDueDateTab,
-  getDueDateUrgency,
+  type ISubscriptionReminder,
+  type TSubscriptionReminderType,
+  formatReminderTypeLabel,
 } from "@/pages/subscription-reminders/common/subscription-reminder";
 import SubscriptionReminderDetailsDrawer from "@/pages/subscription-reminders/component/SubscriptionReminderDetailsDrawer";
 import { Badge } from "@/components/ui/badge";
+import { DASHBOARD_PRESET_BUTTON_CLASS } from "../common/dashboard";
 
-const CARD_CLASS = "w-full min-w-[280px]";
-const LIST_LIMIT = 6;
-const TAB_BUTTON_BASE =
-  "text-xs h-8 rounded-sm border-0 shadow-none transition-colors focus-visible:outline-none focus-visible:border-transparent focus-visible:ring-0 focus-visible:ring-offset-0";
+const CARD_CLASS = "w-full min-w-0 max-w-full overflow-hidden";
+const LIST_LIMIT = 3;
 
-type TabKey = "all" | "overdue" | "due_today" | "upcoming";
+const REMINDER_TYPE_TABS: TSubscriptionReminderType[] = [
+  "30_days",
+  "14_days",
+  "7_days",
+  "due_today",
+  "overdue",
+];
+
+type TabKey = "all" | TSubscriptionReminderType;
 
 function filterByTab(
   items: ISubscriptionReminder[],
   tab: TabKey,
 ): ISubscriptionReminder[] {
   if (tab === "all") return items;
-  return items.filter((r) => getDueDateTab(r.dueDate) === tab);
+  return items.filter((r) => r.reminderType === tab);
+}
+
+function dueDateSortKey(dueDate?: string): number {
+  if (!dueDate) return Number.NEGATIVE_INFINITY;
+  const t = new Date(dueDate).getTime();
+  return Number.isNaN(t) ? Number.NEGATIVE_INFINITY : t;
+}
+
+function sortRemindersByDueDateNewestFirst(
+  items: ISubscriptionReminder[],
+): ISubscriptionReminder[] {
+  return [...items].sort((a, b) => dueDateSortKey(b.dueDate) - dueDateSortKey(a.dueDate));
 }
 
 const DashboardReminders = () => {
@@ -49,21 +65,22 @@ const DashboardReminders = () => {
   const reminders = (data?.contents ?? []) as ISubscriptionReminder[];
 
   const counts = useMemo(() => {
-    const all = reminders.length;
-    const overdue = reminders.filter(
-      (r) => getDueDateTab(r.dueDate) === "overdue",
-    ).length;
-    const dueToday = reminders.filter(
-      (r) => getDueDateTab(r.dueDate) === "due_today",
-    ).length;
-    const upcoming = reminders.filter(
-      (r) => getDueDateTab(r.dueDate) === "upcoming",
-    ).length;
-    return { all, overdue, dueToday, upcoming };
+    const byType = (type: TSubscriptionReminderType) =>
+      reminders.filter((r) => r.reminderType === type).length;
+    return {
+      all: reminders.length,
+      "30_days": byType("30_days"),
+      "14_days": byType("14_days"),
+      "7_days": byType("7_days"),
+      due_today: byType("due_today"),
+      overdue: byType("overdue"),
+    };
   }, [reminders]);
 
   const filtered = useMemo(() => {
-    return filterByTab(reminders, tab).slice(0, LIST_LIMIT);
+    const inTab = filterByTab(reminders, tab);
+    const sorted = sortRemindersByDueDateNewestFirst(inTab);
+    return sorted.slice(0, LIST_LIMIT);
   }, [reminders, tab]);
 
   const header = (
@@ -92,27 +109,29 @@ const DashboardReminders = () => {
 
   const tabs: { key: TabKey; label: string; count: number }[] = [
     { key: "all", label: "All", count: counts.all },
-    { key: "overdue", label: "Overdue", count: counts.overdue },
-    { key: "due_today", label: "Due Today", count: counts.dueToday },
-    { key: "upcoming", label: "Upcoming", count: counts.upcoming },
+    ...REMINDER_TYPE_TABS.map((key) => ({
+      key,
+      label: formatReminderTypeLabel(key),
+      count: counts[key],
+    })),
   ];
 
   return (
     <>
       <CardComponent className={CARD_CLASS} headerTitle={header}>
         <div className="space-y-0">
-          <div className="flex flex-wrap gap-2 border-b border-border pb-3">
+          <div className="flex min-w-0 flex-nowrap overflow-x-auto gap-2 border-b border-border pb-2">
             {tabs.map((t) => (
               <Button
                 key={t.key}
                 variant="ghost"
                 size="sm"
                 className={cn(
-                  TAB_BUTTON_BASE,
-                  tab !== t.key &&
-                    "!bg-transparent text-foreground hover:bg-muted/60 hover:text-foreground",
-                  tab === t.key &&
-                    "!bg-primary !text-primary-foreground hover:!bg-primary/90 hover:!text-primary-foreground",
+                  DASHBOARD_PRESET_BUTTON_CLASS,
+                  "shrink-0",
+                  "focus-visible:outline-none focus-visible:border-transparent focus-visible:ring-0 focus-visible:ring-offset-0",
+                  tab !== t.key && "!bg-transparent !text-black dark:!text-foreground",
+                  tab === t.key && "!bg-primary !text-onPrimary",
                 )}
                 onClick={() => setTab(t.key)}
               >
@@ -120,7 +139,7 @@ const DashboardReminders = () => {
                 {t.key !== "all" && (
                   <span
                     className={cn(
-                      "ml-1 inline-flex min-w-[1.25rem] items-center justify-center rounded-full px-1.5 py-0 text-[10px] font-medium",
+                      "ml-1 inline-flex min-w-[1.25rem] items-center justify-center rounded-full px-1.5 py-0 text-xs font-medium",
                       tab === t.key && "bg-primary-foreground/20 text-inherit",
                       tab !== t.key &&
                         (t.key === "overdue" && t.count > 0
@@ -143,8 +162,7 @@ const DashboardReminders = () => {
             ) : (
               <div className="divide-y !divide-border">
                 {filtered.map((r) => {
-                  const urgency = getDueDateUrgency(r.dueDate);
-                  const pillStyle = getReminderDueUrgencyBadgeStyle(urgency);
+                  const pillStyle = getReminderTypeBadgeStyle(r.reminderType);
                   const customerName =
                     r.customer?.name ?? r.customer?.companyName ?? "—";
                   const softwareName = r.software?.name ?? "—";
@@ -169,7 +187,7 @@ const DashboardReminders = () => {
                             className="border text-[10px] font-medium px-1.5 py-0 rounded-full"
                             style={pillStyle}
                           >
-                            {getReminderDueUrgencyLabel(urgency)}
+                            {formatReminderTypeLabel(r.reminderType)}
                           </Badge>
                           <span className="text-muted-foreground">
                             {r.dueDate ? formatDateTime(r.dueDate) : "—"}

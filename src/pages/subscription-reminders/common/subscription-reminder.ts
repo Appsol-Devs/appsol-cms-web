@@ -67,20 +67,3 @@ export function getDueDateUrgency(
   if (diffDays <= 7) return "soon";
   return "normal";
 }
-
-export function getDueDateTab(
-  dueDateStr?: string,
-): "overdue" | "due_today" | "upcoming" {
-  if (!dueDateStr) return "upcoming";
-  const due = new Date(dueDateStr);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const dueDay = new Date(due);
-  dueDay.setHours(0, 0, 0, 0);
-  const diffDays = Math.round(
-    (dueDay.getTime() - today.getTime()) / 86400000,
-  );
-  if (diffDays < 0) return "overdue";
-  if (diffDays === 0) return "due_today";
-  return "upcoming";
-}

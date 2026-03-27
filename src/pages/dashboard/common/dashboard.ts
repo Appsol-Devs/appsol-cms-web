@@ -129,3 +129,6 @@ export function buildSummaryCards(
     },
   ];
 }
+
+export const DASHBOARD_PRESET_BUTTON_CLASS =
+  "text-xs! px-2 py-1 rounded-sm cursor-pointer border-0 shadow-none outline-none hover:!bg-primary/60 hover:!text-onPrimary hover:opacity-80";

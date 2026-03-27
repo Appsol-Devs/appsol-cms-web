@@ -54,20 +54,20 @@ const Dashboard = () => {
   );
 
   return (
-    <div className="space-y-2 w-full">
+    <div className="space-y-2 w-full min-w-0 max-w-full overflow-x-hidden">
       <DashboardGreetings />
       {summaryError ? (
         <p className="text-sm text-destructive">
           Failed to load summary. Please try again.
         </p>
       ) : null}
-      <div className="grid grid-cols-4 gap-4">
-        {summaryCards.map((card) => (
-          <DashboardSummaryCard key={card.title} summary={card} />
-        ))}
-      </div>
-      <div className="grid w-full min-h-60 grid-cols-1 md:grid-cols-[1fr_1fr] gap-5 items-start">
-        <div className="flex flex-col gap-5">
+      <div className="grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-2 lg:items-start">
+        <div className="flex min-w-0 max-w-full flex-col gap-5">
+          <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2">
+            {summaryCards.map((card) => (
+              <DashboardSummaryCard key={card.title} summary={card} />
+            ))}
+          </div>
           <DashboardChart
             data={revenueTrends ?? null}
             isLoading={revenueLoading}
@@ -75,13 +75,15 @@ const Dashboard = () => {
             dateRange={dateRange}
             onDateRangeChange={setDateRange}
           />
-          <DashboardReminders />
         </div>
-        <DashboardOperationalInsights
-          data={operationalInsights ?? null}
-          isLoading={insightsLoading}
-          isError={insightsError}
-        />
+        <div className="flex min-w-0 max-w-full flex-col gap-5">
+          <DashboardReminders />
+          <DashboardOperationalInsights
+            data={operationalInsights ?? null}
+            isLoading={insightsLoading}
+            isError={insightsError}
+          />
+        </div>
       </div>
     </div>
   );

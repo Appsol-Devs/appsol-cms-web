@@ -25,6 +25,7 @@ import { format, parseISO } from "date-fns";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { Line } from "react-chartjs-2";
 import {
+  DASHBOARD_PRESET_BUTTON_CLASS,
   getPresetFromRange,
   rangeFromDate,
   REVENUE_RANGE_PRESETS,
@@ -44,9 +45,6 @@ ChartJS.register(
   Legend,
   Filler,
 );
-
-const BUTTON_CLASS =
-  "text-xs! px-2 py-1 rounded-sm cursor-pointer border-0 shadow-none outline-none hover:!bg-primary hover:!text-onPrimary hover:opacity-80";
 
 const CHART_HEIGHT = 300;
 
@@ -267,7 +265,7 @@ export default function DashboardChart({
       variant="ghost"
       size="sm"
       className={cn(
-        BUTTON_CLASS,
+        DASHBOARD_PRESET_BUTTON_CLASS,
         activePreset !== d.id && "bg-transparent! text-black!",
         activePreset === d.id && "bg-primary! text-onPrimary!",
       )}
@@ -279,11 +277,11 @@ export default function DashboardChart({
 
   return (
     <CardComponent
-      className="w-full"
+      className="w-full min-w-0 max-w-full overflow-hidden"
       headerTitle={
-        <div className="flex w-full items-center justify-between gap-2 p-0.5 bg-white dark:bg-white">
-          <p className="text-sm font-bold">Weekly Revenue Trends</p>
-          <div className="flex items-center gap-2">
+        <div className="flex w-full min-w-0 flex-col gap-2 p-0.5 bg-white dark:bg-white sm:flex-row sm:items-center sm:justify-between">
+          <p className="font-bold">Weekly Revenue Trends</p>
+          <div className="flex min-w-0 flex-wrap items-center gap-2 sm:justify-end">
             {REVENUE_RANGE_PRESETS.map((d) =>
               d.id === "custom" ? (
                 <Popover
