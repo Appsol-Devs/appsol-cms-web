@@ -220,9 +220,12 @@ const DateRangeComponent = ({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className=" w-auto space-y-2 bg-card text-onCard">
-        <div className="flex items-start justify-start">
-          <ScrollArea className="h-72">
+      <PopoverContent
+        align="start"
+        className="w-[min(100vw-1rem,54rem)] max-w-[calc(100vw-1rem)] space-y-2 overflow-hidden bg-card p-3 text-onCard sm:w-auto sm:max-w-[min(100vw-2rem,56rem)]"
+      >
+        <div className="flex max-h-[min(85vh,760px)] flex-col gap-3 overflow-y-auto overflow-x-hidden sm:max-h-[min(90vh,820px)] sm:flex-row sm:items-start sm:overflow-visible">
+          <ScrollArea className="h-48 shrink-0 sm:h-72 sm:max-w-[9.5rem]">
             <div className="flex justify-between items-center">
               <div className="flex flex-col">
                 {filteredPresets.map(({ label, value }) => {
@@ -244,34 +247,42 @@ const DateRangeComponent = ({
               </div>
             </div>
           </ScrollArea>
-          <div>
+          <div className="min-w-0 flex-1 overflow-x-auto">
             {showCalendars ? (
-              <div className="flex items-center space-x-2 w-max">
-                <DatePicker
-                  title="From"
-                  dateOnly={dateOnly}
-                  defaultDate={selectedDateRange?.start}
-                  placeholder="Start Date"
-                  onChange={(date) =>
-                    setSelectedDateRange({ ...selectedDateRange, start: date })
-                  }
-                  allowFuture={allowFuture}
-                />
-                <DatePicker
-                  title="To"
-                  dateOnly={dateOnly}
-                  defaultDate={selectedDateRange?.end}
-                  disabled={!selectedDateRange.start}
-                  placeholder="End Date"
-                  onChange={(date) =>
-                    setSelectedDateRange({ ...selectedDateRange, end: date })
-                  }
-                  allowFuture={allowFuture}
-                />
+              <div className="flex min-w-0 max-w-full flex-nowrap items-start gap-3 overflow-x-auto pb-0.5">
+                <div className="min-w-[17.5rem] shrink-0 rounded-md border border-border/60 bg-card p-2">
+                  <DatePicker
+                    title="From"
+                    dateOnly={dateOnly}
+                    defaultDate={selectedDateRange?.start}
+                    placeholder="Start Date"
+                    onChange={(date) =>
+                      setSelectedDateRange((prev) => ({ ...prev, start: date }))
+                    }
+                    allowFuture={allowFuture}
+                    showInPopover={false}
+                    calendarClassName="[--cell-size:1.35rem] text-xs"
+                  />
+                </div>
+                <div className="min-w-[17.5rem] shrink-0 rounded-md border border-border/60 bg-card p-2">
+                  <DatePicker
+                    title="To"
+                    dateOnly={dateOnly}
+                    defaultDate={selectedDateRange?.end}
+                    disabled={!selectedDateRange.start}
+                    placeholder="End Date"
+                    onChange={(date) =>
+                      setSelectedDateRange((prev) => ({ ...prev, end: date }))
+                    }
+                    allowFuture={allowFuture}
+                    showInPopover={false}
+                    calendarClassName="[--cell-size:1.35rem] text-xs"
+                  />
+                </div>
               </div>
             ) : null}
             {showCalendars ? (
-              <div className="flex items-center justify-between w-full">
+              <div className="mt-3 flex items-center justify-end gap-2">
                 <Button
                   className="bg-error hidden text-onError"
                   onClick={handleClearDate}
@@ -280,7 +291,6 @@ const DateRangeComponent = ({
                   <CalendarX className="mr-2 h-4 w-4" />
                   Clear
                 </Button>
-                <p></p>
                 <Button
                   onClick={handleDateSubmit}
                   className="text-sm! bg-primary! text-onPrimary!"

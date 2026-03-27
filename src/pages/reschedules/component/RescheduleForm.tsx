@@ -1,12 +1,13 @@
 import MutationFormTemplate from "@/components/form/MutationFormTemplate";
 import type { ISummarySection } from "@/components/form/MutationFormSummary";
 import { showToast } from "@/components/ui/CustomToast";
-import { cleanPayload, generateRandomColor } from "@/lib/helpers";
+import { cleanPayload } from "@/lib/helpers";
+import { getTargetEntityTypeColor } from "@/lib/enums";
 import { CalendarClock } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import type { IRescheduleFormFields } from "../common/reschedules";
+import type { IRescheduleFormFields, TargetEntityType } from "../common/reschedules";
 import type { ICustomer } from "@/pages/customer/common/customers";
 import {
   useAddRescheduleMutation,
@@ -14,8 +15,18 @@ import {
   useUpdateRescheduleMutation,
 } from "../common/reschedulesApi";
 import type { IReschedule } from "../common/reschedules";
-import RescheduleFormContent from "./RescheduleFormContent";
+import RescheduleFormContent, {
+  TARGET_ENTITY_TYPE_OPTIONS,
+} from "./RescheduleFormContent";
 import { allRoutes } from "@/utils/routes";
+
+function getTargetEntityTypeFromForm(
+  v: IRescheduleFormFields["targetEntityType"],
+): TargetEntityType | undefined {
+  if (v == null) return undefined;
+  if (typeof v === "string") return v as TargetEntityType;
+  return v.value;
+}
 
 const RescheduleForm = () => {
   const { id } = useParams();
@@ -30,7 +41,6 @@ const RescheduleForm = () => {
     defaultValues: {
       title: "",
       reason: "",
-      colorCode: generateRandomColor(),
       originalDateTime: "",
       newDateTime: "",
       status: { label: "pending", value: "pending" },
@@ -70,9 +80,21 @@ const RescheduleForm = () => {
             ? { label: data.customerId, value: { _id: data.customerId } as any }
             : undefined,
       targetEntityType: data.targetEntityType
-        ? { label: data.targetEntityType, value: data.targetEntityType }
+        ? (() => {
+            const opt = TARGET_ENTITY_TYPE_OPTIONS.find(
+              (o) => o.value === data.targetEntityType,
+            );
+            return opt
+              ? { label: opt.label, value: opt.value }
+              : {
+                  label: data.targetEntityType,
+                  value: data.targetEntityType as TargetEntityType,
+                };
+          })()
         : undefined,
-      status: data.status ? { label: data.status, value: data.status } : undefined,
+      status: data.status
+        ? { label: data.status, value: data.status }
+        : { label: "pending", value: "pending" },
     });
   };
 
@@ -100,7 +122,7 @@ const RescheduleForm = () => {
       if (res) {
         showToast({
           title: "Success",
-          message: id ? "Reschedule updated successfully." : "Reschedule created successfully.",
+          message: id ? "Schedule updated successfully." : "Schedule created successfully.",
           type: "success",
         });
         navigate(allRoutes.PORTAL + allRoutes.RESCHEDULES);
@@ -108,7 +130,7 @@ const RescheduleForm = () => {
     } catch {
       showToast({
         title: "Error",
-        message: id ? "Failed to update reschedule." : "Failed to create reschedule.",
+        message: id ? "Failed to update schedule." : "Failed to create schedule.",
         type: "error",
       });
     }
@@ -120,7 +142,10 @@ const RescheduleForm = () => {
     const requiredFields: { field: unknown; message: string }[] = [
       { field: data.title?.trim(), message: "Title is required." },
       { field: data.customerId?.value?._id, message: "Customer is required." },
-      { field: data.targetEntityType?.value, message: "Target Entity Type is required." },
+      {
+        field: getTargetEntityTypeFromForm(data.targetEntityType),
+        message: "Target Entity Type is required.",
+      },
       { field: data.originalDateTime, message: "Original Date & Time is required." },
       { field: data.newDateTime, message: "New Date & Time is required." },
       { field: data.status?.value, message: "Status is required." },
@@ -134,14 +159,16 @@ const RescheduleForm = () => {
       }
     }
 
+    const entityType = getTargetEntityTypeFromForm(data.targetEntityType);
+
     const payload = cleanPayload({
       title: data.title?.trim(),
       customerId: data.customerId?.value?._id,
-      targetEntityType: data.targetEntityType?.value,
+      targetEntityType: entityType,
       reason: data.reason?.trim() || undefined,
       originalDateTime: data.originalDateTime,
       newDateTime: data.newDateTime,
-      colorCode: data.colorCode || undefined,
+      colorCode: getTargetEntityTypeColor(entityType) ?? undefined,
       status: data.status?.value,
     });
 
@@ -154,7 +181,10 @@ const RescheduleForm = () => {
     const requiredFields: { field: unknown; message: string }[] = [
       { field: data.title?.trim(), message: "Title is required." },
       { field: data.customerId?.value?._id, message: "Customer is required." },
-      { field: data.targetEntityType?.value, message: "Target Entity Type is required." },
+      {
+        field: getTargetEntityTypeFromForm(data.targetEntityType),
+        message: "Target Entity Type is required.",
+      },
       { field: data.originalDateTime, message: "Original Date & Time is required." },
       { field: data.newDateTime, message: "New Date & Time is required." },
       { field: data.status?.value, message: "Status is required." },
@@ -173,7 +203,7 @@ const RescheduleForm = () => {
 
   const summarySections: ISummarySection[] = [
     {
-      title: "Reschedule",
+      title: "Schedule",
       icon: <CalendarClock className="w-4 h-4" />,
       data: [
         { label: "Title", value: values?.title, required: true },
@@ -184,7 +214,13 @@ const RescheduleForm = () => {
         },
         {
           label: "Entity Type",
-          value: (values?.targetEntityType?.label as string) || "",
+          value: (() => {
+            const v = getTargetEntityTypeFromForm(values?.targetEntityType);
+            if (!v) return "";
+            const label = TARGET_ENTITY_TYPE_OPTIONS.find((o) => o.value === v)
+              ?.label;
+            return typeof label === "string" ? label : v;
+          })(),
           required: true,
         },
         { label: "Original Date", value: values?.originalDateTime, required: true },
@@ -201,22 +237,22 @@ const RescheduleForm = () => {
       <MutationFormTemplate<IRescheduleFormFields>
         form={form}
         pageSummary={{
-          title: id ? "Update Reschedule" : "Create New Reschedule",
-          description: "Schedule, track, and manage rescheduled activities.",
+          title: id ? "Update Schedule" : "Create New Schedule",
+          description: "Schedule, track, and manage scheduled activities.",
           icon: CalendarClock,
         }}
         formContent={<RescheduleFormContent form={form} isLoading={isLoading} />}
         submitData={submitData}
-        pageTitle={id ? `Update Reschedule - ${selectedData?.rescheduleCode ?? ""}` : "Add Reschedule"}
+        pageTitle={id ? `Update Schedule - ${selectedData?.rescheduleCode ?? ""}` : "Add Schedule"}
         loading={isLoading}
         confirmOnSubmit
         validateBeforeOpen={validateBeforeOpen}
-        confirmSubmitTitle={id ? "Confirm Reschedule Update" : "Confirm Reschedule Creation"}
-        confirmSubmitActionLabel={id ? "Save Changes" : "Create Reschedule"}
+        confirmSubmitTitle={id ? "Confirm Schedule Update" : "Confirm Schedule Creation"}
+        confirmSubmitActionLabel={id ? "Save Changes" : "Create Schedule"}
         mutationFormSummary={{
           summaryData: summarySections,
-          summaryMainTitle: "Reschedule Summary",
-          summarySaveButtonText: id ? "Save Changes" : "Create Reschedule",
+          summaryMainTitle: "Schedule Summary",
+          summarySaveButtonText: id ? "Save Changes" : "Create Schedule",
         }}
       />
     </div>

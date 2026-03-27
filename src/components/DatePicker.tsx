@@ -101,7 +101,7 @@ export function DatePicker({
       : undefined;
 
   const innerContent = (
-    <div className="sm:flex">
+    <div className="min-w-0 sm:flex sm:flex-nowrap">
       <Calendar
         mode="single"
         disabled={disabled}
@@ -207,13 +207,17 @@ export function DatePicker({
         </div>
       ) : null}
       {title && !showInPopover ? (
-        <div className="font-bold text-sm bg-gray-300 flex items-center">
-          <CalendarIcon className="mr-2 h-4 w-4" />
-          <div className="text-xs flex items-center space-x-1">
-            <p className="mr-1">{title}</p>
-            {required ? <span className="text-destructive">*</span> : ""}
-          </div>
-          {date && (dateOnly ? format(date, "do MMM y") : formatDateTime(date))}
+        <div className="mb-2 flex items-center gap-2 border-b border-border pb-2 text-xs font-medium text-foreground">
+          <CalendarIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+          <span className="mr-1">
+            {title}
+            {required ? <span className="text-destructive">*</span> : null}
+          </span>
+          {date ? (
+            <span className="ml-auto truncate font-normal text-muted-foreground">
+              {dateOnly ? format(date, "do MMM y") : formatDateTime(date)}
+            </span>
+          ) : null}
         </div>
       ) : null}
       <div>
@@ -241,7 +245,9 @@ export function DatePicker({
             </PopoverContent>
           </Popover>
         ) : (
-          innerContent
+          <div className="min-w-0 max-w-full overflow-x-auto pb-0.5">
+            {innerContent}
+          </div>
         )}
 
         {/* {dateOnly ? null : (

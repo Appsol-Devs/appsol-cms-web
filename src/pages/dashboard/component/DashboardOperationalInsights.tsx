@@ -12,7 +12,7 @@ import { Doughnut } from "react-chartjs-2";
 
 ChartJS.register(DoughnutController, ArcElement, Tooltip, Legend);
 
-const CARD_CLASS = "w-full";
+const CARD_CLASS = "w-full min-w-0 max-w-full overflow-hidden";
 const HEADER_TITLE = <p className="font-bold">Operational Insights</p>;
 
 const COMPLAINTS_COLORS = [
@@ -104,20 +104,20 @@ const DashboardOperationalInsights = ({
       className={CARD_CLASS}
       headerTitle={HEADER_TITLE}
     >
-      <div className="flex flex-col gap-6">
-        <div>
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:items-start">
+        <div className="min-w-0">
           <p className="text-xs text-red-500 font-semibold uppercase mb-2">
             Complaints
           </p>
-          <div className="h-48 w-full">
+          <div className="h-48 w-full min-w-0">
             <Doughnut data={complaintsChartData} options={doughnutOptions} />
           </div>
         </div>
-        <div>
+        <div className="min-w-0">
           <p className="text-xs text-green-500 font-semibold uppercase mb-2">
             Tickets
           </p>
-          <div className="h-48 w-full">
+          <div className="h-48 w-full min-w-0">
             <Doughnut data={ticketsChartData} options={doughnutOptions} />
           </div>
         </div>

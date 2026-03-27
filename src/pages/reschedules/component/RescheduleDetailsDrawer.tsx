@@ -56,7 +56,7 @@ export default function RescheduleDetailsDrawer({
         <DrawerHeader className="flex flex-row items-center justify-between gap-3 border-b py-4">
           <div className="flex-1 min-w-0 flex items-center gap-2">
             <CalendarClock className="w-5 h-5 text-muted-foreground shrink-0" />
-            <DrawerTitle>Reschedule Preview</DrawerTitle>
+            <DrawerTitle>Schedule Preview</DrawerTitle>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             {reschedule?._id && (
@@ -96,15 +96,6 @@ export default function RescheduleDetailsDrawer({
                   >
                     {status}
                   </Badge>
-                  {reschedule.colorCode && (
-                    <Badge
-                      variant="secondary"
-                      className="capitalize text-xs"
-                      style={getLookupBadgeStyle(reschedule.colorCode)}
-                    >
-                      {reschedule.colorCode}
-                    </Badge>
-                  )}
                 </div>
                 <div className="flex items-center gap-2" />
               </div>
@@ -173,12 +164,12 @@ export default function RescheduleDetailsDrawer({
                       <div className="flex flex-wrap gap-2">
                         <ConfirmationDialog
                           alertType="update"
-                          title="Approve Reschedule?"
+                          title="Approve Schedule?"
                           rightActionTitle="Approve"
                           content={
                             <p className="text-muted-foreground text-center">
                               Are you sure you want to{" "}
-                              <strong>approve</strong> this reschedule{" "}
+                              <strong>approve</strong> this schedule{" "}
                               <strong>
                                 {reschedule.rescheduleCode ?? reschedule.title}
                               </strong>
@@ -194,14 +185,14 @@ export default function RescheduleDetailsDrawer({
                               }).unwrap();
                               showToast({
                                 title: "Success",
-                                message: "Reschedule approved.",
+                                message: "Schedule approved.",
                                 type: "success",
                               });
                               onOpenChange(false);
                             } catch {
                               showToast({
                                 title: "Error",
-                                message: "Failed to approve reschedule.",
+                                message: "Failed to approve schedule.",
                                 type: "error",
                               });
                             }
@@ -220,12 +211,12 @@ export default function RescheduleDetailsDrawer({
                         />
                         <ConfirmationDialog
                           alertType="delete"
-                          title="Reject Reschedule?"
+                          title="Reject Schedule?"
                           rightActionTitle="Reject"
                           content={
                             <p className="text-muted-foreground text-center">
                               Are you sure you want to{" "}
-                              <strong>reject</strong> this reschedule{" "}
+                              <strong>reject</strong> this schedule{" "}
                               <strong>
                                 {reschedule.rescheduleCode ?? reschedule.title}
                               </strong>
@@ -241,14 +232,14 @@ export default function RescheduleDetailsDrawer({
                               }).unwrap();
                               showToast({
                                 title: "Success",
-                                message: "Reschedule rejected.",
+                                message: "Schedule rejected.",
                                 type: "success",
                               });
                               onOpenChange(false);
                             } catch {
                               showToast({
                                 title: "Error",
-                                message: "Failed to reject reschedule.",
+                                message: "Failed to reject schedule.",
                                 type: "error",
                               });
                             }
@@ -274,7 +265,7 @@ export default function RescheduleDetailsDrawer({
           </div>
         ) : (
           <div className="p-4 text-center text-muted-foreground text-sm">
-            Select a reschedule to preview.
+            Select a schedule to preview.
           </div>
         )}
       </DrawerContent>

@@ -179,12 +179,8 @@ const DropDownComponent = <T,>({
     styles,
     options,
     placeholder: label,
-    formatOptionLabel: (option: DropDownOption<T>, { context }: any) =>
-      formatOptionLabel
-        ? context === "menu"
-          ? formatOptionLabel(option)
-          : option.label
-        : option.label,
+    formatOptionLabel: (option: DropDownOption<T>) =>
+      formatOptionLabel ? formatOptionLabel(option) : option.label,
     getOptionLabel: (option: DropDownOption<T>) =>
       option.label?.toString() || "",
     isLoading: isLoading ? isLoading : undefined,
@@ -206,16 +202,24 @@ const DropDownComponent = <T,>({
           name={name || ""}
           control={control}
           render={({ field }) => {
-            // TRANSLATION LAYER: Map the primitive value from RHF to the object react-select expects
-            const selectedOption = options.find((opt) => opt.value === field.value) || null;
+            const raw = field.value as T | DropDownOption<T> | null | undefined;
+            const primitiveValue =
+              raw != null &&
+              typeof raw === "object" &&
+              raw !== null &&
+              "value" in raw &&
+              !Array.isArray(raw)
+                ? (raw as DropDownOption<T>).value
+                : raw;
+            const selectedOption =
+              options.find((opt) => opt.value === primitiveValue) ?? null;
 
             return (
               <Select
                 {...commonSelectProps}
                 isClearable={isClearable !== undefined ? isClearable : true}
-                value={selectedOption} // Pass the full object to react-select
+                value={selectedOption}
                 onChange={(val, actionMeta) => {
-                  // Pass ONLY the primitive string/number back to react-hook-form
                   field.onChange(val ? val.value : null);
                   onChanged?.(val, actionMeta);
                 }}

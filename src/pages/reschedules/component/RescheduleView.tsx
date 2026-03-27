@@ -144,14 +144,14 @@ const RescheduleView = () => {
       await deleteReschedule({ id }).unwrap();
       showToast({
         title: "Success",
-        message: "Reschedule deleted successfully.",
+        message: "Schedule deleted successfully.",
         type: "success",
       });
       navigate(allRoutes.PORTAL + allRoutes.RESCHEDULES);
     } catch {
       showToast({
         title: "Error",
-        message: "Failed to delete reschedule.",
+        message: "Failed to delete schedule.",
         type: "error",
       });
     }
@@ -167,7 +167,7 @@ const RescheduleView = () => {
     }
     return (
       <div className="p-8 text-center text-muted-foreground">
-        Reschedule not found.
+        Schedule not found.
       </div>
     );
   }
@@ -176,11 +176,11 @@ const RescheduleView = () => {
 
   return (
     <div className="space-y-4">
-      <PageTitle showBack title="Reschedule Details" />
+      <PageTitle showBack title="Schedule Details" />
 
       <PageSummary
         icon={CalendarClock}
-        title={selected.rescheduleCode ?? "Reschedule"}
+        title={selected.rescheduleCode ?? "Schedule"}
         description={selected.title ?? ""}
         actionComponent={
           <div className="flex items-center gap-2 flex-wrap">
@@ -206,7 +206,7 @@ const RescheduleView = () => {
             />
             <ConfirmationDialog
               alertType="delete"
-              title="Delete Reschedule?"
+              title="Delete Schedule?"
               rightActionTitle="Delete"
               content={
                 <p className="text-muted-foreground text-center">
@@ -247,15 +247,6 @@ const RescheduleView = () => {
               >
                 {status}
               </Badge>
-              {selected.colorCode ? (
-                <Badge
-                  variant="secondary"
-                  className="capitalize border"
-                  style={getLookupBadgeStyle(selected.colorCode)}
-                >
-                  {selected.colorCode}
-                </Badge>
-              ) : null}
             </div>
           </div>
 
@@ -287,7 +278,7 @@ const RescheduleView = () => {
             <div className="px-6 py-4 border-b bg-muted/30 flex items-center gap-2">
               <FileText className="w-4 h-4 text-muted-foreground" />
               <h3 className="font-semibold text-card-foreground">
-                Reschedule Details
+                Schedule Details
               </h3>
             </div>
             <div className="p-6 space-y-6">
@@ -344,12 +335,12 @@ const RescheduleView = () => {
                   <div className="flex flex-wrap gap-2">
                     <ConfirmationDialog
                       alertType="update"
-                      title="Approve Reschedule?"
+                      title="Approve Schedule?"
                       rightActionTitle="Approve"
                       content={
                         <p className="text-muted-foreground text-center">
                           Are you sure you want to{" "}
-                          <strong>approve</strong> this reschedule{" "}
+                          <strong>approve</strong> this schedule{" "}
                           <strong>
                             {selected.rescheduleCode ?? selected.title}
                           </strong>
@@ -371,12 +362,12 @@ const RescheduleView = () => {
                     />
                     <ConfirmationDialog
                       alertType="delete"
-                      title="Reject Reschedule?"
+                      title="Reject Schedule?"
                       rightActionTitle="Reject"
                       content={
                         <p className="text-muted-foreground text-center">
                           Are you sure you want to{" "}
-                          <strong>reject</strong> this reschedule{" "}
+                          <strong>reject</strong> this schedule{" "}
                           <strong>
                             {selected.rescheduleCode ?? selected.title}
                           </strong>
