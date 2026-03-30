@@ -266,8 +266,8 @@ const FeatureContentRenderer = <
           className="min-h-[50vh] rounded-md"
           headerTitle={
             <div className="space-y-2">
-              <div className="flex flex-col md:flex-row items-start md:items-center md:justify-between w-full">
-                <div className="flex items-center gap-4">
+              <div className="flex flex-col md:flex-row items-start md:items-center md:justify-between w-full min-w-0 gap-2">
+                <div className="flex items-center gap-4 min-w-0">
                   <p className="text-sm font-thin flex flex-col">
                     <span className="text-[10px]">Total Records</span>
                     <span className="text-lg md:text-2xl font-bold">
@@ -276,7 +276,7 @@ const FeatureContentRenderer = <
                   </p>
                   <SearchComponent returnSearchKey={handleSearchKeyReturn} />
                 </div>
-                <div className="flex items-center space-x-2 md:space-x-3">
+                <div className="flex min-w-0 flex-nowrap items-center gap-2 md:justify-end">
                   {useDateFilters && (
                     <DateRangeComponent
                       dateRange={(newRange) => {
