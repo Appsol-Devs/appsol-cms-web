@@ -67,3 +67,29 @@ export function getDueDateUrgency(
   if (diffDays <= 7) return "soon";
   return "normal";
 }
+
+function startOfDayMs(d: Date): number {
+  const x = new Date(d);
+  x.setHours(0, 0, 0, 0);
+  return x.getTime();
+}
+
+export function reminderTypeFromDueDate(
+  dueDateStr?: string,
+  now: Date = new Date(),
+): TSubscriptionReminderType | null {
+  if (!dueDateStr) return null;
+  const due = new Date(dueDateStr);
+  const dueMs = startOfDayMs(due);
+  if (Number.isNaN(dueMs)) return null;
+
+  const todayMs = startOfDayMs(now);
+  const diffDays = Math.round((dueMs - todayMs) / 86400000);
+
+  if (diffDays < 0) return "overdue";
+  if (diffDays === 0) return "due_today";
+  if (diffDays <= 7) return "7_days";
+  if (diffDays <= 14) return "14_days";
+  if (diffDays <= 30) return "30_days";
+  return null;
+}

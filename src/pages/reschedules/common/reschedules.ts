@@ -35,6 +35,8 @@ export interface IReschedule {
 
   originalDateTime?: string;
   newDateTime?: string;
+  from?: string;
+  to?: string;
 
   targetEntityType?: TargetEntityType;
 

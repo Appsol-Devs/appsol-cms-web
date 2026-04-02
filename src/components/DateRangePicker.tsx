@@ -197,24 +197,29 @@ const DateRangeComponent = ({
         <Button
           variant="outline"
           className={cn(
-            "w-max justify-start text-left font-normal bg-card! text-onCard! hover:bg-surfaceVariant hover:text-onSurfaceVariant outline-0! ring-0!",
+            "w-max min-w-0 max-w-[16.5rem] sm:max-w-[22rem] md:max-w-[28rem] justify-start text-left font-normal bg-card! text-onCard! hover:bg-surfaceVariant hover:text-onSurfaceVariant outline-0! ring-0! overflow-hidden",
           )}
         >
-          <CalendarIcon className="h-4 w-2" />
+          <CalendarIcon className="h-4 w-4 shrink-0" />
           {selectedDateRange.start && selectedDateRange.end ? (
-            <span className="text-xs">
-              {format(
-                selectedDateRange?.start,
-                dateOnly ? "do MMM y" : "do MMM y hh:mm aa",
-              )}{" "}
-              -{" "}
-              {format(
-                selectedDateRange?.end,
-                dateOnly ? "do MMM y" : "do MMM y hh:mm aa",
-              )}
+            <span className="text-xs truncate">
+              <span className="sm:hidden">
+                {format(selectedDateRange?.start, dateOnly ? "do MMM y" : "do MMM y")}
+              </span>
+              <span className="hidden sm:inline">
+                {format(
+                  selectedDateRange?.start,
+                  dateOnly ? "do MMM y" : "do MMM y hh:mm aa",
+                )}{" "}
+                -{" "}
+                {format(
+                  selectedDateRange?.end,
+                  dateOnly ? "do MMM y" : "do MMM y hh:mm aa",
+                )}
+              </span>
             </span>
           ) : (
-            <span className="text-sm">
+            <span className="text-sm truncate">
               {placeholder || "Choose preferred date range"}
             </span>
           )}

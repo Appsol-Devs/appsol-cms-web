@@ -14,6 +14,7 @@ import {
   type ISubscriptionReminder,
   type TSubscriptionReminderType,
   formatReminderTypeLabel,
+  reminderTypeFromDueDate,
 } from "@/pages/subscription-reminders/common/subscription-reminder";
 import SubscriptionReminderDetailsDrawer from "@/pages/subscription-reminders/component/SubscriptionReminderDetailsDrawer";
 import { Badge } from "@/components/ui/badge";
@@ -23,10 +24,10 @@ const CARD_CLASS = "w-full min-w-0 max-w-full overflow-hidden";
 const LIST_LIMIT = 3;
 
 const REMINDER_TYPE_TABS: TSubscriptionReminderType[] = [
-  "30_days",
-  "14_days",
-  "7_days",
   "due_today",
+  "7_days",
+  "14_days",
+  "30_days",
   "overdue",
 ];
 
@@ -37,7 +38,7 @@ function filterByTab(
   tab: TabKey,
 ): ISubscriptionReminder[] {
   if (tab === "all") return items;
-  return items.filter((r) => r.reminderType === tab);
+  return items.filter((r) => reminderTypeFromDueDate(r.dueDate) === tab);
 }
 
 function dueDateSortKey(dueDate?: string): number {
@@ -64,24 +65,31 @@ const DashboardReminders = () => {
 
   const reminders = (data?.contents ?? []) as ISubscriptionReminder[];
 
+  const remindersWithDerivedType = useMemo(() => {
+    return reminders.map((r) => ({
+      ...r,
+      reminderType: reminderTypeFromDueDate(r.dueDate) ?? r.reminderType,
+    }));
+  }, [reminders]);
+
   const counts = useMemo(() => {
     const byType = (type: TSubscriptionReminderType) =>
-      reminders.filter((r) => r.reminderType === type).length;
+      remindersWithDerivedType.filter((r) => r.reminderType === type).length;
     return {
-      all: reminders.length,
+      all: remindersWithDerivedType.length,
       "30_days": byType("30_days"),
       "14_days": byType("14_days"),
       "7_days": byType("7_days"),
       due_today: byType("due_today"),
       overdue: byType("overdue"),
     };
-  }, [reminders]);
+  }, [remindersWithDerivedType]);
 
   const filtered = useMemo(() => {
-    const inTab = filterByTab(reminders, tab);
+    const inTab = filterByTab(remindersWithDerivedType, tab);
     const sorted = sortRemindersByDueDateNewestFirst(inTab);
     return sorted.slice(0, LIST_LIMIT);
-  }, [reminders, tab]);
+  }, [remindersWithDerivedType, tab]);
 
   const header = (
     <div className="flex items-center justify-between gap-2">

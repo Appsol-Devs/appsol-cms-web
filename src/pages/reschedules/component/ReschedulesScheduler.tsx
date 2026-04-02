@@ -6,7 +6,9 @@ import ActionButton from "@/components/ActionButtons";
 import { Button } from "@/components/ui/button";
 import { allRoutes } from "@/utils/routes";
 import {
+  addDays,
   addMonths,
+  addWeeks,
   eachDayOfInterval,
   endOfDay,
   endOfMonth,
@@ -25,12 +27,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { showToast } from "@/components/ui/CustomToast";
 import { getTargetEntityTypeColor } from "@/lib/enums";
+import { cn } from "@/lib/utils";
 import type { IReschedule, TargetEntityType } from "../common/reschedules";
 import {
   useLazyGetReschedulesQuery,
   useUpdateRescheduleMutation,
 } from "../common/reschedulesApi";
 import RescheduleDetailsDrawer from "./RescheduleDetailsDrawer";
+import { DASHBOARD_PRESET_BUTTON_CLASS } from "@/pages/dashboard/common/dashboard";
 
 const WEEKDAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"] as const;
 
@@ -76,11 +80,16 @@ function inRange(d: Date, range: { start: Date; end: Date }) {
 }
 
 function defaultDateTimeForCalendarDay(day: Date): string {
+  const hasTime =
+    day.getHours() !== 0 ||
+    day.getMinutes() !== 0 ||
+    day.getSeconds() !== 0 ||
+    day.getMilliseconds() !== 0;
   return set(day, {
-    hours: 9,
-    minutes: 0,
-    seconds: 0,
-    milliseconds: 0,
+    hours: hasTime ? day.getHours() : 9,
+    minutes: hasTime ? day.getMinutes() : 0,
+    seconds: hasTime ? day.getSeconds() : 0,
+    milliseconds: hasTime ? day.getMilliseconds() : 0,
   }).toISOString();
 }
 
@@ -103,8 +112,9 @@ type ScheduleMonthCalendarProps = {
   onDayClick?: (day: Date) => void;
   onDropOnDay?: (args: {
     rescheduleId: string;
-    targetDay: Date;
+    targetDate: Date;
     previousAt: Date;
+    mode: "month" | "week" | "day";
   }) => void;
 };
 
@@ -116,13 +126,43 @@ function ScheduleMonthCalendar({
   onDayClick,
   onDropOnDay,
 }: ScheduleMonthCalendarProps) {
+  type CalendarViewMode = "month" | "week" | "day";
   const dragLockRef = useRef(false);
   const [dragOverKey, setDragOverKey] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<CalendarViewMode>("month");
+  const [anchorDate, setAnchorDate] = useState<Date>(() => new Date());
+
   const monthStart = startOfMonth(visibleMonth);
   const monthEnd = endOfMonth(visibleMonth);
-  const gridStart = startOfWeek(monthStart, { weekStartsOn: 1 });
-  const gridEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
-  const days = eachDayOfInterval({ start: gridStart, end: gridEnd });
+  const monthGridStart = startOfWeek(monthStart, { weekStartsOn: 1 });
+  const monthGridEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
+  const monthDays = eachDayOfInterval({ start: monthGridStart, end: monthGridEnd });
+
+  const weekStart = startOfWeek(anchorDate, { weekStartsOn: 1 });
+  const weekEnd = endOfWeek(anchorDate, { weekStartsOn: 1 });
+  const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd });
+
+  const activeLabel = useMemo(() => {
+    if (viewMode === "month") return format(visibleMonth, "MMMM yyyy");
+    if (viewMode === "week") {
+      const a = format(weekStart, "d MMM");
+      const b = format(weekEnd, "d MMM yyyy");
+      return `${a} – ${b}`;
+    }
+    return format(anchorDate, "d MMMM yyyy");
+  }, [viewMode, visibleMonth, anchorDate, weekStart, weekEnd]);
+
+  const handlePrev = () => {
+    if (viewMode === "month") return onMonthChange(addMonths(visibleMonth, -1));
+    if (viewMode === "week") return setAnchorDate((d) => addWeeks(d, -1));
+    return setAnchorDate((d) => addDays(d, -1));
+  };
+
+  const handleNext = () => {
+    if (viewMode === "month") return onMonthChange(addMonths(visibleMonth, 1));
+    if (viewMode === "week") return setAnchorDate((d) => addWeeks(d, 1));
+    return setAnchorDate((d) => addDays(d, 1));
+  };
 
   const byDay = new Map<string, IReschedule[]>();
   for (const { reschedule, at } of events) {
@@ -134,6 +174,27 @@ function ScheduleMonthCalendar({
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+
+  const dayTimeline = useMemo(() => {
+    if (viewMode !== "day") return null;
+    const key = dayKey(anchorDate);
+    const dayEvents = (byDay.get(key) ?? []).slice();
+    dayEvents.sort((a, b) => {
+      const ta = getNewDate(a)?.getTime() ?? 0;
+      const tb = getNewDate(b)?.getTime() ?? 0;
+      return ta - tb;
+    });
+    const byHour = new Map<number, IReschedule[]>();
+    for (const r of dayEvents) {
+      const at = getNewDate(r);
+      if (!at) continue;
+      const h = at.getHours();
+      const list = byHour.get(h) ?? [];
+      list.push(r);
+      byHour.set(h, list);
+    }
+    return { key, byHour };
+  }, [viewMode, anchorDate, byDay]);
 
   return (
     <div className="rounded-2xl border border-zinc-200 bg-white text-zinc-900 shadow-sm overflow-hidden">
@@ -150,26 +211,66 @@ function ScheduleMonthCalendar({
               variant="default"
               size="icon-sm"
               className="rounded-md bg-primary! text-primary-foreground!"
-              onClick={() => onMonthChange(addMonths(visibleMonth, -1))}
-              aria-label="Previous month"
+              onClick={handlePrev}
+              aria-label="Previous"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <span className="min-w-[10rem] text-center text-sm font-medium text-zinc-800 tabular-nums">
-              {format(visibleMonth, "MMMM yyyy")}
+              {activeLabel}
             </span>
             <Button
               type="button"
               variant="default"
               size="icon-sm"
               className="rounded-md bg-primary! text-primary-foreground!"
-              onClick={() => onMonthChange(addMonths(visibleMonth, 1))}
-              aria-label="Next month"
+              onClick={handleNext}
+              aria-label="Next"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
-          <div aria-hidden className="min-w-0" />
+          <div className="flex items-center justify-end gap-1 min-w-0">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className={cn(
+                DASHBOARD_PRESET_BUTTON_CLASS,
+                viewMode !== "day" && "bg-white! text-black!",
+                viewMode === "day" && "bg-primary! text-onPrimary!",
+              )}
+              onClick={() => setViewMode("day")}
+            >
+              Day
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className={cn(
+                DASHBOARD_PRESET_BUTTON_CLASS,
+                viewMode !== "week" && "bg-white! text-black!",
+                viewMode === "week" && "bg-primary! text-onPrimary!",
+              )}
+              onClick={() => setViewMode("week")}
+            >
+              Week
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className={cn(
+                DASHBOARD_PRESET_BUTTON_CLASS,
+                viewMode !== "month" && "bg-white! text-black!",
+                viewMode === "month" && "bg-primary! text-onPrimary!",
+              )}
+              onClick={() => setViewMode("month")}
+            >
+              Month
+            </Button>
+          </div>
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
@@ -196,19 +297,159 @@ function ScheduleMonthCalendar({
         </div>
       </div>
 
-      <div className="grid grid-cols-7 border-b border-zinc-200 bg-zinc-50">
-        {WEEKDAYS.map((d) => (
-          <div
-            key={d}
-            className="px-1 py-2 text-center text-[10px] font-semibold uppercase tracking-wider text-zinc-500"
-          >
-            {d}
-          </div>
-        ))}
-      </div>
+      {viewMode !== "day" ? (
+        <div className="grid grid-cols-7 border-b border-zinc-200 bg-zinc-50">
+          {WEEKDAYS.map((d) => (
+            <div
+              key={d}
+              className="px-1 py-2 text-center text-[10px] font-semibold uppercase tracking-wider text-zinc-500"
+            >
+              {d}
+            </div>
+          ))}
+        </div>
+      ) : null}
 
-      <div className="grid grid-cols-7 border-b border-zinc-200 bg-white">
-        {days.map((day) => {
+      <div
+        className={[
+          viewMode === "day" ? "grid grid-cols-1" : "grid grid-cols-7",
+          "border-b border-zinc-200 bg-white",
+        ].join(" ")}
+      >
+        {viewMode === "day" && dayTimeline ? (
+          <div className="flex flex-col">
+            {Array.from({ length: 24 }).map((_, hour) => {
+              const rowKey = `${dayTimeline.key}-${hour}`;
+              const hourStart = set(anchorDate, {
+                hours: hour,
+                minutes: 0,
+                seconds: 0,
+                milliseconds: 0,
+              });
+              const hourEvents = dayTimeline.byHour.get(hour) ?? [];
+              const isDraggingOver = dragOverKey === rowKey;
+
+              return (
+                <div
+                  key={rowKey}
+                  className={[
+                    "flex min-h-12 border-b border-zinc-200",
+                    isDraggingOver ? "ring-2 ring-inset ring-primary/50 bg-primary/5" : "bg-white",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                >
+                  <div className="w-14 shrink-0 px-2 py-2 text-[10px] font-medium tabular-nums text-zinc-500 border-r border-zinc-200 bg-zinc-50/60">
+                    {String(hour).padStart(2, "0")}:00
+                  </div>
+                  <div
+                    className="flex-1 px-2 py-1.5"
+                    role={onDayClick ? "button" : undefined}
+                    tabIndex={onDayClick ? 0 : undefined}
+                    onKeyDown={(e) => {
+                      if (!onDayClick) return;
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        onDayClick(hourStart);
+                      }
+                    }}
+                    onClick={() => {
+                      if (!onDayClick) return;
+                      if (dragLockRef.current) return;
+                      onDayClick(hourStart);
+                    }}
+                    onDragOver={(e) => {
+                      if (!onDropOnDay) return;
+                      e.preventDefault();
+                      e.dataTransfer.dropEffect = "move";
+                      setDragOverKey(rowKey);
+                    }}
+                    onDrop={(e) => {
+                      if (!onDropOnDay) return;
+                      e.preventDefault();
+                      setDragOverKey(null);
+                      const id =
+                        e.dataTransfer.getData(DRAG_MIME) ||
+                        e.dataTransfer.getData("text/plain");
+                      if (!id) return;
+                      const prevAt = events.find(
+                        (ev) => ev.reschedule._id === id,
+                      )?.at;
+                      if (!prevAt) return;
+                      onDropOnDay({
+                        rescheduleId: id,
+                        targetDate: hourStart,
+                        previousAt: prevAt,
+                        mode: "day",
+                      });
+                    }}
+                    aria-label={
+                      onDayClick
+                        ? `Add schedule at ${format(hourStart, "h:00 a")} on ${format(anchorDate, "MMMM d, yyyy")}`
+                        : undefined
+                    }
+                  >
+                    <div className="flex flex-col gap-1">
+                      {hourEvents.map((r, i) => {
+                        const at = getNewDate(r);
+                        if (!at) return null;
+                        const cust = customerFirstName(r);
+                        const typeColor = calendarColorForEntityType(r);
+                        return (
+                          <button
+                            key={`${r._id ?? r.rescheduleCode ?? "ev"}-${rowKey}-${i}`}
+                            type="button"
+                            draggable={Boolean(r._id && onDropOnDay)}
+                            title={onDropOnDay && r._id ? "drag to move" : undefined}
+                            onClick={(ev) => {
+                              ev.stopPropagation();
+                              onSelectEvent(r);
+                            }}
+                            onDragStart={(ev) => {
+                              if (!r._id || !onDropOnDay) return;
+                              ev.stopPropagation();
+                              dragLockRef.current = true;
+                              ev.dataTransfer.setData(DRAG_MIME, r._id);
+                              ev.dataTransfer.setData("text/plain", r._id);
+                              ev.dataTransfer.effectAllowed = "move";
+                            }}
+                            onDragEnd={() => {
+                              setDragOverKey(null);
+                              window.setTimeout(() => {
+                                dragLockRef.current = false;
+                              }, 0);
+                            }}
+                            style={{
+                              backgroundColor: `color-mix(in srgb, ${typeColor} 18%, transparent)`,
+                              borderColor: `color-mix(in srgb, ${typeColor} 42%, transparent)`,
+                            }}
+                            className={[
+                              "flex w-full min-w-0 items-start rounded border border-solid px-1.5 py-1 text-left transition hover:brightness-[0.98] focus:outline-none focus:ring-2 focus:ring-primary/35",
+                              onDropOnDay && r._id
+                                ? "cursor-grab active:cursor-grabbing"
+                                : "cursor-pointer",
+                            ].join(" ")}
+                          >
+                            <span className="min-w-0 flex-1">
+                              <span className="block truncate text-[10px] font-semibold leading-tight text-zinc-800">
+                                {eventTitle(r)}
+                              </span>
+                              <span className="mt-0.5 block truncate text-[9px] leading-tight text-zinc-600 tabular-nums">
+                                {format(at, "HH:mm")}
+                                {cust ? ` · ${cust}` : ""}
+                              </span>
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          (viewMode === "month" ? monthDays : viewMode === "week" ? weekDays : [anchorDate]).map((day) => {
           const inMonth = isSameMonth(day, visibleMonth);
           const isToday = isSameDay(day, today);
           const key = dayKey(day);
@@ -220,32 +461,33 @@ function ScheduleMonthCalendar({
           });
           const showEvents = dayEventsSorted.slice(0, 3);
           const extra = dayEventsSorted.length - showEvents.length;
+          const isInteractiveMonthCell = viewMode === "month" ? inMonth : true;
 
           return (
             <div
               key={key}
-              role={onDayClick && inMonth ? "button" : undefined}
-              tabIndex={onDayClick && inMonth ? 0 : undefined}
+              role={onDayClick && isInteractiveMonthCell ? "button" : undefined}
+              tabIndex={onDayClick && isInteractiveMonthCell ? 0 : undefined}
               onKeyDown={(e) => {
-                if (!onDayClick || !inMonth) return;
+                if (!onDayClick || !isInteractiveMonthCell) return;
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
                   onDayClick(day);
                 }
               }}
               onClick={() => {
-                if (!inMonth || !onDayClick) return;
+                if (!isInteractiveMonthCell || !onDayClick) return;
                 if (dragLockRef.current) return;
                 onDayClick(day);
               }}
               onDragOver={(e) => {
-                if (!onDropOnDay || !inMonth) return;
+                if (!onDropOnDay || !isInteractiveMonthCell) return;
                 e.preventDefault();
                 e.dataTransfer.dropEffect = "move";
                 setDragOverKey(key);
               }}
               onDrop={(e) => {
-                if (!onDropOnDay || !inMonth) return;
+                if (!onDropOnDay || !isInteractiveMonthCell) return;
                 e.preventDefault();
                 setDragOverKey(null);
                 const id =
@@ -258,24 +500,25 @@ function ScheduleMonthCalendar({
                 if (!prevAt) return;
                 onDropOnDay({
                   rescheduleId: id,
-                  targetDay: day,
+                  targetDate: day,
                   previousAt: prevAt,
+                  mode: viewMode,
                 });
               }}
               className={[
                 "relative flex flex-col min-h-[120px] sm:min-h-[132px] border-b border-r border-zinc-200 p-1 sm:p-1.5",
-                "[&:nth-child(7n)]:border-r-0",
-                !inMonth ? "bg-zinc-50/80 opacity-70" : "bg-white",
+                viewMode !== "day" ? "[&:nth-child(7n)]:border-r-0" : "",
+                viewMode === "month" && !inMonth ? "bg-zinc-50/80 opacity-70" : "bg-white",
                 isToday ? "ring-1 ring-inset ring-primary/45 bg-primary/8" : "",
-                inMonth && onDayClick ? "cursor-pointer hover:bg-zinc-50/90" : "",
-                onDropOnDay && inMonth && dragOverKey === key
+                isInteractiveMonthCell && onDayClick ? "cursor-pointer hover:bg-zinc-50/90" : "",
+                onDropOnDay && isInteractiveMonthCell && dragOverKey === key
                   ? "ring-2 ring-inset ring-primary/50 bg-primary/5"
                   : "",
               ]
                 .filter(Boolean)
                 .join(" ")}
               aria-label={
-                onDayClick && inMonth
+                onDayClick && isInteractiveMonthCell
                   ? `Add schedule on ${format(day, "MMMM d, yyyy")}`
                   : undefined
               }
@@ -362,7 +605,8 @@ function ScheduleMonthCalendar({
               )}
             </div>
           );
-        })}
+        })
+        )}
       </div>
     </div>
   );
@@ -478,15 +722,26 @@ export default function ReschedulesScheduler() {
   const handleDropOnDay = useCallback(
     async ({
       rescheduleId,
-      targetDay,
+      targetDate,
       previousAt,
+      mode,
     }: {
       rescheduleId: string;
-      targetDay: Date;
+      targetDate: Date;
       previousAt: Date;
+      mode: "month" | "week" | "day";
     }) => {
-      const newIso = mergeTargetDayPreserveTime(previousAt, targetDay);
-      if (dayKey(previousAt) === dayKey(targetDay)) return;
+      const newIso =
+        mode === "day"
+          ? set(targetDate, {
+              hours: targetDate.getHours(),
+              minutes: previousAt.getMinutes(),
+              seconds: previousAt.getSeconds(),
+              milliseconds: previousAt.getMilliseconds(),
+            }).toISOString()
+          : mergeTargetDayPreserveTime(previousAt, targetDate);
+
+      if (mode !== "day" && dayKey(previousAt) === dayKey(targetDate)) return;
 
       setOptimisticNewDateById((prev) => ({
         ...prev,
@@ -497,6 +752,7 @@ export default function ReschedulesScheduler() {
         await updateReschedule({
           _id: rescheduleId,
           newDateTime: newIso,
+          to: newIso,
         }).unwrap();
         showToast({
           title: "Success",

@@ -168,6 +168,8 @@ const RescheduleForm = () => {
       reason: data.reason?.trim() || undefined,
       originalDateTime: data.originalDateTime,
       newDateTime: data.newDateTime,
+      from: data.originalDateTime,
+      to: data.newDateTime,
       colorCode: getTargetEntityTypeColor(entityType) ?? undefined,
       status: data.status?.value,
     });
