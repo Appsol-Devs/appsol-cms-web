@@ -343,7 +343,10 @@ function ScheduleMonthCalendar({
                     {String(hour).padStart(2, "0")}:00
                   </div>
                   <div
-                    className="flex-1 px-2 py-1.5"
+                    className={[
+                      "flex-1 px-2 py-1.5",
+                      onDayClick ? "cursor-pointer hover:bg-zinc-50/90" : "",
+                    ].join(" ")}
                     role={onDayClick ? "button" : undefined}
                     tabIndex={onDayClick ? 0 : undefined}
                     onKeyDown={(e) => {
@@ -368,6 +371,9 @@ function ScheduleMonthCalendar({
                       if (!onDropOnDay) return;
                       e.preventDefault();
                       setDragOverKey(null);
+                      window.setTimeout(() => {
+                        dragLockRef.current = false;
+                      }, 0);
                       const id =
                         e.dataTransfer.getData(DRAG_MIME) ||
                         e.dataTransfer.getData("text/plain");
@@ -461,35 +467,39 @@ function ScheduleMonthCalendar({
           });
           const showEvents = dayEventsSorted.slice(0, 3);
           const extra = dayEventsSorted.length - showEvents.length;
-          const isInteractiveMonthCell = viewMode === "month" ? inMonth : true;
+          const isClickableCell = viewMode === "month" ? inMonth : true;
+          const isDroppableCell = true;
 
           return (
             <div
               key={key}
-              role={onDayClick && isInteractiveMonthCell ? "button" : undefined}
-              tabIndex={onDayClick && isInteractiveMonthCell ? 0 : undefined}
+              role={onDayClick && isClickableCell ? "button" : undefined}
+              tabIndex={onDayClick && isClickableCell ? 0 : undefined}
               onKeyDown={(e) => {
-                if (!onDayClick || !isInteractiveMonthCell) return;
+                if (!onDayClick || !isClickableCell) return;
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
                   onDayClick(day);
                 }
               }}
               onClick={() => {
-                if (!isInteractiveMonthCell || !onDayClick) return;
+                if (!isClickableCell || !onDayClick) return;
                 if (dragLockRef.current) return;
                 onDayClick(day);
               }}
               onDragOver={(e) => {
-                if (!onDropOnDay || !isInteractiveMonthCell) return;
+                if (!onDropOnDay || !isDroppableCell) return;
                 e.preventDefault();
                 e.dataTransfer.dropEffect = "move";
                 setDragOverKey(key);
               }}
               onDrop={(e) => {
-                if (!onDropOnDay || !isInteractiveMonthCell) return;
+                if (!onDropOnDay || !isDroppableCell) return;
                 e.preventDefault();
                 setDragOverKey(null);
+                window.setTimeout(() => {
+                  dragLockRef.current = false;
+                }, 0);
                 const id =
                   e.dataTransfer.getData(DRAG_MIME) ||
                   e.dataTransfer.getData("text/plain");
@@ -510,15 +520,15 @@ function ScheduleMonthCalendar({
                 viewMode !== "day" ? "[&:nth-child(7n)]:border-r-0" : "",
                 viewMode === "month" && !inMonth ? "bg-zinc-50/80 opacity-70" : "bg-white",
                 isToday ? "ring-1 ring-inset ring-primary/45 bg-primary/8" : "",
-                isInteractiveMonthCell && onDayClick ? "cursor-pointer hover:bg-zinc-50/90" : "",
-                onDropOnDay && isInteractiveMonthCell && dragOverKey === key
+                isClickableCell && onDayClick ? "cursor-pointer hover:bg-zinc-50/90" : "",
+                onDropOnDay && isDroppableCell && dragOverKey === key
                   ? "ring-2 ring-inset ring-primary/50 bg-primary/5"
                   : "",
               ]
                 .filter(Boolean)
                 .join(" ")}
               aria-label={
-                onDayClick && isInteractiveMonthCell
+                onDayClick && isClickableCell
                   ? `Add schedule on ${format(day, "MMMM d, yyyy")}`
                   : undefined
               }
@@ -633,8 +643,12 @@ export default function ReschedulesScheduler() {
   const pageSize = 1000;
 
   const effectiveRange = useMemo(() => {
-    const start = startOfDay(startOfMonth(visibleMonth));
-    const end = endOfDay(endOfMonth(visibleMonth));
+    const monthStart = startOfMonth(visibleMonth);
+    const monthEnd = endOfMonth(visibleMonth);
+    const gridStart = startOfWeek(monthStart, { weekStartsOn: 1 });
+    const gridEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
+    const start = startOfDay(gridStart);
+    const end = endOfDay(gridEnd);
     return { start, end };
   }, [visibleMonth]);
 
