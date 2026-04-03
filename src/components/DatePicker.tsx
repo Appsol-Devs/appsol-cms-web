@@ -226,7 +226,7 @@ export function DatePicker({
             </div>
             {date && (dateOnly ? format(date, "do MMM y") : formatDateTime(date))}
           </div>
-        </div> // <-- MISSING DIV ADDED HERE
+        </div> 
       ) : null}
       <div className="w-full">
         {showInPopover ? (
