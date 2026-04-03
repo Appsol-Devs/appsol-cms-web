@@ -68,7 +68,7 @@ const FeatureRequest = () => {
         meta: { icon: <User size={14} /> },
         cell: ({ row }) => {
           const { customer, software } = row.original;
-          
+
           // Customer Label
           const customerName = typeof customer === 'string' ? customer : customer?.name ?? "N/A";
 
@@ -156,8 +156,9 @@ const FeatureRequest = () => {
             onClick={() => navigate(allRoutes.PORTAL + allRoutes.ADD_FEATURE_REQUEST)}
           />
         )}
-        // useDateFilters
-        filters={["featurePriority", "softwareId", "customerId", "featureStatus"]} // Removed assignedTo from filters as well
+        useDateFilters
+        dateFilterNoDefault
+        filters={["featurePriority", "softwareId", "customerId", "featureStatus","assignedTo"]} 
         pathOnRowSelected={pathOnRowSelected}
         columns={columns}
         refetchData={executed}

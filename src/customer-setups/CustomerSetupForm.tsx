@@ -96,8 +96,13 @@ const CustomerSetupForm = () => {
           description: data.description || "",
           notes: data.notes || "",
           priority: data.priority || "",
-          setupStatus: typeof data.setupStatus === "string" ? data.setupStatus : data.setupStatus?.name || "",
-          status: (data.status || "scheduled") as any,
+          setupStatus: data.setupStatusId || (typeof data.setupStatus !== "string" ? data.setupStatus?._id : undefined)
+            ? {
+              value: data.setupStatusId || (typeof data.setupStatus !== "string" ? data.setupStatus?._id : undefined),
+              label: typeof data.setupStatus === "string" ? data.setupStatus : data.setupStatus?.name ?? "",
+            }
+            : undefined,
+          status: (data.status || "scheduled"),
           scheduledStart: data.scheduledStart || "",
           scheduledEnd: data.scheduledEnd || "",
           actualCompletionDate: data.actualCompletionDate || "",

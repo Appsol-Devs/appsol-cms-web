@@ -114,7 +114,7 @@ const CustomerSetups = () => {
         },
       },
       {
-        header: "Setup Status", 
+        header: "Setup Status",
         accessorKey: "setupStatus",
         meta: { icon: <CircleDot size={14} /> },
         cell: ({ row }) => {
@@ -181,6 +181,8 @@ const CustomerSetups = () => {
   return (
     <>
       <FeatureContentRenderer
+        useDateFilters
+        dateFilterNoDefault
         tableAddComponent={() => (
           <ActionButton
             type="add"
