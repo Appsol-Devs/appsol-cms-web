@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { showToast } from "@/components/ui/CustomToast";
-import { cleanPayload, formatDate } from "@/lib/helpers";
+import { cleanPayload, formatMutationSummaryDateTime } from "@/lib/helpers";
 import type { ISummarySection } from "@/components/form/MutationFormSummary";
 import { BookOpenText } from "lucide-react";
 import MutationFormTemplate from "@/components/form/MutationFormTemplate";
@@ -238,17 +238,17 @@ const CustomerSetupForm = () => {
         },
         {
           label: "Scheduled Start",
-          value: values?.scheduledStart ? formatDate(values?.scheduledStart) : "",
+          value: formatMutationSummaryDateTime(values?.scheduledStart),
           required: !id
         },
         {
           label: "Scheduled End",
-          value: values?.scheduledEnd ? formatDate(values?.scheduledEnd) : "",
+          value: formatMutationSummaryDateTime(values?.scheduledEnd),
           required: false
         },
         {
           label: "Actual Completion",
-          value: values?.actualCompletionDate ? formatDate(values?.actualCompletionDate) : "",
+          value: formatMutationSummaryDateTime(values?.actualCompletionDate),
           required: false
         },
       ],

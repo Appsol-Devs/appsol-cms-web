@@ -31,7 +31,7 @@ import { sidebarReducer } from "./pages/layout/sidebar/common/sidebarSlice";
 import { notificationsApi } from "./pages/layout/notification/common/notificationsApi";
 import { featureRequestApi } from "./pages/feature-request-module/common/featureRequestApi";
 import { subscriptionRemindersApi } from "./pages/subscription-reminders/common/subscriptionRemindersApi";
-import { customerSetupApi } from "./customer-setups/customerSetupApi";
+import { customerSetupApi } from "./pages/customer-setups/customerSetupApi";
 
 const persistConfig = {
   key: "root",

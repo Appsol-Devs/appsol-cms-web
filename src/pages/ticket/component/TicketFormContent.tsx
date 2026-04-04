@@ -124,7 +124,7 @@ const TicketFormContent = ({
             control={control}
             name="requestedDate"
             render={({ field }) => (
-              <div className="space-y-1 max-w-[280px]" key={field.value ?? "empty"}>
+              <div className="space-y-1 max-w-[280px]">
                 <p className="text-xs text-onCard font-medium">
                   Requested Date & Time{" "}
                   <span className="text-destructive ml-0.5">*</span>

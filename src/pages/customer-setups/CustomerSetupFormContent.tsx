@@ -183,7 +183,7 @@ const CustomerSetupFormContent = ({ isLoading, form, isUpdate }: IField) => {
                         name="scheduledStart"
                         rules={{ required: !isUpdate ? "Scheduled Start is required" : false }}
                         render={({ field }) => (
-                            <div className="space-y-1 w-full" key={field.value ?? "start-empty"}>
+                            <div className="space-y-1 w-full">
                                 <p className="text-xs text-onCard font-medium">
                                     Scheduled Start {!isUpdate && <span className="text-destructive ml-0.5">*</span>}
                                 </p>
@@ -206,7 +206,7 @@ const CustomerSetupFormContent = ({ isLoading, form, isUpdate }: IField) => {
                         control={control}
                         name="scheduledEnd"
                         render={({ field }) => (
-                            <div className="space-y-1 w-full" key={field.value ?? "end-empty"}>
+                            <div className="space-y-1 w-full">
                                 <p className="text-xs text-onCard font-medium">
                                     Scheduled End
                                 </p>
@@ -228,7 +228,7 @@ const CustomerSetupFormContent = ({ isLoading, form, isUpdate }: IField) => {
                         control={control}
                         name="actualCompletionDate"
                         render={({ field }) => (
-                            <div className="space-y-1 w-full" key={field.value ?? "actual-empty"}>
+                            <div className="space-y-1 w-full">
                                 <p className="text-xs text-onCard font-medium">
                                     Actual Completion Date
                                 </p>

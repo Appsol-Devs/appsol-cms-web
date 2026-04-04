@@ -42,15 +42,48 @@ export function DatePicker({
   calendarClassName,
   rangeStart,
   rangeEnd,
+  value,
 }: Props) {
-  const [date, setDate] = React.useState<Date | undefined>(
-    defaultDate ? defaultDate : undefined,
+  const externalMs = React.useMemo(() => {
+    const src =
+      value !== undefined && value !== null ? value : defaultDate;
+    if (src == null) return undefined;
+    if (!(src instanceof Date)) return undefined;
+    const t = src.getTime();
+    return Number.isNaN(t) ? undefined : t;
+  }, [value, defaultDate]);
+
+  const [date, setDate] = React.useState<Date | undefined>(() =>
+    externalMs !== undefined ? new Date(externalMs) : undefined,
   );
+  const [popoverOpen, setPopoverOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    if (externalMs === undefined) {
+      setDate(undefined);
+      return;
+    }
+    setDate((prev) => {
+      if (prev?.getTime() === externalMs) return prev;
+      return new Date(externalMs);
+    });
+  }, [externalMs]);
   const hours = Array.from({ length: 12 }, (_, i) => i + 1);
 
   const handleDateSelect = (selectedDate: Date | undefined) => {
-    if (selectedDate) {
-      setDate(selectedDate);
+    if (!selectedDate) return;
+    const next = new Date(selectedDate);
+    if (date && !dateOnly) {
+      next.setHours(
+        date.getHours(),
+        date.getMinutes(),
+        date.getSeconds(),
+        date.getMilliseconds(),
+      );
+    }
+    setDate(next);
+    if (dateOnly) {
+      setPopoverOpen(false);
     }
   };
 
@@ -126,12 +159,13 @@ export function DatePicker({
                   return (
                     <Button
                       key={hour}
+                      type="button"
                       size="icon-sm"
                       className={cn(
                         "shrink-0 border border-input text-xs!",
                         isActive
                           ? "bg-primary! text-primary-foreground"
-                          : "bg-card! text-card-foreground hover:bg-primary/60 hover:text-primary-foreground",
+                          : "bg-card! text-card-foreground hover:bg-primary/60! hover:text-primary-foreground!",
                       )}
                       onClick={() => handleTimeChange("hour", hour.toString())}
                     >
@@ -149,12 +183,13 @@ export function DatePicker({
                 return (
                   <Button
                     key={minute}
+                    type="button"
                     size="icon-sm"
                     className={cn(
                       "shrink-0 border border-input text-xs!",
                       isActive
                         ? "bg-primary! text-primary-foreground"
-                        : "bg-card! text-card-foreground hover:bg-primary/60 hover:text-primary-foreground",
+                        : "bg-card! text-card-foreground hover:bg-primary/60! hover:text-primary-foreground!",
                     )}
                     onClick={() =>
                       handleTimeChange("minute", minute.toString())
@@ -178,12 +213,13 @@ export function DatePicker({
                 return (
                   <Button
                     key={ampm}
+                    type="button"
                     size="icon-sm"
                     className={cn(
                       "shrink-0 border border-input text-xs!",
                       isActive
                         ? "bg-primary! text-primary-foreground"
-                        : "bg-card! text-card-foreground hover:bg-primary/60 hover:text-primary-foreground",
+                        : "bg-card! text-card-foreground hover:bg-primary/60! hover:text-primary-foreground!",
                     )}
                     onClick={() => handleTimeChange("ampm", ampm)}
                   >
@@ -230,7 +266,7 @@ export function DatePicker({
       ) : null}
       <div className="w-full">
         {showInPopover ? (
-          <Popover>
+          <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
             <PopoverTrigger asChild>
               <div
                 className={cn(
@@ -253,7 +289,12 @@ export function DatePicker({
                 </span>
               </div>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
+            <PopoverContent
+              className="w-auto p-0"
+              onFocusOutside={(e) => {
+                if (!dateOnly) e.preventDefault();
+              }}
+            >
               {innerContent}
             </PopoverContent>
           </Popover>

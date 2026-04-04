@@ -1,7 +1,7 @@
 import type { ISummarySection } from "@/components/form/MutationFormSummary";
 import MutationFormTemplate from "@/components/form/MutationFormTemplate";
 import { showToast } from "@/components/ui/CustomToast";
-import { cleanPayload } from "@/lib/helpers";
+import { cleanPayload, formatMutationSummaryDateTime } from "@/lib/helpers";
 import { Calendar, Receipt, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -229,24 +229,20 @@ const SubscriptionsForm = () => {
       data: [
         {
           label: "Start Date",
-          value: values?.startDate
-            ? new Date(values.startDate).toLocaleDateString()
-            : "",
+          value: formatMutationSummaryDateTime(values?.startDate),
           required: true,
         },
         {
           label: "Current Period",
           value:
             values?.currentPeriodStart && values?.currentPeriodEnd
-              ? `${new Date(values.currentPeriodStart).toLocaleDateString()} - ${new Date(values.currentPeriodEnd).toLocaleDateString()}`
+              ? `${formatMutationSummaryDateTime(values.currentPeriodStart)} - ${formatMutationSummaryDateTime(values.currentPeriodEnd)}`
               : "",
           required: true,
         },
         {
           label: "Next Billing",
-          value: values?.nextBillingDate
-            ? new Date(values.nextBillingDate).toLocaleDateString()
-            : "",
+          value: formatMutationSummaryDateTime(values?.nextBillingDate),
           required: true,
         },
       ],

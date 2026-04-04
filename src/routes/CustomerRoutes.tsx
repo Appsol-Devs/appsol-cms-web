@@ -1,7 +1,6 @@
 import PageNotFound from "@/pages/auth/error/PageNotFound";
 import CustomersView from "@/pages/customer/component/core/CustomersView";
 import CustomerDashboard from "@/pages/customer/component/customer-dashboard/CustomerDashboard";
-import CustomerEnquiry from "@/pages/customer/component/customer-enquiry/CustomerEnquiry";
 import CustomerOutreach from "@/pages/customer/component/customer-outreach/CustomerOutreach";
 import CustomerPayments from "@/pages/customer/component/customer-payment/CustomerPayments";
 import CustomerSummary from "@/pages/customer/component/customer-summary/CustomerSummary";
@@ -19,7 +18,6 @@ interface ICustomerRoute {
 const CustomerRoutes = () => {
   const ALL_CUSTOMER_ROUTES: ICustomerRoute[] = [
     { element: <CustomerSummary />, path: customerRoutes.OVERVIEW },
-    { element: <CustomerEnquiry />, path: customerRoutes.ENQUIRIES },
     { element: <CustomerOutreach />, path: customerRoutes.OUTREACHS },
     { element: <CustomerPayments />, path: customerRoutes.PAYMENTS },
     { element: <CustomerTickets />, path: customerRoutes.TICKETS },

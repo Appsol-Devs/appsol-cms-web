@@ -9,6 +9,7 @@ import {
   addDays,
   addMonths,
   addWeeks,
+  differenceInCalendarDays,
   eachDayOfInterval,
   endOfDay,
   endOfMonth,
@@ -16,7 +17,6 @@ import {
   format,
   isSameDay,
   isSameMonth,
-  isWithinInterval,
   set,
   startOfDay,
   startOfMonth,
@@ -28,7 +28,14 @@ import { useNavigate } from "react-router-dom";
 import { showToast } from "@/components/ui/CustomToast";
 import { getTargetEntityTypeColor } from "@/lib/enums";
 import { cn } from "@/lib/utils";
-import type { IReschedule, TargetEntityType } from "../common/reschedules";
+import {
+  type IReschedule,
+  type TargetEntityType,
+  getScheduleEnd,
+  getScheduleInterval,
+  getScheduleStart,
+  parseRescheduleDate,
+} from "../common/reschedules";
 import {
   useLazyGetReschedulesQuery,
   useUpdateRescheduleMutation,
@@ -65,18 +72,69 @@ function customerFirstName(r: IReschedule): string | undefined {
   return name || undefined;
 }
 
+function scheduleCellTimeAndCustomer(r: IReschedule, cellAt: Date): string {
+  const cust = customerFirstName(r);
+  const timeStr = format(cellAt, "HH:mm");
+  return cust ? `${timeStr} · ${cust}` : timeStr;
+}
+
 function dayKey(d: Date) {
   return format(d, "yyyy-MM-dd");
 }
 
-function getNewDate(res: IReschedule): Date | null {
-  if (!res?.newDateTime) return null;
-  const d = new Date(res.newDateTime);
-  return Number.isNaN(d.getTime()) ? null : d;
+type ScheduleCalendarCell = {
+  reschedule: IReschedule;
+  at: Date;
+};
+
+function expandRescheduleToCalendarCells(
+  r: IReschedule,
+): ScheduleCalendarCell[] {
+  const int = getScheduleInterval(r);
+  if (!int) return [];
+  const { start, end } = int;
+  const fromDay = startOfDay(start);
+  const toDay = startOfDay(end);
+  if (fromDay.getTime() > toDay.getTime()) return [];
+  const days = eachDayOfInterval({ start: fromDay, end: toDay });
+  const out: ScheduleCalendarCell[] = [];
+  for (const d of days) {
+    let at: Date;
+    if (isSameDay(d, start)) at = start;
+    else if (isSameDay(d, end)) at = end;
+    else
+      at = set(d, {
+        hours: start.getHours(),
+        minutes: start.getMinutes(),
+        seconds: start.getSeconds(),
+        milliseconds: start.getMilliseconds(),
+      });
+    out.push({ reschedule: r, at });
+  }
+  return out;
 }
 
-function inRange(d: Date, range: { start: Date; end: Date }) {
-  return isWithinInterval(d, { start: range.start, end: range.end });
+function encodeScheduleDrag(id: string, at: Date): string {
+  return JSON.stringify({ id, at: at.toISOString() });
+}
+
+function parseScheduleDragPayload(
+  raw: string,
+  fallbackEvents: ScheduleCalendarCell[],
+): { id: string; previousAt: Date } | null {
+  if (!raw?.trim()) return null;
+  try {
+    const j = JSON.parse(raw) as { id?: string; at?: string };
+    if (j?.id && j?.at) {
+      const at = new Date(j.at);
+      if (!Number.isNaN(at.getTime())) return { id: j.id, previousAt: at };
+    }
+  } catch {
+  }
+  const id = raw.trim();
+  const previousAt = fallbackEvents.find((ev) => ev.reschedule._id === id)?.at;
+  if (!previousAt) return null;
+  return { id, previousAt };
 }
 
 function defaultDateTimeForCalendarDay(day: Date): string {
@@ -93,21 +151,12 @@ function defaultDateTimeForCalendarDay(day: Date): string {
   }).toISOString();
 }
 
-function mergeTargetDayPreserveTime(at: Date, targetDay: Date): string {
-  return set(targetDay, {
-    hours: at.getHours(),
-    minutes: at.getMinutes(),
-    seconds: at.getSeconds(),
-    milliseconds: at.getMilliseconds(),
-  }).toISOString();
-}
-
 const DRAG_MIME = "application/x-schedule-id";
 
 type ScheduleMonthCalendarProps = {
   visibleMonth: Date;
   onMonthChange: (next: Date) => void;
-  events: { reschedule: IReschedule; at: Date }[];
+  events: ScheduleCalendarCell[];
   onSelectEvent: (r: IReschedule) => void;
   onDayClick?: (day: Date) => void;
   onDropOnDay?: (args: {
@@ -164,11 +213,11 @@ function ScheduleMonthCalendar({
     return setAnchorDate((d) => addDays(d, 1));
   };
 
-  const byDay = new Map<string, IReschedule[]>();
-  for (const { reschedule, at } of events) {
-    const key = dayKey(at);
+  const byDay = new Map<string, ScheduleCalendarCell[]>();
+  for (const cell of events) {
+    const key = dayKey(cell.at);
     const list = byDay.get(key) ?? [];
-    list.push(reschedule);
+    list.push(cell);
     byDay.set(key, list);
   }
 
@@ -179,18 +228,12 @@ function ScheduleMonthCalendar({
     if (viewMode !== "day") return null;
     const key = dayKey(anchorDate);
     const dayEvents = (byDay.get(key) ?? []).slice();
-    dayEvents.sort((a, b) => {
-      const ta = getNewDate(a)?.getTime() ?? 0;
-      const tb = getNewDate(b)?.getTime() ?? 0;
-      return ta - tb;
-    });
-    const byHour = new Map<number, IReschedule[]>();
-    for (const r of dayEvents) {
-      const at = getNewDate(r);
-      if (!at) continue;
-      const h = at.getHours();
+    dayEvents.sort((a, b) => a.at.getTime() - b.at.getTime());
+    const byHour = new Map<number, ScheduleCalendarCell[]>();
+    for (const cell of dayEvents) {
+      const h = cell.at.getHours();
       const list = byHour.get(h) ?? [];
-      list.push(r);
+      list.push(cell);
       byHour.set(h, list);
     }
     return { key, byHour };
@@ -312,7 +355,9 @@ function ScheduleMonthCalendar({
 
       <div
         className={[
-          viewMode === "day" ? "grid grid-cols-1" : "grid grid-cols-7",
+          viewMode === "day" || viewMode === "week"
+            ? "grid grid-cols-1"
+            : "grid grid-cols-7",
           "border-b border-zinc-200 bg-white",
         ].join(" ")}
       >
@@ -374,18 +419,15 @@ function ScheduleMonthCalendar({
                       window.setTimeout(() => {
                         dragLockRef.current = false;
                       }, 0);
-                      const id =
+                      const raw =
                         e.dataTransfer.getData(DRAG_MIME) ||
                         e.dataTransfer.getData("text/plain");
-                      if (!id) return;
-                      const prevAt = events.find(
-                        (ev) => ev.reschedule._id === id,
-                      )?.at;
-                      if (!prevAt) return;
+                      const parsed = parseScheduleDragPayload(raw, events);
+                      if (!parsed) return;
                       onDropOnDay({
-                        rescheduleId: id,
+                        rescheduleId: parsed.id,
                         targetDate: hourStart,
-                        previousAt: prevAt,
+                        previousAt: parsed.previousAt,
                         mode: "day",
                       });
                     }}
@@ -396,14 +438,13 @@ function ScheduleMonthCalendar({
                     }
                   >
                     <div className="flex flex-col gap-1">
-                      {hourEvents.map((r, i) => {
-                        const at = getNewDate(r);
-                        if (!at) return null;
-                        const cust = customerFirstName(r);
+                      {hourEvents.map((cell, i) => {
+                        const r = cell.reschedule;
+                        if (!getScheduleStart(r)) return null;
                         const typeColor = calendarColorForEntityType(r);
                         return (
                           <button
-                            key={`${r._id ?? r.rescheduleCode ?? "ev"}-${rowKey}-${i}`}
+                            key={`${r._id ?? r.rescheduleCode ?? "ev"}-${rowKey}-${cell.at.getTime()}-${i}`}
                             type="button"
                             draggable={Boolean(r._id && onDropOnDay)}
                             title={onDropOnDay && r._id ? "drag to move" : undefined}
@@ -415,7 +456,8 @@ function ScheduleMonthCalendar({
                               if (!r._id || !onDropOnDay) return;
                               ev.stopPropagation();
                               dragLockRef.current = true;
-                              ev.dataTransfer.setData(DRAG_MIME, r._id);
+                              const payload = encodeScheduleDrag(r._id, cell.at);
+                              ev.dataTransfer.setData(DRAG_MIME, payload);
                               ev.dataTransfer.setData("text/plain", r._id);
                               ev.dataTransfer.effectAllowed = "move";
                             }}
@@ -441,8 +483,7 @@ function ScheduleMonthCalendar({
                                 {eventTitle(r)}
                               </span>
                               <span className="mt-0.5 block truncate text-[9px] leading-tight text-zinc-600 tabular-nums">
-                                {format(at, "HH:mm")}
-                                {cust ? ` · ${cust}` : ""}
+                                {scheduleCellTimeAndCustomer(r, cell.at)}
                               </span>
                             </span>
                           </button>
@@ -454,20 +495,171 @@ function ScheduleMonthCalendar({
               );
             })}
           </div>
+        ) : viewMode === "week" ? (
+          <div className="flex flex-col min-w-0">
+            {Array.from({ length: 24 }).map((_, hour) => (
+              <div
+                key={`week-row-${hour}`}
+                className="flex min-h-12 border-b border-zinc-200"
+              >
+                <div className="w-14 shrink-0 px-2 py-2 text-[10px] font-medium tabular-nums text-zinc-500 border-r border-zinc-200 bg-zinc-50/60">
+                  {String(hour).padStart(2, "0")}:00
+                </div>
+                <div className="grid min-w-0 flex-1 grid-cols-7 divide-x divide-zinc-200">
+                  {weekDays.map((day) => {
+                    const key = dayKey(day);
+                    const rowKey = `${key}-${hour}`;
+                    const dayEvents = byDay.get(key) ?? [];
+                    const hourEvents = dayEvents
+                      .filter((cell) => cell.at.getHours() === hour)
+                      .sort((a, b) => a.at.getTime() - b.at.getTime());
+                    const hourStart = set(day, {
+                      hours: hour,
+                      minutes: 0,
+                      seconds: 0,
+                      milliseconds: 0,
+                    });
+                    const isToday = isSameDay(day, today);
+                    const isDraggingOver = dragOverKey === rowKey;
+
+                    return (
+                      <div
+                        key={rowKey}
+                        className={[
+                          "relative min-w-0 px-1 py-1.5",
+                          isToday ? "bg-primary/8" : "bg-white",
+                          isDraggingOver
+                            ? "ring-2 ring-inset ring-primary/50 bg-primary/5"
+                            : "",
+                          onDayClick ? "cursor-pointer hover:bg-zinc-50/90" : "",
+                        ]
+                          .filter(Boolean)
+                          .join(" ")}
+                        role={onDayClick ? "button" : undefined}
+                        tabIndex={onDayClick ? 0 : undefined}
+                        onKeyDown={(e) => {
+                          if (!onDayClick) return;
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            onDayClick(hourStart);
+                          }
+                        }}
+                        onClick={() => {
+                          if (!onDayClick) return;
+                          if (dragLockRef.current) return;
+                          onDayClick(hourStart);
+                        }}
+                        onDragOver={(e) => {
+                          if (!onDropOnDay) return;
+                          e.preventDefault();
+                          e.dataTransfer.dropEffect = "move";
+                          setDragOverKey(rowKey);
+                        }}
+                        onDrop={(e) => {
+                          if (!onDropOnDay) return;
+                          e.preventDefault();
+                          setDragOverKey(null);
+                          window.setTimeout(() => {
+                            dragLockRef.current = false;
+                          }, 0);
+                          const raw =
+                            e.dataTransfer.getData(DRAG_MIME) ||
+                            e.dataTransfer.getData("text/plain");
+                          const parsed = parseScheduleDragPayload(raw, events);
+                          if (!parsed) return;
+                          onDropOnDay({
+                            rescheduleId: parsed.id,
+                            targetDate: hourStart,
+                            previousAt: parsed.previousAt,
+                            mode: "day",
+                          });
+                        }}
+                        aria-label={
+                          onDayClick
+                            ? `Add schedule at ${format(hourStart, "h:00 a")} on ${format(day, "MMMM d, yyyy")}`
+                            : undefined
+                        }
+                      >
+                        {isToday ? (
+                          <span
+                            className="pointer-events-none absolute left-0 top-0 bottom-0 w-0.5 bg-primary"
+                            aria-hidden
+                          />
+                        ) : null}
+                        <div className="flex flex-col gap-1">
+                          {hourEvents.map((cell, i) => {
+                            const r = cell.reschedule;
+                            if (!getScheduleStart(r)) return null;
+                            const typeColor = calendarColorForEntityType(r);
+                            return (
+                              <button
+                                key={`${r._id ?? r.rescheduleCode ?? "ev"}-${rowKey}-${cell.at.getTime()}-${i}`}
+                                type="button"
+                                draggable={Boolean(r._id && onDropOnDay)}
+                                title={
+                                  onDropOnDay && r._id ? "drag to move" : undefined
+                                }
+                                onClick={(ev) => {
+                                  ev.stopPropagation();
+                                  onSelectEvent(r);
+                                }}
+                                onDragStart={(ev) => {
+                                  if (!r._id || !onDropOnDay) return;
+                                  ev.stopPropagation();
+                                  dragLockRef.current = true;
+                                  const payload = encodeScheduleDrag(r._id, cell.at);
+                                  ev.dataTransfer.setData(DRAG_MIME, payload);
+                                  ev.dataTransfer.setData("text/plain", r._id);
+                                  ev.dataTransfer.effectAllowed = "move";
+                                }}
+                                onDragEnd={() => {
+                                  setDragOverKey(null);
+                                  window.setTimeout(() => {
+                                    dragLockRef.current = false;
+                                  }, 0);
+                                }}
+                                style={{
+                                  backgroundColor: `color-mix(in srgb, ${typeColor} 18%, transparent)`,
+                                  borderColor: `color-mix(in srgb, ${typeColor} 42%, transparent)`,
+                                }}
+                                className={[
+                                  "flex w-full min-w-0 items-start rounded border border-solid px-1 py-0.5 text-left transition hover:brightness-[0.98] focus:outline-none focus:ring-2 focus:ring-primary/35",
+                                  onDropOnDay && r._id
+                                    ? "cursor-grab active:cursor-grabbing"
+                                    : "cursor-pointer",
+                                ].join(" ")}
+                              >
+                                <span className="min-w-0 flex-1 pl-0.5">
+                                  <span className="block truncate text-[9px] font-semibold leading-tight text-zinc-800 sm:text-[10px]">
+                                    {eventTitle(r)}
+                                  </span>
+                                  <span className="mt-px block truncate text-[8px] leading-tight text-zinc-600 sm:text-[9px] tabular-nums">
+                                    {scheduleCellTimeAndCustomer(r, cell.at)}
+                                  </span>
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
         ) : (
-          (viewMode === "month" ? monthDays : viewMode === "week" ? weekDays : [anchorDate]).map((day) => {
+          monthDays.map((day) => {
           const inMonth = isSameMonth(day, visibleMonth);
           const isToday = isSameDay(day, today);
           const key = dayKey(day);
           const dayEvents = byDay.get(key) ?? [];
-          const dayEventsSorted = [...dayEvents].sort((a, b) => {
-            const ta = getNewDate(a)?.getTime() ?? 0;
-            const tb = getNewDate(b)?.getTime() ?? 0;
-            return ta - tb;
-          });
+          const dayEventsSorted = [...dayEvents].sort(
+            (a, b) => a.at.getTime() - b.at.getTime(),
+          );
           const showEvents = dayEventsSorted.slice(0, 3);
           const extra = dayEventsSorted.length - showEvents.length;
-          const isClickableCell = viewMode === "month" ? inMonth : true;
+          const isClickableCell = inMonth;
           const isDroppableCell = true;
 
           return (
@@ -500,18 +692,15 @@ function ScheduleMonthCalendar({
                 window.setTimeout(() => {
                   dragLockRef.current = false;
                 }, 0);
-                const id =
+                const raw =
                   e.dataTransfer.getData(DRAG_MIME) ||
                   e.dataTransfer.getData("text/plain");
-                if (!id) return;
-                const prevAt = events.find(
-                  (ev) => ev.reschedule._id === id,
-                )?.at;
-                if (!prevAt) return;
+                const parsed = parseScheduleDragPayload(raw, events);
+                if (!parsed) return;
                 onDropOnDay({
-                  rescheduleId: id,
+                  rescheduleId: parsed.id,
                   targetDate: day,
-                  previousAt: prevAt,
+                  previousAt: parsed.previousAt,
                   mode: viewMode,
                 });
               }}
@@ -549,14 +738,13 @@ function ScheduleMonthCalendar({
               </div>
               {dayEventsSorted.length > 0 && (
                 <div className="mt-1 flex min-h-0 flex-1 flex-col gap-0.5 overflow-hidden pointer-events-auto">
-                  {showEvents.map((r, i) => {
-                    const at = getNewDate(r);
-                    if (!at) return null;
-                    const cust = customerFirstName(r);
+                  {showEvents.map((cell, i) => {
+                    const r = cell.reschedule;
+                    if (!getScheduleStart(r)) return null;
                     const typeColor = calendarColorForEntityType(r);
                     return (
                       <button
-                        key={`${r._id ?? r.rescheduleCode ?? "ev"}-${key}-${i}`}
+                        key={`${r._id ?? r.rescheduleCode ?? "ev"}-${key}-${cell.at.getTime()}-${i}`}
                         type="button"
                         data-draggable-dot=""
                         draggable={Boolean(r._id && onDropOnDay)}
@@ -571,7 +759,8 @@ function ScheduleMonthCalendar({
                           if (!r._id || !onDropOnDay) return;
                           e.stopPropagation();
                           dragLockRef.current = true;
-                          e.dataTransfer.setData(DRAG_MIME, r._id);
+                          const payload = encodeScheduleDrag(r._id, cell.at);
+                          e.dataTransfer.setData(DRAG_MIME, payload);
                           e.dataTransfer.setData("text/plain", r._id);
                           e.dataTransfer.effectAllowed = "move";
                         }}
@@ -595,8 +784,7 @@ function ScheduleMonthCalendar({
                             {eventTitle(r)}
                           </span>
                           <span className="mt-px block truncate text-[8px] leading-tight text-zinc-600 sm:text-[9px]">
-                            {format(at, "HH:mm")}
-                            {cust ? ` · ${cust}` : ""}
+                            {scheduleCellTimeAndCustomer(r, cell.at)}
                           </span>
                         </span>
                       </button>
@@ -636,11 +824,14 @@ export default function ReschedulesScheduler() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selected, setSelected] = useState<IReschedule | null>(null);
 
-  const [optimisticNewDateById, setOptimisticNewDateById] = useState<
-    Record<string, string>
+  type OptimisticScheduleDates = {
+    newDateTime: string;
+    from: string;
+    to: string;
+  };
+  const [optimisticScheduleById, setOptimisticScheduleById] = useState<
+    Record<string, OptimisticScheduleDates>
   >({});
-
-  const pageSize = 1000;
 
   const effectiveRange = useMemo(() => {
     const monthStart = startOfMonth(visibleMonth);
@@ -658,14 +849,13 @@ export default function ReschedulesScheduler() {
   useEffect(() => {
     fetchQuery({
       pageIndex: 1,
-      pageSize,
       search: searchQuery ?? undefined,
       filters: {
         startDate: startDateIso,
         endDate: endDateIso,
       },
     });
-  }, [fetchQuery, pageSize, searchQuery, startDateIso, endDateIso]);
+  }, [fetchQuery, searchQuery, startDateIso, endDateIso]);
 
   const all = (fetchState.data?.contents ?? []) as IReschedule[];
 
@@ -673,13 +863,15 @@ export default function ReschedulesScheduler() {
     return all.map((r) => {
       const id = r._id;
       if (!id) return r;
-      const o = optimisticNewDateById[id];
-      return o ? { ...r, newDateTime: o } : r;
+      const o = optimisticScheduleById[id];
+      return o
+        ? { ...r, newDateTime: o.newDateTime, from: o.from, to: o.to }
+        : r;
     });
-  }, [all, optimisticNewDateById]);
+  }, [all, optimisticScheduleById]);
 
   useEffect(() => {
-    setOptimisticNewDateById((prev) => {
+    setOptimisticScheduleById((prev) => {
       const ids = Object.keys(prev);
       if (!ids.length) return prev;
       let changed = false;
@@ -690,7 +882,12 @@ export default function ReschedulesScheduler() {
         if (
           row?.newDateTime &&
           want &&
-          new Date(row.newDateTime).getTime() === new Date(want).getTime()
+          new Date(row.newDateTime).getTime() ===
+            new Date(want.newDateTime).getTime() &&
+          (!row.from ||
+            new Date(row.from).getTime() === new Date(want.from).getTime()) &&
+          (!row.to ||
+            new Date(row.to).getTime() === new Date(want.to).getTime())
         ) {
           delete next[id];
           changed = true;
@@ -702,10 +899,18 @@ export default function ReschedulesScheduler() {
 
   const eventsInRange = useMemo(() => {
     return allWithOptimisticDates
-      .map((r) => ({ r, d: getNewDate(r) }))
-      .filter((x): x is { r: IReschedule; d: Date } => !!x.d)
-      .filter(({ d }) => inRange(d, effectiveRange))
-      .sort((a, b) => a.d.getTime() - b.d.getTime());
+      .filter((r) => {
+        const int = getScheduleInterval(r);
+        if (!int) return false;
+        return !(
+          int.end < effectiveRange.start || int.start > effectiveRange.end
+        );
+      })
+      .sort(
+        (a, b) =>
+          (getScheduleStart(a)?.getTime() ?? 0) -
+          (getScheduleStart(b)?.getTime() ?? 0),
+      );
   }, [allWithOptimisticDates, effectiveRange.start, effectiveRange.end]);
 
   const openDetails = (r: IReschedule) => {
@@ -713,10 +918,20 @@ export default function ReschedulesScheduler() {
     setDrawerOpen(true);
   };
 
-  const calendarEvents = useMemo(
-    () => eventsInRange.map(({ r, d }) => ({ reschedule: r, at: d })),
-    [eventsInRange],
-  );
+  const calendarEvents = useMemo(() => {
+    const out: ScheduleCalendarCell[] = [];
+    for (const r of eventsInRange) {
+      out.push(...expandRescheduleToCalendarCells(r));
+    }
+    out.sort((a, b) => {
+      const t = a.at.getTime() - b.at.getTime();
+      if (t !== 0) return t;
+      return (a.reschedule._id ?? "").localeCompare(
+        b.reschedule._id ?? "",
+      );
+    });
+    return out;
+  }, [eventsInRange]);
 
   const handleCalendarDayClick = useCallback(
     (day: Date) => {
@@ -726,6 +941,8 @@ export default function ReschedulesScheduler() {
           initialData: {
             newDateTime: iso,
             originalDateTime: iso,
+            from: iso,
+            to: iso,
           } as IReschedule,
         },
       });
@@ -745,28 +962,57 @@ export default function ReschedulesScheduler() {
       previousAt: Date;
       mode: "month" | "week" | "day";
     }) => {
-      const newIso =
-        mode === "day"
-          ? set(targetDate, {
-              hours: targetDate.getHours(),
-              minutes: previousAt.getMinutes(),
-              seconds: previousAt.getSeconds(),
-              milliseconds: previousAt.getMilliseconds(),
-            }).toISOString()
-          : mergeTargetDayPreserveTime(previousAt, targetDate);
+      const row = allWithOptimisticDates.find((r) => r._id === rescheduleId);
+      if (!row?._id) return;
+
+      const prevFrom = getScheduleStart(row);
+      if (!prevFrom) return;
+      const prevTo = getScheduleEnd(row) ?? prevFrom;
+      const prevNew = parseRescheduleDate(row.newDateTime) ?? prevFrom;
+
+      let newFromIso: string;
+      let newToIso: string;
+      let newNewIso: string;
+
+      if (mode === "day") {
+        const newAnchor = set(targetDate, {
+          hours: targetDate.getHours(),
+          minutes: previousAt.getMinutes(),
+          seconds: previousAt.getSeconds(),
+          milliseconds: previousAt.getMilliseconds(),
+        });
+        const deltaMs = newAnchor.getTime() - previousAt.getTime();
+        newFromIso = new Date(prevFrom.getTime() + deltaMs).toISOString();
+        newToIso = new Date(prevTo.getTime() + deltaMs).toISOString();
+        newNewIso = new Date(prevNew.getTime() + deltaMs).toISOString();
+      } else {
+        const dayDelta = differenceInCalendarDays(
+          startOfDay(targetDate),
+          startOfDay(previousAt),
+        );
+        newFromIso = addDays(prevFrom, dayDelta).toISOString();
+        newToIso = addDays(prevTo, dayDelta).toISOString();
+        newNewIso = addDays(prevNew, dayDelta).toISOString();
+      }
 
       if (mode !== "day" && dayKey(previousAt) === dayKey(targetDate)) return;
 
-      setOptimisticNewDateById((prev) => ({
+      const optimistic: OptimisticScheduleDates = {
+        newDateTime: newNewIso,
+        from: newFromIso,
+        to: newToIso,
+      };
+      setOptimisticScheduleById((prev) => ({
         ...prev,
-        [rescheduleId]: newIso,
+        [rescheduleId]: optimistic,
       }));
 
       try {
         await updateReschedule({
           _id: rescheduleId,
-          newDateTime: newIso,
-          to: newIso,
+          newDateTime: newNewIso,
+          from: newFromIso,
+          to: newToIso,
         }).unwrap();
         showToast({
           title: "Success",
@@ -774,7 +1020,7 @@ export default function ReschedulesScheduler() {
           type: "success",
         });
       } catch {
-        setOptimisticNewDateById((prev) => {
+        setOptimisticScheduleById((prev) => {
           const next = { ...prev };
           delete next[rescheduleId];
           return next;
@@ -786,7 +1032,7 @@ export default function ReschedulesScheduler() {
         });
       }
     },
-    [updateReschedule],
+    [updateReschedule, allWithOptimisticDates],
   );
 
   return (

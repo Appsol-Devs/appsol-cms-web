@@ -2,7 +2,7 @@ import ActionButton from "@/components/ActionButtons";
 import FeatureContentRenderer from "@/components/table/component/FeatureContentRenderer";
 import { allRoutes } from "@/utils/routes";
 import type { ColumnDef } from "@tanstack/react-table";
-import { NotepadText, File, Pen, Palette } from "lucide-react";
+import { NotepadText, File, Palette } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLazyGetOutReachTypesQuery } from "../common/OutReachApi";
@@ -81,27 +81,8 @@ const OutReach = () => {
           </div>
         ),
       },
-      {
-        header: "Action",
-        meta: { icon: <Pen size={14} /> },
-        accessorKey: "action",
-        cell: ({ row }) => (
-          <div className="flex items-center space-x-2">
-            <ActionButton
-              type="view"
-              onClick={() =>
-                navigate(allRoutes.PORTAL + allRoutes.VIEW_OUTREACH_TYPE(row.original._id as string), {
-                  state: { initialData: row.original },
-                })
-              }
-            />
-          </div>
-        ),
-      },
-
-
     ],
-    [executed]
+    []
   );
 
   return (
@@ -115,6 +96,13 @@ const OutReach = () => {
           />
         )}
         columns={columns}
+        pathOnRowSelected={(row) => {
+          const item = row as IOutReachType;
+          if (!item._id) return;
+          navigate(allRoutes.PORTAL + allRoutes.VIEW_OUTREACH_TYPE(item._id), {
+            state: { initialData: item },
+          });
+        }}
         // filters={["company", "location", "role", "gender"]}
         refetchData={executed}
         title="Outreach Types"

@@ -62,3 +62,32 @@ export type IRescheduleFormFields = Omit<
   status?: DropDownOption<RescheduleStatus>;
 };
 
+export function parseRescheduleDate(iso?: string | null): Date | null {
+  if (iso == null || String(iso).trim() === "") return null;
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+export function getScheduleStart(res: IReschedule): Date | null {
+  return parseRescheduleDate(res.from) ?? parseRescheduleDate(res.newDateTime);
+}
+
+export function getScheduleEnd(res: IReschedule): Date | null {
+  return (
+    parseRescheduleDate(res.to) ??
+    parseRescheduleDate(res.newDateTime) ??
+    parseRescheduleDate(res.from)
+  );
+}
+
+export function getScheduleInterval(
+  res: IReschedule,
+): { start: Date; end: Date } | null {
+  const a = getScheduleStart(res);
+  if (!a) return null;
+  const b = getScheduleEnd(res) ?? a;
+  const start = a.getTime() <= b.getTime() ? a : b;
+  const end = a.getTime() <= b.getTime() ? b : a;
+  return { start, end };
+}
+

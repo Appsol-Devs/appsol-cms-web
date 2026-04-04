@@ -153,7 +153,7 @@ const FeatureRequestFormContent = ({ isLoading, form, isUpdate }: IField) => {
             name="requestedDate"
             rules={{ required: !isUpdate ? "Requested Date is required" : false }}
             render={({ field }) => (
-              <div className="space-y-1 w-full" key={field.value ?? "empty"}>
+              <div className="space-y-1 w-full">
                 <p className="text-xs text-onCard font-medium">
                   Requested Date {!isUpdate && <span className="text-destructive ml-0.5">*</span>}
                 </p>
