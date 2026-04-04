@@ -11,10 +11,10 @@ import { useGenerateDropdownOptionsFromEnum } from "@/lib/helpers";
 import type { IFilterArray, IFilters } from "@/lib/pagination";
 import type { ICustomer } from "@/pages/customer/common/customers";
 import { useLazyGetCustomersQuery } from "@/pages/customer/common/customersApi";
-import { PAYMENT_STATUS_ENUM, REQUEST_FEATURE_PRIORITY_ENUM, REQUEST_FEATURE_STATUS_ENUM } from "@/lib/enums";
+import { CUSTOMER_SETUP_STATUS_ENUM, PAYMENT_STATUS_ENUM, REQUEST_FEATURE_PRIORITY_ENUM, REQUEST_FEATURE_STATUS_ENUM } from "@/lib/enums";
 import type { TSubscriptionReminderType } from "@/pages/subscription-reminders/common/subscription-reminder";
 import { dueDateRangeForReminderType, SUBSCRIPTION_REMINDER_TYPE_LABELS } from "@/pages/subscription-reminders/common/subscription-reminder";
-import { useLazyGetLeadStatusesQuery, useLazyGetSoftwaresQuery } from "@/pages/settings/common/settingsApi";
+import { useLazyGetLeadStatusesQuery, useLazyGetSetupStatusesQuery, useLazyGetSoftwaresQuery } from "@/pages/settings/common/settingsApi";
 import CustomInputField from "@/components/CustomInputField";
 import { useLazyGetUsersQuery } from "@/pages/users/common/usersApi";
 
@@ -40,7 +40,9 @@ type IFilterFields = Omit<
   | "assignedTo"
   | "featurePriority"
   | "reminderType"
+  | "setUpStatusId"
   | "isSent"
+  | "CustomerSetupStatus"
 > & {
   customerId?: DropDownOption<ICustomer>;
   status?: DropDownOption<string>;
@@ -54,6 +56,9 @@ type IFilterFields = Omit<
   featurePriority?: DropDownOption<string>;
   reminderType?: DropDownOption<string>;
   isSent?: DropDownOption<string>;
+  setUpStatusId?: DropDownOption<string>;
+  CustomerSetupStatus?: DropDownOption<string>;
+
 };
 
 const FiltersTemplate = ({
@@ -70,7 +75,7 @@ const FiltersTemplate = ({
   const [getLeadStatuses] = useLazyGetLeadStatusesQuery();
   const [getSoftwares] = useLazyGetSoftwaresQuery();
   const [getUsers] = useLazyGetUsersQuery();
-
+  const [getSetupStatus] = useLazyGetSetupStatusesQuery();
   const { getValues, control, reset, watch, register } = useForm<IFilterFields>();
 
   const queryParams = { paginate: false, filters: initialQueryFilters };
@@ -90,12 +95,16 @@ const FiltersTemplate = ({
     DropDownOption<string>[]
   >([]);
 
+  const [setUpStatusOptions, setSetUpStatusOptions] = useState<
+    DropDownOption<string>[]
+  >([]);
+
   //   --------------------------------------------------------
 
   //   Dropdown options from enums
   const statusOptions =
     useGenerateDropdownOptionsFromEnum(PAYMENT_STATUS_ENUM);
-   const targetEntityTypeOptions: DropDownOption<string>[] = [
+  const targetEntityTypeOptions: DropDownOption<string>[] = [
     { label: "CustomerSetup", value: "CustomerSetup" },
     { label: "Generic", value: "Generic" },
     { label: "Ticket", value: "Ticket" },
@@ -108,6 +117,8 @@ const FiltersTemplate = ({
   // -------------------------------------------------------
   const featurePriorityOptions =
     useGenerateDropdownOptionsFromEnum(REQUEST_FEATURE_PRIORITY_ENUM);
+
+  const customerSetUpStatusOptions = useGenerateDropdownOptionsFromEnum(CUSTOMER_SETUP_STATUS_ENUM);
 
   const reminderTypeOptions: DropDownOption<string>[] = (
     Object.entries(SUBSCRIPTION_REMINDER_TYPE_LABELS) as [
@@ -219,6 +230,26 @@ const FiltersTemplate = ({
           }
         });
     }
+    if (checkIfHasString("setUpStatusId")) {
+      getSetupStatus(queryParams)
+        .unwrap()
+        .then((res) => {
+          if (res) {
+            setSetUpStatusOptions(() =>
+              res.contents.map((data) => {
+                const payload: DropDownOption<string> = {
+                  label: data.name,
+                  value: data?._id as string,
+                };
+                return payload;
+              }),
+            );
+          }
+        });
+    }
+
+
+
 
   }, [toggleFilter]);
 
@@ -231,7 +262,7 @@ const FiltersTemplate = ({
           startDate: dueRange?.startDate ?? selectedFilters?.startDate,
           endDate: dueRange?.endDate ?? selectedFilters?.endDate,
           customerId: values.customerId?.value?._id,
-          status: values.status?.value || values.featureStatus?.value,
+          status: values.status?.value || values.featureStatus?.value || values.CustomerSetupStatus?.value,
           priority: values.featurePriority?.value,
           softwareId: values.softwareId?.value,
           assignedTo: values.assignedTo?.value,
@@ -241,6 +272,8 @@ const FiltersTemplate = ({
           // Filter using dueDate range (relative to today), not the raw enum.
           reminderType: dueRange ? undefined : reminderTypeVal,
           isSent: values.isSent?.value,
+          setUpStatusId: values.setUpStatusId?.value,
+
         };
         returnOnFilterChange(payload);
       });
@@ -254,7 +287,8 @@ const FiltersTemplate = ({
     const softwareIdVal = typeof data.softwareId === "string" ? data.softwareId : data.softwareId?.value;
     const assignedToVal = typeof data.assignedTo === "string" ? data.assignedTo : data.assignedTo?.value;
     const featureStatusVal = typeof data.featureStatus === "string" ? data.featureStatus : data.featureStatus?.value;
-    
+    const customerSetupStatusVal = typeof data.CustomerSetupStatus === "string" ? data.CustomerSetupStatus : data.CustomerSetupStatus?.value;
+    const setupStatusIdVal = typeof data.setUpStatusId === "string" ? data.setUpStatusId : data.setUpStatusId?.value;
     const reminderTypeVal =
       typeof data.reminderType === "string"
         ? data.reminderType
@@ -267,7 +301,7 @@ const FiltersTemplate = ({
       startDate: dueRange?.startDate ?? selectedFilters?.startDate,
       endDate: dueRange?.endDate ?? selectedFilters?.endDate,
       customerId: data.customerId?.value?._id,
-      status: data.status?.value || featureStatusVal,
+      status: data.status?.value || featureStatusVal || customerSetupStatusVal,
       priority: typeof data.featurePriority === "string" ? data.featurePriority as unknown as string : data.featurePriority?.value,
       softwareId: softwareIdVal,
       assignedTo: assignedToVal,
@@ -277,6 +311,7 @@ const FiltersTemplate = ({
       // Filter using dueDate range (relative to today), not the raw enum.
       reminderType: dueRange ? undefined : reminderTypeVal,
       isSent: isSentVal,
+      setupStatusId: setupStatusIdVal,
     };
     console.log("payload", payload);
     if (payload) {
@@ -400,6 +435,7 @@ const FiltersTemplate = ({
                   label="Select feature status"
                 />
               )}
+
               {checkIfHasString("featurePriority") && (
                 <DropDownComponent
                   title="Feature Priority"
@@ -446,6 +482,24 @@ const FiltersTemplate = ({
                   options={isSentOptions}
                   name="isSent"
                   label="Sent or not sent"
+                />
+              )}
+              {checkIfHasString("CustomerSetupStatus") && (
+                <DropDownComponent
+                  title="Customer Setup Status"
+                  control={control}
+                  options={customerSetUpStatusOptions}
+                  name="CustomerSetupStatus"
+                  label="Select customer setup status"
+                />
+              )}
+              {checkIfHasString("setUpStatusId") && (
+                <DropDownComponent
+                  title="Setup Status"
+                  control={control}
+                  options={setUpStatusOptions}
+                  name="setUpStatusId"
+                  label="Select setup status"
                 />
               )}
 

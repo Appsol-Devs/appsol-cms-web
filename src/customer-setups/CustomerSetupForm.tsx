@@ -1,0 +1,287 @@
+import type { DropDownOption } from "@/components/DropdownComponent";
+import { useNavigate, useParams } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
+import { showToast } from "@/components/ui/CustomToast";
+import { cleanPayload, formatDate } from "@/lib/helpers";
+import type { ISummarySection } from "@/components/form/MutationFormSummary";
+import { BookOpenText } from "lucide-react";
+import MutationFormTemplate from "@/components/form/MutationFormTemplate";
+
+import { allRoutes } from "@/utils/routes";
+
+import { useLazyGetSetupStatusesQuery, useLazyGetSoftwaresQuery } from "@/pages/settings/common/settingsApi";
+import { lookup_params } from "@/lib/api";
+import type { ISetupStatus, ISoftware } from "@/pages/settings/common/settings";
+import CustomerSetupFormContent from "./CustomerSetupFormContent";
+import type { ICustomerSetup } from "./customerSetup";
+import { useAddCustomerSetupMutation, useUpdateCustomerSetupMutation, useLazyGetACustomerSetupQuery } from "./customerSetupApi";
+
+export type ICustomerSetupFields = Omit<
+  ICustomerSetup,
+  "_id" | "assignedTo" | "scheduledStart" | "scheduledEnd" | "actualCompletionDate" | "customerId" | "softwareId"
+> & {
+  title: string;
+  customerId: DropDownOption<string> | string;
+  softwareId: DropDownOption<string> | string;
+  description: string;
+  notes: string;
+  priority: string;
+  status: string;
+  setupStatus: DropDownOption<string> | string;
+  scheduledStart: string;
+  scheduledEnd: string;
+  actualCompletionDate?: string;
+  assignedTo: DropDownOption<string>[];
+  setupStatusId: DropDownOption<string> | string;
+};
+
+const CustomerSetupForm = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  const [createCustomerSetup, { isLoading: isCreating }] = useAddCustomerSetupMutation();
+  const [updateCustomerSetup, { isLoading: isUpdating }] = useUpdateCustomerSetupMutation();
+  const [getACustomerSetup, { isLoading: isGetting }] = useLazyGetACustomerSetupQuery();
+
+  const [getSoftwares] = useLazyGetSoftwaresQuery();
+  const [softwareList, setSoftwareList] = useState<ISoftware[]>([]);
+  const [getSetupStatuses] = useLazyGetSetupStatusesQuery();
+  const [setupStatusList, setSetupStatusList] = useState<ISetupStatus[]>([]);
+
+  const form = useForm<ICustomerSetupFields>({});
+
+  const { watch, getValues, reset } = form;
+  const values = watch();
+
+  useEffect(() => {
+    getSoftwares(lookup_params)
+      .unwrap()
+      .then((res: { contents?: ISoftware[] }) => {
+        if (res?.contents) {
+          setSoftwareList(res.contents);
+        }
+      })
+      .catch((err) => console.error(err));
+    getSetupStatuses(lookup_params)
+      .unwrap()
+      .then((res: { contents?: ISetupStatus[] }) => {
+        if (res?.contents) {
+          setSetupStatusList(res.contents);
+        }
+      })
+      .catch((err) => console.error(err));
+  }, [getSoftwares, getSetupStatuses]);
+
+  const fetchAndResetData = async (setupId: string) => {
+    try {
+      const data = await getACustomerSetup(setupId).unwrap();
+
+      if (data) {
+        reset({
+          ...data,
+          customerId: data.customerId
+            ? {
+              value: data.customerId,
+              label: typeof data.customer === "string" ? data.customer : data.customer?.name ?? "",
+            }
+            : undefined,
+          softwareId: data.softwareId
+            ? {
+              value: data.softwareId,
+              label: typeof data.software === "string" ? data.software : data.software?.name ?? "",
+            }
+            : undefined,
+          title: data.title || "",
+          description: data.description || "",
+          notes: data.notes || "",
+          priority: data.priority || "",
+          setupStatus: data.setupStatusId || (typeof data.setupStatus !== "string" ? data.setupStatus?._id : undefined)
+            ? {
+              value: data.setupStatusId || (typeof data.setupStatus !== "string" ? data.setupStatus?._id : undefined),
+              label: typeof data.setupStatus === "string" ? data.setupStatus : data.setupStatus?.name ?? "",
+            }
+            : undefined,
+          status: (data.status || "scheduled"),
+          scheduledStart: data.scheduledStart || "",
+          scheduledEnd: data.scheduledEnd || "",
+          actualCompletionDate: data.actualCompletionDate || "",
+          assignedTo:
+            data.assignedTo?.map((user: any) => ({
+              label: typeof user === "string" ? user : `${user.firstName} ${user.lastName}`,
+              value: typeof user === "string" ? user : user._id,
+            })) || [],
+        });
+      }
+    } catch (err) {
+      console.error("Error fetching customer setup:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (id) {
+      fetchAndResetData(id);
+    }
+  }, [id]);
+
+  const handleDataSubmission = async (payload: Partial<ICustomerSetup>) => {
+    try {
+      const res = id
+        ? await updateCustomerSetup({ ...payload, _id: id }).unwrap()
+        : await createCustomerSetup(payload as ICustomerSetup).unwrap();
+
+      if (res) {
+        showToast({
+          title: "Success",
+          message: id
+            ? "Customer Setup updated successfully."
+            : "Customer Setup created successfully.",
+          type: "success",
+        });
+        navigate(allRoutes.PORTAL + "/customer-setups");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const extractValue = (field: any) => (typeof field === "string" ? field : field?.value);
+  const getCustomerLabel = (field: any) => (typeof field === "string" ? field : field?.label);
+
+  const getSoftwareLabel = (val: any) => {
+    if (!val) return "";
+    if (typeof val !== "string") return val.label;
+    const found = softwareList.find((s) => s._id === val);
+    return found ? found.name : val;
+  };
+  const getSetupStatusLabel = (val: any) => {
+    if (!val) return "";
+    if (typeof val !== "string") return val.label;
+    const found = setupStatusList.find((s) => s._id === val);
+    return found ? found.name : val;
+  };
+
+  const submitData = () => {
+    const data = getValues();
+    const selectedStatusId = extractValue(data.setupStatus);
+    const foundStatus = setupStatusList.find((s) => s._id === selectedStatusId);
+
+    const requiredFields = id ? [
+      { field: data.title, message: "Title is required." },
+      { field: data.priority, message: "Priority is required." },
+      { field: data.status, message: "Setup Status is required." },
+    ] : [
+      { field: data.setupStatus, message: "Setup status is required." },
+      { field: data.title, message: "Title is required." },
+      { field: extractValue(data.customerId), message: "Customer is required." },
+      { field: extractValue(data.softwareId), message: "Software is required." },
+      { field: data.priority, message: "Priority is required." },
+      { field: data.status, message: "Customer Setup Status is required." },
+      { field: data.scheduledStart, message: "Scheduled start date is required." },
+      { field: data.scheduledEnd, message: "Scheduled end date is required." },
+      { field: data.description, message: "Description is required." },
+    ];
+
+    for (const { field, message } of requiredFields) {
+      if (!field || (Array.isArray(field) && field.length === 0)) {
+        showToast({ title: "Info", message, type: "info", duration: 1000 });
+        return;
+      }
+    }
+
+    const basePayload = {
+      title: data.title,
+      description: data.description,
+      notes: data.notes,
+      priority: data.priority,
+      status: data.status,
+      scheduledStart: data.scheduledStart,
+      scheduledEnd: data.scheduledEnd,
+      actualCompletionDate: data.actualCompletionDate,
+      assignedTo: data.assignedTo?.map((user: any) => extractValue(user)) || [],
+      setupStatusId: selectedStatusId,
+      setupStatus: foundStatus?.name?.toLowerCase() || "",
+    };
+
+    const payload = cleanPayload(
+      id
+        ? basePayload
+        : {
+          ...basePayload,
+          customerId: extractValue(data.customerId),
+          softwareId: extractValue(data.softwareId),
+        }
+    ) as Partial<ICustomerSetup>;
+
+    handleDataSubmission(payload);
+  };
+
+  const summarySections: ISummarySection[] = [
+    {
+      title: "Setup Details",
+      icon: <BookOpenText className="w-4 h-4" />,
+      data: [
+        { label: "Title", value: values?.title, required: true },
+        { label: "Priority", value: values?.priority, required: true },
+        { label: "Customer Setup Status", value: values?.status, required: true },
+        { label: "Setup Status", value: getSetupStatusLabel(values?.setupStatus) as string, required: true },
+
+        {
+          label: "Customer",
+          value: getCustomerLabel(values?.customerId) as string,
+          required: !id
+        },
+        {
+          label: "Software",
+          value: getSoftwareLabel(values?.softwareId) as string,
+          required: !id
+        },
+        {
+          label: "Scheduled Start",
+          value: values?.scheduledStart ? formatDate(values?.scheduledStart) : "",
+          required: !id
+        },
+        {
+          label: "Scheduled End",
+          value: values?.scheduledEnd ? formatDate(values?.scheduledEnd) : "",
+          required: false
+        },
+        {
+          label: "Actual Completion",
+          value: values?.actualCompletionDate ? formatDate(values?.actualCompletionDate) : "",
+          required: false
+        },
+      ],
+    },
+  ];
+
+  const isLoading = isGetting || isCreating || isUpdating;
+
+  return (
+    <MutationFormTemplate<ICustomerSetupFields>
+      form={form}
+      pageSummary={{
+        title: id ? "Update Customer Setup" : "Create Customer Setup",
+        description: `Enter the details for the customer setup you want to ${id ? "update" : "create"}.`,
+        icon: BookOpenText,
+      }}
+      formContent={
+        <CustomerSetupFormContent
+          isUpdate={!!id}
+          form={form}
+          isLoading={isLoading}
+        />
+      }
+      submitData={submitData}
+      pageTitle={id ? `Update Customer Setup` : "Add Customer Setup"}
+      loading={isLoading}
+      mutationFormSummary={{
+        summaryData: summarySections,
+        summaryMainTitle: "Setup Details Summary",
+        summarySaveButtonText: id ? "Save Changes" : "Save Setup",
+      }}
+    />
+  );
+};
+
+export default CustomerSetupForm;

@@ -87,17 +87,17 @@ export function DatePicker({
   const rangeModifiers =
     rangeStart && rangeEnd
       ? {
-          in_range: {
-            from:
-              toDateOnly(rangeStart) <= toDateOnly(rangeEnd)
-                ? toDateOnly(rangeStart)
-                : toDateOnly(rangeEnd),
-            to:
-              toDateOnly(rangeStart) <= toDateOnly(rangeEnd)
-                ? toDateOnly(rangeEnd)
-                : toDateOnly(rangeStart),
-          },
-        }
+        in_range: {
+          from:
+            toDateOnly(rangeStart) <= toDateOnly(rangeEnd)
+              ? toDateOnly(rangeStart)
+              : toDateOnly(rangeEnd),
+          to:
+            toDateOnly(rangeStart) <= toDateOnly(rangeEnd)
+              ? toDateOnly(rangeEnd)
+              : toDateOnly(rangeStart),
+        },
+      }
       : undefined;
 
   const innerContent = (
@@ -128,10 +128,10 @@ export function DatePicker({
                       key={hour}
                       size="icon-sm"
                       className={cn(
-                        "shrink-0 border border-input !text-xs",
+                        "shrink-0 border border-input text-xs!",
                         isActive
-                          ? "!bg-primary text-primary-foreground"
-                          : "!bg-card text-card-foreground hover:bg-primary/60! hover:text-primary-foreground!",
+                          ? "bg-primary! text-primary-foreground"
+                          : "bg-card! text-card-foreground hover:bg-primary/60 hover:text-primary-foreground",
                       )}
                       onClick={() => handleTimeChange("hour", hour.toString())}
                     >
@@ -151,10 +151,10 @@ export function DatePicker({
                     key={minute}
                     size="icon-sm"
                     className={cn(
-                      "shrink-0 border border-input !text-xs",
+                      "shrink-0 border border-input text-xs!",
                       isActive
-                        ? "!bg-primary text-primary-foreground"
-                        : "!bg-card text-card-foreground hover:bg-primary/60! hover:text-primary-foreground!",
+                        ? "bg-primary! text-primary-foreground"
+                        : "bg-card! text-card-foreground hover:bg-primary/60 hover:text-primary-foreground",
                     )}
                     onClick={() =>
                       handleTimeChange("minute", minute.toString())
@@ -180,10 +180,10 @@ export function DatePicker({
                     key={ampm}
                     size="icon-sm"
                     className={cn(
-                      "shrink-0 border border-input !text-xs",
+                      "shrink-0 border border-input text-xs!",
                       isActive
-                        ? "!bg-primary text-primary-foreground"
-                        : "!bg-card text-card-foreground hover:bg-primary/60! hover:text-primary-foreground!",
+                        ? "bg-primary! text-primary-foreground"
+                        : "bg-card! text-card-foreground hover:bg-primary/60 hover:text-primary-foreground",
                     )}
                     onClick={() => handleTimeChange("ampm", ampm)}
                   >
@@ -199,10 +199,10 @@ export function DatePicker({
   );
 
   return (
-    <div>
+    <div className="w-full">
       {showInPopover && title ? (
-        <div className="text-xs flex items-center space-x-1">
-          <p className="mr-1">{title}</p>
+        <div className="text-xs flex items-center space-x-1 mb-1">
+          <p className="mr-1 text-onCard">{title}</p>
           {required ? <span className="text-destructive">*</span> : ""}
         </div>
       ) : null}
@@ -218,26 +218,39 @@ export function DatePicker({
               {dateOnly ? format(date, "do MMM y") : formatDateTime(date)}
             </span>
           ) : null}
-        </div>
+          <div className="font-bold text-sm bg-gray-300 flex items-center mb-1">
+            <CalendarIcon className="mr-2 h-4 w-4" />
+            <div className="text-xs flex items-center space-x-1">
+              <p className="mr-1 text-onCard">{title}</p>
+              {required ? <span className="text-destructive">*</span> : ""}
+            </div>
+            {date && (dateOnly ? format(date, "do MMM y") : formatDateTime(date))}
+          </div>
+        </div> 
       ) : null}
-      <div>
+      <div className="w-full">
         {showInPopover ? (
           <Popover>
             <PopoverTrigger asChild>
               <div
-                // variant="outline"
-                className="w-full flex text-xs border-2 justify-start text-left p-1 rounded-sm bg-accent font-normal "
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {date ? (
-                  dateOnly ? (
-                    format(date, "do MMM y")
-                  ) : (
-                    formatDateTime(date)
-                  )
-                ) : (
-                  <span className="text-muted-foreground">{placeholder}</span>
+                className={cn(
+                  "w-full flex items-center h-9 px-3 text-xs border border-input rounded-md bg-surface font-normal cursor-pointer transition-colors ",
+                  disabled && "opacity-50 cursor-not-allowed",
+                  !date && "text-muted-foreground"
                 )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+                <span className="truncate">
+                  {date ? (
+                    dateOnly ? (
+                      format(date, "do MMM y")
+                    ) : (
+                      formatDateTime(date)
+                    )
+                  ) : (
+                    placeholder
+                  )}
+                </span>
               </div>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0">
@@ -249,61 +262,6 @@ export function DatePicker({
             {innerContent}
           </div>
         )}
-
-        {/* {dateOnly ? null : (
-          <div className="flex flex-col sm:flex-row sm:h-max divide-y sm:divide-y-0 sm:divide-x">
-            <div>
-              <Label htmlFor="hour">Hr</Label>
-              <Input
-                id="hour"
-                type={"number"}
-                key={"hour"}
-                className="w-20"
-                // value={hour}
-                onChange={(e: any) =>
-                  handleTimeChange("hour", e.traget.value.toString())
-                }
-              />
-            </div>
-            <div>
-              <Label htmlFor="minutes">Min</Label>
-              <Input
-                id="minutes"
-                type={"number"}
-                className="w-20"
-                key={"minutes"}
-                // value={hour}
-                onChange={(e: any) =>
-                  handleTimeChange("minute", e.traget.value.toString())
-                }
-              />
-            </div>
-            <ScrollArea>
-              <div className="flex sm:flex-col p-2 gap-0.5">
-                {["AM", "PM"].map((ampm) => {
-                  const isActive =
-                    date &&
-                    ((ampm === "AM" && date.getHours() < 12) ||
-                      (ampm === "PM" && date.getHours() >= 12));
-
-                  return (
-                    <Button
-                      key={ampm}
-                      size="icon"
-                      className={cn(
-                        "sm:w-full shrink-0 aspect-square",
-                        !isActive && "bg-rx-neutral text-rx-neutral-foreground"
-                      )}
-                      onClick={() => handleTimeChange("ampm", ampm)}
-                    >
-                      {ampm}
-                    </Button>
-                  );
-                })}
-              </div>
-            </ScrollArea>
-          </div>
-        )} */}
       </div>
     </div>
   );

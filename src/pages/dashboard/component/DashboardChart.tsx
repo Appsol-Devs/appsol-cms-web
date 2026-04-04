@@ -58,10 +58,15 @@ const CHART_OPTIONS = {
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
+    font: {
+      family: "quicksand",
+      size: 12,
+    },
     legend: {
       display: true,
       position: "top" as const,
       align: "start" as const,
+
       labels: {
         usePointStyle: true,
         pointStyle: "rect" as const,
@@ -167,6 +172,7 @@ function buildLineDataset(data: number[]) {
     data,
     fill: CHART_DATASET.fill,
     borderColor: CHART_DATASET.borderColor,
+
     backgroundColor: (ctx: {
       chart: {
         ctx: CanvasRenderingContext2D;
@@ -185,6 +191,7 @@ function buildLineDataset(data: number[]) {
     pointBackgroundColor: CHART_DATASET.pointBackgroundColor,
     pointBorderColor: CHART_DATASET.pointBorderColor,
     pointBorderWidth: CHART_DATASET.pointBorderWidth,
+
   };
 }
 
