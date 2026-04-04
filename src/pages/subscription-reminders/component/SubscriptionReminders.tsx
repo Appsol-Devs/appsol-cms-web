@@ -22,6 +22,7 @@ import {
   type ISubscriptionReminder,
   formatReminderTypeLabel,
   getDueDateUrgency,
+  reminderTypeFromDueDate,
 } from "../common/subscription-reminder";
 import { useLazyGetSubscriptionRemindersQuery } from "../common/subscriptionRemindersApi";
 import SubscriptionReminderDetailsDrawer from "./SubscriptionReminderDetailsDrawer";
@@ -30,6 +31,14 @@ const SubscriptionReminders = () => {
   const [fetchQuery, fetchState] = useLazyGetSubscriptionRemindersQuery();
   const [selected, setSelected] = useState<ISubscriptionReminder | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const remindersWithDerivedType = useMemo(() => {
+    const rows = (fetchState.data?.contents ?? []) as ISubscriptionReminder[];
+    return rows.map((r) => ({
+      ...r,
+      reminderType: reminderTypeFromDueDate(r.dueDate) ?? r.reminderType,
+    }));
+  }, [fetchState.data]);
 
   const columns = useMemo<ColumnDef<ISubscriptionReminder>[]>(
     () => [
@@ -127,7 +136,7 @@ const SubscriptionReminders = () => {
         accessorKey: "reminderType",
         meta: { icon: <Bell size={14} /> },
         cell: ({ row }) => {
-          const t = row.original.reminderType;
+          const t = reminderTypeFromDueDate(row.original.dueDate) ?? row.original.reminderType;
           const pillStyle = getReminderTypeBadgeStyle(t);
           return (
             <Badge
@@ -192,6 +201,7 @@ const SubscriptionReminders = () => {
         columns={columns}
         title="Subscription reminders"
         lazyFetchQuery={[fetchQuery, fetchState]}
+        data={remindersWithDerivedType}
       />
       <SubscriptionReminderDetailsDrawer
         reminder={selected}

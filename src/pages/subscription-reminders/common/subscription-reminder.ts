@@ -74,6 +74,24 @@ function startOfDayMs(d: Date): number {
   return x.getTime();
 }
 
+function startOfDayDate(d: Date): Date {
+  const x = new Date(d);
+  x.setHours(0, 0, 0, 0);
+  return x;
+}
+
+function endOfDayDate(d: Date): Date {
+  const x = new Date(d);
+  x.setHours(23, 59, 59, 999);
+  return x;
+}
+
+function addDaysDate(d: Date, days: number): Date {
+  const x = new Date(d);
+  x.setDate(x.getDate() + days);
+  return x;
+}
+
 export function reminderTypeFromDueDate(
   dueDateStr?: string,
   now: Date = new Date(),
@@ -92,4 +110,43 @@ export function reminderTypeFromDueDate(
   if (diffDays <= 14) return "14_days";
   if (diffDays <= 30) return "30_days";
   return null;
+}
+
+export function dueDateRangeForReminderType(
+  type?: TSubscriptionReminderType | string,
+  now: Date = new Date(),
+): { startDate?: string; endDate?: string } | null {
+  if (!type) return null;
+
+  const todayStart = startOfDayDate(now);
+  const todayEnd = endOfDayDate(now);
+
+  switch (type as TSubscriptionReminderType) {
+    case "overdue": {
+      const end = endOfDayDate(addDaysDate(todayStart, -1));
+      return { endDate: end.toISOString() };
+    }
+    case "due_today":
+      return {
+        startDate: todayStart.toISOString(),
+        endDate: todayEnd.toISOString(),
+      };
+    case "7_days": {
+      const start = startOfDayDate(addDaysDate(todayStart, 1));
+      const end = endOfDayDate(addDaysDate(todayStart, 7));
+      return { startDate: start.toISOString(), endDate: end.toISOString() };
+    }
+    case "14_days": {
+      const start = startOfDayDate(addDaysDate(todayStart, 1));
+      const end = endOfDayDate(addDaysDate(todayStart, 14));
+      return { startDate: start.toISOString(), endDate: end.toISOString() };
+    }
+    case "30_days": {
+      const start = startOfDayDate(addDaysDate(todayStart, 1));
+      const end = endOfDayDate(addDaysDate(todayStart, 30));
+      return { startDate: start.toISOString(), endDate: end.toISOString() };
+    }
+    default:
+      return null;
+  }
 }
