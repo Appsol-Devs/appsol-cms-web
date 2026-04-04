@@ -4,7 +4,8 @@ import {
   CircleDot,
   User,
   Hash,
-  Tag
+  Tag,
+  Calendar
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import ActionButton from "@/components/ActionButtons";
@@ -14,11 +15,12 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { allRoutes } from "@/utils/routes";
 import { getLookupBadgeStyle } from "@/lib/enums";
-import { getPriorityColor, getStatusColor, type IFeatureRequest } from "../common/feature-request";
-import { useLazyGetFeatureRequestsQuery } from "../common/featureRequestApi";
+import { useLazyGetCustomerSetupsQuery } from "./customerSetupApi";
+import type { ICustomerSetup } from "./customerSetup";
+import { getPriorityColor } from "@/pages/feature-request-module/common/feature-request";
 
-const FeatureRequest = () => {
-  const [fetchQuery, fetchState] = useLazyGetFeatureRequestsQuery();
+const CustomerSetups = () => {
+  const [fetchQuery, fetchState] = useLazyGetCustomerSetupsQuery();
   const [executed, setExecuted] = useState(false);
   const navigate = useNavigate();
 
@@ -28,7 +30,7 @@ const FeatureRequest = () => {
     }
   }, [executed]);
 
-  const columns = useMemo<ColumnDef<IFeatureRequest>[]>(
+  const columns = useMemo<ColumnDef<ICustomerSetup>[]>(
     () => [
       {
         header: "#",
@@ -36,13 +38,13 @@ const FeatureRequest = () => {
         cell: ({ row }) => row.index + 1,
       },
       {
-        header: "Request Info",
-        accessorKey: "requestCode",
+        header: "Setup Info",
+        accessorKey: "setupCode",
         meta: { icon: <Hash size={14} /> },
         cell: ({ row }) => (
           <div className="flex flex-col gap-1">
             <span className="font-semibold text-xs">
-              {row.original?.requestCode || "N/A"}
+              {row.original?.setupCode || "N/A"}
             </span>
             <span className="text-[10px] text-muted-foreground">
               {row.original?.createdAt
@@ -69,10 +71,8 @@ const FeatureRequest = () => {
         cell: ({ row }) => {
           const { customer, software } = row.original;
 
-          // Customer Label
           const customerName = typeof customer === 'string' ? customer : customer?.name ?? "N/A";
 
-          // Software Label & Style
           const softwareName = typeof software === 'string' ? software : software?.name ?? "N/A";
           const colorCode = typeof software === 'string' ? undefined : software?.colorCode;
           const style = getLookupBadgeStyle(colorCode);
@@ -114,12 +114,20 @@ const FeatureRequest = () => {
         },
       },
       {
-        header: "Status",
-        accessorKey: "status",
+        header: "Setup Status",
+        accessorKey: "setupStatus",
         meta: { icon: <CircleDot size={14} /> },
         cell: ({ row }) => {
-          const status = row.original.status;
-          const colorCode = getStatusColor(status);
+          const { setupStatus } = row.original;
+
+          const statusName = typeof setupStatus === 'string'
+            ? setupStatus
+            : (setupStatus?.name ?? "N/A");
+
+          const colorCode = typeof setupStatus === 'string'
+            ? undefined
+            : setupStatus?.colorCode;
+
           const style = getLookupBadgeStyle(colorCode);
 
           return (
@@ -128,45 +136,69 @@ const FeatureRequest = () => {
               className="capitalize border text-xs font-medium px-2 py-0 rounded-full"
               style={style}
             >
-              {status ?? "N/A"}
+              {statusName}
             </Badge>
           );
         },
+      },
+      {
+        header: "Scheduled Start",
+        accessorKey: "scheduledStart",
+        meta: { icon: <Calendar size={14} /> },
+        cell: ({ row }) => (
+          <span className="text-xs text-muted-foreground">
+            {row.original?.scheduledStart
+              ? formatDateTime(row.original.scheduledStart)
+              : "N/A"}
+          </span>
+        ),
+      },
+      {
+        header: "Scheduled End",
+        accessorKey: "scheduledEnd",
+        meta: { icon: <Calendar size={14} /> },
+        cell: ({ row }) => (
+          <span className="text-xs text-muted-foreground">
+            {row.original?.scheduledEnd
+              ? formatDateTime(row.original.scheduledEnd)
+              : "N/A"}
+          </span>
+        ),
       },
     ],
     [executed],
   );
 
-  const pathOnRowSelected = (data: IFeatureRequest) => {
+  const pathOnRowSelected = (data: ICustomerSetup) => {
     const { _id } = data;
     if (!_id) return;
 
     navigate(
-      allRoutes.PORTAL + allRoutes.VIEW_FEATURE_REQUEST(_id)
+      allRoutes.PORTAL + allRoutes.VIEW_CUSTOMER_SETUP(_id)
     );
   };
 
   return (
     <>
       <FeatureContentRenderer
+        useDateFilters
+        dateFilterNoDefault
         tableAddComponent={() => (
           <ActionButton
             type="add"
-            useText="Add Feature Request"
-            onClick={() => navigate(allRoutes.PORTAL + allRoutes.ADD_FEATURE_REQUEST)}
+            useText="Add Customer Setup"
+            onClick={() => navigate(allRoutes.PORTAL + allRoutes.ADD_CUSTOMER_SETUP)}
           />
         )}
-        useDateFilters
-        dateFilterNoDefault
-        filters={["featurePriority", "softwareId", "customerId", "featureStatus","assignedTo"]} 
+        filters={["priority", "softwareId", "customerId", "CustomerSetupStatus", "assignedTo", "setUpStatusId"]}
         pathOnRowSelected={pathOnRowSelected}
         columns={columns}
         refetchData={executed}
-        title="Feature Requests"
+        title="Customer Setups"
         lazyFetchQuery={[fetchQuery, fetchState]}
       />
     </>
   );
 };
 
-export default FeatureRequest;
+export default CustomerSetups;

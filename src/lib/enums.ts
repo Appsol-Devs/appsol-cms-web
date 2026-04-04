@@ -246,7 +246,8 @@ export const getReminderTypeBadgeStyle = (
   | undefined => {
   const t = (reminderType ?? "").toLowerCase();
   if (t === "overdue") return getLookupBadgeStyle(DUE_STATUS_COLORS.overdue);
-  if (t === "due_today") return getLookupBadgeStyle(DUE_STATUS_COLORS["due-today"]);
+  if (t === "due_today")
+    return getLookupBadgeStyle(DUE_STATUS_COLORS["due-today"]);
   if (t === "7_days" || t === "14_days" || t === "30_days") {
     return getLookupBadgeStyle("#eab308");
   }
@@ -289,3 +290,24 @@ export const getDueStatus = (
     color: DUE_STATUS_COLORS.upcoming,
   };
 };
+
+// export enum CUSTOMER_SETUP_STATUS_ENUM {
+//   SCHEDULED = "scheduled",
+//   IN_PROGRESS = "inProgress",
+//   COMPLETED = "completed",
+//   CANCELLED = "cancelled",
+// }
+
+export enum CUSTOMER_SETUP_PRIORITY_ENUM {
+  P1 = "P1",
+  P2 = "P2",
+  P3 = "P3",
+  P4 = "P4",
+}
+
+export enum CUSTOMER_SETUP_STATUS_ENUM {
+  SCHEDULED = "scheduled",
+  IN_PROGRESS = "inProgress",
+  COMPLETED = "completed",
+  CANCELLED = "cancelled",
+}

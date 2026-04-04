@@ -65,7 +65,6 @@ const CustomersForm = () => {
     null,
   );
 
-  // console.log("Selected Customer:", existingData);
 
   const fetchCustomerData = async (id: string) => {
     if (!id) return;

@@ -115,7 +115,7 @@ const FeatureRequestFormContent = ({ isLoading, form, isUpdate }: IField) => {
             placeholder="Type to search customers..."
             label="Customer"
             required={!isUpdate}
-            disabled={isLoading || isUpdate} 
+            disabled={isLoading || isUpdate}
             options={loadCustomerOptions}
             width="100%"
           />
@@ -127,7 +127,7 @@ const FeatureRequestFormContent = ({ isLoading, form, isUpdate }: IField) => {
             required={!isUpdate}
             title="Software"
             options={softwareOptions}
-            disabled={isLoading || isUpdate} 
+            disabled={isLoading || isUpdate}
           />
 
           <DropDownComponent
@@ -193,6 +193,7 @@ const FeatureRequestFormContent = ({ isLoading, form, isUpdate }: IField) => {
               placeholder="Provide a detailed description..."
               disabled={isLoading}
               register={register}
+              multipleLines
             />
           </div>
 
@@ -205,6 +206,7 @@ const FeatureRequestFormContent = ({ isLoading, form, isUpdate }: IField) => {
               placeholder="Add internal notes..."
               disabled={isLoading}
               register={register}
+              multipleLines
             />
           </div>
         </div>
