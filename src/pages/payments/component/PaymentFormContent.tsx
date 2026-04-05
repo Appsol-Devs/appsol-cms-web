@@ -131,7 +131,7 @@ const PaymentFormContent = ({
             control={control}
             name="renewalDate"
             render={({ field }) => (
-              <div className="space-y-1 max-w-[200px]" key={field.value ?? "empty"}>
+              <div className="space-y-1 max-w-[200px]">
                 <p className="text-xs text-onCard font-medium">
                   Renewal Date <span className="text-destructive ml-0.5">*</span>
                   {prefillFromSubscription && (

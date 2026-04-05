@@ -58,9 +58,9 @@ import FeatureRequest from "@/pages/feature-request-module/components/FeatureReq
 import ViewFeatureRequest from "@/pages/feature-request-module/components/ViewFeatureRequest";
 import FeatureRequestForm from "@/pages/feature-request-module/components/FeatureRequestForm";
 import SubscriptionReminders from "@/pages/subscription-reminders/component/SubscriptionReminders";
-import CustomerSetups from "@/customer-setups/CustomerSetups";
-import CustomerSetupForm from "@/customer-setups/CustomerSetupForm";
-import CustomerSetupView from "@/customer-setups/CustomerSetupView";
+import CustomerSetups from "@/pages/customer-setups/CustomerSetups";
+import CustomerSetupForm from "@/pages/customer-setups/CustomerSetupForm";
+import CustomerSetupView from "@/pages/customer-setups/CustomerSetupView";
 
 const PrivateRoutes = () => {
   return (

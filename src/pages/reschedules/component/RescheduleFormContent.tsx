@@ -123,7 +123,7 @@ const RescheduleFormContent = ({ isLoading, form }: Props) => {
             control={control}
             name="originalDateTime"
             render={({ field }) => (
-              <div className="space-y-1 max-w-[280px]" key={field.value ?? "empty-original"}>
+              <div className="space-y-1 max-w-[280px]">
                 <p className="text-xs text-onCard font-medium">
                   Original Date & Time{" "}
                   <span className="text-destructive ml-0.5">*</span>
@@ -144,13 +144,59 @@ const RescheduleFormContent = ({ isLoading, form }: Props) => {
             control={control}
             name="newDateTime"
             render={({ field }) => (
-              <div className="space-y-1 max-w-[280px]" key={field.value ?? "empty-new"}>
+              <div className="space-y-1 max-w-[280px]">
                 <p className="text-xs text-onCard font-medium">
                   New Date & Time <span className="text-destructive ml-0.5">*</span>
                 </p>
                 <DatePicker
                   title=""
                   placeholder="Select new date and time"
+                  required
+                  disabled={isLoading}
+                  defaultDate={field.value ? new Date(field.value) : undefined}
+                  onChange={(date) => field.onChange(date ? date.toISOString() : "")}
+                />
+              </div>
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="from"
+            render={({ field }) => (
+              <div className="space-y-1 max-w-[280px]">
+                <p className="text-xs text-onCard font-medium">
+                  From <span className="text-destructive ml-0.5">*</span>
+                </p>
+                <p className="text-[10px] text-muted-foreground leading-snug">
+                  Start of the scheduled range
+                </p>
+                <DatePicker
+                  title=""
+                  placeholder="Range start date and time"
+                  required
+                  disabled={isLoading}
+                  defaultDate={field.value ? new Date(field.value) : undefined}
+                  onChange={(date) => field.onChange(date ? date.toISOString() : "")}
+                />
+              </div>
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="to"
+            render={({ field }) => (
+              <div className="space-y-1 max-w-[280px]">
+                <p className="text-xs text-onCard font-medium">
+                  To <span className="text-destructive ml-0.5">*</span>
+                </p>
+                <p className="text-[10px] text-muted-foreground leading-snug">
+                  End of the scheduled range
+                </p>
+                <DatePicker
+                  title=""
+                  placeholder="Range end date and time"
                   required
                   disabled={isLoading}
                   defaultDate={field.value ? new Date(field.value) : undefined}

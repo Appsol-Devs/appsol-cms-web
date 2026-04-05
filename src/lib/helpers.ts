@@ -100,6 +100,29 @@ export const formatDateTime = (date?: Date | string) => {
   );
 };
 
+export const formatMutationSummaryDateTime = (
+  date?: Date | string | null,
+): string => {
+  if (date == null) return "";
+  const raw = typeof date === "string" ? date : date;
+  if (!String(raw).trim()) return "";
+  const d = new Date(raw);
+  if (Number.isNaN(d.getTime()))
+    return typeof date === "string" ? date : "";
+  const datePart = format(d, "do MMM y");
+  const hasTime =
+    d.getHours() !== 0 ||
+    d.getMinutes() !== 0 ||
+    d.getSeconds() !== 0 ||
+    d.getMilliseconds() !== 0;
+  if (!hasTime) return datePart;
+  const timePart = format(d, "h:mm a").replace(
+    /\s+(AM|PM)$/i,
+    (_, ap) => ap.toLowerCase(),
+  );
+  return `${datePart}, ${timePart}`;
+};
+
 export const getInitials = (firstName?: string, lastName?: string) => {
   const first = firstName?.charAt(0) || "";
   const last = lastName?.charAt(0) || "";

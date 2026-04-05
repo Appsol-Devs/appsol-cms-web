@@ -4,8 +4,6 @@ import {
   CircleDot,
   Mail,
   MailX,
-
-  Pen,
   User,
   VerifiedIcon,
 } from "lucide-react";
@@ -112,23 +110,6 @@ const Users = () => {
           );
         },
       },
-      {
-        header: "Action",
-        meta: { icon: <Pen size={14} /> },
-        accessorKey: "action",
-        cell: ({ row }) => (
-          <div className="flex items-center space-x-2">
-            <ActionButton
-              type="view"
-              onClick={() =>
-                navigate(allRoutes.PORTAL + allRoutes.VIEW_USER(row.original._id as string), {
-                  state: { initialData: row.original },
-                })
-              }
-            />
-          </div>
-        ),
-      },
     ],
     [executed]
   );
@@ -144,7 +125,13 @@ const Users = () => {
           />
         )}
         columns={columns}
-        // filters={["company", "location", "role", "gender"]}
+        pathOnRowSelected={(row) => {
+          const user = row as IUser;
+          if (!user._id) return;
+          navigate(allRoutes.PORTAL + allRoutes.VIEW_USER(user._id), {
+            state: { initialData: user },
+          });
+        }}
         refetchData={executed}
         title="Users"
         lazyFetchQuery={[fetchQuery, fetchState]}

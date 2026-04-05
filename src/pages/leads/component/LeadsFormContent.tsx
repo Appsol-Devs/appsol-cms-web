@@ -191,7 +191,7 @@ const LeadsFormContent = ({ isLoading, form, isConverted }: IField) => {
               control={control}
               name="initialEnquiryDate"
               render={({ field }) => (
-                <div className="space-y-1 max-w-[180px]" key={field.value ?? "empty"}>
+                <div className="space-y-1 max-w-[180px]">
                   <p className="text-xs text-onCard font-medium">
                     Initial Enquiry Date <span className="text-destructive ml-0.5">*</span>
                   </p>

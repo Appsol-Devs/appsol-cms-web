@@ -38,10 +38,6 @@ const CustomersView = () => {
       path: customerRoutes.DASHBOARD,
     },
     {
-      name: "Enquiries",
-      path: customerRoutes.ENQUIRIES,
-    },
-    {
       name: "Tickets",
       path: customerRoutes.TICKETS,
     },

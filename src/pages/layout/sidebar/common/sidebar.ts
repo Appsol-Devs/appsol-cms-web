@@ -3,7 +3,6 @@ import {
   BriefcaseBusiness,
   CalendarCheck2,
   CalendarClock,
-  ChartBar,
   Computer,
   CreditCard,
   Headset,
@@ -93,12 +92,6 @@ export const sidebarMainMenus: ISidebar[] = [
     path: allRoutes.COMPLAINTS,
   },
   {
-    mainPath: `${allRoutes.PORTAL}${allRoutes.USERS}`,
-    name: "Users",
-    icon: Lock,
-    path: allRoutes.USERS,
-  },
-  {
     mainPath: `${allRoutes.PORTAL}${allRoutes.FEATURE_REQUESTS}`,
     name: "Feature Requests",
     icon: Lock,
@@ -126,10 +119,10 @@ export const sidebarMainMenus: ISidebar[] = [
         icon: User,
       },
       {
-        name: "Enquiries",
-        icon: PhoneCall,
-        mainPath: `${allRoutes.PORTAL}${allRoutes.ENQUIRIES}`,
-        path: allRoutes.ENQUIRIES,
+        name: "Users",
+        path: allRoutes.USERS,
+        icon: Users,
+        mainPath: `${allRoutes.PORTAL}${allRoutes.USERS}`,
       },
       {
         name: "Softwares",
@@ -175,12 +168,6 @@ export const sidebarMainMenus: ISidebar[] = [
         name: "OutReach Types",
         path: `${allRoutes.OUT_REACH_TYPES}`,
         icon: User,
-      },
-      {
-        mainPath: `${allRoutes.PORTAL}${allRoutes.ANALYTICS}`,
-        name: "Analytics",
-        icon: ChartBar,
-        path: allRoutes.ANALYTICS,
       },
     ],
   },

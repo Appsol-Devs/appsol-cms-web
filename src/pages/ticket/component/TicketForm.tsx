@@ -1,7 +1,7 @@
 import type { ISummarySection } from "@/components/form/MutationFormSummary";
 import MutationFormTemplate from "@/components/form/MutationFormTemplate";
 import { showToast } from "@/components/ui/CustomToast";
-import { cleanPayload } from "@/lib/helpers";
+import { cleanPayload, formatMutationSummaryDateTime } from "@/lib/helpers";
 import { Ticket, Notebook } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -202,9 +202,7 @@ const TicketForm = () => {
         { label: "Title", value: values?.title, required: true },
         {
           label: "Requested Date",
-          value: values?.requestedDate
-            ? new Date(values.requestedDate).toLocaleString()
-            : "",
+          value: formatMutationSummaryDateTime(values?.requestedDate),
           required: true,
         },
         {

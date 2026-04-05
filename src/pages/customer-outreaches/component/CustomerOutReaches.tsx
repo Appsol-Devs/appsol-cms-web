@@ -2,7 +2,7 @@ import ActionButton from "@/components/ActionButtons";
 import FeatureContentRenderer from "@/components/table/component/FeatureContentRenderer";
 import { allRoutes } from "@/utils/routes";
 import type { ColumnDef } from "@tanstack/react-table";
-import { CircleDot, Megaphone, Pen, Target, User, } from "lucide-react";
+import { CircleDot, Megaphone, Target, User } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
@@ -106,27 +106,6 @@ const CustomerOutReaches = () => {
           );
         },
       },
-      {
-        header: "Action",
-        meta: { icon: <Pen size={14} /> },
-        accessorKey: "action",
-        cell: ({ row }) => (
-          <div className="flex items-center space-x-2">
-            <ActionButton
-              type="view"
-              onClick={() =>
-                navigate(
-                  allRoutes.PORTAL +
-                    allRoutes.VIEW_CUSTOMER_OUTREACH(row.original._id as string),
-                  { state: { initialData: row.original } }
-                )
-              }
-            />
-          </div>
-        ),
-      },
-
-
     ],
     [executed]
   );
@@ -142,6 +121,14 @@ const CustomerOutReaches = () => {
           />
         )}
         columns={columns}
+        pathOnRowSelected={(row) => {
+          const o = row as ICustomerOutreach;
+          if (!o._id) return;
+          navigate(
+            allRoutes.PORTAL + allRoutes.VIEW_CUSTOMER_OUTREACH(o._id),
+            { state: { initialData: o } },
+          );
+        }}
         refetchData={executed}
         title="Customer Outreach"
         lazyFetchQuery={[fetchQuery, fetchState]}

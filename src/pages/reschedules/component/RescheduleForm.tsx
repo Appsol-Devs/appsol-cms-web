@@ -1,7 +1,7 @@
 import MutationFormTemplate from "@/components/form/MutationFormTemplate";
 import type { ISummarySection } from "@/components/form/MutationFormSummary";
 import { showToast } from "@/components/ui/CustomToast";
-import { cleanPayload } from "@/lib/helpers";
+import { cleanPayload, formatMutationSummaryDateTime } from "@/lib/helpers";
 import { getTargetEntityTypeColor } from "@/lib/enums";
 import { CalendarClock } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -28,6 +28,21 @@ function getTargetEntityTypeFromForm(
   return v.value;
 }
 
+function validateFromToRangeOrder(from: string, to: string): boolean {
+  const fromMs = new Date(from).getTime();
+  const toMs = new Date(to).getTime();
+  if (!Number.isNaN(fromMs) && !Number.isNaN(toMs) && toMs < fromMs) {
+    showToast({
+      title: "Validation",
+      message: "“To” must be on or after “From”.",
+      type: "info",
+      duration: 2500,
+    });
+    return false;
+  }
+  return true;
+}
+
 const RescheduleForm = () => {
   const { id } = useParams();
   const location = useLocation();
@@ -43,6 +58,8 @@ const RescheduleForm = () => {
       reason: "",
       originalDateTime: "",
       newDateTime: "",
+      from: "",
+      to: "",
       status: { label: "pending", value: "pending" },
     } as any,
   });
@@ -64,8 +81,12 @@ const RescheduleForm = () => {
 
   const resetFormWithData = (data: IReschedule) => {
     if (!data) return;
+    const fromVal = data.from?.trim() ? data.from : data.newDateTime ?? "";
+    const toVal = data.to?.trim() ? data.to : data.newDateTime ?? "";
     reset({
       ...data,
+      from: fromVal,
+      to: toVal,
       customerId:
         data.customerId && typeof data.customer !== "string"
           ? {
@@ -148,6 +169,8 @@ const RescheduleForm = () => {
       },
       { field: data.originalDateTime, message: "Original Date & Time is required." },
       { field: data.newDateTime, message: "New Date & Time is required." },
+      { field: data.from, message: "From date & time is required." },
+      { field: data.to, message: "To date & time is required." },
       { field: data.status?.value, message: "Status is required." },
       { field: data.reason?.trim(), message: "Reason is required." },
     ];
@@ -159,6 +182,8 @@ const RescheduleForm = () => {
       }
     }
 
+    if (!validateFromToRangeOrder(String(data.from), String(data.to))) return;
+
     const entityType = getTargetEntityTypeFromForm(data.targetEntityType);
 
     const payload = cleanPayload({
@@ -168,8 +193,8 @@ const RescheduleForm = () => {
       reason: data.reason?.trim() || undefined,
       originalDateTime: data.originalDateTime,
       newDateTime: data.newDateTime,
-      from: data.originalDateTime,
-      to: data.newDateTime,
+      from: data.from,
+      to: data.to,
       colorCode: getTargetEntityTypeColor(entityType) ?? undefined,
       status: data.status?.value,
     });
@@ -189,6 +214,8 @@ const RescheduleForm = () => {
       },
       { field: data.originalDateTime, message: "Original Date & Time is required." },
       { field: data.newDateTime, message: "New Date & Time is required." },
+      { field: data.from, message: "From date & time is required." },
+      { field: data.to, message: "To date & time is required." },
       { field: data.status?.value, message: "Status is required." },
       { field: data.reason?.trim(), message: "Reason is required." },
     ];
@@ -199,6 +226,8 @@ const RescheduleForm = () => {
         return false;
       }
     }
+
+    if (!validateFromToRangeOrder(String(data.from), String(data.to))) return false;
 
     return true;
   };
@@ -225,8 +254,26 @@ const RescheduleForm = () => {
           })(),
           required: true,
         },
-        { label: "Original Date", value: values?.originalDateTime, required: true },
-        { label: "New Date", value: values?.newDateTime, required: true },
+        {
+          label: "Original Date",
+          value: formatMutationSummaryDateTime(values?.originalDateTime),
+          required: true,
+        },
+        {
+          label: "New Date",
+          value: formatMutationSummaryDateTime(values?.newDateTime),
+          required: true,
+        },
+        {
+          label: "From (range)",
+          value: formatMutationSummaryDateTime(values?.from),
+          required: true,
+        },
+        {
+          label: "To (range)",
+          value: formatMutationSummaryDateTime(values?.to),
+          required: true,
+        },
         { label: "Status", value: (values?.status?.label as string) || "", required: true },
       ],
     },

@@ -215,7 +215,7 @@ const SubscriptionsFormContent = ({ isLoading, form }: IField) => {
             control={control}
             name="currentPeriodStart"
             render={({ field }) => (
-              <div className="space-y-1 max-w-[200px]" key={field.value ?? "empty"}>
+              <div className="space-y-1 max-w-[200px]">
                 <p className="text-xs text-onCard font-medium">
                   Current Period Start{" "}
                   <span className="text-destructive ml-0.5">*</span>
@@ -240,7 +240,7 @@ const SubscriptionsFormContent = ({ isLoading, form }: IField) => {
             control={control}
             name="currentPeriodEnd"
             render={({ field }) => (
-              <div className="space-y-1 max-w-[200px]" key={field.value ?? "empty"}>
+              <div className="space-y-1 max-w-[200px]">
                 <p className="text-xs text-onCard font-medium">
                   Current Period End{" "}
                   <span className="text-destructive ml-0.5">*</span>
@@ -268,7 +268,7 @@ const SubscriptionsFormContent = ({ isLoading, form }: IField) => {
             control={control}
             name="nextBillingDate"
             render={({ field }) => (
-              <div className="space-y-1 max-w-[200px]" key={field.value ?? "empty"}>
+              <div className="space-y-1 max-w-[200px]">
                 <p className="text-xs text-onCard font-medium">
                   Next Billing Date{" "}
                   <span className="text-destructive ml-0.5">*</span>

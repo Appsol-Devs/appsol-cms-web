@@ -141,6 +141,7 @@ const Reschedules = () => {
     <>
       <FeatureContentRenderer
         useDateFilters
+        dateFilterNoDefault
         filters={["customerId", "status", "targetEntityType", "loggedBy"]}
         columns={columns}
         tableAddComponent={() => (

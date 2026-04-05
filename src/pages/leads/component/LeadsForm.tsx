@@ -1,7 +1,7 @@
 import type { ISummarySection } from "@/components/form/MutationFormSummary";
 import MutationFormTemplate from "@/components/form/MutationFormTemplate";
 import { showToast } from "@/components/ui/CustomToast";
-import { cleanPayload } from "@/lib/helpers";
+import { cleanPayload, formatMutationSummaryDateTime } from "@/lib/helpers";
 import { Spotlight, Headset, Home, Lock, StepForward } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -231,7 +231,7 @@ const LeadsForm = () => {
         },
         {
           label: "Initial Enquiry Date",
-          value: values?.initialEnquiryDate as string,
+          value: formatMutationSummaryDateTime(values?.initialEnquiryDate),
           required: true,
         },
         // {

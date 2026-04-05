@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { showToast } from "@/components/ui/CustomToast";
-import { cleanPayload, formatDate } from "@/lib/helpers";
+import { cleanPayload, formatMutationSummaryDateTime } from "@/lib/helpers";
 import type { ISummarySection } from "@/components/form/MutationFormSummary";
 import { BookOpenText } from "lucide-react";
 import MutationFormTemplate from "@/components/form/MutationFormTemplate";
@@ -202,7 +202,7 @@ const FeatureRequestForm = () => {
         },
         {
           label: "Requested Date",
-          value: values?.requestedDate ? formatDate(values?.requestedDate) : "",
+          value: formatMutationSummaryDateTime(values?.requestedDate),
           required: !id
         },
       ],

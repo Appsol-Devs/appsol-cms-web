@@ -1,5 +1,5 @@
 import { formatDateTime } from "@/lib/helpers";
-import { Briefcase, NotepadText, Shield, Eye } from "lucide-react";
+import { Briefcase, NotepadText, Shield } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useLazyGetRolesQuery } from "../common/rolesApi";
 import ActionButton from "@/components/ActionButtons";
@@ -69,25 +69,8 @@ const Roles = () => {
           </div>
         ),
       },
-      {
-        header: "Action",
-        meta: { icon: <Eye size={14} /> },
-        accessorKey: "action",
-        cell: ({ row }) => (
-          <div className="flex items-center space-x-2">
-            <ActionButton
-              type="view"
-              onClick={() =>
-                navigate(allRoutes.PORTAL + allRoutes.VIEW_ROLE(row.original._id as string), {
-                  state: { initialData: row.original },
-                })
-              }
-            />
-          </div>
-        ),
-      },
     ],
-    [executed]
+    []
   );
 
   return (
@@ -101,6 +84,13 @@ const Roles = () => {
           />
         )}
         columns={columns}
+        pathOnRowSelected={(row) => {
+          const role = row as IRole;
+          if (!role._id) return;
+          navigate(allRoutes.PORTAL + allRoutes.VIEW_ROLE(role._id), {
+            state: { initialData: role },
+          });
+        }}
         refetchData={executed}
         title="Roles"
         lazyFetchQuery={[fetchQuery, fetchState]}

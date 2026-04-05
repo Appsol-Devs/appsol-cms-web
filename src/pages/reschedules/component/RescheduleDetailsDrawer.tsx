@@ -8,7 +8,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { formatDate } from "@/lib/helpers";
+import { formatDateTime } from "@/lib/helpers";
 import { getLookupBadgeStyle, getPaymentStatusColor } from "@/lib/enums";
 import type { IReschedule } from "../common/reschedules";
 import { CalendarClock, CheckCircle2, X, XCircle } from "lucide-react";
@@ -131,7 +131,7 @@ export default function RescheduleDetailsDrawer({
                   </span>
                   <span className="text-sm font-medium">
                     {reschedule.originalDateTime
-                      ? formatDate(reschedule.originalDateTime)
+                      ? formatDateTime(reschedule.originalDateTime)
                       : "—"}
                   </span>
                 </div>
@@ -141,8 +141,20 @@ export default function RescheduleDetailsDrawer({
                   </span>
                   <span className="text-sm font-medium">
                     {reschedule.newDateTime
-                      ? formatDate(reschedule.newDateTime)
+                      ? formatDateTime(reschedule.newDateTime)
                       : "—"}
+                  </span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs text-muted-foreground">From</span>
+                  <span className="text-sm font-medium">
+                    {reschedule.from ? formatDateTime(reschedule.from) : "—"}
+                  </span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs text-muted-foreground">To</span>
+                  <span className="text-sm font-medium">
+                    {reschedule.to ? formatDateTime(reschedule.to) : "—"}
                   </span>
                 </div>
                 <div className="flex flex-col">

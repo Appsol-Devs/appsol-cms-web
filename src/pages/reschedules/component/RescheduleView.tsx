@@ -316,6 +316,22 @@ const RescheduleView = () => {
                     {selected.newDateTime ? formatDateTime(selected.newDateTime) : "—"}
                   </p>
                 </div>
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase font-semibold mb-1.5">
+                    From
+                  </p>
+                  <p className="text-sm text-card-foreground">
+                    {selected.from ? formatDateTime(selected.from) : "—"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase font-semibold mb-1.5">
+                    To
+                  </p>
+                  <p className="text-sm text-card-foreground">
+                    {selected.to ? formatDateTime(selected.to) : "—"}
+                  </p>
+                </div>
               </div>
 
               <div>

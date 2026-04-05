@@ -126,6 +126,7 @@ const Payments = () => {
       <FeatureContentRenderer
         tableAddComponent={() => null}
         useDateFilters
+        dateFilterNoDefault
         filters={["status"]}
         columns={columns}
         pathOnRowSelected={(row) => {
