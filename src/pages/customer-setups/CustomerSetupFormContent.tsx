@@ -16,8 +16,11 @@ import type { ICustomer, IUser } from "@/pages/customer/common/customers";
 import AsyncDropDownComponent from "@/components/AsyncDropDownComponent";
 import DropDownComponent from "@/components/DropdownComponent";
 import { useGenerateDropdownOptionsFromEnum } from "@/lib/helpers";
-import { REQUEST_FEATURE_PRIORITY_ENUM, CUSTOMER_SETUP_STATUS_ENUM } from "@/lib/enums";
+import { REQUEST_FEATURE_PRIORITY_ENUM, CUSTOMER_SETUP_STATUS_ENUM, SETUP_STATUS_LABEL_MAP } from "@/lib/enums";
 import type { ICustomerSetupFields } from "./CustomerSetupForm";
+import { CustomSwitchComponent } from "@/components/CustomSwitchComponent";
+
+
 
 interface IField {
     isLoading?: boolean;
@@ -79,14 +82,12 @@ const CustomerSetupFormContent = ({ isLoading, form, isUpdate }: IField) => {
                 if (res?.contents) {
                     setSetupStatusOptions(
                         res.contents.map((status: ISetupStatus) => ({
-                            label: status.name ?? "",
+                            label: (SETUP_STATUS_LABEL_MAP[status.name ?? ""] || status.name) ?? "",
                             value: status._id ?? "",
                         }))
                     );
                 }
             });
-
-
 
     }, [getSoftwares, getUsers, getSetupStatuses]);
 
@@ -133,8 +134,8 @@ const CustomerSetupFormContent = ({ isLoading, form, isUpdate }: IField) => {
                         name="customerId"
                         placeholder="Type to search customers..."
                         label="Customer"
-                        required={!isUpdate}
-                        disabled={isLoading || isUpdate}
+                        required
+                        disabled={isLoading}
                         options={loadCustomerOptions}
                         width="100%"
                     />
@@ -143,10 +144,10 @@ const CustomerSetupFormContent = ({ isLoading, form, isUpdate }: IField) => {
                         control={control}
                         name="softwareId"
                         label="Select software"
-                        required={!isUpdate}
+                        required
                         title="Software"
                         options={softwareOptions}
-                        disabled={isLoading || isUpdate}
+                        disabled={isLoading}
                     />
 
                     <DropDownComponent
@@ -236,7 +237,7 @@ const CustomerSetupFormContent = ({ isLoading, form, isUpdate }: IField) => {
                                     title=""
                                     placeholder="Select actual completion date"
                                     dateOnly={false}
-                                    disabled={isLoading}
+                                    disabled={isLoading || !isUpdate}
                                     defaultDate={field.value ? new Date(field.value) : undefined}
                                     onChange={(date) =>
                                         field.onChange(date ? date.toISOString() : "")
@@ -245,6 +246,17 @@ const CustomerSetupFormContent = ({ isLoading, form, isUpdate }: IField) => {
                             </div>
                         )}
                     />
+
+                    <div className="md:col-span-2 lg:col-span-3">
+                        <div className="py-2">
+                            <CustomSwitchComponent
+                                control={control}
+                                name="addToCalendar"
+                                label="Add to Calendar?"
+                                disabled={isLoading}
+                            />
+                        </div>
+                    </div>
 
                     <div className="md:col-span-2 lg:col-span-3">
                         <MultiSelectorComponent

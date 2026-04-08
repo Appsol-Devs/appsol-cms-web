@@ -16,6 +16,7 @@ import type { ISetupStatus, ISoftware } from "@/pages/settings/common/settings";
 import CustomerSetupFormContent from "./CustomerSetupFormContent";
 import type { ICustomerSetup } from "./customerSetup";
 import { useAddCustomerSetupMutation, useUpdateCustomerSetupMutation, useLazyGetACustomerSetupQuery } from "./customerSetupApi";
+import { SETUP_STATUS_LABEL_MAP } from "@/lib/enums";
 
 export type ICustomerSetupFields = Omit<
   ICustomerSetup,
@@ -34,6 +35,7 @@ export type ICustomerSetupFields = Omit<
   actualCompletionDate?: string;
   assignedTo: DropDownOption<string>[];
   setupStatusId: DropDownOption<string> | string;
+  addToCalendar?: boolean;
 };
 
 const CustomerSetupForm = () => {
@@ -49,7 +51,11 @@ const CustomerSetupForm = () => {
   const [getSetupStatuses] = useLazyGetSetupStatusesQuery();
   const [setupStatusList, setSetupStatusList] = useState<ISetupStatus[]>([]);
 
-  const form = useForm<ICustomerSetupFields>({});
+  const form = useForm<ICustomerSetupFields>({
+    defaultValues: {
+      addToCalendar: true,
+    }
+  });
 
   const { watch, getValues, reset } = form;
   const values = watch();
@@ -99,7 +105,9 @@ const CustomerSetupForm = () => {
           setupStatus: data.setupStatusId || (typeof data.setupStatus !== "string" ? data.setupStatus?._id : undefined)
             ? {
               value: data.setupStatusId || (typeof data.setupStatus !== "string" ? data.setupStatus?._id : undefined),
-              label: typeof data.setupStatus === "string" ? data.setupStatus : data.setupStatus?.name ?? "",
+              label: typeof data.setupStatus === "string" 
+                ? SETUP_STATUS_LABEL_MAP[data.setupStatus] || data.setupStatus 
+                : (SETUP_STATUS_LABEL_MAP[data.setupStatus?.name ?? ""] || data.setupStatus?.name) ?? "",
             }
             : undefined,
           status: (data.status || "scheduled"),
@@ -107,10 +115,10 @@ const CustomerSetupForm = () => {
           scheduledEnd: data.scheduledEnd || "",
           actualCompletionDate: data.actualCompletionDate || "",
           assignedTo:
-            data.assignedTo?.map((user: any) => ({
-              label: typeof user === "string" ? user : `${user.firstName} ${user.lastName}`,
-              value: typeof user === "string" ? user : user._id,
-            })) || [],
+            data.assignedTo?.map((user: any) => 
+               typeof user === "string" ? user : user._id
+            ) || [],
+          addToCalendar: data.addToCalendar ?? false, 
         });
       }
     } catch (err) {
@@ -158,7 +166,7 @@ const CustomerSetupForm = () => {
     if (!val) return "";
     if (typeof val !== "string") return val.label;
     const found = setupStatusList.find((s) => s._id === val);
-    return found ? found.name : val;
+    return found ? (SETUP_STATUS_LABEL_MAP[found.name ?? ""] || found.name) : val;
   };
 
   const submitData = () => {
@@ -201,6 +209,9 @@ const CustomerSetupForm = () => {
       assignedTo: data.assignedTo?.map((user: any) => extractValue(user)) || [],
       setupStatusId: selectedStatusId,
       setupStatus: foundStatus?.name?.toLowerCase() || "",
+      customerId: extractValue(data.customerId),
+      softwareId: extractValue(data.softwareId),
+      addToCalendar: data.addToCalendar,
     };
 
     const payload = cleanPayload(
@@ -249,6 +260,11 @@ const CustomerSetupForm = () => {
         {
           label: "Actual Completion",
           value: formatMutationSummaryDateTime(values?.actualCompletionDate),
+          required: false
+        },
+        {
+          label: "Add to Calendar",
+          value: values?.addToCalendar ? "Yes" : "No", 
           required: false
         },
       ],

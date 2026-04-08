@@ -17,6 +17,7 @@ import {
   BookOpenText,
   PlayCircle,
   CheckCircle2,
+  CalendarPlus,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
@@ -337,6 +338,11 @@ const CustomerSetupView = () => {
                 icon={<CheckCircle2 className="w-4 h-4 text-muted-foreground" />}
                 label="Actual Completion Date"
                 value={selectedSetup.actualCompletionDate ? formatDate(selectedSetup.actualCompletionDate) : "—"}
+              />
+              <DetailItem
+                icon={<CalendarPlus className="w-4 h-4 text-muted-foreground" />}
+                label="Added to Calendar"
+                value={selectedSetup.addToCalendar ? "Yes" : "No"}
               />
             </div>
           </div>

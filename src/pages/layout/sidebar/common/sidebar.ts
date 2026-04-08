@@ -7,7 +7,6 @@ import {
   CreditCard,
   Headset,
   LayoutDashboardIcon,
-  Lock,
   Phone,
   PhoneCall,
   Receipt,
@@ -17,6 +16,8 @@ import {
   Ticket,
   User,
   Users,
+  UserRoundCog,
+  Sparkles,
 } from "lucide-react";
 import type { SVGProps } from "react";
 
@@ -94,13 +95,13 @@ export const sidebarMainMenus: ISidebar[] = [
   {
     mainPath: `${allRoutes.PORTAL}${allRoutes.FEATURE_REQUESTS}`,
     name: "Feature Requests",
-    icon: Lock,
+    icon: Sparkles,
     path: allRoutes.FEATURE_REQUESTS,
   },
   {
     mainPath: `${allRoutes.PORTAL}${allRoutes.CUSTOMER_SETUPS}`,
     name: "Customer Setups",
-    icon: Lock,
+    icon: UserRoundCog,
     path: allRoutes.CUSTOMER_SETUPS,
   },
   {

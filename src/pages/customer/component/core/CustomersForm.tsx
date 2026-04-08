@@ -80,7 +80,6 @@ const CustomersForm = () => {
       console.error(err);
     }
   };
-
   const resetFormWithData = (data: ICustomer) => {
     if (!data) return;
     reset({

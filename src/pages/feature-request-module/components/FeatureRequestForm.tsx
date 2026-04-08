@@ -25,7 +25,7 @@ export type IFeatureRequestFields = Omit<
   "_id" | "assignedTo" | "requestedDate" | "customerId" | "softwareId"
 > & {
   title: string;
-  customerId: DropDownOption<string> | string; 
+  customerId: DropDownOption<string> | string;
   softwareId: DropDownOption<string> | string;
   description: string;
   notes: string;
@@ -42,7 +42,7 @@ const FeatureRequestForm = () => {
   const [createFeatureRequest, { isLoading: isCreating }] = useAddFeatureRequestMutation();
   const [updateFeatureRequest, { isLoading: isUpdating }] = useUpdateFeatureRequestMutation();
   const [getAFeatureRequest, { isLoading: isGetting }] = useLazyGetAFeatureRequestQuery();
-  
+
   const [getSoftwares] = useLazyGetSoftwaresQuery();
   const [softwareList, setSoftwareList] = useState<ISoftware[]>([]);
 
@@ -88,10 +88,9 @@ const FeatureRequestForm = () => {
           status: (data.status || "new") as any,
           requestedDate: data.requestedDate || "",
           assignedTo:
-            data.assignedTo?.map((user: any) => ({
-              label: typeof user === "string" ? user : `${user.firstName} ${user.lastName}`,
-              value: typeof user === "string" ? user : user._id,
-            })) || [],
+            data.assignedTo?.map((user: any) =>
+              typeof user === "string" ? user : user._id
+            ) || [],
         });
       }
     } catch (err) {
@@ -128,7 +127,7 @@ const FeatureRequestForm = () => {
 
   const extractValue = (field: any) => (typeof field === "string" ? field : field?.value);
   const getCustomerLabel = (field: any) => (typeof field === "string" ? field : field?.label);
-  
+
   const getSoftwareLabel = (val: any) => {
     if (!val) return "";
     if (typeof val !== "string") return val.label;
