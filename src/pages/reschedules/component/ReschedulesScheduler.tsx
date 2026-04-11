@@ -8,6 +8,7 @@ import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover"
 import { allRoutes } from "@/utils/routes";
 import {
   addDays,
+  addHours,
   addMonths,
   addWeeks,
   differenceInCalendarDays,
@@ -24,7 +25,15 @@ import {
   startOfWeek,
 } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState, type MutableRefObject } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type MutableRefObject,
+} from "react";
 import { useNavigate } from "react-router-dom";
 import { showToast } from "@/components/ui/CustomToast";
 import { getTargetEntityTypeColor } from "@/lib/enums";
@@ -97,6 +106,134 @@ function rescheduleStableKey(r: IReschedule): string {
   return r._id ?? r.rescheduleCode ?? "";
 }
 
+const HOUR_ROW_PX = 48;
+const DAY_TIMELINE_HEIGHT_PX = 24 * HOUR_ROW_PX;
+const MIN_TIMED_EVENT_PX = 22;
+
+const HOUR_GRID_BACKGROUND_STYLE: CSSProperties = {
+  backgroundImage: `repeating-linear-gradient(to bottom, transparent 0px, transparent ${HOUR_ROW_PX - 1}px, rgb(228 228 231) ${HOUR_ROW_PX - 1}px, rgb(228 228 231) ${HOUR_ROW_PX}px)`,
+};
+
+function clipScheduleToCalendarDay(
+  r: IReschedule,
+  day: Date,
+): { start: Date; end: Date } | null {
+  const int = getScheduleInterval(r);
+  if (!int) return null;
+  const ds = startOfDay(day);
+
+  if (isMultiDayReschedule(r)) {
+    const rangeFirst = startOfDay(int.start);
+    const rangeLast = startOfDay(int.end);
+    if (ds < rangeFirst || ds > rangeLast) return null;
+
+    const dayStart = set(ds, {
+      hours: int.start.getHours(),
+      minutes: int.start.getMinutes(),
+      seconds: int.start.getSeconds(),
+      milliseconds: int.start.getMilliseconds(),
+    });
+    let dayEnd = set(ds, {
+      hours: int.end.getHours(),
+      minutes: int.end.getMinutes(),
+      seconds: int.end.getSeconds(),
+      milliseconds: int.end.getMilliseconds(),
+    });
+
+    if (dayEnd.getTime() < dayStart.getTime()) {
+      dayEnd = addDays(dayEnd, 1);
+    } else if (dayEnd.getTime() === dayStart.getTime()) {
+      dayEnd = addHours(dayStart, 1);
+    }
+    if (dayEnd.getTime() <= dayStart.getTime()) return null;
+    return { start: dayStart, end: dayEnd };
+  }
+
+  const de = endOfDay(day);
+  const start = int.start < ds ? ds : int.start;
+  const end = int.end > de ? de : int.end;
+  if (start.getTime() >= end.getTime()) return null;
+  return { start, end };
+}
+
+function scheduleTimeRangeLineForDay(r: IReschedule, day: Date): string {
+  const clip = clipScheduleToCalendarDay(r, day);
+  const cust = customerFirstName(r);
+  if (!clip) {
+    const s = getScheduleStart(r);
+    return s ? scheduleCellTimeAndCustomer(r, s) : eventTitle(r);
+  }
+  const a = format(clip.start, "HH:mm");
+  const b = format(clip.end, "HH:mm");
+  const range = a === b ? a : `${a} – ${b}`;
+  return cust ? `${range} · ${cust}` : range;
+}
+
+type TimedLayoutItem = {
+  cell: ScheduleCalendarCell;
+  topPx: number;
+  heightPx: number;
+  lane: number;
+  laneCount: number;
+};
+
+function buildTimedLayoutForDay(
+  cells: ScheduleCalendarCell[],
+  day: Date,
+): TimedLayoutItem[] {
+  const midnight = startOfDay(day).getTime();
+  type Row = {
+    cell: ScheduleCalendarCell;
+    startMin: number;
+    endMin: number;
+  };
+  const rows: Row[] = [];
+  for (const cell of cells) {
+    const clip = clipScheduleToCalendarDay(cell.reschedule, day);
+    if (!clip) continue;
+    const startMin = (clip.start.getTime() - midnight) / 60000;
+    const endMin = (clip.end.getTime() - midnight) / 60000;
+    if (endMin - startMin <= 0) continue;
+    rows.push({ cell, startMin, endMin });
+  }
+  rows.sort(
+    (a, b) =>
+      a.startMin - b.startMin ||
+      a.endMin - b.endMin ||
+      (a.cell.reschedule._id ?? "").localeCompare(b.cell.reschedule._id ?? ""),
+  );
+  const laneEndMin: number[] = [];
+  const laneIdx: number[] = [];
+  let maxLane = 0;
+  for (const row of rows) {
+    let lane = 0;
+    while (lane < laneEndMin.length && laneEndMin[lane] > row.startMin + 1e-9) {
+      lane++;
+    }
+    if (lane === laneEndMin.length) laneEndMin.push(row.endMin);
+    else laneEndMin[lane] = row.endMin;
+    laneIdx.push(lane);
+    maxLane = Math.max(maxLane, lane);
+  }
+  const laneCount = Math.max(1, maxLane + 1);
+  const minsPerDay = 24 * 60;
+  return rows.map((row, i) => {
+    const topPx = (row.startMin / minsPerDay) * DAY_TIMELINE_HEIGHT_PX;
+    const durMin = row.endMin - row.startMin;
+    const heightPx = Math.max(
+      MIN_TIMED_EVENT_PX,
+      (durMin / minsPerDay) * DAY_TIMELINE_HEIGHT_PX,
+    );
+    return {
+      cell: row.cell,
+      topPx,
+      heightPx,
+      lane: laneIdx[i],
+      laneCount,
+    };
+  });
+}
+
 type RangeBarSegment = {
   r: IReschedule;
   colStart: number;
@@ -124,40 +261,15 @@ function segmentDisplayAt(seg: RangeBarSegment, weekDays: Date[]): Date {
   return start;
 }
 
-function weekHourAllSegments(
-  hour: number,
-  weekDays: Date[],
-  multiDayList: IReschedule[],
-  byDay: Map<string, ScheduleCalendarCell[]>,
-): RangeBarSegment[] {
-  const multi = weekHourRangeSegments(hour, weekDays, multiDayList);
-  const singles: RangeBarSegment[] = [];
-  weekDays.forEach((day, idx) => {
-    const key = dayKey(day);
-    for (const cell of byDay.get(key) ?? []) {
-      if (isMultiDayReschedule(cell.reschedule)) continue;
-      if (cell.at.getHours() !== hour) continue;
-      singles.push({
-        r: cell.reschedule,
-        colStart: idx + 1,
-        colEnd: idx + 1,
-        at: cell.at,
-      });
-    }
-  });
-  return [...multi, ...singles];
-}
-
 function monthWeekAllSegments(
   weekDays: Date[],
   multiDayList: IReschedule[],
-  byDay: Map<string, ScheduleCalendarCell[]>,
+  events: ScheduleCalendarCell[],
 ): RangeBarSegment[] {
   const multi = monthWeekRangeSegments(weekDays, multiDayList);
   const singles: RangeBarSegment[] = [];
   weekDays.forEach((day, idx) => {
-    const key = dayKey(day);
-    for (const cell of byDay.get(key) ?? []) {
+    for (const cell of getCalendarCellsForDay(events, day)) {
       if (isMultiDayReschedule(cell.reschedule)) continue;
       singles.push({
         r: cell.reschedule,
@@ -222,30 +334,6 @@ function monthWeekRangeSegments(
   return segments;
 }
 
-function weekHourRangeSegments(
-  hour: number,
-  weekDays: Date[],
-  multiDayList: IReschedule[],
-): RangeBarSegment[] {
-  const segments: RangeBarSegment[] = [];
-  const w0 = startOfDay(weekDays[0]);
-  const w6 = startOfDay(weekDays[6]);
-  for (const r of multiDayList) {
-    const int = getScheduleInterval(r);
-    if (!int) continue;
-    if (getScheduleStart(r)?.getHours() !== hour) continue;
-    const s = startOfDay(int.start);
-    const e = startOfDay(int.end);
-    const overlapStart = s > w0 ? s : w0;
-    const overlapEnd = e < w6 ? e : w6;
-    if (overlapStart > overlapEnd) continue;
-    const colStart = differenceInCalendarDays(overlapStart, w0) + 1;
-    const colEnd = differenceInCalendarDays(overlapEnd, w0) + 1;
-    segments.push({ r, colStart, colEnd });
-  }
-  return segments;
-}
-
 function packRangeSegmentsIntoLanes(
   segments: RangeBarSegment[],
 ): RangeBarSegment[][] {
@@ -285,22 +373,20 @@ function chunkMonthDaysIntoWeeks(days: Date[]): Date[][] {
   return weeks;
 }
 
-function cellsToSingleColumnSegments(
-  cells: ScheduleCalendarCell[],
-): RangeBarSegment[] {
-  return cells.map((cell) => ({
-    r: cell.reschedule,
-    colStart: 1,
-    colEnd: 1,
-    at: cell.at,
-  }));
-}
-
+/** One cell per reschedule; multi-day ranges are expanded per-day at read time via {@link getCalendarCellsForDay}. */
 function expandRescheduleToCalendarCells(
   r: IReschedule,
 ): ScheduleCalendarCell[] {
   const int = getScheduleInterval(r);
   if (!int) return [];
+
+  if (isMultiDayReschedule(r)) {
+    const fromDay = startOfDay(int.start);
+    const clip0 = clipScheduleToCalendarDay(r, fromDay);
+    if (!clip0) return [];
+    return [{ reschedule: r, at: clip0.start }];
+  }
+
   const { start, end } = int;
   const fromDay = startOfDay(start);
   const toDay = startOfDay(end);
@@ -320,6 +406,37 @@ function expandRescheduleToCalendarCells(
       });
     out.push({ reschedule: r, at });
   }
+  return out;
+}
+
+function getCalendarCellsForDay(
+  events: ScheduleCalendarCell[],
+  day: Date,
+): ScheduleCalendarCell[] {
+  const out: ScheduleCalendarCell[] = [];
+  const seen = new Set<string>();
+  for (const c of events) {
+    const r = c.reschedule;
+    const id = rescheduleStableKey(r) || eventTitle(r);
+    if (isMultiDayReschedule(r)) {
+      const clip = clipScheduleToCalendarDay(r, day);
+      if (!clip) continue;
+      if (seen.has(`m:${id}`)) continue;
+      seen.add(`m:${id}`);
+      out.push({ reschedule: r, at: clip.start });
+      continue;
+    }
+    if (dayKey(c.at) === dayKey(day)) {
+      if (seen.has(`s:${id}`)) continue;
+      seen.add(`s:${id}`);
+      out.push(c);
+    }
+  }
+  out.sort(
+    (a, b) =>
+      a.at.getTime() - b.at.getTime() ||
+      (a.reschedule._id ?? "").localeCompare(b.reschedule._id ?? ""),
+  );
   return out;
 }
 
@@ -382,6 +499,8 @@ type ScheduleSegmentLanePillProps = {
   gridColumn?: string;
   gridRow?: number;
   density: "day" | "week" | "month";
+  subtitleOverride?: string;
+  fillSlot?: boolean;
   onSelectEvent: (r: IReschedule) => void;
   onDropOnDay?: ScheduleMonthCalendarProps["onDropOnDay"];
   dragLockRef: MutableRefObject<boolean>;
@@ -394,6 +513,8 @@ function ScheduleSegmentLanePill({
   gridColumn,
   gridRow,
   density,
+  subtitleOverride,
+  fillSlot,
   onSelectEvent,
   onDropOnDay,
   dragLockRef,
@@ -404,7 +525,11 @@ function ScheduleSegmentLanePill({
   const displayAt = segmentDisplayAt(seg, weekDays);
   const dragAt = displayAt;
   const typeColor = calendarColorForEntityType(r);
-  const pad = density === "day" ? "px-1.5 py-1" : "px-1 py-0.5";
+  const pad = fillSlot
+    ? "px-1.5 py-0.5"
+    : density === "day"
+      ? "px-1.5 py-1"
+      : "px-1 py-0.5";
   const titleCls =
     density === "day"
       ? "text-[10px] font-semibold leading-tight text-zinc-800"
@@ -418,6 +543,8 @@ function ScheduleSegmentLanePill({
     gridColumn != null && gridRow != null
       ? { gridColumn, gridRow }
       : undefined;
+  const subLine =
+    subtitleOverride ?? scheduleCellTimeAndCustomer(r, displayAt);
 
   return (
     <button
@@ -430,7 +557,10 @@ function ScheduleSegmentLanePill({
         borderColor: `color-mix(in srgb, ${typeColor} 42%, transparent)`,
       }}
       className={[
-        "pointer-events-auto flex w-full min-w-0 items-start rounded border border-solid text-left transition hover:brightness-[0.98] focus:outline-none focus:ring-2 focus:ring-primary/35",
+        "pointer-events-auto flex w-full min-w-0 rounded border border-solid text-left transition hover:brightness-[0.98] focus:outline-none focus:ring-2 focus:ring-primary/35",
+        fillSlot
+          ? "h-full min-h-0 flex-col items-stretch justify-start overflow-hidden"
+          : "items-start",
         pad,
         mx,
         onDropOnDay && r._id
@@ -459,10 +589,27 @@ function ScheduleSegmentLanePill({
         }, 0);
       }}
     >
-      <span className="min-w-0 flex-1 pl-0.5">
-        <span className={`block truncate ${titleCls}`}>{eventTitle(r)}</span>
-        <span className={`block truncate ${subCls}`}>
-          {scheduleCellTimeAndCustomer(r, displayAt)}
+      <span
+        className={cn(
+          "min-w-0 pl-0.5",
+          fillSlot ? "flex min-h-0 flex-1 flex-col overflow-hidden" : "flex-1",
+        )}
+      >
+        <span
+          className={cn(
+            `block ${titleCls}`,
+            fillSlot ? "line-clamp-2 shrink-0" : "truncate",
+          )}
+        >
+          {eventTitle(r)}
+        </span>
+        <span
+          className={cn(
+            `block ${subCls}`,
+            fillSlot ? "line-clamp-2 min-h-0 shrink" : "truncate",
+          )}
+        >
+          {subLine}
         </span>
       </span>
     </button>
@@ -589,23 +736,6 @@ function ScheduleMonthCalendar({
     return setAnchorDate((d) => addDays(d, 1));
   };
 
-  const byDay = new Map<string, ScheduleCalendarCell[]>();
-  for (const cell of events) {
-    const key = dayKey(cell.at);
-    const list = byDay.get(key) ?? [];
-    list.push(cell);
-    byDay.set(key, list);
-  }
-  for (const list of byDay.values()) {
-    list.sort((a, b) => {
-      const t = a.at.getTime() - b.at.getTime();
-      if (t !== 0) return t;
-      return (a.reschedule._id ?? "").localeCompare(
-        b.reschedule._id ?? "",
-      );
-    });
-  }
-
   const multiDaySchedules = useMemo(() => {
     const m = new Map<string, IReschedule>();
     for (const cell of events) {
@@ -620,20 +750,46 @@ function ScheduleMonthCalendar({
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const dayTimeline = useMemo(() => {
+  const dayTimedLayout = useMemo(() => {
     if (viewMode !== "day") return null;
-    const key = dayKey(anchorDate);
-    const dayEvents = (byDay.get(key) ?? []).slice();
-    dayEvents.sort((a, b) => a.at.getTime() - b.at.getTime());
-    const byHour = new Map<number, ScheduleCalendarCell[]>();
-    for (const cell of dayEvents) {
-      const h = cell.at.getHours();
-      const list = byHour.get(h) ?? [];
-      list.push(cell);
-      byHour.set(h, list);
+    const cells = getCalendarCellsForDay(events, anchorDate);
+    return buildTimedLayoutForDay(cells, anchorDate);
+  }, [viewMode, anchorDate, events]);
+
+  const weekDayTimedLayouts = useMemo(() => {
+    if (viewMode !== "week") return null;
+    const m = new Map<string, TimedLayoutItem[]>();
+    for (const day of weekDays) {
+      const key = dayKey(day);
+      const cells = getCalendarCellsForDay(events, day).filter(
+        (c) => !isMultiDayReschedule(c.reschedule),
+      );
+      m.set(key, buildTimedLayoutForDay(cells, day));
     }
-    return { key, byHour };
-  }, [viewMode, anchorDate, byDay]);
+    return m;
+  }, [viewMode, weekDays, events]);
+
+  const weekMultiDaySpanningLanes = useMemo(() => {
+    if (viewMode !== "week") return null;
+    const ws = startOfDay(weekDays[0]);
+    const segments: RangeBarSegment[] = [];
+    for (const r of multiDaySchedules) {
+      const int = getScheduleInterval(r);
+      if (!int) continue;
+      const s = startOfDay(int.start);
+      const e = startOfDay(int.end);
+      const we = startOfDay(weekDays[6]);
+      const overlapStart = s > ws ? s : ws;
+      const overlapEnd = e < we ? e : we;
+      if (overlapStart > overlapEnd) continue;
+      const colStart = differenceInCalendarDays(overlapStart, ws) + 1;
+      const colEnd = differenceInCalendarDays(overlapEnd, ws) + 1;
+      const clip = clipScheduleToCalendarDay(r, overlapStart);
+      if (!clip) continue;
+      segments.push({ r, colStart, colEnd, at: clip.start });
+    }
+    return packRangeSegmentsIntoLanes(segments);
+  }, [viewMode, weekDays, multiDaySchedules]);
 
   return (
     <div className="rounded-2xl border border-zinc-200 bg-white text-zinc-900 shadow-sm overflow-hidden">
@@ -757,40 +913,44 @@ function ScheduleMonthCalendar({
           "border-b border-zinc-200 bg-white",
         ].join(" ")}
       >
-        {viewMode === "day" && dayTimeline ? (
-          <div className="flex flex-col">
-            {Array.from({ length: 24 }).map((_, hour) => {
-              const rowKey = `${dayTimeline.key}-${hour}`;
-              const hourStart = set(anchorDate, {
-                hours: hour,
-                minutes: 0,
-                seconds: 0,
-                milliseconds: 0,
-              });
-              const hourEvents = dayTimeline.byHour.get(hour) ?? [];
-              const hourSegs = cellsToSingleColumnSegments(hourEvents);
-              const dayRangeLanes = packRangeSegmentsIntoLanes(hourSegs);
-              const dayWeekCol = [anchorDate];
-              const isDraggingOver = dragOverKey === rowKey;
-
-              return (
+        {viewMode === "day" && dayTimedLayout !== null ? (
+          <div className="flex min-w-0 border-b border-zinc-200 bg-white">
+            <div className="flex w-14 shrink-0 flex-col border-r border-zinc-200 bg-zinc-50/60">
+              {Array.from({ length: 24 }).map((_, hour) => (
                 <div
-                  key={rowKey}
-                  className={[
-                    "flex min-h-12 border-b border-zinc-200",
-                    isDraggingOver ? "ring-2 ring-inset ring-primary/50 bg-primary/5" : "bg-white",
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
+                  key={hour}
+                  className="flex h-12 shrink-0 items-start border-b border-zinc-200 px-2 py-2 text-[10px] font-medium tabular-nums text-zinc-500"
                 >
-                  <div className="w-14 shrink-0 px-2 py-2 text-[10px] font-medium tabular-nums text-zinc-500 border-r border-zinc-200 bg-zinc-50/60">
-                    {String(hour).padStart(2, "0")}:00
-                  </div>
+                  {String(hour).padStart(2, "0")}:00
+                </div>
+              ))}
+            </div>
+            <div
+              className="relative min-w-0 flex-1"
+              style={{ height: DAY_TIMELINE_HEIGHT_PX, ...HOUR_GRID_BACKGROUND_STYLE }}
+            >
+              {Array.from({ length: 24 }).map((_, hour) => {
+                const rowKey = `${dayKey(anchorDate)}-${hour}`;
+                const hourStart = set(anchorDate, {
+                  hours: hour,
+                  minutes: 0,
+                  seconds: 0,
+                  milliseconds: 0,
+                });
+                const isDraggingOver = dragOverKey === rowKey;
+                return (
                   <div
-                    className={[
-                      "flex min-h-12 min-w-0 flex-1 flex-col px-2 py-1.5",
-                      onDayClick ? "cursor-pointer hover:bg-zinc-50/90" : "",
-                    ].join(" ")}
+                    key={rowKey}
+                    className={cn(
+                      "absolute right-0 left-0",
+                      onDayClick && "cursor-pointer hover:bg-zinc-50/90",
+                      isDraggingOver &&
+                        "z-[5] bg-primary/5 ring-2 ring-inset ring-primary/50",
+                    )}
+                    style={{
+                      top: hour * HOUR_ROW_PX,
+                      height: HOUR_ROW_PX,
+                    }}
                     role={onDayClick ? "button" : undefined}
                     tabIndex={onDayClick ? 0 : undefined}
                     onKeyDown={(e) => {
@@ -835,167 +995,253 @@ function ScheduleMonthCalendar({
                         ? `Add schedule at ${format(hourStart, "h:00 a")} on ${format(anchorDate, "MMMM d, yyyy")}`
                         : undefined
                     }
+                  />
+                );
+              })}
+              {dayTimedLayout.map((item) => {
+                const { cell, topPx, heightPx, lane, laneCount } = item;
+                const seg: RangeBarSegment = {
+                  r: cell.reschedule,
+                  colStart: 1,
+                  colEnd: 1,
+                  at: cell.at,
+                };
+                const wPct = 100 / laneCount;
+                return (
+                  <div
+                    key={`dt-${rescheduleStableKey(cell.reschedule)}-${cell.at.getTime()}-${lane}`}
+                    className="absolute z-10 px-1"
+                    style={{
+                      top: topPx,
+                      height: heightPx,
+                      left: `${lane * wPct}%`,
+                      width: `${wPct}%`,
+                    }}
                   >
-                    {dayRangeLanes.length > 0 ? (
-                      <div className="flex min-w-0 flex-1 flex-col gap-1">
-                        {dayRangeLanes.flatMap((lane, li) =>
-                          lane.map((seg) => (
+                    <ScheduleSegmentLanePill
+                      seg={seg}
+                      weekDays={[anchorDate]}
+                      density="day"
+                      fillSlot
+                      subtitleOverride={scheduleTimeRangeLineForDay(
+                        cell.reschedule,
+                        anchorDate,
+                      )}
+                      onSelectEvent={onSelectEvent}
+                      onDropOnDay={onDropOnDay}
+                      dragLockRef={dragLockRef}
+                      setDragOverKey={setDragOverKey}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ) : viewMode === "week" && weekDayTimedLayouts ? (
+          <div className="flex min-w-0 border-b border-zinc-200 bg-white">
+            <div className="flex w-14 shrink-0 flex-col border-r border-zinc-200 bg-zinc-50/60">
+              {Array.from({ length: 24 }).map((_, hour) => (
+                <div
+                  key={hour}
+                  className="flex h-12 shrink-0 items-start border-b border-zinc-200 px-2 py-2 text-[10px] font-medium tabular-nums text-zinc-500"
+                >
+                  {String(hour).padStart(2, "0")}:00
+                </div>
+              ))}
+            </div>
+            <div
+              className="relative min-w-0 flex-1"
+              style={{ height: DAY_TIMELINE_HEIGHT_PX }}
+            >
+              <div className="absolute inset-0 z-[1] grid min-w-0 grid-cols-7 divide-x divide-zinc-200">
+                {weekDays.map((day) => {
+                  const dk = dayKey(day);
+                  const layout = weekDayTimedLayouts.get(dk) ?? [];
+                  return (
+                    <div
+                      key={dk}
+                      className={cn(
+                        "relative min-w-0",
+                        isSameDay(day, today) ? "bg-primary/8" : "bg-white",
+                      )}
+                    >
+                      {isSameDay(day, today) ? (
+                        <span
+                          className="pointer-events-none absolute top-0 bottom-0 left-0 z-20 w-0.5 bg-primary"
+                          aria-hidden
+                        />
+                      ) : null}
+                      {Array.from({ length: 24 }).map((_, hour) => {
+                        const rowKey = `${dk}-${hour}`;
+                        const hourStart = set(day, {
+                          hours: hour,
+                          minutes: 0,
+                          seconds: 0,
+                          milliseconds: 0,
+                        });
+                        const isDraggingOver = dragOverKey === rowKey;
+                        return (
+                          <div
+                            key={rowKey}
+                            className={cn(
+                              "absolute right-0 left-0 border-b border-zinc-200",
+                              onDayClick && "cursor-pointer hover:bg-zinc-50/90",
+                              isDraggingOver &&
+                                "z-[5] bg-primary/5 ring-2 ring-inset ring-primary/50",
+                            )}
+                            style={{
+                              top: hour * HOUR_ROW_PX,
+                              height: HOUR_ROW_PX,
+                            }}
+                            role={onDayClick ? "button" : undefined}
+                            tabIndex={onDayClick ? 0 : undefined}
+                            onKeyDown={(e) => {
+                              if (!onDayClick) return;
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                onDayClick(hourStart);
+                              }
+                            }}
+                            onClick={() => {
+                              if (!onDayClick) return;
+                              if (dragLockRef.current) return;
+                              onDayClick(hourStart);
+                            }}
+                            onDragOver={(e) => {
+                              if (!onDropOnDay) return;
+                              e.preventDefault();
+                              e.dataTransfer.dropEffect = "move";
+                              setDragOverKey(rowKey);
+                            }}
+                            onDrop={(e) => {
+                              if (!onDropOnDay) return;
+                              e.preventDefault();
+                              setDragOverKey(null);
+                              window.setTimeout(() => {
+                                dragLockRef.current = false;
+                              }, 0);
+                              const raw =
+                                e.dataTransfer.getData(DRAG_MIME) ||
+                                e.dataTransfer.getData("text/plain");
+                              const parsed = parseScheduleDragPayload(raw, events);
+                              if (!parsed) return;
+                              onDropOnDay({
+                                rescheduleId: parsed.id,
+                                targetDate: hourStart,
+                                previousAt: parsed.previousAt,
+                                mode: "week",
+                              });
+                            }}
+                            aria-label={
+                              onDayClick
+                                ? `Add schedule at ${format(hourStart, "h:00 a")} on ${format(day, "MMMM d, yyyy")}`
+                                : undefined
+                            }
+                          />
+                        );
+                      })}
+                      {layout.map((item) => {
+                        const { cell, topPx, heightPx, lane, laneCount } = item;
+                        const seg: RangeBarSegment = {
+                          r: cell.reschedule,
+                          colStart: 1,
+                          colEnd: 1,
+                          at: cell.at,
+                        };
+                        const wPct = 100 / laneCount;
+                        return (
+                          <div
+                            key={`wt-${dk}-${rescheduleStableKey(cell.reschedule)}-${cell.at.getTime()}-${lane}`}
+                            className="absolute z-10 px-0.5"
+                            style={{
+                              top: topPx,
+                              height: heightPx,
+                              left: `${lane * wPct}%`,
+                              width: `${wPct}%`,
+                            }}
+                          >
                             <ScheduleSegmentLanePill
-                              key={`dseg-${rowKey}-${li}-${segmentSortTime(seg)}-${rescheduleStableKey(seg.r)}`}
                               seg={seg}
-                              weekDays={dayWeekCol}
-                              density="day"
+                              weekDays={[day]}
+                              density="week"
+                              fillSlot
+                              subtitleOverride={scheduleTimeRangeLineForDay(
+                                cell.reschedule,
+                                day,
+                              )}
                               onSelectEvent={onSelectEvent}
                               onDropOnDay={onDropOnDay}
                               dragLockRef={dragLockRef}
                               setDragOverKey={setDragOverKey}
                             />
-                          )),
-                        )}
-                      </div>
-                    ) : null}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        ) : viewMode === "week" ? (
-          <div className="flex flex-col min-w-0">
-            {Array.from({ length: 24 }).map((_, hour) => {
-              const weekHourSegs = weekHourAllSegments(
-                hour,
-                weekDays,
-                multiDaySchedules,
-                byDay,
-              );
-              const weekRangeLanes = packRangeSegmentsIntoLanes(weekHourSegs);
-              const weekRowMinH = Math.max(48, 6 + weekRangeLanes.length * 36);
-
-              return (
-              <div
-                key={`week-row-${hour}`}
-                className="flex border-b border-zinc-200"
-                style={{ minHeight: weekRowMinH }}
-              >
-                <div className="w-14 shrink-0 px-2 py-2 text-[10px] font-medium tabular-nums text-zinc-500 border-r border-zinc-200 bg-zinc-50/60">
-                  {String(hour).padStart(2, "0")}:00
-                </div>
-                <div className="relative min-w-0 flex-1">
-                <div className="relative z-[1] grid min-h-12 min-w-0 grid-cols-7 divide-x divide-zinc-200 isolate">
-                  {weekDays.map((day) => {
-                    const key = dayKey(day);
-                    const rowKey = `${key}-${hour}`;
-                    const hourStart = set(day, {
-                      hours: hour,
-                      minutes: 0,
-                      seconds: 0,
-                      milliseconds: 0,
-                    });
-                    const isToday = isSameDay(day, today);
-                    const isDraggingOver = dragOverKey === rowKey;
-
-                    return (
-                      <div
-                        key={rowKey}
-                        className={[
-                          "relative min-w-0 px-1 py-1.5",
-                          isToday ? "bg-primary/8" : "bg-white",
-                          isDraggingOver
-                            ? "ring-2 ring-inset ring-primary/50 bg-primary/5"
-                            : "",
-                          onDayClick ? "cursor-pointer hover:bg-zinc-50/90" : "",
-                        ]
-                          .filter(Boolean)
-                          .join(" ")}
-                        role={onDayClick ? "button" : undefined}
-                        tabIndex={onDayClick ? 0 : undefined}
-                        onKeyDown={(e) => {
-                          if (!onDayClick) return;
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            onDayClick(hourStart);
-                          }
-                        }}
-                        onClick={() => {
-                          if (!onDayClick) return;
-                          if (dragLockRef.current) return;
-                          onDayClick(hourStart);
-                        }}
-                        onDragOver={(e) => {
-                          if (!onDropOnDay) return;
-                          e.preventDefault();
-                          e.dataTransfer.dropEffect = "move";
-                          setDragOverKey(rowKey);
-                        }}
-                        onDrop={(e) => {
-                          if (!onDropOnDay) return;
-                          e.preventDefault();
-                          setDragOverKey(null);
-                          window.setTimeout(() => {
-                            dragLockRef.current = false;
-                          }, 0);
-                          const raw =
-                            e.dataTransfer.getData(DRAG_MIME) ||
-                            e.dataTransfer.getData("text/plain");
-                          const parsed = parseScheduleDragPayload(raw, events);
-                          if (!parsed) return;
-                          onDropOnDay({
-                            rescheduleId: parsed.id,
-                            targetDate: hourStart,
-                            previousAt: parsed.previousAt,
-                            mode: "week",
-                          });
-                        }}
-                        aria-label={
-                          onDayClick
-                            ? `Add schedule at ${format(hourStart, "h:00 a")} on ${format(day, "MMMM d, yyyy")}`
-                            : undefined
-                        }
-                      >
-                        {isToday ? (
-                          <span
-                            className="pointer-events-none absolute left-0 top-0 bottom-0 w-0.5 bg-primary"
-                            aria-hidden
-                          />
-                        ) : null}
-                      </div>
-                    );
-                  })}
-                </div>
-                {weekRangeLanes.length > 0 ? (
-                  <div
-                    className="pointer-events-none absolute inset-0 z-[2] grid auto-rows-auto grid-cols-7 content-start gap-y-0.5 px-0.5 pt-0.5"
-                    aria-hidden={false}
-                  >
-                    {weekRangeLanes.flatMap((lane, li) =>
-                      lane.map((seg) => (
-                        <ScheduleSegmentLanePill
-                          key={`wseg-${hour}-${li}-${seg.colStart}-${seg.colEnd}-${segmentSortTime(seg)}-${rescheduleStableKey(seg.r)}`}
-                          seg={seg}
-                          weekDays={weekDays}
-                          gridColumn={`${seg.colStart} / ${seg.colEnd + 1}`}
-                          gridRow={li + 1}
-                          density="week"
-                          onSelectEvent={onSelectEvent}
-                          onDropOnDay={onDropOnDay}
-                          dragLockRef={dragLockRef}
-                          setDragOverKey={setDragOverKey}
-                        />
-                      )),
-                    )}
-                  </div>
-                ) : null}
-                </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
               </div>
-              );
-            })}
+              {weekMultiDaySpanningLanes != null &&
+              weekMultiDaySpanningLanes.length > 0 ? (
+                <div className="pointer-events-none absolute inset-0 z-[14]">
+                  {weekMultiDaySpanningLanes.flatMap((lane, laneIdx) =>
+                    lane.flatMap((seg) => {
+                      const d = weekDays[seg.colStart - 1];
+                      const clip = clipScheduleToCalendarDay(seg.r, d);
+                      if (!clip) return [];
+                      const midnight = startOfDay(d).getTime();
+                      const startMin = (clip.start.getTime() - midnight) / 60000;
+                      const endMin = (clip.end.getTime() - midnight) / 60000;
+                      const durMin = endMin - startMin;
+                      const topPx =
+                        (startMin / (24 * 60)) * DAY_TIMELINE_HEIGHT_PX +
+                        laneIdx * 4;
+                      const heightPx = Math.max(
+                        MIN_TIMED_EVENT_PX,
+                        (durMin / (24 * 60)) * DAY_TIMELINE_HEIGHT_PX,
+                      );
+                      const leftPct = ((seg.colStart - 1) / 7) * 100;
+                      const widthPct =
+                        ((seg.colEnd - seg.colStart + 1) / 7) * 100;
+                      return [
+                        <div
+                          key={`wspan-${rescheduleStableKey(seg.r)}-${seg.colStart}-${seg.colEnd}-${laneIdx}`}
+                          className="absolute px-0.5"
+                          style={{
+                            top: topPx,
+                            left: `${leftPct}%`,
+                            width: `${widthPct}%`,
+                            height: heightPx,
+                          }}
+                        >
+                          <ScheduleSegmentLanePill
+                            seg={seg}
+                            weekDays={weekDays}
+                            density="week"
+                            fillSlot
+                            subtitleOverride={scheduleTimeRangeLineForDay(
+                              seg.r,
+                              d,
+                            )}
+                            onSelectEvent={onSelectEvent}
+                            onDropOnDay={onDropOnDay}
+                            dragLockRef={dragLockRef}
+                            setDragOverKey={setDragOverKey}
+                          />
+                        </div>,
+                      ];
+                    }),
+                  )}
+                </div>
+              ) : null}
+            </div>
           </div>
         ) : (
           chunkMonthDaysIntoWeeks(monthDays).map((week) => {
             const monthWeekSegs = monthWeekAllSegments(
               week,
               multiDaySchedules,
-              byDay,
+              events,
             );
             const MONTH_VISIBLE_EVENTS_PER_DAY = 2;
             const monthWeekSegsVisible = monthSegmentsAfterStartColumnCap(
