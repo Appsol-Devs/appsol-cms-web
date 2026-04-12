@@ -127,8 +127,15 @@ const Notifications = () => {
 
         <div className="flex items-center justify-between px-2 py-1.5 border-b bg-background z-10">
           <span className="font-bold text-xs">Notifications</span>
-          <Button variant="ghost" size="icon" className="h-5 w-5 rounded-full" onClick={() => setIsOpen(false)}>
-            <X className="h-3 w-3 text-muted-foreground" />
+          <Button
+            type="button"
+            variant="destructive"
+            size="icon"
+            className="!h-5 !w-5 !min-h-0 !min-w-0 !bg-card hover:!bg-destructive/60 [&_svg]:!text-black hover:[&_svg]:!text-white"
+            onClick={() => setIsOpen(false)}
+            aria-label="Close notifications"
+          >
+            <X className="h-3 w-3" />
           </Button>
         </div>
 
@@ -152,7 +159,7 @@ const Notifications = () => {
                     key={notif._id}
                     className={cn(
                       "group flex items-start gap-1.5 p-1 rounded-sm transition-colors border-b last:border-0",
-                      "bg-white hover:bg-blue-50 dark:bg-background dark:hover:bg-blue-900/20"
+                      "bg-white hover:bg-primary/60 dark:bg-background dark:hover:bg-primary/20"
                     )}
                   >
                     {notif.user ? (
@@ -213,9 +220,10 @@ const Notifications = () => {
 
                     {!notif.isRead && (
                       <Button
+                        type="button"
                         variant="ghost"
                         size="icon"
-                        className="h-5 w-5 shrink-0 text-muted-foreground hover:text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-full opacity-60 hover:opacity-100 transition-all"
+                        className="h-5 w-5 shrink-0 !bg-card hover:!bg-primary/50 [&_svg]:!text-muted-foreground hover:[&_svg]:!text-primary"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleMarkAsRead(notif);
@@ -236,19 +244,22 @@ const Notifications = () => {
         <div className="p-1.5 border-t flex items-center gap-1.5 bg-background z-10">
           {notifications.length > 0 && (
             <Button
-              variant="outline"
+              type="button"
+              variant="default"
               size="sm"
-              className="flex-1 h-7 text-[10px] border-muted-foreground/20 text-white!"
+              className="flex-1 !h-7 text-[10px] !bg-primary hover:!bg-primary/60"
               onClick={handleMarkAllAsRead}
               disabled={unreadCount === 0}
             >
-              <CheckCheck className="mr-1 h-3 w-3 text-white!" />
+              <CheckCheck className="mr-1 h-3 w-3" />
               Mark all read
             </Button>
           )}
           <Button
+            type="button"
+            variant="default"
             size="sm"
-            className="flex-1 h-7 text-[10px] bg-blue-600 hover:bg-blue-700 text-white"
+            className="flex-1 !h-7 text-[10px] !bg-primary hover:!bg-primary/60"
             onClick={() => {
               setIsOpen(false);
               navigate(allRoutes.PORTAL + allRoutes.ALL_NOTIFICATIONS);
