@@ -311,3 +311,10 @@ export enum CUSTOMER_SETUP_STATUS_ENUM {
   COMPLETED = "completed",
   CANCELLED = "cancelled",
 }
+
+export const SETUP_STATUS_LABEL_MAP: Record<string, string> = {
+    scheduled: "Scheduled",
+    inProgress: "In Progress",
+    completed: "Completed",
+    cancelled: "Cancelled",
+};

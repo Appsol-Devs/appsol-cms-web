@@ -3,7 +3,7 @@ import CustomInputField from "@/components/CustomInputField";
 import { Separator } from "@/components/ui/separator";
 import { BookOpenText } from "lucide-react";
 import type { UseFormReturn } from "react-hook-form";
-import { type DropDownOption } from "@/components/DropdownComponent"; 
+import { type DropDownOption } from "@/components/DropdownComponent";
 import { useLazyGetPermissionsQuery } from "@/pages/roles/common/rolesApi";
 import { useEffect, useState } from "react";
 import type { IRoleFields } from "./RolesForm";
@@ -23,7 +23,7 @@ const RolesFormContent = ({ isLoading, form }: IField) => {
     try {
       const response = await getPermissions().unwrap();
       const options: DropDownOption[] = response.map((permission: any) => ({
-        value: permission._id,
+        value: permission.name, 
         label: permission.name,
       }));
       setPermissions(options);
@@ -77,7 +77,7 @@ const RolesFormContent = ({ isLoading, form }: IField) => {
                 },
               }}
             />
-            
+
             <CustomInputField<IRoleFields>
               type="text"
               label="Description"
@@ -107,9 +107,9 @@ const RolesFormContent = ({ isLoading, form }: IField) => {
                 name="permissions"
                 label="Permissions"
                 title="Permissions"
-                required
+
                 disabled={isLoading}
-                width="100%" 
+                width="100%"
               />
             </div>
           </div>

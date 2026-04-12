@@ -10,6 +10,7 @@ import type { ISummarySection } from "@/components/form/MutationFormSummary";
 import { BookOpenText } from "lucide-react";
 import MutationFormTemplate from "@/components/form/MutationFormTemplate";
 import RolesFormContent from "./RolesFormContent";
+import { allRoutes } from "@/utils/routes";
 
 export type IRoleFields = Omit<IRole, "_id" | "permissions"> & {
     name: string;
@@ -44,10 +45,10 @@ const RolesForm = () => {
                 reset({
                     name: data.name,
                     description: data.description,
-                    permissions: data.permissions?.map((perm: any) => ({
-                        label: typeof perm === 'string' ? perm : perm.name,
-                        value: typeof perm === 'string' ? perm : perm._id
-                    })) || [],
+                    permissions: data.permissions?.map((perm: any) =>
+                        typeof perm === 'string' ? perm : perm.name
+                    ) || [],
+
                 });
             }
         } catch (err) {
@@ -73,7 +74,7 @@ const RolesForm = () => {
                     message: id ? "Role updated successfully." : "Role created successfully.",
                     type: "success",
                 });
-                navigate(-1);
+                navigate(allRoutes.PORTAL + allRoutes.ROLES);
             }
         } catch (error) {
             console.error(error);
@@ -99,7 +100,7 @@ const RolesForm = () => {
         const payload = cleanPayload({
             name: data.name,
             description: data.description,
-            permissions: data.permissions?.map((perm) => perm.label) || [],
+            permissions: data.permissions || [],
         }) as unknown as IRole;
 
         handleDataSubmission(payload);

@@ -29,6 +29,7 @@ export interface ICustomerSetup {
 
   createdAt?: string;
   updatedAt?: string;
+  addToCalendar?: boolean;
 }
 
 export type TCustomerSetupStatus =
