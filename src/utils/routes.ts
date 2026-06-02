@@ -89,6 +89,7 @@ export const allRoutes = Object.freeze({
   ADD_CUSTOMER_SETUP: "/customer-setups/new",
   UPDATE_CUSTOMER_SETUP: (id: string) => `/customer-setups/${id}`,
   VIEW_CUSTOMER_SETUP: (id: string) => `/customer-setups/${id}/view`,
+  PROFILE: "/profile",
 });
 
 export const customerRoutes = Object.freeze({
