@@ -9,11 +9,17 @@ import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { allRoutes } from "@/utils/routes";
 import {
+  buildComplaintFormOption,
+  ticketComplaintToId,
+  ticketComplaintToLabel,
+  ticketFieldToId,
+  ticketFieldToLabel,
   ticketFormSchema,
   type ICreateTicketPayload,
   type ITicketFormFields,
   type ITicket,
 } from "../common/tickets";
+import { useLazyGetAComplaintQuery } from "@/pages/complaint/common/complaintsApi";
 import {
   useAddTicketMutation,
   useLazyGetATicketQuery,
@@ -34,25 +40,18 @@ const TicketForm = () => {
   const [addTicket, { isLoading: isCreating }] = useAddTicketMutation();
   const [updateTicket, { isLoading: isUpdating }] = useUpdateTicketMutation();
   const [getTicket, { isLoading: isGetting }] = useLazyGetATicketQuery();
+  const [getComplaint, { isLoading: isLoadingComplaint }] =
+    useLazyGetAComplaintQuery();
   const form = useForm<ITicketFormFields>({
     resolver: zodResolver(ticketFormSchema),
     defaultValues: {
       title: "",
       requestedDate: new Date().toISOString(),
       notes: "",
-      complaintId: prefillComplaintId
-        ? {
-            value: prefillComplaintId,
-            label:
-              prefillComplaint
-                ? `${prefillComplaint.complaintCode ?? ""} - ${prefillComplaint.customer?.name ?? ""}`
-                : prefillComplaintId,
-          }
+      complaintId: prefillComplaint
+        ? buildComplaintFormOption(prefillComplaint)
         : undefined,
-      status: {
-        label: "open",
-        value: "open",
-      },
+      status: "open",
     },
   });
   const { watch, handleSubmit, reset, setValue, trigger, formState } = form;
@@ -61,15 +60,19 @@ const TicketForm = () => {
   const [selectedTicket, setSelectedTicket] = useState<ITicket | null>(null);
 
   useEffect(() => {
-    if (prefillComplaintId) {
-      setValue("complaintId", {
-        value: prefillComplaintId,
-        label: prefillComplaint
-          ? `${prefillComplaint.complaintCode ?? ""} - ${prefillComplaint.customer?.name ?? ""}`
-          : prefillComplaintId,
-      });
+    if (prefillComplaint) {
+      setValue("complaintId", buildComplaintFormOption(prefillComplaint));
+      return;
     }
-  }, [prefillComplaintId, prefillComplaint, setValue]);
+    if (!prefillComplaintId || id) return;
+
+    getComplaint(prefillComplaintId)
+      .unwrap()
+      .then((res) => {
+        if (res) setValue("complaintId", buildComplaintFormOption(res));
+      })
+      .catch((err) => console.error("Failed to load complaint for ticket", err));
+  }, [prefillComplaintId, prefillComplaint, id, getComplaint, setValue]);
 
   useEffect(() => {
     if (!id) return;
@@ -84,26 +87,12 @@ const TicketForm = () => {
             requestedDate: res.requestedDate ?? "",
             notes: res.notes ?? "",
             complaintId: res.complaint
-              ? {
-                  label: `${res.complaint.complaintCode ?? "—"} — ${res.complaint.customer?.name ?? ""}`.trim(),
-                  value: res.complaint as unknown as string | Record<string, unknown>,
-                }
+              ? buildComplaintFormOption(res.complaint as IComplaint)
               : undefined,
-            assignedEngineerId: res.assignedEngineer
-              ? {
-                  label: `${res.assignedEngineer.firstName ?? ""} ${
-                    res.assignedEngineer.lastName ?? ""
-                  } (${res.assignedEngineer.email ?? ""})`.trim(),
-                  value:
-                    res.assignedEngineer._id ?? res.assignedEngineerId ?? "",
-                }
-              : undefined,
-            priority: res.priority
-              ? { label: res.priority, value: res.priority }
-              : undefined,
-            status: res.status
-              ? { label: res.status, value: res.status }
-              : undefined,
+            assignedEngineerId:
+              res.assignedEngineer?._id ?? res.assignedEngineerId ?? undefined,
+            priority: res.priority ?? undefined,
+            status: res.status ?? undefined,
           });
         }
       })
@@ -137,11 +126,8 @@ const TicketForm = () => {
 
   const submitData = handleSubmit(
     (data) => {
-      const rawValue = data.complaintId?.value;
       const complaintId =
-        typeof rawValue === "string"
-          ? rawValue
-          : (rawValue as { _id?: string })?._id ?? prefillComplaintId;
+        ticketComplaintToId(data.complaintId) ?? prefillComplaintId;
       if (!complaintId) {
         showToast({
           title: "Validation",
@@ -157,9 +143,9 @@ const TicketForm = () => {
       requestedDate: data.requestedDate,
       notes: data.notes?.trim() || undefined,
       complaintId,
-      assignedEngineerId: data.assignedEngineerId?.value,
-      priority: data.priority?.value as ICreateTicketPayload["priority"],
-      status: (data.status?.value as string) ?? "open",
+      assignedEngineerId: ticketFieldToId(data.assignedEngineerId),
+      priority: ticketFieldToId(data.priority) as ICreateTicketPayload["priority"],
+      status: ticketFieldToId(data.status) ?? "open",
     }) as ICreateTicketPayload;
 
       handleDataSubmission(payload);
@@ -178,6 +164,9 @@ const TicketForm = () => {
   );
 
   const validateBeforeOpen = async () => {
+    if (!ticketComplaintToId(form.getValues().complaintId) && prefillComplaint) {
+      setValue("complaintId", buildComplaintFormOption(prefillComplaint));
+    }
     const valid = await trigger();
     if (!valid) {
       const firstError = Object.values(formState.errors)[0];
@@ -207,22 +196,22 @@ const TicketForm = () => {
         },
         {
           label: "Complaint",
-          value: String(values?.complaintId?.label ?? (prefillComplaint ? `${prefillComplaint.complaintCode} - ${prefillComplaint.customer?.name}` : "")),
+          value: ticketComplaintToLabel(values?.complaintId, prefillComplaint) ?? "",
           required: true,
         },
         {
           label: "Assigned Engineer",
-          value: String(values?.assignedEngineerId?.label ?? ""),
+          value: ticketFieldToLabel(values?.assignedEngineerId) ?? "",
           required: false,
         },
         {
           label: "Priority",
-          value: String(values?.priority?.label ?? ""),
+          value: ticketFieldToLabel(values?.priority) ?? "",
           required: false,
         },
         {
           label: "Status",
-          value: String(values?.status?.label ?? ""),
+          value: ticketFieldToLabel(values?.status) ?? "",
           required: false,
         },
       ],
@@ -246,7 +235,7 @@ const TicketForm = () => {
         formContent={
           <TicketFormContent
             form={form}
-            isLoading={isCreating}
+            isLoading={isCreating || isLoadingComplaint}
             prefillComplaintId={prefillComplaintId}
             prefillComplaint={prefillComplaint}
             isStatusDisabled={selectedTicket?.status?.toLowerCase() === "closed"}
@@ -272,7 +261,7 @@ const TicketForm = () => {
           </div>
         }
         confirmSubmitActionLabel={id ? "Save Changes" : "Create Ticket"}
-        loading={isCreating || isUpdating || isGetting}
+        loading={isCreating || isUpdating || isGetting || isLoadingComplaint}
         mutationFormSummary={{
           summaryData: summarySections,
           summaryMainTitle: "Ticket Summary",

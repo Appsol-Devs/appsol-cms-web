@@ -1,4 +1,5 @@
-import type { IUser } from "@/pages/customer/common/customers";
+import type { DropDownOption } from "@/components/DropdownComponent";
+import type { ICustomer, IUser } from "@/pages/customer/common/customers";
 import type { ILeadNextStep } from "@/pages/settings/common/settings";
 import type { ISoftware } from "@/pages/settings/common/settings";
 
@@ -23,4 +24,38 @@ export type ILead = {
   notes?: string;
   _id?: string;
   isConverted?: boolean;
+  customerId?: string;
+  customer?: ICustomer;
+};
+
+export const mapLeadToCustomerPrefill = (lead: ILead): Partial<ICustomer> => ({
+  name: lead.name ?? "",
+  email: lead.email ?? "",
+  phone: lead.phone ?? "",
+  companyName: lead.companyName ?? "",
+  location: lead.location ?? "",
+  notes: lead.notes ?? "",
+  softwareId: lead.softwareId,
+  dateConverted: new Date().toISOString().split("T")[0],
+  leadId: lead._id,
+  status: "active",
+});
+
+export type LeadFormDropdownValue = string | DropDownOption<string> | null;
+
+export const leadFieldToId = (
+  val?: LeadFormDropdownValue,
+): string | undefined => {
+  if (!val) return undefined;
+  if (typeof val === "string") return val;
+  if ("value" in val) return val.value;
+  return undefined;
+};
+
+export const leadFieldToLabel = (
+  val?: LeadFormDropdownValue,
+): string | undefined => {
+  if (!val) return undefined;
+  if (typeof val === "string") return val;
+  return val.label?.toString();
 };

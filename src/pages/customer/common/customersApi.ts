@@ -52,6 +52,7 @@ export const customersApi = createApi({
         body: payload,
         method: "POST",
       }),
+      transformResponse: async (response: Response) => response.json(),
     }),
     updateCustomer: builder.mutation<ICustomer, ICustomer>({
       query: ({ _id, ...payload }) => ({

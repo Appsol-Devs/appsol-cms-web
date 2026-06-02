@@ -57,10 +57,39 @@ export type IRescheduleFormFields = Omit<
   IReschedule,
   "_id" | "customer" | "targetEntity" | "loggedBy" | "status" | "targetEntityType"
 > & {
-  customerId?: DropDownOption<ICustomer>;
-  targetEntityType?: DropDownOption<TargetEntityType>;
-  status?: DropDownOption<RescheduleStatus>;
+  customerId?: DropDownOption<ICustomer> | null;
+  targetEntityType?: string | DropDownOption<TargetEntityType> | null;
+  status?: string | DropDownOption<RescheduleStatus> | null;
 };
+
+export const rescheduleCustomerToId = (
+  customer?: DropDownOption<ICustomer> | null,
+): string | undefined => {
+  if (!customer?.value) return undefined;
+  const val = customer.value;
+  if (typeof val === "string") return val;
+  return val._id;
+};
+
+export const rescheduleFieldToId = <T extends string>(
+  val?: string | DropDownOption<T> | null,
+): T | undefined => {
+  if (!val) return undefined;
+  if (typeof val === "string") return val as T;
+  return val.value as T;
+};
+
+export const rescheduleFieldToLabel = <T extends string>(
+  val?: string | DropDownOption<T> | null,
+): string | undefined => {
+  if (!val) return undefined;
+  if (typeof val === "string") return val;
+  return val.label?.toString();
+};
+
+export const getTargetEntityTypeFromForm = (
+  v?: IRescheduleFormFields["targetEntityType"],
+): TargetEntityType | undefined => rescheduleFieldToId(v);
 
 export function parseRescheduleDate(iso?: string | null): Date | null {
   if (iso == null || String(iso).trim() === "") return null;

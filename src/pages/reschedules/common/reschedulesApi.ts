@@ -74,6 +74,7 @@ export const reschedulesApi = createApi({
         body: payload,
         method: "POST",
       }),
+      transformResponse: async (response: Response) => response.json(),
       invalidatesTags: ["IReschedule"],
     }),
     updateReschedule: builder.mutation<

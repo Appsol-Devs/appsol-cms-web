@@ -6,10 +6,13 @@ import { Calendar, Receipt, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
-import type {
-  ISubscription,
-  ISubscriptionFields,
+import {
+  subscriptionFieldToId,
+  subscriptionFieldToLabel,
+  type ISubscription,
+  type ISubscriptionFields,
 } from "../common/subscriptions";
+import { SUBSCRIPTION_STATUS_ENUM } from "@/lib/enums";
 import {
   useAddSubscriptionMutation,
   useLazyGetASubscriptionQuery,
@@ -42,7 +45,10 @@ const SubscriptionsForm = () => {
   const [getSelectedData, { isLoading: isGetting }] =
     useLazyGetASubscriptionQuery();
   const form = useForm<ISubscriptionFields>({
-    defaultValues: { autoRenew: true },
+    defaultValues: {
+      autoRenew: true,
+      status: SUBSCRIPTION_STATUS_ENUM.PENDING,
+    },
   });
   const { watch, getValues, reset } = form;
   const values = watch();
@@ -67,32 +73,36 @@ const SubscriptionsForm = () => {
   const resetFormWithData = (data: ISubscription) => {
     if (!data) return;
 
+    const customerId =
+      typeof data.customerId === "string"
+        ? data.customerId
+        : data.customer?._id;
+    const softwareId =
+      typeof data.softwareId === "string"
+        ? data.softwareId
+        : data.software?._id;
+    const subscriptionTypeId =
+      typeof data.subscriptionTypeId === "string"
+        ? data.subscriptionTypeId
+        : data.subscriptionType?._id;
+
     reset({
-      ...data,
-      customerId: data.customerId
+      customerId: customerId
         ? {
-            value: data.customerId,
+            value: customerId,
             label: data.customer?.name ?? "",
           }
         : undefined,
-      softwareId: data.softwareId
-        ? {
-            value: data.softwareId,
-            label: data.software?.name ?? "",
-          }
-        : undefined,
-      subscriptionTypeId: data.subscriptionTypeId
-        ? {
-            value: data.subscriptionTypeId,
-            label: data.subscriptionType?.name ?? "",
-          }
-        : undefined,
-      status: data.status
-        ? {
-            value: data.status,
-            label: mapStatusToLabel(data.status),
-          }
-        : undefined,
+      softwareId: softwareId ?? undefined,
+      subscriptionTypeId: subscriptionTypeId ?? undefined,
+      status: data.status ?? undefined,
+      startDate: data.startDate ?? undefined,
+      currentPeriodStart: data.currentPeriodStart ?? undefined,
+      currentPeriodEnd: data.currentPeriodEnd ?? undefined,
+      nextBillingDate: data.nextBillingDate ?? undefined,
+      amount: data.amount ?? undefined,
+      autoRenew: data.autoRenew ?? true,
+      notes: data.notes ?? undefined,
     });
   };
 
@@ -135,9 +145,18 @@ const SubscriptionsForm = () => {
 
     const requiredFields = [
       { field: data.customerId, message: "Customer is required." },
-      { field: data.softwareId, message: "Software is required." },
-      { field: data.subscriptionTypeId, message: "Subscription type is required." },
-      { field: data.status?.value, message: "Status is required." },
+      {
+        field: subscriptionFieldToId(data.softwareId),
+        message: "Software is required.",
+      },
+      {
+        field: subscriptionFieldToId(data.subscriptionTypeId),
+        message: "Subscription type is required.",
+      },
+      {
+        field: subscriptionFieldToId(data.status),
+        message: "Status is required.",
+      },
       { field: data.startDate, message: "Start date is required." },
       {
         field: data.currentPeriodStart,
@@ -180,10 +199,11 @@ const SubscriptionsForm = () => {
     }
 
     const payload = cleanPayload({
-      customerId: data.customerId?.value,
-      softwareId: data.softwareId?.value,
-      subscriptionTypeId: data.subscriptionTypeId?.value,
-      status: data.status?.value,
+      customerId: subscriptionFieldToId(data.customerId),
+      softwareId: subscriptionFieldToId(data.softwareId),
+      subscriptionTypeId: subscriptionFieldToId(data.subscriptionTypeId),
+      status:
+        subscriptionFieldToId(data.status) ?? SUBSCRIPTION_STATUS_ENUM.PENDING,
       startDate: data.startDate,
       currentPeriodStart: data.currentPeriodStart,
       currentPeriodEnd: data.currentPeriodEnd,
@@ -208,17 +228,19 @@ const SubscriptionsForm = () => {
         },
         {
           label: "Software",
-          value: values?.softwareId?.label as string,
+          value: subscriptionFieldToLabel(values?.softwareId),
           required: true,
         },
         {
           label: "Subscription Type",
-          value: values?.subscriptionTypeId?.label as string,
+          value: subscriptionFieldToLabel(values?.subscriptionTypeId),
           required: true,
         },
         {
           label: "Status",
-          value: values?.status?.label as string,
+          value:
+            subscriptionFieldToLabel(values?.status) ??
+            mapStatusToLabel(subscriptionFieldToId(values?.status)),
           required: true,
         },
       ],

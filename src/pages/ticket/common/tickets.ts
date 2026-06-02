@@ -10,6 +10,8 @@ const dropdownOptionSchema = z.object({
   value: z.string(),
 });
 
+const formDropdownFieldSchema = z.union([z.string(), dropdownOptionSchema]);
+
 export const ticketFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
   requestedDate: z.string().min(1, "Requested date and time is required"),
@@ -27,10 +29,52 @@ export const ticketFormSchema = z.object({
       const val = (v as { value?: string | { _id?: string } }).value;
       return typeof val === "string" ? !!val?.trim() : !!val?._id;
     }, { message: "Complaint is required" }),
-  assignedEngineerId: dropdownOptionSchema.optional(),
-  priority: dropdownOptionSchema.optional(),
-  status: dropdownOptionSchema.optional(),
+  assignedEngineerId: formDropdownFieldSchema.optional(),
+  priority: formDropdownFieldSchema.optional(),
+  status: formDropdownFieldSchema.optional(),
 });
+
+export const ticketFieldToId = (
+  val?: string | z.infer<typeof dropdownOptionSchema> | null,
+): string | undefined => {
+  if (!val) return undefined;
+  if (typeof val === "string") return val;
+  return val.value;
+};
+
+export const ticketFieldToLabel = (
+  val?: string | z.infer<typeof dropdownOptionSchema> | null,
+): string | undefined => {
+  if (!val) return undefined;
+  if (typeof val === "string") return val;
+  return val.label?.toString();
+};
+
+export const buildComplaintFormOption = (complaint: IComplaint) => ({
+  label: `${complaint.complaintCode ?? "—"} - ${complaint.customer?.name ?? "Unknown"}`,
+  value: complaint,
+});
+
+export const ticketComplaintToId = (
+  complaint?: ITicketFormFields["complaintId"],
+): string | undefined => {
+  if (!complaint) return undefined;
+  const rawValue = complaint.value;
+  if (typeof rawValue === "string") return rawValue;
+  return rawValue?._id;
+};
+
+export const ticketComplaintToLabel = (
+  complaint?: ITicketFormFields["complaintId"],
+  fallback?: IComplaint | null,
+): string | undefined => {
+  if (complaint?.label != null && complaint.label !== "") {
+    return String(complaint.label);
+  }
+  if (fallback) return buildComplaintFormOption(fallback).label;
+  const id = ticketComplaintToId(complaint);
+  return id ? id : undefined;
+};
 
 export type ITicketFormFields = z.infer<typeof ticketFormSchema>;
 export type TicketStatus = "open" | "fixed" | "closed" | "assigned" | "rejected";

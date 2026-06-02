@@ -1,5 +1,7 @@
 import type { ISoftware } from '@/pages/settings/common/settings';
 import type { ILoginResponse, IRole } from "@/pages/auth/login/common/login";
+import type { DropDownOption } from "@/components/DropdownComponent";
+import { z } from "zod";
 
 export interface ICustomer {
   customerCode?: string
@@ -97,7 +99,15 @@ export interface IVerifyOTPResponse {
   data: ILoginResponse;
 }
 
-import { z } from "zod";
+
+
+const customerSoftwareFieldSchema = z.union([
+  z.string().min(1, "Associated Software is required"),
+  z.object({
+    label: z.string(),
+    value: z.string().min(1, "Associated Software is required"),
+  }),
+]);
 
 export const customerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -105,17 +115,30 @@ export const customerSchema = z.object({
   phone: z.string().regex(/^\+?[0-9]{10,15}$/, "Please enter a valid phone number."),
   companyName: z.string().min(1, "Company Name is required"),
   location: z.string().min(1, "Location is required"),
-  softwareId: z.object(
-    {
-      label: z.string(),
-      value: z.string(),
-    },
-    { error: "Associated Software is required" }
-  ),
+  softwareId: customerSoftwareFieldSchema,
   dateConverted: z.string().nullish(),
   notes: z.string().optional(),
   status: z.string().optional(),
-  geolocation: z.any().optional(), 
+  geolocation: z.any().optional(),
 });
 
 export type ICustomerFields = z.infer<typeof customerSchema>;
+
+export type CustomerFormDropdownValue = string | DropDownOption<string>;
+
+export const customerFieldToId = (
+  val?: CustomerFormDropdownValue | null,
+): string | undefined => {
+  if (!val) return undefined;
+  if (typeof val === "string") return val;
+  if ("value" in val) return val.value;
+  return undefined;
+};
+
+export const customerFieldToLabel = (
+  val?: CustomerFormDropdownValue | null,
+): string | undefined => {
+  if (!val) return undefined;
+  if (typeof val === "string") return val;
+  return val.label?.toString();
+};
