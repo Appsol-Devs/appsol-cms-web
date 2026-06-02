@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import type { IComplaint } from "../common/complaints";
+import { COMPLAINT_STATUS_ENUM } from "@/lib/enums";
 import {
   useAddComplaintMutation,
   useLazyGetAComplaintQuery,
@@ -17,10 +18,26 @@ import ComplaintsFormContent from "./ComplaintsFormContent";
 
 export type IComplaintFields = Omit<IComplaint, "_id"> & {
   customerId?: DropDownOption<string>;
-  complaintTypeId?: DropDownOption<string>;
-  complaintCategoryId?: DropDownOption<string>;
-  relatedSoftwareId?: DropDownOption<string>;
-  status?: DropDownOption<string>;
+  complaintTypeId?: string | DropDownOption<string> | null;
+  complaintCategoryId?: string | DropDownOption<string> | null;
+  relatedSoftwareId?: string | DropDownOption<string> | null;
+  status?: string | DropDownOption<string> | null;
+};
+
+const toId = (
+  val?: string | DropDownOption<string> | null,
+): string | undefined => {
+  if (!val) return undefined;
+  if (typeof val === "string") return val;
+  return val.value;
+};
+
+const toLabel = (
+  val?: string | DropDownOption<string> | null,
+): string | undefined => {
+  if (!val) return undefined;
+  if (typeof val === "string") return val;
+  return val.label?.toString();
 };
 
 const ComplaintsForm = () => {
@@ -32,7 +49,11 @@ const ComplaintsForm = () => {
     useUpdateComplaintMutation();
   const [getSelectedData, { isLoading: isGetting }] =
     useLazyGetAComplaintQuery();
-  const form = useForm<IComplaintFields>();
+  const form = useForm<IComplaintFields>({
+    defaultValues: {
+      status: COMPLAINT_STATUS_ENUM.Open,
+    },
+  });
   const { watch, getValues, reset } = form;
   const values = watch();
 
@@ -60,27 +81,10 @@ const ComplaintsForm = () => {
       customerId: data.customer
         ? { label: data.customer.name ?? "", value: data.customer._id ?? "" }
         : undefined,
-      complaintTypeId: data.complaintType
-        ? {
-            label: data.complaintType.name ?? "",
-            value: data.complaintType._id ?? "",
-          }
-        : undefined,
-      complaintCategoryId: data.complaintCategory
-        ? {
-            label: data.complaintCategory.name ?? "",
-            value: data.complaintCategory._id ?? "",
-          }
-        : undefined,
-      relatedSoftwareId: data.relatedSoftware
-        ? {
-            label: data.relatedSoftware.name ?? "",
-            value: data.relatedSoftware._id ?? "",
-          }
-        : undefined,
-      status: data.status
-        ? { label: data.status, value: data.status }
-        : undefined,
+      complaintTypeId: data.complaintType?._id ?? undefined,
+      complaintCategoryId: data.complaintCategory?._id ?? undefined,
+      relatedSoftwareId: data.relatedSoftware?._id ?? undefined,
+      status: data.status ?? undefined,
     });
   };
 
@@ -123,15 +127,19 @@ const ComplaintsForm = () => {
 
     const requiredFields = [
       { field: data.customerId, message: "Customer is required." },
-      { field: data.complaintTypeId, message: "Complaint type is required." },
       {
-        field: data.complaintCategoryId,
+        field: toId(data.complaintTypeId),
+        message: "Complaint type is required.",
+      },
+      {
+        field: toId(data.complaintCategoryId),
         message: "Complaint category is required.",
       },
       {
-        field: data.relatedSoftwareId,
+        field: toId(data.relatedSoftwareId),
         message: "Related Software is required.",
       },
+      { field: toId(data.status), message: "Status is required." },
       { field: data.description, message: "Description is required." },
     ];
 
@@ -144,11 +152,11 @@ const ComplaintsForm = () => {
 
     const payload: IComplaint = cleanPayload({
       ...data,
-      customerId: data.customerId?.value,
-      complaintTypeId: data.complaintTypeId?.value,
-      complaintCategoryId: data.complaintCategoryId?.value,
-      relatedSoftwareId: data.relatedSoftwareId?.value,
-      status: data.status?.value,
+      customerId: toId(data.customerId),
+      complaintTypeId: toId(data.complaintTypeId),
+      complaintCategoryId: toId(data.complaintCategoryId),
+      relatedSoftwareId: toId(data.relatedSoftwareId),
+      status: toId(data.status) ?? COMPLAINT_STATUS_ENUM.Open,
     });
 
     // console.log(payload);
@@ -173,17 +181,17 @@ const ComplaintsForm = () => {
       data: [
         {
           label: "Complaint Type",
-          value: values?.complaintTypeId?.label as string,
+          value: toLabel(values?.complaintTypeId),
           required: true,
         },
         {
           label: "Complaint Category",
-          value: values?.complaintCategoryId?.label as string,
+          value: toLabel(values?.complaintCategoryId),
           required: true,
         },
         {
           label: "Related Software",
-          value: values?.relatedSoftwareId?.label as string,
+          value: toLabel(values?.relatedSoftwareId),
           required: true,
         },
       ],
