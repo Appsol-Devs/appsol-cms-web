@@ -1,6 +1,13 @@
 "use client";
 
-import { Search, Menu, Settings, LogOut, User, CalendarClock } from "lucide-react";
+import {
+  Search,
+  Menu,
+  Settings,
+  LogOut,
+  User,
+  CalendarClock,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { allRoutes } from "@/utils/routes";
 import { Button } from "@/components/ui/button";
@@ -16,17 +23,27 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Sidebar from "../../sidebar/component/Sidebar";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "@/store";
 import Notifications from "../../notification/component/Notifications";
 import SidebarToggler from "../../sidebar/component/SidebarToggler";
+import { logoutUser } from "@/pages/auth/login/common/loginSlice";
 
 function Header() {
   const navigate = useNavigate();
   const activeUser = useSelector((state: RootState) => state.user);
+  const dispatch = useDispatch();
   const isCollapsed: boolean = useSelector(
     (state: RootState) => state.sidebar.isSidebarToggled,
   );
+
+  const handleUserLogout = () => {
+    dispatch(logoutUser());
+    localStorage.clear();
+    navigate(allRoutes.LOGIN);
+    console.log("User logged out successfully");
+  };
+
   const getInitials = () => {
     const userData = activeUser;
 
@@ -121,15 +138,23 @@ function Header() {
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() =>
+                  navigate(`${allRoutes.PORTAL}${allRoutes.PROFILE}`)
+                }
+              >
                 <User className="mr-2 h-4 w-4" /> Profile
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <Settings className="mr-2 h-4 w-4" /> Settings
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-red-500 cursor-pointer hover:bg-red-50 dark:hover:bg-red-950">
-                <LogOut className="mr-2 h-4 w-4" /> Logout
+              <DropdownMenuItem
+                className="text-red-500 cursor-pointer hover:bg-red-50 dark:hover:bg-red-950"
+                onClick={() => handleUserLogout()}
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Logout
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

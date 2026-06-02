@@ -61,6 +61,7 @@ import SubscriptionReminders from "@/pages/subscription-reminders/component/Subs
 import CustomerSetups from "@/pages/customer-setups/CustomerSetups";
 import CustomerSetupForm from "@/pages/customer-setups/CustomerSetupForm";
 import CustomerSetupView from "@/pages/customer-setups/CustomerSetupView";
+import UserProfile from "@/pages/userProfile/component/UserProfile";
 
 const PrivateRoutes = () => {
   return (
@@ -103,14 +104,8 @@ const PrivateRoutes = () => {
       />
       <Route path={allRoutes.TICKETS} element={<Tickets />} />
       <Route path={allRoutes.ADD_TICKET} element={<TicketForm />} />
-      <Route
-        path={allRoutes.UPDATE_TICKET(":id")}
-        element={<TicketForm />}
-      />
-      <Route
-        path={allRoutes.VIEW_TICKET(":id")}
-        element={<TicketView />}
-      />
+      <Route path={allRoutes.UPDATE_TICKET(":id")} element={<TicketForm />} />
+      <Route path={allRoutes.VIEW_TICKET(":id")} element={<TicketView />} />
       <Route path={allRoutes.RESCHEDULES} element={<Reschedules />} />
       <Route
         path={allRoutes.RESCHEDULES_SCHEDULER}
@@ -194,12 +189,8 @@ const PrivateRoutes = () => {
       <Route path={allRoutes.DELETE_ROLE(":id")} element={<RolesForm />} />
       <Route path={allRoutes.VIEW_ROLE(":id")} element={<RolesView />} />
 
-
       <Route path={allRoutes.OUT_REACH_TYPES} element={<OutReach />} />
-      <Route
-        path={allRoutes.ADD_OUTREACH_TYPE}
-        element={<OutReachForm />}
-      />
+      <Route path={allRoutes.ADD_OUTREACH_TYPE} element={<OutReachForm />} />
       <Route
         path={allRoutes.UPDATE_OUTREACH_TYPE(":id")}
         element={<OutReachForm />}
@@ -233,7 +224,10 @@ const PrivateRoutes = () => {
         element={<SubscriptionReminders />}
       />
       <Route path={allRoutes.SUBSCRIPTIONS} element={<Subscriptions />} />
-      <Route path={allRoutes.ADD_SUBSCRIPTION} element={<SubscriptionsForm />} />
+      <Route
+        path={allRoutes.ADD_SUBSCRIPTION}
+        element={<SubscriptionsForm />}
+      />
       <Route
         path={allRoutes.UPDATE_SUBSCRIPTION(":id")}
         element={<SubscriptionsForm />}
@@ -247,28 +241,40 @@ const PrivateRoutes = () => {
         element={<PaymentForm />}
       />
       <Route path={allRoutes.PAYMENTS} element={<Payments />} />
-      <Route
-        path={allRoutes.VIEW_PAYMENT(":id")}
-        element={<PaymentsView />}
-      />
+      <Route path={allRoutes.VIEW_PAYMENT(":id")} element={<PaymentsView />} />
       <Route
         path={allRoutes.ALL_NOTIFICATIONS}
         element={<AllNotifications />}
       />
 
       <Route path={allRoutes.FEATURE_REQUESTS} element={<FeatureRequest />} />
-      <Route path={allRoutes.ADD_FEATURE_REQUEST} element={<FeatureRequestForm />} />
+      <Route
+        path={allRoutes.ADD_FEATURE_REQUEST}
+        element={<FeatureRequestForm />}
+      />
       <Route
         path={allRoutes.UPDATE_FEATURE_REQUEST(":id")}
         element={<FeatureRequestForm />}
       />
-      <Route path={allRoutes.VIEW_FEATURE_REQUEST(":id")} element={<ViewFeatureRequest />} />
-      
-      <Route path={allRoutes.CUSTOMER_SETUPS} element={<CustomerSetups />} />
-      <Route path={allRoutes.ADD_CUSTOMER_SETUP} element={<CustomerSetupForm />} />
-      <Route path={allRoutes.UPDATE_CUSTOMER_SETUP(":id")} element={<CustomerSetupForm />} />
-      <Route path={allRoutes.VIEW_CUSTOMER_SETUP(":id")} element={<CustomerSetupView />} />
+      <Route
+        path={allRoutes.VIEW_FEATURE_REQUEST(":id")}
+        element={<ViewFeatureRequest />}
+      />
 
+      <Route path={allRoutes.CUSTOMER_SETUPS} element={<CustomerSetups />} />
+      <Route
+        path={allRoutes.ADD_CUSTOMER_SETUP}
+        element={<CustomerSetupForm />}
+      />
+      <Route
+        path={allRoutes.UPDATE_CUSTOMER_SETUP(":id")}
+        element={<CustomerSetupForm />}
+      />
+      <Route
+        path={allRoutes.VIEW_CUSTOMER_SETUP(":id")}
+        element={<CustomerSetupView />}
+      />
+      <Route path={allRoutes.PROFILE} element={<UserProfile />} />
 
       <Route
         path={`${allRoutes.SETTINGS}/*`}
