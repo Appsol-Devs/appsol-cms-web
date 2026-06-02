@@ -11,16 +11,24 @@ import {
   useLazyGetALeadQuery,
   useUpdateLeadMutation,
 } from "../common/leadsApi";
-import type { ILead } from "../common/leads";
+import {
+  leadFieldToId,
+  leadFieldToLabel,
+  type ILead,
+  type LeadFormDropdownValue,
+} from "../common/leads";
 import LeadsFormContent from "./LeadsFormContent";
-import type { DropDownOption } from "@/components/DropdownComponent";
+import { LEAD_PRIORITY_ENUM, LEAD_STATUS_ENUM } from "@/lib/enums";
 
-export type ILeadFields = Omit<ILead, "_id" | "leadStage" | "nextStep"> & {
-  nextStep?: DropDownOption<string>;
-  leadStage?: DropDownOption<string>;
-  software?: DropDownOption<string>;
-  priority?: DropDownOption<string>;
-  leadStatus?: DropDownOption<string>;
+export type ILeadFields = Omit<
+  ILead,
+  "_id" | "leadStage" | "nextStep" | "software"
+> & {
+  nextStep?: LeadFormDropdownValue;
+  leadStage?: LeadFormDropdownValue;
+  software?: LeadFormDropdownValue;
+  priority?: LeadFormDropdownValue;
+  leadStatus?: LeadFormDropdownValue;
 };
 
 const LeadsForm = () => {
@@ -29,7 +37,12 @@ const LeadsForm = () => {
   const [createMutation, { isLoading: isCreating }] = useAddLeadMutation();
   const [updateMutation, { isLoading: isUpdating }] = useUpdateLeadMutation();
   const [getSelectedData, { isLoading: isGetting }] = useLazyGetALeadQuery();
-  const form = useForm<ILeadFields>();
+  const form = useForm<ILeadFields>({
+    defaultValues: {
+      priority: LEAD_PRIORITY_ENUM.MEDIUM,
+      leadStatus: LEAD_STATUS_ENUM.NEW,
+    },
+  });
   const { watch, getValues, reset } = form;
   const values = watch();
 
@@ -51,34 +64,26 @@ const LeadsForm = () => {
 
   const resetFormWithData = (data: ILead) => {
     if (!data) return;
+
+    const softwareId =
+      typeof data.softwareId === "string"
+        ? data.softwareId
+        : data.software?._id;
+
     reset({
-      ...data,
-      name: data.name,
-      email: data.email,
-      phone: data.phone,
-      companyName: data.companyName,
-      leadSource: data.leadSource,
-      location: data.location,
-      notes: data.notes,
-      initialEnquiryDate: data.initialEnquiryDate,
-      leadStage: data.leadStage
-        ? { label: data.leadStage.name ?? "", value: data.leadStage._id ?? "" }
-        : undefined,
-      nextStep: data.nextStep
-        ? { label: data.nextStep.name ?? "", value: data.nextStep._id ?? "" }
-        : undefined,
-      priority: data.priority
-        ? { label: data.priority, value: data.priority }
-        : undefined,
-      leadStatus: data.leadStatus
-        ? { label: data.leadStatus, value: data.leadStatus }
-        : undefined,
-      software: data.softwareId
-        ? {
-            label: data.software?.name ?? "",
-            value: data.softwareId,
-          }
-        : undefined,
+      name: data.name ?? "",
+      email: data.email ?? "",
+      phone: data.phone ?? "",
+      companyName: data.companyName ?? "",
+      leadSource: data.leadSource ?? "",
+      location: data.location ?? "",
+      notes: data.notes ?? "",
+      initialEnquiryDate: data.initialEnquiryDate ?? "",
+      leadStage: data.leadStage?._id ?? undefined,
+      nextStep: data.nextStep?._id ?? undefined,
+      priority: data.priority ?? undefined,
+      leadStatus: data.leadStatus ?? undefined,
+      software: softwareId ?? undefined,
     });
   };
 
@@ -133,11 +138,23 @@ const LeadsForm = () => {
       { field: trim(data.email), message: "Email is required." },
       { field: trim(data.companyName), message: "Company Name is required." },
       { field: trim(data.leadSource), message: "Lead Source is required." },
-      { field: data.software?.value, message: "Software is required." },
+      {
+        field: leadFieldToId(data.software),
+        message: "Software is required.",
+      },
       { field: data.initialEnquiryDate, message: "Initial Enquiry Date is required." },
-      { field: data.nextStep?.value, message: "Next Step is required." },
-      { field: data.leadStatus?.value, message: "Lead Status is required." },
-      { field: data.priority?.value, message: "Priority is required." },
+      {
+        field: leadFieldToId(data.nextStep),
+        message: "Next Step is required.",
+      },
+      {
+        field: leadFieldToId(data.leadStatus),
+        message: "Lead Status is required.",
+      },
+      {
+        field: leadFieldToId(data.priority),
+        message: "Priority is required.",
+      },
     ];
 
     for (const { field, message } of requiredFields) {
@@ -170,7 +187,7 @@ const LeadsForm = () => {
     }
 
     const shouldSendLeadStatus = !selectedData?.isConverted;
-    const leadStatusValue = data.leadStatus?.value;
+    const leadStatusValue = leadFieldToId(data.leadStatus);
 
     const payload: ILead = cleanPayload({
       name: trim(data.name),
@@ -180,12 +197,13 @@ const LeadsForm = () => {
       notes: trim(data.notes),
       location: trim(data.location),
       leadSource: trim(data.leadSource),
-      softwareId: data.software?.value,
+      softwareId: leadFieldToId(data.software),
       initialEnquiryDate: data.initialEnquiryDate,
-      leadStage: data.leadStage?.value,
-      nextStep: data.nextStep?.value,
-      priority: data.priority?.value,
-      ...(shouldSendLeadStatus && leadStatusValue && { leadStatus: leadStatusValue }),
+      leadStage: leadFieldToId(data.leadStage),
+      nextStep: leadFieldToId(data.nextStep),
+      priority: leadFieldToId(data.priority),
+      ...(shouldSendLeadStatus &&
+        leadStatusValue && { leadStatus: leadStatusValue }),
     });
 
     handleDataSubmission(payload);
@@ -210,7 +228,7 @@ const LeadsForm = () => {
         },
         {
           label: "Software",
-          value: values?.software?.label as string,
+          value: leadFieldToLabel(values?.software),
           required: true,
         },
       ],
@@ -246,12 +264,12 @@ const LeadsForm = () => {
       data: [
         {
           label: "Current Stage",
-          value: values?.leadStage?.label as string,
+          value: leadFieldToLabel(values?.leadStage),
           required: false,
         },
         {
           label: "Next Stage",
-          value: values?.nextStep?.label as string,
+          value: leadFieldToLabel(values?.nextStep),
           required: true,
         },
         {
@@ -270,12 +288,12 @@ const LeadsForm = () => {
       data: [
         {
           label: "Priority",
-          value: values?.priority?.label as string,
+          value: leadFieldToLabel(values?.priority),
           required: true,
         },
         {
           label: "Status",
-          value: values?.leadStatus?.label as string,
+          value: leadFieldToLabel(values?.leadStatus),
           required: true,
         },
       ],

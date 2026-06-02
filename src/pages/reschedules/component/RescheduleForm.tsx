@@ -7,7 +7,13 @@ import { CalendarClock } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import type { IRescheduleFormFields, TargetEntityType } from "../common/reschedules";
+import {
+  getTargetEntityTypeFromForm,
+  rescheduleCustomerToId,
+  rescheduleFieldToId,
+  rescheduleFieldToLabel,
+  type IRescheduleFormFields,
+} from "../common/reschedules";
 import type { ICustomer } from "@/pages/customer/common/customers";
 import {
   useAddRescheduleMutation,
@@ -19,14 +25,6 @@ import RescheduleFormContent, {
   TARGET_ENTITY_TYPE_OPTIONS,
 } from "./RescheduleFormContent";
 import { allRoutes } from "@/utils/routes";
-
-function getTargetEntityTypeFromForm(
-  v: IRescheduleFormFields["targetEntityType"],
-): TargetEntityType | undefined {
-  if (v == null) return undefined;
-  if (typeof v === "string") return v as TargetEntityType;
-  return v.value;
-}
 
 function validateFromToRangeOrder(from: string, to: string): boolean {
   const fromMs = new Date(from).getTime();
@@ -60,8 +58,8 @@ const RescheduleForm = () => {
       newDateTime: "",
       from: "",
       to: "",
-      status: { label: "pending", value: "pending" },
-    } as any,
+      status: "pending",
+    },
   });
   const { watch, getValues, reset } = form;
   const values = watch();
@@ -83,39 +81,33 @@ const RescheduleForm = () => {
     if (!data) return;
     const fromVal = data.from?.trim() ? data.from : data.newDateTime ?? "";
     const toVal = data.to?.trim() ? data.to : data.newDateTime ?? "";
+    const customer =
+      data.customer && typeof data.customer !== "string"
+        ? (data.customer as ICustomer)
+        : undefined;
+
     reset({
-      ...data,
+      title: data.title ?? "",
+      reason: data.reason ?? "",
+      originalDateTime: data.originalDateTime ?? "",
+      newDateTime: data.newDateTime ?? "",
       from: fromVal,
       to: toVal,
-      customerId:
-        data.customerId && typeof data.customer !== "string"
+      customerId: customer
+        ? {
+            label: `${customer.name ?? ""}${
+              customer.companyName ? ` - ${customer.companyName}` : ""
+            }`,
+            value: customer,
+          }
+        : data.customerId
           ? {
-              label: `${(data.customer as any)?.name ?? ""}${
-                (data.customer as any)?.companyName
-                  ? " - " + (data.customer as any).companyName
-                  : ""
-              }`,
-              value: data.customer as ICustomer,
+              label: data.customerId,
+              value: { _id: data.customerId } as ICustomer,
             }
-          : data.customerId
-            ? { label: data.customerId, value: { _id: data.customerId } as any }
-            : undefined,
-      targetEntityType: data.targetEntityType
-        ? (() => {
-            const opt = TARGET_ENTITY_TYPE_OPTIONS.find(
-              (o) => o.value === data.targetEntityType,
-            );
-            return opt
-              ? { label: opt.label, value: opt.value }
-              : {
-                  label: data.targetEntityType,
-                  value: data.targetEntityType as TargetEntityType,
-                };
-          })()
-        : undefined,
-      status: data.status
-        ? { label: data.status, value: data.status }
-        : { label: "pending", value: "pending" },
+          : undefined,
+      targetEntityType: data.targetEntityType ?? undefined,
+      status: data.status ?? "pending",
     });
   };
 
@@ -162,7 +154,7 @@ const RescheduleForm = () => {
 
     const requiredFields: { field: unknown; message: string }[] = [
       { field: data.title?.trim(), message: "Title is required." },
-      { field: data.customerId?.value?._id, message: "Customer is required." },
+      { field: rescheduleCustomerToId(data.customerId), message: "Customer is required." },
       {
         field: getTargetEntityTypeFromForm(data.targetEntityType),
         message: "Target Entity Type is required.",
@@ -171,7 +163,7 @@ const RescheduleForm = () => {
       { field: data.newDateTime, message: "New Date & Time is required." },
       { field: data.from, message: "From date & time is required." },
       { field: data.to, message: "To date & time is required." },
-      { field: data.status?.value, message: "Status is required." },
+      { field: rescheduleFieldToId(data.status), message: "Status is required." },
       { field: data.reason?.trim(), message: "Reason is required." },
     ];
 
@@ -188,7 +180,7 @@ const RescheduleForm = () => {
 
     const payload = cleanPayload({
       title: data.title?.trim(),
-      customerId: data.customerId?.value?._id,
+      customerId: rescheduleCustomerToId(data.customerId),
       targetEntityType: entityType,
       reason: data.reason?.trim() || undefined,
       originalDateTime: data.originalDateTime,
@@ -196,7 +188,7 @@ const RescheduleForm = () => {
       from: data.from,
       to: data.to,
       colorCode: getTargetEntityTypeColor(entityType) ?? undefined,
-      status: data.status?.value,
+      status: rescheduleFieldToId(data.status) ?? "pending",
     });
 
     handleDataSubmission(payload);
@@ -207,7 +199,7 @@ const RescheduleForm = () => {
 
     const requiredFields: { field: unknown; message: string }[] = [
       { field: data.title?.trim(), message: "Title is required." },
-      { field: data.customerId?.value?._id, message: "Customer is required." },
+      { field: rescheduleCustomerToId(data.customerId), message: "Customer is required." },
       {
         field: getTargetEntityTypeFromForm(data.targetEntityType),
         message: "Target Entity Type is required.",
@@ -216,7 +208,7 @@ const RescheduleForm = () => {
       { field: data.newDateTime, message: "New Date & Time is required." },
       { field: data.from, message: "From date & time is required." },
       { field: data.to, message: "To date & time is required." },
-      { field: data.status?.value, message: "Status is required." },
+      { field: rescheduleFieldToId(data.status), message: "Status is required." },
       { field: data.reason?.trim(), message: "Reason is required." },
     ];
 
@@ -274,7 +266,11 @@ const RescheduleForm = () => {
           value: formatMutationSummaryDateTime(values?.to),
           required: true,
         },
-        { label: "Status", value: (values?.status?.label as string) || "", required: true },
+        {
+          label: "Status",
+          value: rescheduleFieldToLabel(values?.status) ?? "",
+          required: true,
+        },
       ],
     },
   ];

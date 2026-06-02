@@ -11,7 +11,7 @@ import { useGenerateDropdownOptionsFromEnum } from "@/lib/helpers";
 import { SUBSCRIPTION_STATUS_ENUM } from "@/lib/enums";
 import { Calendar, Receipt, User } from "lucide-react";
 import { Controller, type UseFormReturn } from "react-hook-form";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { DropDownOption } from "@/components/DropdownComponent";
 import type { ICustomer } from "@/pages/customer/common/customers";
 import { useLazyGetCustomersQuery } from "@/pages/customer/common/customersApi";
@@ -24,6 +24,7 @@ import {
   useLazyGetSubscriptionTypesQuery,
 } from "@/pages/settings/common/settingsApi";
 import type { ISubscriptionFields } from "../common/subscriptions";
+import { subscriptionFieldToId } from "../common/subscriptions";
 
 interface IField {
   isLoading?: boolean;
@@ -31,8 +32,9 @@ interface IField {
   isUpdate?: boolean;
 }
 
-const SubscriptionsFormContent = ({ isLoading, form }: IField) => {
+const SubscriptionsFormContent = ({ isLoading, form, isUpdate }: IField) => {
   const { control, register, watch, setValue } = form;
+  const skipInitialPeriodCalc = useRef(isUpdate);
 
   const [getCustomers] = useLazyGetCustomersQuery();
   const [getSoftwares] = useLazyGetSoftwaresQuery();
@@ -99,15 +101,27 @@ const SubscriptionsFormContent = ({ isLoading, form }: IField) => {
       });
   }, []);
 
-  const subscriptionTypeId = watch("subscriptionTypeId")?.value;
+  const subscriptionTypeId = subscriptionFieldToId(
+    watch("subscriptionTypeId"),
+  );
   const startDate = watch("startDate");
 
   useEffect(() => {
     if (!subscriptionTypeId || !startDate) return;
+
+    if (skipInitialPeriodCalc.current) {
+      skipInitialPeriodCalc.current = false;
+      return;
+    }
+
     const subscriptionType = subscriptionTypesMap.get(subscriptionTypeId);
     const durationInMonths = subscriptionType?.durationInMonths ?? 1;
     const start = new Date(startDate);
+    if (Number.isNaN(start.getTime())) return;
+
     const periodEnd = addMonths(start, durationInMonths);
+    if (Number.isNaN(periodEnd.getTime())) return;
+
     setValue("currentPeriodStart", startDate);
     setValue("currentPeriodEnd", periodEnd.toISOString());
     setValue("nextBillingDate", periodEnd.toISOString());
@@ -202,7 +216,9 @@ const SubscriptionsFormContent = ({ isLoading, form }: IField) => {
                   required
                   disabled={isLoading}
                   defaultDate={
-                    field.value ? new Date(field.value) : undefined
+                    field.value && !Number.isNaN(new Date(field.value).getTime())
+                      ? new Date(field.value)
+                      : undefined
                   }
                   onChange={(date) =>
                     field.onChange(date ? date.toISOString() : "")
@@ -227,7 +243,9 @@ const SubscriptionsFormContent = ({ isLoading, form }: IField) => {
                   required
                   disabled={isLoading}
                   defaultDate={
-                    field.value ? new Date(field.value) : undefined
+                    field.value && !Number.isNaN(new Date(field.value).getTime())
+                      ? new Date(field.value)
+                      : undefined
                   }
                   onChange={(date) =>
                     field.onChange(date ? date.toISOString() : "")
@@ -255,7 +273,9 @@ const SubscriptionsFormContent = ({ isLoading, form }: IField) => {
                   required
                   disabled
                   defaultDate={
-                    field.value ? new Date(field.value) : undefined
+                    field.value && !Number.isNaN(new Date(field.value).getTime())
+                      ? new Date(field.value)
+                      : undefined
                   }
                   onChange={(date) =>
                     field.onChange(date ? date.toISOString() : "")
@@ -283,7 +303,9 @@ const SubscriptionsFormContent = ({ isLoading, form }: IField) => {
                   required
                   disabled
                   defaultDate={
-                    field.value ? new Date(field.value) : undefined
+                    field.value && !Number.isNaN(new Date(field.value).getTime())
+                      ? new Date(field.value)
+                      : undefined
                   }
                   onChange={(date) =>
                     field.onChange(date ? date.toISOString() : "")

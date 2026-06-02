@@ -13,7 +13,13 @@ import { lookup_params } from "@/lib/api";
 import type { ICustomer } from "@/pages/customer/common/customers";
 import { useLazyGetCustomersQuery } from "@/pages/customer/common/customersApi";
 import type { IRescheduleFormFields, TargetEntityType } from "../common/reschedules";
+import { parseRescheduleDate } from "../common/reschedules";
 import { getTargetEntityTypeColor } from "@/lib/enums";
+
+const toDatePickerDefault = (iso?: string) => {
+  const d = parseRescheduleDate(iso);
+  return d ?? undefined;
+};
 
 interface Props {
   isLoading?: boolean;
@@ -133,7 +139,7 @@ const RescheduleFormContent = ({ isLoading, form }: Props) => {
                   placeholder="Select original date and time"
                   required
                   disabled={isLoading}
-                  defaultDate={field.value ? new Date(field.value) : undefined}
+                  defaultDate={toDatePickerDefault(field.value)}
                   onChange={(date) => field.onChange(date ? date.toISOString() : "")}
                 />
               </div>
@@ -153,7 +159,7 @@ const RescheduleFormContent = ({ isLoading, form }: Props) => {
                   placeholder="Select new date and time"
                   required
                   disabled={isLoading}
-                  defaultDate={field.value ? new Date(field.value) : undefined}
+                  defaultDate={toDatePickerDefault(field.value)}
                   onChange={(date) => field.onChange(date ? date.toISOString() : "")}
                 />
               </div>
@@ -176,7 +182,7 @@ const RescheduleFormContent = ({ isLoading, form }: Props) => {
                   placeholder="Range start date and time"
                   required
                   disabled={isLoading}
-                  defaultDate={field.value ? new Date(field.value) : undefined}
+                  defaultDate={toDatePickerDefault(field.value)}
                   onChange={(date) => field.onChange(date ? date.toISOString() : "")}
                 />
               </div>
@@ -199,7 +205,7 @@ const RescheduleFormContent = ({ isLoading, form }: Props) => {
                   placeholder="Range end date and time"
                   required
                   disabled={isLoading}
-                  defaultDate={field.value ? new Date(field.value) : undefined}
+                  defaultDate={toDatePickerDefault(field.value)}
                   onChange={(date) => field.onChange(date ? date.toISOString() : "")}
                 />
               </div>
@@ -209,6 +215,7 @@ const RescheduleFormContent = ({ isLoading, form }: Props) => {
           <DropDownComponent
             control={control}
             name="status"
+            required
             title="Status"
             label="Select status"
             options={statusOptions}

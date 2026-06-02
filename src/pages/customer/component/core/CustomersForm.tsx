@@ -2,7 +2,13 @@ import type { ISummarySection } from "@/components/form/MutationFormSummary";
 import MutationFormTemplate from "@/components/form/MutationFormTemplate";
 import { showToast } from "@/components/ui/CustomToast";
 import { cleanPayload } from "@/lib/helpers";
-import { customerSchema, type ICustomer, type ICustomerFields } from "@/pages/customer/common/customers";
+import {
+  customerFieldToId,
+  customerFieldToLabel,
+  customerSchema,
+  type ICustomer,
+  type ICustomerFields,
+} from "@/pages/customer/common/customers";
 import { BookOpenText, Home } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -12,8 +18,16 @@ import {
   useLazyGetACustomerQuery,
   useUpdateCustomerMutation,
 } from "../../common/customersApi";
+import { useConvertLeadMutation } from "@/pages/leads/common/leadsApi";
 import CustomersFormContent from "./CustomersFormContent";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { allRoutes } from "@/utils/routes";
+
+type CustomerFormLocationState = {
+  customerData?: Partial<ICustomer>;
+  fromLeadId?: string;
+  leadAlreadyConverted?: boolean;
+};
 // export type ICustomerFields = Omit<ICustomer, "_id"> & {
 //   name?: string;
 //   companyName?: string;
@@ -35,24 +49,31 @@ const CustomersForm = () => {
   const [updateCustomer, { isLoading: isUpdating }] =
     useUpdateCustomerMutation();
   const location = useLocation();
+  const locationState = location.state as CustomerFormLocationState | null;
   const [getACustomer, { isLoading: isGetting }] = useLazyGetACustomerQuery();
-  // const form = useForm<ICustomerFields>();
-  const existingData = location.state?.customerData as ICustomer | undefined;
+  const [convertLead] = useConvertLeadMutation();
+  const existingData = locationState?.customerData;
+  const fromLeadId = locationState?.fromLeadId;
+  const leadAlreadyConverted = locationState?.leadAlreadyConverted ?? false;
+
   const formattedDefaultValues: Partial<ICustomerFields> = existingData
     ? {
-      name: existingData.name,
-      companyName: existingData.companyName,
-      email: existingData.email,
-      phone: existingData.phone,
-      location: existingData.location,
-      dateConverted: existingData.dateConverted,
-      notes: existingData.notes,
-      status: existingData.status,
-      geolocation: existingData.geolocation,
-      softwareId: existingData.software
-        ? { label: existingData.software.name || "", value: existingData.software._id || "" }
-        : undefined,
-    }
+        name: existingData.name ?? "",
+        companyName: existingData.companyName ?? "",
+        email: existingData.email ?? "",
+        phone: existingData.phone ?? "",
+        location: existingData.location ?? "",
+        dateConverted:
+          existingData.dateConverted ??
+          new Date().toISOString().split("T")[0],
+        notes: existingData.notes ?? "",
+        status: existingData.status ?? "active",
+        geolocation: existingData.geolocation,
+        softwareId:
+          existingData.softwareId ??
+          existingData.software?._id ??
+          undefined,
+      }
     : {};
   const form = useForm<ICustomerFields>({
     resolver: zodResolver(customerSchema),
@@ -82,20 +103,23 @@ const CustomersForm = () => {
   };
   const resetFormWithData = (data: ICustomer) => {
     if (!data) return;
+
+    const softwareId =
+      typeof data.softwareId === "string"
+        ? data.softwareId
+        : data.software?._id;
+
     reset({
-      ...data,
-      name: data.name,
-      companyName: data.companyName,
-      email: data.email,
-      phone: data.phone,
-      location: data.location,
-      dateConverted: data.dateConverted,
-      notes: data.notes,
-      status: data.status,
+      name: data.name ?? "",
+      companyName: data.companyName ?? "",
+      email: data.email ?? "",
+      phone: data.phone ?? "",
+      location: data.location ?? "",
+      dateConverted: data.dateConverted ?? undefined,
+      notes: data.notes ?? undefined,
+      status: data.status ?? undefined,
       geolocation: data.geolocation,
-      softwareId: data.software
-        ? { label: data.software.name || "", value: data.software._id || "" }
-        : undefined,
+      softwareId: softwareId ?? undefined,
     });
   };
 
@@ -111,6 +135,11 @@ const CustomersForm = () => {
     }
   }, [selectedCustomer]);
 
+  useEffect(() => {
+    if (id || !existingData) return;
+    reset(formattedDefaultValues);
+  }, [id, existingData, reset]);
+
   const handleDataSubmission = async (payload: ICustomer) => {
     if (!payload) return;
     try {
@@ -119,14 +148,35 @@ const CustomersForm = () => {
         : await createNewCustomer(payload).unwrap();
 
       if (res) {
+        if (!id && fromLeadId && !leadAlreadyConverted) {
+          try {
+            await convertLead(fromLeadId).unwrap();
+          } catch (convertError) {
+            console.error("Customer created but lead convert failed", convertError);
+            showToast({
+              title: "Warning",
+              message:
+                "Customer was saved, but linking the lead as converted failed.",
+              type: "info",
+            });
+          }
+        }
+
         showToast({
           title: "Success",
           message: id
             ? "Customer updated successfully."
-            : "Customer created successfully.",
+            : fromLeadId
+              ? "Customer created from lead successfully."
+              : "Customer created successfully.",
           type: "success",
         });
-        navigate(-1);
+
+        if (!id && res._id) {
+          navigate(allRoutes.PORTAL + allRoutes.VIEW_CUSTOMER(res._id));
+        } else {
+          navigate(-1);
+        }
       }
     } catch (error) {
       if (!error) return;
@@ -145,7 +195,8 @@ const submitData = handleSubmit(
       location: data.location,
       geolocation: data.geolocation,
       status: data.status,
-      softwareId: data.softwareId?.value,
+      softwareId: customerFieldToId(data.softwareId),
+      ...(fromLeadId && { leadId: fromLeadId }),
     });
 
     handleDataSubmission(payload);
@@ -192,8 +243,8 @@ const submitData = handleSubmit(
         },
         {
           label: "Related Software",
-          value: values?.softwareId?.label as string,
-        }
+          value: customerFieldToLabel(values?.softwareId),
+        },
         // {
         //   label:"Geolocation",
         //   value: values?.geolocation as string,
@@ -209,9 +260,16 @@ const submitData = handleSubmit(
       <MutationFormTemplate<ICustomerFields>
         form={form}
         pageSummary={{
-          title: id ? "Update Customer" : "Create New Customer",
-          description: `Enter all the details of the customer you want to ${id ? "update" : "create"
-            }.`,
+          title: id
+            ? "Update Customer"
+            : fromLeadId
+              ? "Create Customer from Lead"
+              : "Create New Customer",
+          description: fromLeadId
+            ? "Review and complete the customer profile converted from this lead."
+            : `Enter all the details of the customer you want to ${
+                id ? "update" : "create"
+              }.`,
           icon: BookOpenText,
         }}
         formContent={

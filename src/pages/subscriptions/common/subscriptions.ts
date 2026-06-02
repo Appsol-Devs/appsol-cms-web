@@ -59,8 +59,26 @@ export type ISubscriptionFields = Omit<
   ISubscription,
   "_id" | "customer" | "software" | "subscriptionType" | "lastPayment"
 > & {
-  customerId?: DropDownOption<string>;
-  softwareId?: DropDownOption<string>;
-  subscriptionTypeId?: DropDownOption<string>;
-  status?: DropDownOption<string>;
+  customerId?: DropDownOption<string> | null;
+  softwareId?: string | DropDownOption<string> | null;
+  subscriptionTypeId?: string | DropDownOption<string> | null;
+  status?: string | DropDownOption<string> | null;
+};
+
+export const subscriptionFieldToId = (
+  val?: string | DropDownOption<string> | { _id?: string } | null,
+): string | undefined => {
+  if (!val) return undefined;
+  if (typeof val === "string") return val;
+  if ("value" in val) return val.value;
+  if ("_id" in val) return val._id;
+  return undefined;
+};
+
+export const subscriptionFieldToLabel = (
+  val?: string | DropDownOption<string> | null,
+): string | undefined => {
+  if (!val) return undefined;
+  if (typeof val === "string") return val;
+  return val.label?.toString();
 };

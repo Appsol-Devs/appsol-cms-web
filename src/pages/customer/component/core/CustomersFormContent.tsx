@@ -40,7 +40,7 @@ const CustomersFormContent = ({ isLoading, form }: IField) => {
   useEffect(() => {
     fetchSoftwares();
   }, []);
-console.log(errors)
+
   return (
     <div className="space-y-4">
       <CardComponent
@@ -182,7 +182,16 @@ console.log(errors)
                 placeholder="e.g. 12/09/2023"
                 dateOnly
                 required
-                onChange={field.onChange}
+                defaultDate={
+                  field.value && !Number.isNaN(new Date(field.value).getTime())
+                    ? new Date(field.value)
+                    : undefined
+                }
+                onChange={(date) =>
+                  field.onChange(
+                    date ? date.toISOString().split("T")[0] : "",
+                  )
+                }
               />
             )}
           />

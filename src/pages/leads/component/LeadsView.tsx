@@ -18,7 +18,7 @@ import {
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { allRoutes } from "@/utils/routes";
-import type { ILead } from "../common/leads";
+import { mapLeadToCustomerPrefill, type ILead } from "../common/leads";
 import {
   useConvertLeadMutation,
   useDeleteLeadMutation,
@@ -79,15 +79,44 @@ const LeadsView = () => {
   };
 
   const handleConvert = async () => {
-    if (!id) return;
+    if (!id || !selectedLead) return;
     try {
       const res = await convertLead(id).unwrap();
+      let mergedLead = { ...selectedLead, ...res };
+
+      try {
+        const refreshed = await getLeadDetails(id).unwrap();
+        if (refreshed) mergedLead = refreshed;
+      } catch {
+        // use convert response if refetch fails
+      }
+
+      setSelectedLead(mergedLead);
+
+      const customerId = mergedLead.customerId ?? mergedLead.customer?._id;
+
       showToast({
         title: "Success",
-        message: "Lead converted successfully.",
+        message: customerId
+          ? "Lead converted. Opening customer record."
+          : "Lead converted. Complete the customer profile.",
         type: "success",
       });
-      if (res) setSelectedLead(res);
+
+      if (customerId) {
+        navigate(allRoutes.PORTAL + allRoutes.VIEW_CUSTOMER(customerId), {
+          state: { initialData: res.customer },
+        });
+        return;
+      }
+
+      navigate(allRoutes.PORTAL + allRoutes.ADD_CUSTOMER, {
+        state: {
+          customerData: mapLeadToCustomerPrefill(mergedLead),
+          fromLeadId: id,
+          leadAlreadyConverted: !!mergedLead.isConverted,
+        },
+      });
     } catch (error) {
       console.error("Failed to convert lead", error);
       showToast({
@@ -256,16 +285,31 @@ const LeadsView = () => {
           </div>
 
           {selectedLead.isConverted ? (
-            <div className="w-full rounded-md border border-primary/30 bg-primary/5 px-3 py-2.5 flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-primary shrink-0" />
-              <div>
-                <p className="text-xs font-medium text-card-foreground">
-                  Converted
-                </p>
-                <p className="text-[10px] text-muted-foreground">
-                  This lead has been converted to a customer.
-                </p>
+            <div className="space-y-2 w-full">
+              <div className="w-full rounded-md border border-primary/30 bg-primary/5 px-3 py-2.5 flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-primary shrink-0" />
+                <div>
+                  <p className="text-xs font-medium text-card-foreground">
+                    Converted
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">
+                    This lead has been converted to a customer.
+                  </p>
+                </div>
               </div>
+              {selectedLead.customerId && (
+                <Button
+                  className="w-full bg-primary! text-primary-foreground text-xs"
+                  onClick={() =>
+                    navigate(
+                      allRoutes.PORTAL +
+                        allRoutes.VIEW_CUSTOMER(selectedLead.customerId!),
+                    )
+                  }
+                >
+                  View Customer
+                </Button>
+              )}
             </div>
           ) : (
             <ConfirmationDialog

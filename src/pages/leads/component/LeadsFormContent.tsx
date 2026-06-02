@@ -201,7 +201,12 @@ const LeadsFormContent = ({ isLoading, form, isConverted }: IField) => {
                     dateOnly
                     required
                     disabled={isLoading}
-                    defaultDate={field.value ? new Date(field.value) : undefined}
+                    defaultDate={
+                      field.value &&
+                      !Number.isNaN(new Date(field.value).getTime())
+                        ? new Date(field.value)
+                        : undefined
+                    }
                     onChange={(date) =>
                       field.onChange(
                         date ? date.toISOString().split("T")[0] : ""
