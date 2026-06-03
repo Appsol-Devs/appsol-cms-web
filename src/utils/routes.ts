@@ -60,7 +60,8 @@ export const allRoutes = Object.freeze({
   ADD_SUBSCRIPTION: "/subscriptions/new",
   UPDATE_SUBSCRIPTION: (id: string) => `/subscriptions/${id}`,
   VIEW_SUBSCRIPTION: (id: string) => `/subscriptions/${id}/view`,
-  ADD_SUBSCRIPTION_PAYMENT: (subscriptionId: string) => `/subscriptions/${subscriptionId}/payment/new`,
+  ADD_SUBSCRIPTION_PAYMENT: (subscriptionId: string) =>
+    `/subscriptions/${subscriptionId}/payment/new`,
   PAYMENTS: "/payments",
   VIEW_PAYMENT: (id: string) => `/payments/${id}/view`,
   TICKETS: "/tickets",

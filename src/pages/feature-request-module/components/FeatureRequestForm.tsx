@@ -20,7 +20,7 @@ import type {
 import {
   useAddFeatureRequestMutation,
   useUpdateFeatureRequestMutation,
-  useLazyGetAFeatureRequestQuery
+  useLazyGetAFeatureRequestQuery,
 } from "../common/featureRequestApi";
 import { useLazyGetSoftwaresQuery } from "@/pages/settings/common/settingsApi";
 import { lookup_params } from "@/lib/api";
@@ -46,9 +46,12 @@ const FeatureRequestForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [createFeatureRequest, { isLoading: isCreating }] = useAddFeatureRequestMutation();
-  const [updateFeatureRequest, { isLoading: isUpdating }] = useUpdateFeatureRequestMutation();
-  const [getAFeatureRequest, { isLoading: isGetting }] = useLazyGetAFeatureRequestQuery();
+  const [createFeatureRequest, { isLoading: isCreating }] =
+    useAddFeatureRequestMutation();
+  const [updateFeatureRequest, { isLoading: isUpdating }] =
+    useUpdateFeatureRequestMutation();
+  const [getAFeatureRequest, { isLoading: isGetting }] =
+    useLazyGetAFeatureRequestQuery();
 
   const [getSoftwares] = useLazyGetSoftwaresQuery();
   const [softwareList, setSoftwareList] = useState<ISoftware[]>([]);
@@ -177,8 +180,10 @@ const FeatureRequestForm = () => {
     }
   };
 
-  const extractValue = (field: any) => (typeof field === "string" ? field : field?.value);
-  const getCustomerLabel = (field: any) => (typeof field === "string" ? field : field?.label);
+  const extractValue = (field: any) =>
+    typeof field === "string" ? field : field?.value;
+  const getCustomerLabel = (field: any) =>
+    typeof field === "string" ? field : field?.label;
 
   const getSoftwareLabel = (val: any) => {
     if (!val) return "";
@@ -190,18 +195,27 @@ const FeatureRequestForm = () => {
   const submitData = () => {
     const data = getValues();
 
-    const requiredFields = id ? [
-      { field: data.title, message: "Title is required." },
-      { field: data.priority, message: "Priority is required." },
-      { field: data.status, message: "Status is required." },
-    ] : [
-      { field: data.title, message: "Title is required." },
-      { field: extractValue(data.customerId), message: "Customer is required." },
-      { field: extractValue(data.softwareId), message: "Software is required." },
-      { field: data.priority, message: "Priority is required." },
-      { field: data.status, message: "Status is required." },
-      { field: data.requestedDate, message: "Requested date is required." },
-    ];
+    const requiredFields = id
+      ? [
+          { field: data.title, message: "Title is required." },
+          { field: data.priority, message: "Priority is required." },
+          { field: data.status, message: "Status is required." },
+        ]
+      : [
+          { field: data.title, message: "Title is required." },
+          {
+            field: extractValue(data.customerId),
+            message: "Customer is required.",
+          },
+          {
+            field: extractValue(data.softwareId),
+            message: "Software is required.",
+          },
+          { field: data.priority, message: "Priority is required." },
+          { field: data.status, message: "Status is required." },
+          { field: data.requestedDate, message: "Requested date is required." },
+          { field: data.description, message: "Description is required." },
+        ];
 
     for (const { field, message } of requiredFields) {
       if (!field || (Array.isArray(field) && field.length === 0)) {
@@ -223,11 +237,11 @@ const FeatureRequestForm = () => {
       id
         ? basePayload
         : {
-          ...basePayload,
-          customerId: extractValue(data.customerId),
-          softwareId: extractValue(data.softwareId),
-          requestedDate: data.requestedDate,
-        }
+            ...basePayload,
+            customerId: extractValue(data.customerId),
+            softwareId: extractValue(data.softwareId),
+            requestedDate: data.requestedDate,
+          },
     ) as Partial<IFeatureRequest>;
 
     handleDataSubmission(payload);
@@ -244,17 +258,17 @@ const FeatureRequestForm = () => {
         {
           label: "Customer",
           value: getCustomerLabel(values?.customerId) as string,
-          required: !id
+          required: !id,
         },
         {
           label: "Software",
           value: getSoftwareLabel(values?.softwareId) as string,
-          required: !id
+          required: !id,
         },
         {
           label: "Requested Date",
           value: formatMutationSummaryDateTime(values?.requestedDate),
-          required: !id
+          required: !id,
         },
       ],
     },

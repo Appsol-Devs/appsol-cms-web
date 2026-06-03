@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Search,
-  Menu,
-  LogOut,
-  User,
-  CalendarClock,
-} from "lucide-react";
+import { Search, Menu, LogOut, User, CalendarClock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { allRoutes } from "@/utils/routes";
 import { Button } from "@/components/ui/button";
@@ -27,6 +21,7 @@ import type { RootState } from "@/store";
 import Notifications from "../../notification/component/Notifications";
 import SidebarToggler from "../../sidebar/component/SidebarToggler";
 import { logoutUser } from "@/pages/auth/login/common/loginSlice";
+import ConfirmationDialog from "@/components/ConfirmationDialog";
 
 function Header() {
   const navigate = useNavigate();
@@ -94,17 +89,6 @@ function Header() {
         </div>
 
         <div className="flex items-center gap-3">
-          {/* <Button variant="ghost" size="icon" className="relative bg-transparent! border-onSurface!">
-            <Bell className="h-5 w-5 text-onSurface hover:text-foreground transition-colors" />
-            {notifications > 0 && (
-              <Badge
-                variant="destructive"
-                className="absolute -right-0.5 -top-0.5 h-4 w-4 rounded-full p-0 flex items-center justify-center text-[10px] border-2 border-background "
-              >
-                {notifications}
-              </Badge>
-            )}
-          </Button> */}
           <Button
             type="button"
             variant="ghost"
@@ -145,13 +129,27 @@ function Header() {
                 <User className="mr-2 h-4 w-4" /> Profile
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="text-red-500 cursor-pointer hover:bg-red-50 dark:hover:bg-red-950"
-                onClick={() => handleUserLogout()}
-              >
-                <LogOut className="mr-2 h-4 w-4" />
-                Logout
-              </DropdownMenuItem>
+
+              <ConfirmationDialog
+                alertType="warning"
+                title="Confirm Logout"
+                rightActionTitle="Logout"
+                content={
+                  <p className="text-muted-foreground text-center">
+                    Are you sure you want to log out of your account?
+                  </p>
+                }
+                onConfirmClicked={handleUserLogout}
+                trigger={
+                  <DropdownMenuItem
+                    className="text-red-500 cursor-pointer w-full hover:text-red-500!"
+                    onSelect={(e) => e.preventDefault()}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Logout
+                  </DropdownMenuItem>
+                }
+              />
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

@@ -1,4 +1,5 @@
 import PageNotFound from "@/pages/auth/error/PageNotFound";
+import CustomerComplaints from "@/pages/complaint/component/CustomerComplaints";
 import CustomersView from "@/pages/customer/component/core/CustomersView";
 import CustomerDashboard from "@/pages/customer/component/customer-dashboard/CustomerDashboard";
 import CustomerOutreach from "@/pages/customer/component/customer-outreach/CustomerOutreach";
@@ -22,6 +23,7 @@ const CustomerRoutes = () => {
     { element: <CustomerPayments />, path: customerRoutes.PAYMENTS },
     { element: <CustomerTickets />, path: customerRoutes.TICKETS },
     { element: <CustomerDashboard />, path: customerRoutes.DASHBOARD },
+    {element:<CustomerComplaints />, path: customerRoutes.COMPLAINTS},
     { element: <PageNotFound />, path: allRoutes.NOT_FOUND },
     { element: <PageNotFound />, path: "*" },
   ];
