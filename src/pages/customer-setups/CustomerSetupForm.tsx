@@ -3,7 +3,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { showToast } from "@/components/ui/CustomToast";
-import { cleanPayload, formatMutationSummaryDateTime } from "@/lib/helpers";
+import {
+  cleanPayload,
+  formatMutationSummaryDateTime,
+  resetMutationForm,
+} from "@/lib/helpers";
+import type { DefaultValues } from "react-hook-form";
 import type { ISummarySection } from "@/components/form/MutationFormSummary";
 import { BookOpenText } from "lucide-react";
 import MutationFormTemplate from "@/components/form/MutationFormTemplate";
@@ -79,47 +84,105 @@ const CustomerSetupForm = () => {
       .catch((err) => console.error(err));
   }, [getSoftwares, getSetupStatuses]);
 
+  const getEmptyCustomerSetupValues = () => ({
+    title: "",
+    customerId: undefined,
+    softwareId: undefined,
+    description: "",
+    notes: "",
+    priority: "",
+    status: "scheduled" as ICustomerSetupFields["status"],
+    setupStatus: undefined,
+    setupStatusId: undefined,
+    scheduledStart: "",
+    scheduledEnd: "",
+    actualCompletionDate: "",
+    assignedTo: [] as DropDownOption<string>[],
+    addToCalendar: true,
+  });
+
+  const [loadedData, setLoadedData] = useState<ICustomerSetup | null>(null);
+
+  const resetFormWithData = (data: ICustomerSetup) => {
+    const setupStatusId =
+      data.setupStatusId ||
+      (typeof data.setupStatus !== "string" ? data.setupStatus?._id : undefined);
+    const setupStatusLabel =
+      typeof data.setupStatus === "string"
+        ? SETUP_STATUS_LABEL_MAP[data.setupStatus] || data.setupStatus
+        : (SETUP_STATUS_LABEL_MAP[data.setupStatus?.name ?? ""] ||
+            data.setupStatus?.name) ??
+          "";
+
+    reset({
+      title: data.title || "",
+      description: data.description || "",
+      notes: data.notes || "",
+      priority: data.priority || "",
+      status: data.status || "scheduled",
+      scheduledStart: data.scheduledStart || "",
+      scheduledEnd: data.scheduledEnd || "",
+      actualCompletionDate: data.actualCompletionDate || "",
+      addToCalendar: data.addToCalendar ?? false,
+      customerId: data.customerId
+        ? {
+            value: data.customerId,
+            label:
+              typeof data.customer === "string"
+                ? data.customer
+                : (data.customer?.name ?? ""),
+          }
+        : undefined,
+      softwareId: data.softwareId
+        ? {
+            value: data.softwareId,
+            label:
+              typeof data.software === "string"
+                ? data.software
+                : (data.software?.name ?? ""),
+          }
+        : undefined,
+      setupStatus: setupStatusId
+        ? { value: setupStatusId, label: setupStatusLabel }
+        : undefined,
+      setupStatusId: setupStatusId
+        ? { value: setupStatusId, label: setupStatusLabel }
+        : undefined,
+      assignedTo:
+        data.assignedTo
+          ?.map((user) => {
+            if (typeof user === "string") {
+              return { value: user, label: user } as DropDownOption<string>;
+            }
+            const userId = user._id;
+            if (!userId) return null;
+            const name =
+              `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() ||
+              user.email ||
+              userId;
+            return { value: userId, label: name } as DropDownOption<string>;
+          })
+          .filter((opt): opt is DropDownOption<string> => opt != null) ?? [],
+    });
+  };
+
+  const handleResetForm = () => {
+    if (id && loadedData) {
+      resetFormWithData(loadedData);
+      return;
+    }
+    resetMutationForm<ICustomerSetupFields>(
+      form,
+      getEmptyCustomerSetupValues() as DefaultValues<ICustomerSetupFields>,
+    );
+  };
+
   const fetchAndResetData = async (setupId: string) => {
     try {
       const data = await getACustomerSetup(setupId).unwrap();
-
       if (data) {
-        reset({
-          ...data,
-          customerId: data.customerId
-            ? {
-              value: data.customerId,
-              label: typeof data.customer === "string" ? data.customer : data.customer?.name ?? "",
-            }
-            : undefined,
-          softwareId: data.softwareId
-            ? {
-              value: data.softwareId,
-              label: typeof data.software === "string" ? data.software : data.software?.name ?? "",
-            }
-            : undefined,
-          title: data.title || "",
-          description: data.description || "",
-          notes: data.notes || "",
-          priority: data.priority || "",
-          setupStatus: data.setupStatusId || (typeof data.setupStatus !== "string" ? data.setupStatus?._id : undefined)
-            ? {
-              value: data.setupStatusId || (typeof data.setupStatus !== "string" ? data.setupStatus?._id : undefined),
-              label: typeof data.setupStatus === "string" 
-                ? SETUP_STATUS_LABEL_MAP[data.setupStatus] || data.setupStatus 
-                : (SETUP_STATUS_LABEL_MAP[data.setupStatus?.name ?? ""] || data.setupStatus?.name) ?? "",
-            }
-            : undefined,
-          status: (data.status || "scheduled"),
-          scheduledStart: data.scheduledStart || "",
-          scheduledEnd: data.scheduledEnd || "",
-          actualCompletionDate: data.actualCompletionDate || "",
-          assignedTo:
-            data.assignedTo?.map((user: any) => 
-               typeof user === "string" ? user : user._id
-            ) || [],
-          addToCalendar: data.addToCalendar ?? false, 
-        });
+        setLoadedData(data);
+        resetFormWithData(data);
       }
     } catch (err) {
       console.error("Error fetching customer setup:", err);
@@ -296,6 +359,7 @@ const CustomerSetupForm = () => {
         summaryMainTitle: "Setup Details Summary",
         summarySaveButtonText: id ? "Save Changes" : "Save Setup",
       }}
+      onResetForm={handleResetForm}
     />
   );
 };

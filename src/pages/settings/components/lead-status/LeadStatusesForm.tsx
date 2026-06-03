@@ -1,7 +1,8 @@
 import type { ISummarySection } from "@/components/form/MutationFormSummary";
 import MutationFormTemplate from "@/components/form/MutationFormTemplate";
 import { showToast } from "@/components/ui/CustomToast";
-import { cleanPayload } from "@/lib/helpers";
+import { cleanPayload, resetMutationForm } from "@/lib/helpers";
+import type { DefaultValues } from "react-hook-form";
 import { Computer } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -46,15 +47,31 @@ const LeadStatusesForm = () => {
     }
   };
 
+  const getEmptyValues = (): ILeadStatusFields => ({
+    name: "",
+    description: "",
+    colorCode: undefined,
+  });
+
   const resetFormWithData = (data: ILeadStatus) => {
     if (!data) return;
     reset({
-      ...data,
-      name: data.name,
-      description: data.description,
+      name: data.name ?? "",
+      description: data.description ?? "",
       isActive: data.isActive,
       colorCode: data.colorCode,
     });
+  };
+
+  const handleResetForm = () => {
+    if (id && selectedLeadStatus) {
+      resetFormWithData(selectedLeadStatus);
+      return;
+    }
+    resetMutationForm<ILeadStatusFields>(
+      form,
+      getEmptyValues() as DefaultValues<ILeadStatusFields>,
+    );
   };
 
   useEffect(() => {
@@ -159,6 +176,7 @@ const LeadStatusesForm = () => {
           summaryMainTitle: "Lead Status Details Summary",
           summarySaveButtonText: id ? "Save Changes" : "Save Lead Status",
         }}
+        onResetForm={handleResetForm}
       />
     </div>
   );

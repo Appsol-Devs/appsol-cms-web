@@ -1,7 +1,8 @@
 import type { ISummarySection } from "@/components/form/MutationFormSummary";
 import MutationFormTemplate from "@/components/form/MutationFormTemplate";
 import { showToast } from "@/components/ui/CustomToast";
-import { cleanPayload } from "@/lib/helpers";
+import { cleanPayload, resetMutationForm } from "@/lib/helpers";
+import type { DefaultValues } from "react-hook-form";
 import { Computer } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -46,15 +47,31 @@ const SoftwaresForm = () => {
     }
   };
 
+  const getEmptyValues = (): ISoftwareFields => ({
+    name: "",
+    description: "",
+    colorCode: undefined,
+  });
+
   const resetFormWithData = (data: ISoftware) => {
     if (!data) return;
     reset({
-      ...data,
-      name: data.name,
-      description: data.description,
+      name: data.name ?? "",
+      description: data.description ?? "",
       isActive: data.isActive,
       colorCode: data.colorCode,
     });
+  };
+
+  const handleResetForm = () => {
+    if (id && selectedSoftware) {
+      resetFormWithData(selectedSoftware);
+      return;
+    }
+    resetMutationForm<ISoftwareFields>(
+      form,
+      getEmptyValues() as DefaultValues<ISoftwareFields>,
+    );
   };
 
   useEffect(() => {
@@ -159,6 +176,7 @@ const SoftwaresForm = () => {
           summaryMainTitle: "Software Details Summary",
           summarySaveButtonText: id ? "Save Changes" : "Save Software",
         }}
+        onResetForm={handleResetForm}
       />
     </div>
   );

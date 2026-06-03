@@ -1,7 +1,8 @@
 import type { ISummarySection } from "@/components/form/MutationFormSummary";
 import MutationFormTemplate from "@/components/form/MutationFormTemplate";
 import { showToast } from "@/components/ui/CustomToast";
-import { cleanPayload } from "@/lib/helpers";
+import { cleanPayload, resetMutationForm } from "@/lib/helpers";
+import type { DefaultValues } from "react-hook-form";
 import { Phone, Notebook, File } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -11,7 +12,7 @@ import type { IOutReachType } from "@/pages/customer/common/customers";
 import { useAddOutReachTypeMutation, useLazyGetOutReachTypeQuery, useUpdateOutReachTypeMutation } from "../common/OutReachApi";
 import OutReachFormContent from "./OutReachFormContent";
 
-export type IOutReachTypeFields = Omit<IOutReachType, "_id"> & {
+export type IOutReachTypeFields = Omit<IOutReachType, "_id" | "isActive"> & {
   isActive?: boolean;
   name?: string;
   description?: string;
@@ -47,14 +48,32 @@ const OutReachForm = () => {
     }
   };
 
+  const getEmptyValues = (): IOutReachTypeFields => ({
+    name: "",
+    description: "",
+    colorCode: undefined,
+    isActive: true,
+  });
+
   const resetFormWithData = (data: IOutReachType) => {
     if (!data) return;
     reset({
-      ...data,
-      name: data.name,
-      description: data.description,
+      name: data.name ?? "",
+      description: data.description ?? "",
       isActive: data.isActive,
+      colorCode: data.colorCode,
     });
+  };
+
+  const handleResetForm = () => {
+    if (id && selectedData) {
+      resetFormWithData(selectedData);
+      return;
+    }
+    resetMutationForm<IOutReachTypeFields>(
+      form,
+      getEmptyValues() as DefaultValues<IOutReachTypeFields>,
+    );
   };
 
   useEffect(() => {
@@ -168,6 +187,7 @@ const OutReachForm = () => {
           summaryMainTitle: "Outreach Summary",
           summarySaveButtonText: id ? "Save Changes" : "Save Outreach",
         }}
+        onResetForm={handleResetForm}
       />
     </div>
   );

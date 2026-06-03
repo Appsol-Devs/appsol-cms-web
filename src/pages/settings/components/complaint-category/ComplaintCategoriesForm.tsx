@@ -1,7 +1,8 @@
 import type { ISummarySection } from "@/components/form/MutationFormSummary";
 import MutationFormTemplate from "@/components/form/MutationFormTemplate";
 import { showToast } from "@/components/ui/CustomToast";
-import { cleanPayload } from "@/lib/helpers";
+import { cleanPayload, resetMutationForm } from "@/lib/helpers";
+import type { DefaultValues } from "react-hook-form";
 import { Headset } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -47,15 +48,31 @@ const ComplaintCategoriesForm = () => {
     }
   };
 
+  const getEmptyValues = (): IComplaintCategoryFields => ({
+    name: "",
+    description: "",
+    colorCode: undefined,
+  });
+
   const resetFormWithData = (data: IComplaintCategory) => {
     if (!data) return;
     reset({
-      ...data,
-      name: data.name,
-      description: data.description,
+      name: data.name ?? "",
+      description: data.description ?? "",
       isActive: data.isActive,
       colorCode: data.colorCode,
     });
+  };
+
+  const handleResetForm = () => {
+    if (id && selectedData) {
+      resetFormWithData(selectedData);
+      return;
+    }
+    resetMutationForm<IComplaintCategoryFields>(
+      form,
+      getEmptyValues() as DefaultValues<IComplaintCategoryFields>,
+    );
   };
 
   useEffect(() => {
@@ -164,6 +181,7 @@ const ComplaintCategoriesForm = () => {
             ? "Save Changes"
             : "Save Complaint Category",
         }}
+        onResetForm={handleResetForm}
       />
     </div>
   );

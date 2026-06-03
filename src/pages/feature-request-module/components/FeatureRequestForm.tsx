@@ -1,15 +1,22 @@
 import type { DropDownOption } from "@/components/DropdownComponent";
 import { useNavigate, useParams } from "react-router-dom";
-import { useForm } from "react-hook-form";
+import { useForm, type DefaultValues } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { showToast } from "@/components/ui/CustomToast";
-import { cleanPayload, formatMutationSummaryDateTime } from "@/lib/helpers";
+import {
+  cleanPayload,
+  formatMutationSummaryDateTime,
+  resetMutationForm,
+} from "@/lib/helpers";
 import type { ISummarySection } from "@/components/form/MutationFormSummary";
 import { BookOpenText } from "lucide-react";
 import MutationFormTemplate from "@/components/form/MutationFormTemplate";
 
 import { allRoutes } from "@/utils/routes";
-import type { IFeatureRequest } from "../common/feature-request";
+import type {
+  IFeatureRequest,
+  TFeatureRequestStatus,
+} from "../common/feature-request";
 import {
   useAddFeatureRequestMutation,
   useUpdateFeatureRequestMutation,
@@ -62,36 +69,81 @@ const FeatureRequestForm = () => {
       .catch((err) => console.error(err));
   }, [getSoftwares]);
 
+  const getEmptyFeatureRequestValues = () => ({
+    title: "",
+    customerId: undefined,
+    softwareId: undefined,
+    description: "",
+    notes: "",
+    priority: "",
+    status: "new" as TFeatureRequestStatus,
+    requestedDate: "",
+    assignedTo: [] as DropDownOption<string>[],
+  });
+
+  const [loadedData, setLoadedData] = useState<IFeatureRequest | null>(null);
+
+  const resetFormWithData = (data: IFeatureRequest) => {
+    reset({
+      title: data.title || "",
+      description: data.description || "",
+      notes: data.notes || "",
+      priority: data.priority || "",
+      status: data.status || "new",
+      requestedDate: data.requestedDate || "",
+      customerId: data.customerId
+        ? {
+            value: data.customerId,
+            label:
+              typeof data.customer === "string"
+                ? data.customer
+                : (data.customer?.name ?? ""),
+          }
+        : undefined,
+      softwareId: data.softwareId
+        ? {
+            value: data.softwareId,
+            label:
+              typeof data.software === "string"
+                ? data.software
+                : (data.software?.name ?? ""),
+          }
+        : undefined,
+      assignedTo:
+        data.assignedTo
+          ?.map((user) => {
+            if (typeof user === "string") {
+              return { value: user, label: user } as DropDownOption<string>;
+            }
+            const userId = user._id;
+            if (!userId) return null;
+            const name =
+              `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() ||
+              user.email ||
+              userId;
+            return { value: userId, label: name } as DropDownOption<string>;
+          })
+          .filter((opt): opt is DropDownOption<string> => opt != null) ?? [],
+    });
+  };
+
+  const handleResetForm = () => {
+    if (id && loadedData) {
+      resetFormWithData(loadedData);
+      return;
+    }
+    resetMutationForm<IFeatureRequestFields>(
+      form,
+      getEmptyFeatureRequestValues() as DefaultValues<IFeatureRequestFields>,
+    );
+  };
+
   const fetchAndResetData = async (requestId: string) => {
     try {
       const data = await getAFeatureRequest(requestId).unwrap();
-
       if (data) {
-        reset({
-          ...data,
-          customerId: data.customerId
-            ? {
-              value: data.customerId,
-              label: typeof data.customer === "string" ? data.customer : data.customer?.name ?? "",
-            }
-            : undefined,
-          softwareId: data.softwareId
-            ? {
-              value: data.softwareId,
-              label: typeof data.software === "string" ? data.software : data.software?.name ?? "",
-            }
-            : undefined,
-          title: data.title || "",
-          description: data.description || "",
-          notes: data.notes || "",
-          priority: data.priority || "",
-          status: (data.status || "new") as any,
-          requestedDate: data.requestedDate || "",
-          assignedTo:
-            data.assignedTo?.map((user: any) =>
-              typeof user === "string" ? user : user._id
-            ) || [],
-        });
+        setLoadedData(data);
+        resetFormWithData(data);
       }
     } catch (err) {
       console.error("Error fetching feature request:", err);
@@ -233,6 +285,7 @@ const FeatureRequestForm = () => {
         summaryMainTitle: "Request Details Summary",
         summarySaveButtonText: id ? "Save Changes" : "Save Request",
       }}
+      onResetForm={handleResetForm}
     />
   );
 };

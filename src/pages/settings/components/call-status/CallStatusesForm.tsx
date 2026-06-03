@@ -1,7 +1,8 @@
 import type { ISummarySection } from "@/components/form/MutationFormSummary";
 import MutationFormTemplate from "@/components/form/MutationFormTemplate";
 import { showToast } from "@/components/ui/CustomToast";
-import { cleanPayload } from "@/lib/helpers";
+import { cleanPayload, resetMutationForm } from "@/lib/helpers";
+import type { DefaultValues } from "react-hook-form";
 import { Computer } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -46,16 +47,33 @@ const CallStatusesForm = () => {
     }
   };
 
+  const getEmptyValues = (): ICallStatusFields => ({
+    name: "",
+    description: "",
+    colorCode: undefined,
+    isFinal: undefined,
+  });
+
   const resetFormWithData = (data: ICallStatus) => {
     if (!data) return;
     reset({
-      ...data,
-      name: data.name,
-      description: data.description,
+      name: data.name ?? "",
+      description: data.description ?? "",
       isActive: data.isActive,
       isFinal: data.isFinal,
-      colorCode: data.colorCode
+      colorCode: data.colorCode,
     });
+  };
+
+  const handleResetForm = () => {
+    if (id && selectedCallStatus) {
+      resetFormWithData(selectedCallStatus);
+      return;
+    }
+    resetMutationForm<ICallStatusFields>(
+      form,
+      getEmptyValues() as DefaultValues<ICallStatusFields>,
+    );
   };
 
   useEffect(() => {
@@ -161,6 +179,7 @@ const CallStatusesForm = () => {
           summaryMainTitle: "Call Status Details Summary",
           summarySaveButtonText: id ? "Save Changes" : "Save Call Status",
         }}
+        onResetForm={handleResetForm}
       />
     </div>
   );

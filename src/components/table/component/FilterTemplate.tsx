@@ -1,5 +1,5 @@
 import { Check, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import DropDownComponent, {
@@ -7,7 +7,10 @@ import DropDownComponent, {
 } from "@/components/DropdownComponent";
 import { Button } from "@/components/ui/button";
 import AsyncDropDownComponent from "@/components/AsyncDropDownComponent";
-import { useGenerateDropdownOptionsFromEnum } from "@/lib/helpers";
+import {
+  filterFieldToValue,
+  useGenerateDropdownOptionsFromEnum,
+} from "@/lib/helpers";
 import type { IFilterArray, IFilters } from "@/lib/pagination";
 import type { ICustomer } from "@/pages/customer/common/customers";
 import { useLazyGetCustomersQuery } from "@/pages/customer/common/customersApi";
@@ -78,9 +81,15 @@ const FiltersTemplate = ({
   const [getSetupStatus] = useLazyGetSetupStatusesQuery();
   const { getValues, control, reset, watch, register } = useForm<IFilterFields>();
 
-  const queryParams = { paginate: false, filters: initialQueryFilters };
+  const queryParams = useMemo(
+    () => ({ paginate: false, filters: initialQueryFilters }),
+    [initialQueryFilters],
+  );
 
-  const checkIfHasString = (filter: IFilterArray) => filters.includes(filter);
+  const checkIfHasString = useCallback(
+    (filter: IFilterArray) => filters.includes(filter),
+    [filters],
+  );
 
   // Dropdown Options from query (Dropdown component)
   const [engineOptions, setEngineOptions] = useState<DropDownOption<string>[]>([]);
@@ -251,29 +260,40 @@ const FiltersTemplate = ({
 
 
 
-  }, [toggleFilter]);
+  }, [
+    toggleFilter,
+    checkIfHasString,
+    queryParams,
+    getLeadStatuses,
+    getUsers,
+    getSoftwares,
+    getSetupStatus,
+  ]);
 
   useEffect(() => {
     if (returnOnFilterChange) {
       const subscription = watch((values) => {
-        const reminderTypeVal = values.reminderType?.value as string | undefined;
+        const reminderTypeVal = filterFieldToValue(values.reminderType);
         const dueRange = dueDateRangeForReminderType(reminderTypeVal);
         const payload: IFilters = {
           startDate: dueRange?.startDate ?? selectedFilters?.startDate,
           endDate: dueRange?.endDate ?? selectedFilters?.endDate,
-          customerId: values.customerId?.value?._id,
-          status: values.status?.value || values.featureStatus?.value || values.CustomerSetupStatus?.value,
-          priority: values.featurePriority?.value,
-          softwareId: values.softwareId?.value,
-          assignedTo: values.assignedTo?.value,
-          targetEntityType: values.targetEntityType?.value,
+          customerId: filterFieldToValue(values.customerId),
+          status:
+            filterFieldToValue(values.status) ||
+            filterFieldToValue(values.featureStatus) ||
+            filterFieldToValue(values.CustomerSetupStatus),
+          priority: filterFieldToValue(values.featurePriority),
+          softwareId: filterFieldToValue(values.softwareId),
+          assignedTo: filterFieldToValue(values.assignedTo),
+          targetEntityType: filterFieldToValue(values.targetEntityType),
           targetEntityId: values.targetEntityId,
-          loggedBy: values.loggedBy?.value,
+          loggedBy: filterFieldToValue(values.loggedBy),
+          leadStatusId: filterFieldToValue(values.leadStatusId),
           // Filter using dueDate range (relative to today), not the raw enum.
           reminderType: dueRange ? undefined : reminderTypeVal,
-          isSent: values.isSent?.value,
-          setUpStatusId: values.setUpStatusId?.value,
-
+          isSent: filterFieldToValue(values.isSent),
+          setUpStatusId: filterFieldToValue(values.setUpStatusId),
         };
         returnOnFilterChange(payload);
       });
@@ -284,39 +304,29 @@ const FiltersTemplate = ({
   const handleSubmitFilters = () => {
     const data: IFilterFields = getValues();
 
-    const softwareIdVal = typeof data.softwareId === "string" ? data.softwareId : data.softwareId?.value;
-    const assignedToVal = typeof data.assignedTo === "string" ? data.assignedTo : data.assignedTo?.value;
-    const featureStatusVal = typeof data.featureStatus === "string" ? data.featureStatus : data.featureStatus?.value;
-    const customerSetupStatusVal = typeof data.CustomerSetupStatus === "string" ? data.CustomerSetupStatus : data.CustomerSetupStatus?.value;
-    const setupStatusIdVal = typeof data.setUpStatusId === "string" ? data.setUpStatusId : data.setUpStatusId?.value;
-    const reminderTypeVal =
-      typeof data.reminderType === "string"
-        ? data.reminderType
-        : data.reminderType?.value;
+    const reminderTypeVal = filterFieldToValue(data.reminderType);
     const dueRange = dueDateRangeForReminderType(reminderTypeVal);
-    const isSentVal =
-      typeof data.isSent === "string" ? data.isSent : data.isSent?.value;
 
     const payload: IFilters = {
       startDate: dueRange?.startDate ?? selectedFilters?.startDate,
       endDate: dueRange?.endDate ?? selectedFilters?.endDate,
-      customerId: data.customerId?.value?._id,
-      status: data.status?.value || featureStatusVal || customerSetupStatusVal,
-      priority: typeof data.featurePriority === "string" ? data.featurePriority as unknown as string : data.featurePriority?.value,
-      softwareId: softwareIdVal,
-      assignedTo: assignedToVal,
-      targetEntityType: data.targetEntityType?.value,
+      customerId: filterFieldToValue(data.customerId),
+      status:
+        filterFieldToValue(data.status) ||
+        filterFieldToValue(data.featureStatus) ||
+        filterFieldToValue(data.CustomerSetupStatus),
+      priority: filterFieldToValue(data.featurePriority),
+      softwareId: filterFieldToValue(data.softwareId),
+      assignedTo: filterFieldToValue(data.assignedTo),
+      targetEntityType: filterFieldToValue(data.targetEntityType),
       targetEntityId: data.targetEntityId,
-      loggedBy: data.loggedBy?.value,
-      // Filter using dueDate range (relative to today), not the raw enum.
+      loggedBy: filterFieldToValue(data.loggedBy),
+      leadStatusId: filterFieldToValue(data.leadStatusId),
       reminderType: dueRange ? undefined : reminderTypeVal,
-      isSent: isSentVal,
-      setupStatusId: setupStatusIdVal,
+      isSent: filterFieldToValue(data.isSent),
+      setUpStatusId: filterFieldToValue(data.setUpStatusId),
     };
-    console.log("payload", payload);
-    if (payload) {
-      returnFilters?.(payload);
-    }
+    returnFilters?.(payload);
   };
 
   const handleResetFilters = () => {

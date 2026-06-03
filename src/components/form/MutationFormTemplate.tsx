@@ -30,6 +30,7 @@ export interface IMutationFormTemplateProps<T extends Record<string, unknown>> {
   confirmSubmitContent?: ReactNode;
   confirmSubmitActionLabel?: string;
   validateBeforeOpen?: () => Promise<boolean>;
+  onResetForm?: () => void;
 }
 
 const MutationFormTemplate = <T extends Record<string, unknown>>({
@@ -45,6 +46,7 @@ const MutationFormTemplate = <T extends Record<string, unknown>>({
   confirmSubmitContent,
   confirmSubmitActionLabel,
   validateBeforeOpen,
+  onResetForm,
 }: IMutationFormTemplateProps<T>) => {
   const [confirmOpen, setConfirmOpen] = useState(false);
 
@@ -136,7 +138,10 @@ const MutationFormTemplate = <T extends Record<string, unknown>>({
               />
             )}
             <ConfirmationDialog
-              onConfirmClicked={() => form.reset()}
+              onConfirmClicked={() => {
+                if (onResetForm) onResetForm();
+                else form.reset();
+              }}
               disabled={loading}
               title="Clear Form"
               content={
