@@ -148,6 +148,13 @@ export interface IFilters {
   isSent?: string;
   setUpStatusId?: string;
   CustomerSetupStatus?: string;
+  assignedEngineerId?: string;
+  subscriptionTypeId?: string;
+  complaintTypeId?: string;
+  complaintCategoryId?: string;
+  relatedSoftwareId?: string;
+  outreachTypeId?: string;
+  callStatusId?: string;
 }
 
 const ALL_FILTERS = [
@@ -167,7 +174,19 @@ const ALL_FILTERS = [
   "reminderType",
   "isSent",
   "setUpStatusId",
-  "CustomerSetupStatus" 
+  "CustomerSetupStatus",
+  "ticketStatus",
+  "ticketPriority",
+  "assignedEngineerId",
+  "subscriptionStatus",
+  "subscriptionTypeId",
+  "complaintStatus",
+  "complaintTypeId",
+  "complaintCategoryId",
+  "relatedSoftwareId",
+  "outreachStatus",
+  "outreachTypeId",
+  "callStatusId",
 ] as const;
 
 export type IFilterArray = (typeof ALL_FILTERS)[number];

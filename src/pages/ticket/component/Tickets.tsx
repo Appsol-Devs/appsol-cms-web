@@ -180,6 +180,11 @@ const Tickets = () => {
         }}
         refetchData={executed}
         title="Tickets"
+        filters={[
+          "ticketStatus",
+          "ticketPriority",
+          "assignedEngineerId",
+        ]}
         lazyFetchQuery={[fetchQuery, fetchState]}
       />
       <TicketPreviewDrawer

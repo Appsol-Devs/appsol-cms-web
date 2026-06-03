@@ -2,12 +2,20 @@ import type { ISummarySection } from "@/components/form/MutationFormSummary";
 import MutationFormTemplate from "@/components/form/MutationFormTemplate";
 import { showToast } from "@/components/ui/CustomToast";
 import { cleanPayload, formatMutationSummaryDateTime } from "@/lib/helpers";
+import { lookup_params } from "@/lib/api";
+import type { DropDownOption } from "@/components/DropdownComponent";
+import type { ISoftware, ISubscriptionType } from "@/pages/settings/common/settings";
+import {
+  useLazyGetSoftwaresQuery,
+  useLazyGetSubscriptionTypesQuery,
+} from "@/pages/settings/common/settingsApi";
 import { Calendar, Receipt, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   subscriptionFieldToId,
+  subscriptionFieldToDisplayLabel,
   subscriptionFieldToLabel,
   type ISubscription,
   type ISubscriptionFields,
@@ -22,14 +30,10 @@ import SubscriptionsFormContent from "./SubscriptionsFormContent";
 
 const mapStatusToLabel = (status?: string): string => {
   switch (status) {
-    case "active":
+    case SUBSCRIPTION_STATUS_ENUM.ACTIVE:
       return "Active";
-    case "expired":
-      return "Expired";
-    case "cancelled":
-      return "Cancelled";
-    case "pending":
-      return "Pending";
+    case SUBSCRIPTION_STATUS_ENUM.INACTIVE:
+      return "Inactive";
     default:
       return status ?? "";
   }
@@ -47,7 +51,7 @@ const SubscriptionsForm = () => {
   const form = useForm<ISubscriptionFields>({
     defaultValues: {
       autoRenew: true,
-      status: SUBSCRIPTION_STATUS_ENUM.PENDING,
+      status: SUBSCRIPTION_STATUS_ENUM.ACTIVE,
     },
   });
   const { watch, getValues, reset } = form;
@@ -55,6 +59,43 @@ const SubscriptionsForm = () => {
 
   const navigate = useNavigate();
   const [selectedData, setSelectedData] = useState<ISubscription | null>(null);
+  const [getSoftwares] = useLazyGetSoftwaresQuery();
+  const [getSubscriptionTypes] = useLazyGetSubscriptionTypesQuery();
+  const [softwareOptions, setSoftwareOptions] = useState<
+    DropDownOption<string>[]
+  >([]);
+  const [subscriptionTypeOptions, setSubscriptionTypeOptions] = useState<
+    DropDownOption<string>[]
+  >([]);
+
+  useEffect(() => {
+    getSoftwares(lookup_params)
+      .unwrap()
+      .then((res: { contents?: ISoftware[] }) => {
+        if (res?.contents) {
+          setSoftwareOptions(
+            res.contents.map((item) => ({
+              label: item.name ?? "",
+              value: item._id ?? "",
+            })),
+          );
+        }
+      })
+      .catch(console.error);
+    getSubscriptionTypes(lookup_params)
+      .unwrap()
+      .then((res: { contents?: ISubscriptionType[] }) => {
+        if (res?.contents) {
+          setSubscriptionTypeOptions(
+            res.contents.map((item) => ({
+              label: item.name ?? "",
+              value: item._id ?? "",
+            })),
+          );
+        }
+      })
+      .catch(console.error);
+  }, [getSoftwares, getSubscriptionTypes]);
 
   const fetchData = async (id: string) => {
     if (!id) return;
@@ -203,7 +244,7 @@ const SubscriptionsForm = () => {
       softwareId: subscriptionFieldToId(data.softwareId),
       subscriptionTypeId: subscriptionFieldToId(data.subscriptionTypeId),
       status:
-        subscriptionFieldToId(data.status) ?? SUBSCRIPTION_STATUS_ENUM.PENDING,
+        subscriptionFieldToId(data.status) ?? SUBSCRIPTION_STATUS_ENUM.ACTIVE,
       startDate: data.startDate,
       currentPeriodStart: data.currentPeriodStart,
       currentPeriodEnd: data.currentPeriodEnd,
@@ -228,12 +269,26 @@ const SubscriptionsForm = () => {
         },
         {
           label: "Software",
-          value: subscriptionFieldToLabel(values?.softwareId),
+          value:
+            subscriptionFieldToDisplayLabel(
+              values?.softwareId,
+              softwareOptions,
+            ) ??
+            (typeof selectedData?.software !== "string"
+              ? selectedData?.software?.name
+              : undefined),
           required: true,
         },
         {
           label: "Subscription Type",
-          value: subscriptionFieldToLabel(values?.subscriptionTypeId),
+          value:
+            subscriptionFieldToDisplayLabel(
+              values?.subscriptionTypeId,
+              subscriptionTypeOptions,
+            ) ??
+            (typeof selectedData?.subscriptionType !== "string"
+              ? selectedData?.subscriptionType?.name
+              : undefined),
           required: true,
         },
         {

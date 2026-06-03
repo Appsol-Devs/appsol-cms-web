@@ -166,7 +166,13 @@ const Complaints = () => {
             state: { initialData: complaint },
           });
         }}
-        // filters={["company", "location", "role", "gender"]}
+        filters={[
+          "complaintStatus",
+          "customerId",
+          "complaintTypeId",
+          "complaintCategoryId",
+          "relatedSoftwareId",
+        ]}
         refetchData={executed}
         title="Complaints"
         lazyFetchQuery={[fetchQuery, fetchState]}

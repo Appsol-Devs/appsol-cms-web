@@ -14,10 +14,29 @@ import {
 import type { IFilterArray, IFilters } from "@/lib/pagination";
 import type { ICustomer } from "@/pages/customer/common/customers";
 import { useLazyGetCustomersQuery } from "@/pages/customer/common/customersApi";
-import { CUSTOMER_SETUP_STATUS_ENUM, PAYMENT_STATUS_ENUM, REQUEST_FEATURE_PRIORITY_ENUM, REQUEST_FEATURE_STATUS_ENUM } from "@/lib/enums";
+import {
+  COMPLAINT_STATUS_ENUM,
+  CUSTOMER_OUTREACH_STATUS,
+  CUSTOMER_SETUP_STATUS_ENUM,
+  PAYMENT_STATUS_ENUM,
+  REQUEST_FEATURE_PRIORITY_ENUM,
+  REQUEST_FEATURE_STATUS_ENUM,
+  TICKET_PRIORITY_ENUM,
+  TICKET_STATUS_OPTIONS,
+  SUBSCRIPTION_STATUS_OPTIONS,
+} from "@/lib/enums";
 import type { TSubscriptionReminderType } from "@/pages/subscription-reminders/common/subscription-reminder";
 import { dueDateRangeForReminderType, SUBSCRIPTION_REMINDER_TYPE_LABELS } from "@/pages/subscription-reminders/common/subscription-reminder";
-import { useLazyGetLeadStatusesQuery, useLazyGetSetupStatusesQuery, useLazyGetSoftwaresQuery } from "@/pages/settings/common/settingsApi";
+import { useLazyGetOutReachTypesQuery } from "@/pages/outreach/common/OutReachApi";
+import {
+  useLazyGetCallStatusesQuery,
+  useLazyGetComplaintCategoriesQuery,
+  useLazyGetComplaintTypesQuery,
+  useLazyGetLeadStatusesQuery,
+  useLazyGetSetupStatusesQuery,
+  useLazyGetSoftwaresQuery,
+  useLazyGetSubscriptionTypesQuery,
+} from "@/pages/settings/common/settingsApi";
 import CustomInputField from "@/components/CustomInputField";
 import { useLazyGetUsersQuery } from "@/pages/users/common/usersApi";
 
@@ -46,6 +65,15 @@ type IFilterFields = Omit<
   | "setUpStatusId"
   | "isSent"
   | "CustomerSetupStatus"
+  | "ticketStatus"
+  | "ticketPriority"
+  | "assignedEngineerId"
+  | "subscriptionTypeId"
+  | "complaintTypeId"
+  | "complaintCategoryId"
+  | "relatedSoftwareId"
+  | "outreachTypeId"
+  | "callStatusId"
 > & {
   customerId?: DropDownOption<ICustomer>;
   status?: DropDownOption<string>;
@@ -61,7 +89,18 @@ type IFilterFields = Omit<
   isSent?: DropDownOption<string>;
   setUpStatusId?: DropDownOption<string>;
   CustomerSetupStatus?: DropDownOption<string>;
-
+  ticketStatus?: DropDownOption<string>;
+  ticketPriority?: DropDownOption<string>;
+  assignedEngineerId?: DropDownOption<string>;
+  subscriptionStatus?: DropDownOption<string>;
+  subscriptionTypeId?: DropDownOption<string>;
+  complaintStatus?: DropDownOption<string>;
+  complaintTypeId?: DropDownOption<string>;
+  complaintCategoryId?: DropDownOption<string>;
+  relatedSoftwareId?: DropDownOption<string>;
+  outreachStatus?: DropDownOption<string>;
+  outreachTypeId?: DropDownOption<string>;
+  callStatusId?: DropDownOption<string>;
 };
 
 const FiltersTemplate = ({
@@ -79,6 +118,11 @@ const FiltersTemplate = ({
   const [getSoftwares] = useLazyGetSoftwaresQuery();
   const [getUsers] = useLazyGetUsersQuery();
   const [getSetupStatus] = useLazyGetSetupStatusesQuery();
+  const [getSubscriptionTypes] = useLazyGetSubscriptionTypesQuery();
+  const [getComplaintTypes] = useLazyGetComplaintTypesQuery();
+  const [getComplaintCategories] = useLazyGetComplaintCategoriesQuery();
+  const [getOutreachTypes] = useLazyGetOutReachTypesQuery();
+  const [getCallStatuses] = useLazyGetCallStatusesQuery();
   const { getValues, control, reset, watch, register } = useForm<IFilterFields>();
 
   const queryParams = useMemo(
@@ -107,6 +151,21 @@ const FiltersTemplate = ({
   const [setUpStatusOptions, setSetUpStatusOptions] = useState<
     DropDownOption<string>[]
   >([]);
+  const [subscriptionTypeOptions, setSubscriptionTypeOptions] = useState<
+    DropDownOption<string>[]
+  >([]);
+  const [complaintTypeOptions, setComplaintTypeOptions] = useState<
+    DropDownOption<string>[]
+  >([]);
+  const [complaintCategoryOptions, setComplaintCategoryOptions] = useState<
+    DropDownOption<string>[]
+  >([]);
+  const [outreachTypeOptions, setOutreachTypeOptions] = useState<
+    DropDownOption<string>[]
+  >([]);
+  const [callStatusOptions, setCallStatusOptions] = useState<
+    DropDownOption<string>[]
+  >([]);
 
   //   --------------------------------------------------------
 
@@ -128,6 +187,16 @@ const FiltersTemplate = ({
     useGenerateDropdownOptionsFromEnum(REQUEST_FEATURE_PRIORITY_ENUM);
 
   const customerSetUpStatusOptions = useGenerateDropdownOptionsFromEnum(CUSTOMER_SETUP_STATUS_ENUM);
+  const ticketStatusOptions: DropDownOption<string>[] = TICKET_STATUS_OPTIONS;
+  const ticketPriorityOptions =
+    useGenerateDropdownOptionsFromEnum(TICKET_PRIORITY_ENUM);
+  const subscriptionStatusOptions: DropDownOption<string>[] =
+    SUBSCRIPTION_STATUS_OPTIONS;
+  const complaintStatusOptions =
+    useGenerateDropdownOptionsFromEnum(COMPLAINT_STATUS_ENUM);
+  const outreachStatusOptions = useGenerateDropdownOptionsFromEnum(
+    CUSTOMER_OUTREACH_STATUS,
+  );
 
   const reminderTypeOptions: DropDownOption<string>[] = (
     Object.entries(SUBSCRIPTION_REMINDER_TYPE_LABELS) as [
@@ -204,7 +273,10 @@ const FiltersTemplate = ({
           }
         });
     }
-    if (checkIfHasString("softwareId")) {
+    if (
+      checkIfHasString("softwareId") ||
+      checkIfHasString("relatedSoftwareId")
+    ) {
       getSoftwares(queryParams)
         .unwrap()
         .then((res) => {
@@ -222,15 +294,17 @@ const FiltersTemplate = ({
         });
     }
 
-    if (checkIfHasString("assignedTo")) {
+    const loadEngineerOptions = () => {
       getUsers({ pageIndex: 1, pageSize: 10 })
         .unwrap()
         .then((res) => {
           if (res) {
             setEngineOptions(() =>
               res.contents.map((data) => {
+                const name =
+                  `${data.firstName ?? ""} ${data.lastName ?? ""}`.trim();
                 const payload: DropDownOption<string> = {
-                  label: `${data.firstName} ${data.lastName}`,
+                  label: name || data.email || "User",
                   value: data?._id as string,
                 };
                 return payload;
@@ -238,6 +312,10 @@ const FiltersTemplate = ({
             );
           }
         });
+    };
+
+    if (checkIfHasString("assignedTo") || checkIfHasString("assignedEngineerId")) {
+      loadEngineerOptions();
     }
     if (checkIfHasString("setUpStatusId")) {
       getSetupStatus(queryParams)
@@ -257,6 +335,81 @@ const FiltersTemplate = ({
         });
     }
 
+    if (checkIfHasString("subscriptionTypeId")) {
+      getSubscriptionTypes(queryParams)
+        .unwrap()
+        .then((res) => {
+          if (res?.contents) {
+            setSubscriptionTypeOptions(
+              res.contents.map((data) => ({
+                label: data.name ?? "",
+                value: data._id as string,
+              })),
+            );
+          }
+        });
+    }
+
+    if (checkIfHasString("complaintTypeId")) {
+      getComplaintTypes(queryParams)
+        .unwrap()
+        .then((res) => {
+          if (res?.contents) {
+            setComplaintTypeOptions(
+              res.contents.map((data) => ({
+                label: data.name ?? "",
+                value: data._id as string,
+              })),
+            );
+          }
+        });
+    }
+
+    if (checkIfHasString("complaintCategoryId")) {
+      getComplaintCategories(queryParams)
+        .unwrap()
+        .then((res) => {
+          if (res?.contents) {
+            setComplaintCategoryOptions(
+              res.contents.map((data) => ({
+                label: data.name ?? "",
+                value: data._id as string,
+              })),
+            );
+          }
+        });
+    }
+
+    if (checkIfHasString("outreachTypeId")) {
+      getOutreachTypes(queryParams)
+        .unwrap()
+        .then((res) => {
+          if (res?.contents) {
+            setOutreachTypeOptions(
+              res.contents.map((data) => ({
+                label: data.name ?? "",
+                value: data._id as string,
+              })),
+            );
+          }
+        });
+    }
+
+    if (checkIfHasString("callStatusId")) {
+      getCallStatuses(queryParams)
+        .unwrap()
+        .then((res) => {
+          if (res?.contents) {
+            setCallStatusOptions(
+              res.contents.map((data) => ({
+                label: data.name ?? "",
+                value: data._id as string,
+              })),
+            );
+          }
+        });
+    }
+
 
 
 
@@ -268,6 +421,11 @@ const FiltersTemplate = ({
     getUsers,
     getSoftwares,
     getSetupStatus,
+    getSubscriptionTypes,
+    getComplaintTypes,
+    getComplaintCategories,
+    getOutreachTypes,
+    getCallStatuses,
   ]);
 
   useEffect(() => {
@@ -280,10 +438,24 @@ const FiltersTemplate = ({
           endDate: dueRange?.endDate ?? selectedFilters?.endDate,
           customerId: filterFieldToValue(values.customerId),
           status:
+            filterFieldToValue(values.outreachStatus) ||
+            filterFieldToValue(values.complaintStatus) ||
+            filterFieldToValue(values.subscriptionStatus) ||
+            filterFieldToValue(values.ticketStatus) ||
             filterFieldToValue(values.status) ||
             filterFieldToValue(values.featureStatus) ||
             filterFieldToValue(values.CustomerSetupStatus),
-          priority: filterFieldToValue(values.featurePriority),
+          subscriptionTypeId: filterFieldToValue(values.subscriptionTypeId),
+          complaintTypeId: filterFieldToValue(values.complaintTypeId),
+          complaintCategoryId: filterFieldToValue(values.complaintCategoryId),
+          relatedSoftwareId: filterFieldToValue(values.relatedSoftwareId),
+          outreachTypeId: filterFieldToValue(values.outreachTypeId),
+          callStatusId: filterFieldToValue(values.callStatusId),
+          priority:
+            filterFieldToValue(values.ticketPriority) ||
+            filterFieldToValue(values.featurePriority) ||
+            filterFieldToValue(values.priority),
+          assignedEngineerId: filterFieldToValue(values.assignedEngineerId),
           softwareId: filterFieldToValue(values.softwareId),
           assignedTo: filterFieldToValue(values.assignedTo),
           targetEntityType: filterFieldToValue(values.targetEntityType),
@@ -312,10 +484,24 @@ const FiltersTemplate = ({
       endDate: dueRange?.endDate ?? selectedFilters?.endDate,
       customerId: filterFieldToValue(data.customerId),
       status:
+        filterFieldToValue(data.outreachStatus) ||
+        filterFieldToValue(data.complaintStatus) ||
+        filterFieldToValue(data.subscriptionStatus) ||
+        filterFieldToValue(data.ticketStatus) ||
         filterFieldToValue(data.status) ||
         filterFieldToValue(data.featureStatus) ||
         filterFieldToValue(data.CustomerSetupStatus),
-      priority: filterFieldToValue(data.featurePriority),
+      subscriptionTypeId: filterFieldToValue(data.subscriptionTypeId),
+      complaintTypeId: filterFieldToValue(data.complaintTypeId),
+      complaintCategoryId: filterFieldToValue(data.complaintCategoryId),
+      relatedSoftwareId: filterFieldToValue(data.relatedSoftwareId),
+      outreachTypeId: filterFieldToValue(data.outreachTypeId),
+      callStatusId: filterFieldToValue(data.callStatusId),
+      priority:
+        filterFieldToValue(data.ticketPriority) ||
+        filterFieldToValue(data.featurePriority) ||
+        filterFieldToValue(data.priority),
+      assignedEngineerId: filterFieldToValue(data.assignedEngineerId),
       softwareId: filterFieldToValue(data.softwareId),
       assignedTo: filterFieldToValue(data.assignedTo),
       targetEntityType: filterFieldToValue(data.targetEntityType),
@@ -333,11 +519,23 @@ const FiltersTemplate = ({
     reset({
       customerId: undefined,
       status: undefined,
+      ticketStatus: undefined,
+      ticketPriority: undefined,
       targetEntityType: undefined,
       targetEntityId: undefined,
       loggedBy: undefined,
       reminderType: undefined,
       isSent: undefined,
+      assignedEngineerId: undefined,
+      subscriptionStatus: undefined,
+      subscriptionTypeId: undefined,
+      complaintStatus: undefined,
+      complaintTypeId: undefined,
+      complaintCategoryId: undefined,
+      relatedSoftwareId: undefined,
+      outreachStatus: undefined,
+      outreachTypeId: undefined,
+      callStatusId: undefined,
     });
     if (returnOnFilterChange) return;
     handleSubmitFilters();
@@ -436,6 +634,51 @@ const FiltersTemplate = ({
                   label="Select status"
                 />
               )}
+              {checkIfHasString("outreachStatus") && (
+                <DropDownComponent
+                  title="Outreach Status"
+                  control={control}
+                  options={outreachStatusOptions}
+                  name="outreachStatus"
+                  label="Select outreach status"
+                />
+              )}
+              {checkIfHasString("complaintStatus") && (
+                <DropDownComponent
+                  title="Complaint Status"
+                  control={control}
+                  options={complaintStatusOptions}
+                  name="complaintStatus"
+                  label="Select complaint status"
+                />
+              )}
+              {checkIfHasString("subscriptionStatus") && (
+                <DropDownComponent
+                  title="Subscription Status"
+                  control={control}
+                  options={subscriptionStatusOptions}
+                  name="subscriptionStatus"
+                  label="Select subscription status"
+                />
+              )}
+              {checkIfHasString("ticketStatus") && (
+                <DropDownComponent
+                  title="Ticket Status"
+                  control={control}
+                  options={ticketStatusOptions}
+                  name="ticketStatus"
+                  label="Select ticket status"
+                />
+              )}
+              {checkIfHasString("ticketPriority") && (
+                <DropDownComponent
+                  title="Ticket Priority"
+                  control={control}
+                  options={ticketPriorityOptions}
+                  name="ticketPriority"
+                  label="Select ticket priority"
+                />
+              )}
               {checkIfHasString("featureStatus") && (
                 <DropDownComponent
                   title="Feature Status"
@@ -465,6 +708,60 @@ const FiltersTemplate = ({
                   label="Select software"
                 />
               )}
+              {checkIfHasString("subscriptionTypeId") && (
+                <DropDownComponent
+                  title="Subscription Type"
+                  control={control}
+                  options={subscriptionTypeOptions}
+                  name="subscriptionTypeId"
+                  label="Select subscription type"
+                />
+              )}
+              {checkIfHasString("complaintTypeId") && (
+                <DropDownComponent
+                  title="Complaint Type"
+                  control={control}
+                  options={complaintTypeOptions}
+                  name="complaintTypeId"
+                  label="Select complaint type"
+                />
+              )}
+              {checkIfHasString("complaintCategoryId") && (
+                <DropDownComponent
+                  title="Complaint Category"
+                  control={control}
+                  options={complaintCategoryOptions}
+                  name="complaintCategoryId"
+                  label="Select complaint category"
+                />
+              )}
+              {checkIfHasString("relatedSoftwareId") && (
+                <DropDownComponent
+                  title="Related Software"
+                  control={control}
+                  options={softwareOptions}
+                  name="relatedSoftwareId"
+                  label="Select related software"
+                />
+              )}
+              {checkIfHasString("outreachTypeId") && (
+                <DropDownComponent
+                  title="Outreach Type"
+                  control={control}
+                  options={outreachTypeOptions}
+                  name="outreachTypeId"
+                  label="Select outreach type"
+                />
+              )}
+              {checkIfHasString("callStatusId") && (
+                <DropDownComponent
+                  title="Call Status"
+                  control={control}
+                  options={callStatusOptions}
+                  name="callStatusId"
+                  label="Select call status"
+                />
+              )}
 
               {checkIfHasString("assignedTo") && (
                 <DropDownComponent
@@ -473,6 +770,15 @@ const FiltersTemplate = ({
                   options={engineOptions}
                   name="assignedTo"
                   label="Select assigned user"
+                />
+              )}
+              {checkIfHasString("assignedEngineerId") && (
+                <DropDownComponent
+                  title="Assigned Engineer"
+                  control={control}
+                  options={engineOptions}
+                  name="assignedEngineerId"
+                  label="Select assigned engineer"
                 />
               )}
 

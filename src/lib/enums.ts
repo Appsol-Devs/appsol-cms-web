@@ -101,6 +101,29 @@ export const getTicketPriorityColor = (priority?: string) =>
     ? (TICKET_PRIORITY_COLORS[priority.toLowerCase()] ?? undefined)
     : undefined;
 
+export enum TICKET_STATUS_ENUM {
+  OPEN = "open",
+  FIXED = "fixed",
+  CLOSED = "closed",
+  ASSIGNED = "assigned",
+  REJECTED = "rejected",
+}
+
+const TICKET_STATUS_LABELS: Record<TICKET_STATUS_ENUM, string> = {
+  [TICKET_STATUS_ENUM.OPEN]: "Open",
+  [TICKET_STATUS_ENUM.FIXED]: "Fixed",
+  [TICKET_STATUS_ENUM.CLOSED]: "Closed",
+  [TICKET_STATUS_ENUM.ASSIGNED]: "Assigned",
+  [TICKET_STATUS_ENUM.REJECTED]: "Rejected",
+};
+
+export const TICKET_STATUS_OPTIONS = (
+  Object.values(TICKET_STATUS_ENUM) as TICKET_STATUS_ENUM[]
+).map((value) => ({
+  label: TICKET_STATUS_LABELS[value],
+  value,
+}));
+
 export const TICKET_STATUS_COLORS: Record<string, string> = {
   open: "#3b82f6",
   fixed: "#eab308",
@@ -137,16 +160,24 @@ export enum CUSTOMER_OUTREACH_STATUS {
 
 export enum SUBSCRIPTION_STATUS_ENUM {
   ACTIVE = "active",
-  EXPIRED = "expired",
-  CANCELLED = "cancelled",
-  PENDING = "pending",
+  INACTIVE = "inactive",
 }
+
+const SUBSCRIPTION_STATUS_LABELS: Record<SUBSCRIPTION_STATUS_ENUM, string> = {
+  [SUBSCRIPTION_STATUS_ENUM.ACTIVE]: "Active",
+  [SUBSCRIPTION_STATUS_ENUM.INACTIVE]: "Inactive",
+};
+
+export const SUBSCRIPTION_STATUS_OPTIONS = (
+  Object.values(SUBSCRIPTION_STATUS_ENUM) as SUBSCRIPTION_STATUS_ENUM[]
+).map((value) => ({
+  label: SUBSCRIPTION_STATUS_LABELS[value],
+  value,
+}));
 
 export const SUBSCRIPTION_STATUS_COLORS: Record<string, string> = {
   active: "#22c55e",
-  expired: "#6b7280",
-  cancelled: "#ef4444",
-  pending: "#f97316",
+  inactive: "#6b7280",
 };
 
 export const getSubscriptionStatusColor = (status?: string) =>

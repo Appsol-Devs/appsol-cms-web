@@ -176,6 +176,12 @@ const Subscriptions = () => {
         }}
         refetchData={executed}
         title="Subscriptions"
+        filters={[
+          "subscriptionStatus",
+          "customerId",
+          "softwareId",
+          "subscriptionTypeId",
+        ]}
         lazyFetchQuery={[fetchQuery, fetchState]}
       />
     </>
