@@ -4,12 +4,16 @@ import { showToast } from "@/components/ui/CustomToast";
 import { cleanPayload, resetMutationForm } from "@/lib/helpers";
 import type { DefaultValues } from "react-hook-form";
 import {
+  customerFieldToDisplayLabel,
   customerFieldToId,
-  customerFieldToLabel,
   customerSchema,
   type ICustomer,
   type ICustomerFields,
 } from "@/pages/customer/common/customers";
+import { lookup_params } from "@/lib/api";
+import type { DropDownOption } from "@/components/DropdownComponent";
+import type { ISoftware } from "@/pages/settings/common/settings";
+import { useLazyGetSoftwaresQuery } from "@/pages/settings/common/settingsApi";
 import { BookOpenText, Home } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -86,6 +90,26 @@ const CustomersForm = () => {
   const [selectedCustomer, setSelectedCustomer] = useState<ICustomer | null>(
     null,
   );
+  const [getSoftwares] = useLazyGetSoftwaresQuery();
+  const [softwareOptions, setSoftwareOptions] = useState<
+    DropDownOption<string>[]
+  >([]);
+
+  useEffect(() => {
+    getSoftwares(lookup_params)
+      .unwrap()
+      .then((res: { contents?: ISoftware[] }) => {
+        if (res?.contents) {
+          setSoftwareOptions(
+            res.contents.map((item) => ({
+              label: item.name ?? "",
+              value: item._id ?? "",
+            })),
+          );
+        }
+      })
+      .catch(console.error);
+  }, [getSoftwares]);
 
 
   const fetchCustomerData = async (id: string) => {
@@ -275,7 +299,14 @@ const submitData = handleSubmit(
         },
         {
           label: "Related Software",
-          value: customerFieldToLabel(values?.softwareId),
+          value:
+            customerFieldToDisplayLabel(
+              values?.softwareId,
+              softwareOptions,
+            ) ??
+            (typeof selectedCustomer?.software !== "string"
+              ? selectedCustomer?.software?.name
+              : undefined),
         },
         // {
         //   label:"Geolocation",

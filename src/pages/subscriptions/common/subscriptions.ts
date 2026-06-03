@@ -79,6 +79,20 @@ export const subscriptionFieldToLabel = (
   val?: string | DropDownOption<string> | null,
 ): string | undefined => {
   if (!val) return undefined;
-  if (typeof val === "string") return val;
-  return val.label?.toString();
+  if (typeof val !== "string") return val.label?.toString();
+  return val;
+};
+
+export const subscriptionFieldToDisplayLabel = (
+  val?: string | DropDownOption<string> | null,
+  options?: DropDownOption<string>[],
+): string | undefined => {
+  if (val == null || val === "") return undefined;
+  if (typeof val !== "string") {
+    const label = val.label?.toString();
+    if (label) return label;
+    val = val.value;
+  }
+  const match = options?.find((o) => String(o.value) === String(val));
+  return match?.label?.toString();
 };

@@ -7,8 +7,7 @@ import AsyncDropDownComponent from "@/components/AsyncDropDownComponent";
 import { Separator } from "@/components/ui/separator";
 import { addMonths } from "date-fns";
 import { lookup_params } from "@/lib/api";
-import { useGenerateDropdownOptionsFromEnum } from "@/lib/helpers";
-import { SUBSCRIPTION_STATUS_ENUM } from "@/lib/enums";
+import { SUBSCRIPTION_STATUS_OPTIONS } from "@/lib/enums";
 import { Calendar, Receipt, User } from "lucide-react";
 import { Controller, type UseFormReturn } from "react-hook-form";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -50,8 +49,7 @@ const SubscriptionsFormContent = ({ isLoading, form, isUpdate }: IField) => {
     Map<string, ISubscriptionType>
   >(new Map());
 
-  const statusOptions =
-    useGenerateDropdownOptionsFromEnum(SUBSCRIPTION_STATUS_ENUM);
+  const statusOptions: DropDownOption<string>[] = SUBSCRIPTION_STATUS_OPTIONS;
 
   const loadCustomerOptions = useCallback(
     async (inputValue: string): Promise<DropDownOption<string>[]> => {

@@ -2,6 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { prepareApiHeaders, type IBaseQueryParam } from "@/lib/api";
 import {
   getPaginationMetaDataV2,
+  getQueryRequestUrl,
   type IPagination,
   type PaginatedResponse,
 } from "@/lib/pagination";
@@ -20,16 +21,17 @@ export const customerOutreachApi = createApi({
       PaginatedResponse<ICustomerOutreach[]>,
       IBaseQueryParam
     >({
-      query: ({ pageIndex, search, pageSize }) => {
-        let url = `/customer_outreachs?pageSize=${pageSize}`;
-        if (search) {
-          url += `&search=${search}`;
-        }
-        if (pageIndex) {
-          url += `&pageIndex=${pageIndex}`;
-        }
+      query: ({ pageIndex, search, pageSize, filters }) => {
+        const params = new URLSearchParams();
+        if (pageSize !== undefined) params.set("pageSize", String(pageSize));
+        if (search) params.set("search", search);
+        if (pageIndex !== undefined) params.set("pageIndex", String(pageIndex));
+
         return {
-          url: url,
+          url: getQueryRequestUrl(
+            `/customer_outreachs?${params.toString()}`,
+            filters,
+          ),
         };
       },
       transformResponse: async (response: Response) => {

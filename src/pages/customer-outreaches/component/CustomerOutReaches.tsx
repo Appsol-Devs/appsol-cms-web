@@ -129,6 +129,12 @@ const CustomerOutReaches = () => {
             { state: { initialData: o } },
           );
         }}
+        filters={[
+          "outreachStatus",
+          "customerId",
+          "outreachTypeId",
+          "callStatusId",
+        ]}
         refetchData={executed}
         title="Customer Outreach"
         lazyFetchQuery={[fetchQuery, fetchState]}
