@@ -1,7 +1,7 @@
 import type { ISummarySection } from "@/components/form/MutationFormSummary";
 import MutationFormTemplate from "@/components/form/MutationFormTemplate";
 import { showToast } from "@/components/ui/CustomToast";
-import { cleanPayload } from "@/lib/helpers";
+import { cleanPayload, resetMutationForm } from "@/lib/helpers";
 import { Phone, Notebook, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -74,17 +74,34 @@ const ComplaintsForm = () => {
     }
   };
 
+  const getEmptyComplaintValues = (): IComplaintFields => ({
+    description: "",
+    status: COMPLAINT_STATUS_ENUM.Open,
+    customerId: undefined,
+    complaintTypeId: undefined,
+    complaintCategoryId: undefined,
+    relatedSoftwareId: undefined,
+  });
+
+  const handleResetForm = () => {
+    if (id && selectedData) {
+      resetFormWithData(selectedData);
+      return;
+    }
+    resetMutationForm(form, getEmptyComplaintValues());
+  };
+
   const resetFormWithData = (data: IComplaint) => {
     if (!data) return;
     reset({
-      ...data,
+      description: data.description ?? "",
       customerId: data.customer
         ? { label: data.customer.name ?? "", value: data.customer._id ?? "" }
         : undefined,
       complaintTypeId: data.complaintType?._id ?? undefined,
       complaintCategoryId: data.complaintCategory?._id ?? undefined,
       relatedSoftwareId: data.relatedSoftware?._id ?? undefined,
-      status: data.status ?? undefined,
+      status: data.status ?? COMPLAINT_STATUS_ENUM.Open,
     });
   };
 
@@ -237,6 +254,7 @@ const ComplaintsForm = () => {
           summaryMainTitle: "Complaint Summary",
           summarySaveButtonText: id ? "Save Changes" : "Save Complaint",
         }}
+        onResetForm={handleResetForm}
       />
     </div>
   );

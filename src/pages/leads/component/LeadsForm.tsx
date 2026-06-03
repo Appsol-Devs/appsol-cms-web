@@ -1,7 +1,11 @@
 import type { ISummarySection } from "@/components/form/MutationFormSummary";
 import MutationFormTemplate from "@/components/form/MutationFormTemplate";
 import { showToast } from "@/components/ui/CustomToast";
-import { cleanPayload, formatMutationSummaryDateTime } from "@/lib/helpers";
+import {
+  cleanPayload,
+  formatMutationSummaryDateTime,
+  resetMutationForm,
+} from "@/lib/helpers";
 import { Spotlight, Headset, Home, Lock, StepForward } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -60,6 +64,30 @@ const LeadsForm = () => {
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const getEmptyLeadValues = (): ILeadFields => ({
+    name: "",
+    email: "",
+    phone: "",
+    companyName: "",
+    leadSource: "",
+    location: "",
+    notes: "",
+    initialEnquiryDate: "",
+    leadStage: undefined,
+    nextStep: undefined,
+    priority: LEAD_PRIORITY_ENUM.MEDIUM,
+    leadStatus: LEAD_STATUS_ENUM.NEW,
+    software: undefined,
+  });
+
+  const handleResetForm = () => {
+    if (id && selectedData) {
+      resetFormWithData(selectedData);
+      return;
+    }
+    resetMutationForm(form, getEmptyLeadValues());
   };
 
   const resetFormWithData = (data: ILead) => {
@@ -331,6 +359,7 @@ const LeadsForm = () => {
           summaryMainTitle: "Lead Details Summary",
           summarySaveButtonText: id ? "Save Changes" : "Save Lead",
         }}
+        onResetForm={handleResetForm}
       />
     </div>
   );

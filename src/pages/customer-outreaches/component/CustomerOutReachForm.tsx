@@ -2,7 +2,7 @@ import type { DropDownOption } from "@/components/DropdownComponent";
 import type { ISummarySection } from "@/components/form/MutationFormSummary";
 import MutationFormTemplate from "@/components/form/MutationFormTemplate";
 import { showToast } from "@/components/ui/CustomToast";
-import { cleanPayload } from "@/lib/helpers";
+import { cleanPayload, resetMutationForm } from "@/lib/helpers";
 import { CheckCircle2, Megaphone, PhoneOutgoing, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -19,7 +19,7 @@ export type ICustomerOutreachFields = {
     purpose: string;
     notes: string;
     isRoutineCall: boolean;
-    status: DropDownOption<string>;
+    status?: DropDownOption<string>;
 };
 
 const CustomerOutreachForm = () => {
@@ -58,24 +58,47 @@ const CustomerOutreachForm = () => {
         }
     }, [id]);
 
+    const getEmptyOutreachValues = (): ICustomerOutreachFields => ({
+        purpose: "",
+        notes: "",
+        isRoutineCall: false,
+        customer: undefined,
+        outreachType: undefined,
+        callStatus: undefined,
+        status: undefined,
+    });
+
+    const resetFormWithData = (data: ICustomerOutreach) => {
+        reset({
+            purpose: data.purpose ?? "",
+            notes: data.notes ?? "",
+            isRoutineCall: data.isRoutineCall ?? false,
+            customer: data.customer
+                ? { label: data.customer.name, value: data.customerId }
+                : undefined,
+            outreachType: data.outreachType
+                ? { label: data.outreachType.name, value: data.outreachTypeId }
+                : undefined,
+            callStatus: data.callStatus
+                ? { label: data.callStatus.name, value: data.callStatusId }
+                : undefined,
+            status: data.status
+                ? { label: data.status, value: data.status }
+                : undefined,
+        });
+    };
+
+    const handleResetForm = () => {
+        if (id && selectedData) {
+            resetFormWithData(selectedData);
+            return;
+        }
+        resetMutationForm(form, getEmptyOutreachValues());
+    };
+
     useEffect(() => {
         if (id && selectedData) {
-            reset({
-                purpose: selectedData.purpose,
-                notes: selectedData.notes,
-                isRoutineCall: selectedData.isRoutineCall,
-                customer: selectedData.customer
-                    ? { label: selectedData.customer.name, value: selectedData.customerId }
-                    : undefined,
-                outreachType: selectedData.outreachType
-                    ? { label: selectedData.outreachType.name, value: selectedData.outreachTypeId }
-                    : undefined,
-                callStatus: selectedData.callStatus
-                    ? { label: selectedData.callStatus.name, value: selectedData.callStatusId }
-                    : undefined,
-                status: selectedData.status ? { label: selectedData.status, value: selectedData.status }
-                    : undefined,
-            });
+            resetFormWithData(selectedData);
         }
     }, [selectedData, id, reset]);
 
@@ -204,6 +227,7 @@ const CustomerOutreachForm = () => {
                     summaryMainTitle: "Log Summary",
                     summarySaveButtonText: id ? "Update Log" : "Save Log",
                 }}
+                onResetForm={handleResetForm}
             />
         </div>
     );

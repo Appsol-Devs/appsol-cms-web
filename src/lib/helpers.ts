@@ -1,6 +1,7 @@
 import type { DropDownOption } from "@/components/DropdownComponent";
 import { format, formatDistanceToNow } from "date-fns";
 import { useCallback, useRef } from "react";
+import type { DefaultValues, FieldValues, UseFormReturn } from "react-hook-form";
 
 const DEBOUNCE_MS = 300;
 
@@ -78,6 +79,41 @@ export const cleanPayload = (obj: Record<string, any>) => {
       ([_, v]) => v !== "" && v !== undefined && v !== null,
     ),
   );
+};
+
+export const resetMutationForm = <T extends FieldValues>(
+  form: UseFormReturn<T>,
+  values: DefaultValues<T>,
+) => {
+  form.reset(values, { keepDefaultValues: true });
+};
+
+export const filterFieldToValue = (val: unknown): string | undefined => {
+  if (val == null || val === "") return undefined;
+  if (typeof val === "string" || typeof val === "number") return String(val);
+  if (typeof val !== "object") return undefined;
+
+  if ("value" in val) {
+    const inner = (val as DropDownOption<unknown>).value;
+    if (inner == null || inner === "") return undefined;
+    if (typeof inner === "string" || typeof inner === "number") {
+      return String(inner);
+    }
+    if (
+      typeof inner === "object" &&
+      inner !== null &&
+      "_id" in inner &&
+      (inner as { _id?: string })._id
+    ) {
+      return String((inner as { _id: string })._id);
+    }
+  }
+
+  if ("_id" in val && (val as { _id?: string })._id) {
+    return String((val as { _id: string })._id);
+  }
+
+  return undefined;
 };
 
 export function formatToTimeAgo(date: string | Date) {

@@ -1,7 +1,11 @@
 import type { ISummarySection } from "@/components/form/MutationFormSummary";
 import MutationFormTemplate from "@/components/form/MutationFormTemplate";
 import { showToast } from "@/components/ui/CustomToast";
-import { cleanPayload, formatMutationSummaryDateTime } from "@/lib/helpers";
+import {
+  cleanPayload,
+  formatMutationSummaryDateTime,
+  resetMutationForm,
+} from "@/lib/helpers";
 import { Ticket, Notebook } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -58,6 +62,39 @@ const TicketForm = () => {
   const values = watch();
   const navigate = useNavigate();
   const [selectedTicket, setSelectedTicket] = useState<ITicket | null>(null);
+
+  const getCreateDefaultValues = (): ITicketFormFields => ({
+    title: "",
+    requestedDate: new Date().toISOString(),
+    notes: "",
+    complaintId: prefillComplaint
+      ? buildComplaintFormOption(prefillComplaint)
+      : undefined,
+    assignedEngineerId: undefined,
+    priority: undefined,
+    status: "open",
+  });
+
+  const handleResetForm = () => {
+    if (id && selectedTicket) {
+      reset({
+        title: selectedTicket.title ?? "",
+        requestedDate: selectedTicket.requestedDate ?? "",
+        notes: selectedTicket.notes ?? "",
+        complaintId: selectedTicket.complaint
+          ? buildComplaintFormOption(selectedTicket.complaint as IComplaint)
+          : undefined,
+        assignedEngineerId:
+          selectedTicket.assignedEngineer?._id ??
+          selectedTicket.assignedEngineerId ??
+          undefined,
+        priority: selectedTicket.priority ?? undefined,
+        status: selectedTicket.status ?? undefined,
+      });
+      return;
+    }
+    resetMutationForm(form, getCreateDefaultValues());
+  };
 
   useEffect(() => {
     if (prefillComplaint) {
@@ -267,6 +304,7 @@ const TicketForm = () => {
           summaryMainTitle: "Ticket Summary",
           summarySaveButtonText: id ? "Save Changes" : "Create Ticket",
         }}
+        onResetForm={handleResetForm}
       />
     </div>
   );

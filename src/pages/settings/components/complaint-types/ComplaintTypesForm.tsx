@@ -1,7 +1,8 @@
 import type { ISummarySection } from "@/components/form/MutationFormSummary";
 import MutationFormTemplate from "@/components/form/MutationFormTemplate";
 import { showToast } from "@/components/ui/CustomToast";
-import { cleanPayload } from "@/lib/helpers";
+import { cleanPayload, resetMutationForm } from "@/lib/helpers";
+import type { DefaultValues } from "react-hook-form";
 import { Phone } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -46,15 +47,31 @@ const ComplaintTypesForm = () => {
     }
   };
 
+  const getEmptyValues = (): IComplaintTypeFields => ({
+    name: "",
+    description: "",
+    colorCode: undefined,
+  });
+
   const resetFormWithData = (data: IComplaintType) => {
     if (!data) return;
     reset({
-      ...data,
-      name: data.name,
-      description: data.description,
+      name: data.name ?? "",
+      description: data.description ?? "",
       isActive: data.isActive,
       colorCode: data.colorCode,
     });
+  };
+
+  const handleResetForm = () => {
+    if (id && selectedComplaintType) {
+      resetFormWithData(selectedComplaintType);
+      return;
+    }
+    resetMutationForm<IComplaintTypeFields>(
+      form,
+      getEmptyValues() as DefaultValues<IComplaintTypeFields>,
+    );
   };
 
   useEffect(() => {
@@ -159,6 +176,7 @@ const ComplaintTypesForm = () => {
           summaryMainTitle: "Complaint Type Details Summary",
           summarySaveButtonText: id ? "Save Changes" : "Save Complaint Type",
         }}
+        onResetForm={handleResetForm}
       />
     </div>
   );

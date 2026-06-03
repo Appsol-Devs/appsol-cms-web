@@ -2,7 +2,8 @@ import type { DropDownOption } from "@/components/DropdownComponent";
 import type { ISummarySection } from "@/components/form/MutationFormSummary";
 import MutationFormTemplate from "@/components/form/MutationFormTemplate";
 import { showToast } from "@/components/ui/CustomToast";
-import { cleanPayload } from "@/lib/helpers";
+import { cleanPayload, resetMutationForm } from "@/lib/helpers";
+import type { DefaultValues } from "react-hook-form";
 import type { IUser } from "@/pages/customer/common/customers";
 import { BookOpenText, Shield } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -47,18 +48,40 @@ const UsersForm = () => {
     }
   };
 
+  const getEmptyUserValues = (): IUserFields => ({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    password: "",
+    confirm_password: "",
+    role: undefined,
+  });
+
   const resetFormWithData = (data: IUser) => {
     if (!data) return;
     reset({
-      ...data,
-      firstName: data.firstName,
-      lastName: data.lastName,
-      email: data.email,
-      phone: data.phone,
+      firstName: data.firstName ?? "",
+      lastName: data.lastName ?? "",
+      email: data.email ?? "",
+      phone: data.phone ?? "",
+      password: "",
+      confirm_password: "",
       role: data.role
         ? { label: data.role.name, value: data.role._id as string }
         : undefined,
     });
+  };
+
+  const handleResetForm = () => {
+    if (id && selectedUser) {
+      resetFormWithData(selectedUser);
+      return;
+    }
+    resetMutationForm<IUserFields>(
+      form,
+      getEmptyUserValues() as DefaultValues<IUserFields>,
+    );
   };
 
   useEffect(() => {
@@ -204,6 +227,7 @@ const UsersForm = () => {
           summaryMainTitle: "User Details Summary",
           summarySaveButtonText: id ? "Save Changes" : "Save User",
         }}
+        onResetForm={handleResetForm}
       />
     </div>
   );

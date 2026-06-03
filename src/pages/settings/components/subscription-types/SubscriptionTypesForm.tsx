@@ -1,7 +1,8 @@
 import type { ISummarySection } from "@/components/form/MutationFormSummary";
 import MutationFormTemplate from "@/components/form/MutationFormTemplate";
 import { showToast } from "@/components/ui/CustomToast";
-import { cleanPayload } from "@/lib/helpers";
+import { cleanPayload, resetMutationForm } from "@/lib/helpers";
+import type { DefaultValues } from "react-hook-form";
 import { CalendarCheck2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -47,16 +48,33 @@ const SubscriptionTypesForm = () => {
     }
   };
 
+  const getEmptyValues = (): ISubscriptionTypeFields => ({
+    name: "",
+    description: "",
+    durationInMonths: undefined,
+    colorCode: undefined,
+  });
+
   const resetFormWithData = (data: ISubscriptionType) => {
     if (!data) return;
     reset({
-      ...data,
-      name: data.name,
-      description: data.description,
+      name: data.name ?? "",
+      description: data.description ?? "",
       isActive: data.isActive,
       durationInMonths: data.durationInMonths,
       colorCode: data.colorCode,
     });
+  };
+
+  const handleResetForm = () => {
+    if (id && selectedData) {
+      resetFormWithData(selectedData);
+      return;
+    }
+    resetMutationForm<ISubscriptionTypeFields>(
+      form,
+      getEmptyValues() as DefaultValues<ISubscriptionTypeFields>,
+    );
   };
 
   useEffect(() => {
@@ -175,6 +193,7 @@ const SubscriptionTypesForm = () => {
           summaryMainTitle: "Subscription Type Details Summary",
           summarySaveButtonText: id ? "Save Changes" : "Save Subscription Type",
         }}
+        onResetForm={handleResetForm}
       />
     </div>
   );

@@ -1,7 +1,8 @@
 import type { ISummarySection } from "@/components/form/MutationFormSummary";
 import MutationFormTemplate from "@/components/form/MutationFormTemplate";
 import { showToast } from "@/components/ui/CustomToast";
-import { cleanPayload } from "@/lib/helpers";
+import { cleanPayload, resetMutationForm } from "@/lib/helpers";
+import type { DefaultValues } from "react-hook-form";
 import {
   customerFieldToId,
   customerFieldToLabel,
@@ -101,6 +102,19 @@ const CustomersForm = () => {
       console.error(err);
     }
   };
+  const getEmptyCustomerValues = (): ICustomerFields => ({
+    name: "",
+    companyName: "",
+    email: "",
+    phone: "",
+    location: "",
+    dateConverted: undefined,
+    notes: "",
+    status: "active",
+    geolocation: undefined,
+    softwareId: "",
+  });
+
   const resetFormWithData = (data: ICustomer) => {
     if (!data) return;
 
@@ -121,6 +135,24 @@ const CustomersForm = () => {
       geolocation: data.geolocation,
       softwareId: softwareId ?? undefined,
     });
+  };
+
+  const handleResetForm = () => {
+    if (id && selectedCustomer) {
+      resetFormWithData(selectedCustomer);
+      return;
+    }
+    if (!id && existingData) {
+      resetMutationForm<ICustomerFields>(
+        form,
+        formattedDefaultValues as DefaultValues<ICustomerFields>,
+      );
+      return;
+    }
+    resetMutationForm<ICustomerFields>(
+      form,
+      getEmptyCustomerValues() as DefaultValues<ICustomerFields>,
+    );
   };
 
   useEffect(() => {
@@ -291,6 +323,7 @@ const submitData = handleSubmit(
           summaryMainTitle: "Customer Details Summary",
           summarySaveButtonText: id ? "Save Changes" : "Save Customer",
         }}
+        onResetForm={handleResetForm}
       />
     </div>
   );
