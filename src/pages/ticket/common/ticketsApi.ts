@@ -6,7 +6,11 @@ import {
   type IPagination,
   type PaginatedResponse,
 } from "@/lib/pagination";
-import type { ITicket, ICreateTicketPayload, IReassignTicketPayload } from "./tickets";
+import type {
+  ITicket,
+  ICreateTicketPayload,
+  IReassignTicketPayload,
+} from "./tickets";
 
 export const ticketsApi = createApi({
   reducerPath: "ticketsApi",

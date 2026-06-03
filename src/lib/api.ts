@@ -24,6 +24,7 @@ export interface IBaseQueryParam {
   startDate?: string;
   endDate?: string;
   filters?: IFilters;
+  customerId?: string;
 }
 
 
