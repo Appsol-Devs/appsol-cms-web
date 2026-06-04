@@ -58,11 +58,11 @@ function ActivityItem({
   const date = (entry.date ?? entry.createdAt) ? formatDate(entry.date ?? entry.createdAt!) : "—";
 
   return (
-    <div className="flex gap-3 py-3 border-b border-border last:border-0">
+    <div className="flex gap-3 py-3">
       <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0">
         <History className="w-4 h-4 text-muted-foreground" />
       </div>
-      <div className="flex-1 min-w-0 pb-1">
+      <div className="flex-1 min-w-0">
         <p className="text-sm text-foreground font-medium">{description}</p>
         {reason && (
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -147,13 +147,13 @@ const TicketPreviewDrawer = ({
 
   return (
     <Drawer direction="right" open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="h-[calc(100vh-2rem)] max-h-none sm:max-w-lg !top-4 !right-4 !bottom-4 data-[vaul-drawer-direction=right]:!top-4 data-[vaul-drawer-direction=right]:!right-4 data-[vaul-drawer-direction=right]:!bottom-4 data-[vaul-drawer-direction=right]:rounded-xl flex flex-col">
-        <DrawerHeader className="flex flex-row items-center justify-between gap-3 border-b py-4">
-          <div className="flex-1 min-w-0 flex items-center gap-2">
-            <Ticket className="w-5 h-5 text-muted-foreground shrink-0" />
-            <DrawerTitle>Ticket Preview</DrawerTitle>
+      <DrawerContent className="h-[calc(100vh-2rem)] max-h-[calc(100vh-2rem)] sm:max-w-lg !top-4 !right-4 !bottom-4 data-[vaul-drawer-direction=right]:!top-4 data-[vaul-drawer-direction=right]:!right-4 data-[vaul-drawer-direction=right]:!bottom-4 data-[vaul-drawer-direction=right]:rounded-xl flex flex-col overflow-hidden p-0">
+        <DrawerHeader className="shrink-0 flex flex-row items-center justify-between gap-3 space-y-0 border-b p-0 px-4 py-4 text-left">
+          <div className="flex min-w-0 flex-1 items-center gap-2">
+            <Ticket className="h-5 w-5 shrink-0 text-muted-foreground" />
+            <DrawerTitle className="text-left text-base">Ticket Preview</DrawerTitle>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex shrink-0 items-center gap-2">
             {ticket?._id && (
               <Button
                 variant="default"
@@ -165,7 +165,11 @@ const TicketPreviewDrawer = ({
               </Button>
             )}
             <DrawerClose asChild>
-              <Button variant="ghost" size="icon" className="shrink-0 h-8 w-8 shrink-0 h-8 w-8 bg-transparent! border-none! hover:bg-transparent! hover:text-muted-foreground!">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 shrink-0 bg-transparent! border-none! hover:bg-transparent! hover:text-muted-foreground!"
+              >
                 <X className="h-4 w-4" />
               </Button>
             </DrawerClose>
@@ -173,10 +177,10 @@ const TicketPreviewDrawer = ({
         </DrawerHeader>
 
         {ticket ? (
-          <>
-            <div className="flex-1 overflow-hidden flex flex-col min-h-0">
-              <div className="px-4 py-3 space-y-3 border-b shrink-0">
-                <p className="font-semibold text-foreground">
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+            <div className="shrink-0 border-b">
+              <div className="space-y-3 px-4 py-4">
+                <p className="text-sm font-semibold leading-snug text-foreground">
                   {ticket.ticketCode ?? "—"} {ticket.title ?? ""}
                 </p>
                 <div className="flex flex-wrap items-center justify-between gap-2">
@@ -201,7 +205,7 @@ const TicketPreviewDrawer = ({
                       title="Mark as Closed?"
                       rightActionTitle="Close"
                       content={
-                        <p className="text-muted-foreground text-center">
+                        <p className="text-center text-muted-foreground">
                           Are you sure you want to close this ticket{" "}
                           <strong>{ticket.ticketCode ?? ticket.title}</strong>?
                         </p>
@@ -213,7 +217,7 @@ const TicketPreviewDrawer = ({
                           variant="default"
                           size="sm"
                           disabled={isClosing}
-                          className="bg-primary! text-primary-foreground! rounded-md! text-xs! hover:opacity-90! hover:bg-primary/90! shrink-0"
+                          className="shrink-0 bg-primary! text-primary-foreground! rounded-md! text-xs! hover:opacity-90! hover:bg-primary/90!"
                         >
                           <CheckCircle2 className="mr-2 h-4 w-4" />
                           Mark as Closed
@@ -222,9 +226,9 @@ const TicketPreviewDrawer = ({
                     />
                   )}
                 </div>
-                <div className="grid gap-2 text-sm">
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Wrench className="w-4 h-4 shrink-0" />
+                <div className="grid gap-2 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <Wrench className="h-4 w-4 shrink-0" />
                     <span>
                       Assigned to{" "}
                       {ticket.assignedEngineer
@@ -232,21 +236,23 @@ const TicketPreviewDrawer = ({
                         : "Unassigned"}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Calendar className="w-4 h-4 shrink-0" />
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 shrink-0" />
                     <span>Requested {formatDate(ticket.requestedDate)}</span>
                   </div>
                 </div>
               </div>
+            </div>
 
-              <div className="flex-1 min-h-0 flex flex-col px-4 py-3">
-                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
-                  <History className="w-4 h-4" />
-                  Activities
-                </h4>
-                <ScrollArea className="flex-1 pr-2 -mr-2">
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+              <h4 className="flex shrink-0 items-center gap-2 border-b px-4 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                <History className="h-4 w-4" />
+                Activities
+              </h4>
+              <ScrollArea className="min-h-0 flex-1">
+                <div className="px-4 pb-4">
                   {history.length > 0 ? (
-                    <div className="space-y-0">
+                    <div className="divide-y divide-border">
                       {history.map((entry, index) => (
                         <ActivityItem
                           key={entry._id ?? index}
@@ -256,16 +262,16 @@ const TicketPreviewDrawer = ({
                       ))}
                     </div>
                   ) : (
-                    <p className="text-sm text-muted-foreground py-4">
+                    <p className="py-4 text-sm text-muted-foreground">
                       No activity recorded yet.
                     </p>
                   )}
-                </ScrollArea>
-              </div>
+                </div>
+              </ScrollArea>
             </div>
-          </>
+          </div>
         ) : (
-          <div className="p-4 text-center text-muted-foreground text-sm">
+          <div className="px-4 py-6 text-center text-sm text-muted-foreground">
             Select a ticket to preview.
           </div>
         )}
