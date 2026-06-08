@@ -2,7 +2,16 @@ import type { DropDownOption } from "@/components/DropdownComponent";
 import type { ISummarySection } from "@/components/form/MutationFormSummary";
 import MutationFormTemplate from "@/components/form/MutationFormTemplate";
 import { showToast } from "@/components/ui/CustomToast";
-import { cleanPayload, resetMutationForm } from "@/lib/helpers";
+import {
+    cleanPayload,
+    dropdownValueToDisplayLabel,
+    resetMutationForm,
+    useGenerateDropdownOptionsFromEnum,
+} from "@/lib/helpers";
+import { lookup_params } from "@/lib/api";
+import { CUSTOMER_OUTREACH_STATUS } from "@/lib/enums";
+import { useLazyGetOutReachTypesQuery } from "@/pages/outreach/common/OutReachApi";
+import { useLazyGetCallStatusesQuery } from "@/pages/settings/common/settingsApi";
 import { CheckCircle2, Megaphone, PhoneOutgoing, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -29,6 +38,45 @@ const CustomerOutreachForm = () => {
     const [createMutation, { isLoading: isCreating }] = useAddCustomerOutReachMutation();
     const [updateMutation, { isLoading: isUpdating }] = useUpdateCustomerOutReachMutation();
     const [getSelectedData, { isLoading: isGetting }] = useLazyGetCustomerOutReachQuery();
+    const [getOutreachTypes] = useLazyGetOutReachTypesQuery();
+    const [getCallStatuses] = useLazyGetCallStatusesQuery();
+    const [outreachTypeOptions, setOutreachTypeOptions] = useState<
+        DropDownOption<string>[]
+    >([]);
+    const [callStatusOptions, setCallStatusOptions] = useState<
+        DropDownOption<string>[]
+    >([]);
+    const outreachStatusOptions =
+        useGenerateDropdownOptionsFromEnum(CUSTOMER_OUTREACH_STATUS);
+
+    useEffect(() => {
+        getOutreachTypes(lookup_params)
+            .unwrap()
+            .then((res) => {
+                if (res?.contents) {
+                    setOutreachTypeOptions(
+                        res.contents.map((type: { name?: string; _id?: string }) => ({
+                            label: type.name ?? "",
+                            value: type._id ?? "",
+                        })),
+                    );
+                }
+            })
+            .catch(() => undefined);
+        getCallStatuses(lookup_params)
+            .unwrap()
+            .then((res) => {
+                if (res?.contents) {
+                    setCallStatusOptions(
+                        res.contents.map((status: { name?: string; _id?: string }) => ({
+                            label: status.name ?? "",
+                            value: status._id ?? "",
+                        })),
+                    );
+                }
+            })
+            .catch(() => undefined);
+    }, [getOutreachTypes, getCallStatuses]);
 
     const form = useForm<ICustomerOutreachFields>({
         defaultValues: {
@@ -182,9 +230,33 @@ const CustomerOutreachForm = () => {
             title: "Classification",
             icon: <Megaphone className="w-4 h-4" />,
             data: [
-                { label: "Method", value: values?.outreachType?.label as string, required: true },
-                { label: "Outcome", value: values?.callStatus?.label as string, required: true },
-                { label: "Status", value: values?.status?.label as string, required: true },
+                {
+                    label: "Method",
+                    value:
+                        dropdownValueToDisplayLabel(
+                            values?.outreachType,
+                            outreachTypeOptions,
+                        ) ?? selectedData?.outreachType?.name,
+                    required: true,
+                },
+                {
+                    label: "Outcome",
+                    value:
+                        dropdownValueToDisplayLabel(
+                            values?.callStatus,
+                            callStatusOptions,
+                        ) ?? selectedData?.callStatus?.name,
+                    required: true,
+                },
+                {
+                    label: "Status",
+                    value:
+                        dropdownValueToDisplayLabel(
+                            values?.status,
+                            outreachStatusOptions,
+                        ) ?? selectedData?.status,
+                    required: true,
+                },
             ],
         },
         {

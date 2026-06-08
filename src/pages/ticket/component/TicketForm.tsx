@@ -3,9 +3,14 @@ import MutationFormTemplate from "@/components/form/MutationFormTemplate";
 import { showToast } from "@/components/ui/CustomToast";
 import {
   cleanPayload,
+  dropdownValueToDisplayLabel,
   formatMutationSummaryDateTime,
   resetMutationForm,
 } from "@/lib/helpers";
+import { lookup_params } from "@/lib/api";
+import type { DropDownOption } from "@/components/DropdownComponent";
+import type { IUser } from "@/pages/customer/common/customers";
+import { useLazyGetUsersQuery } from "@/pages/users/common/usersApi";
 import { Ticket, Notebook } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -46,6 +51,10 @@ const TicketForm = () => {
   const [getTicket, { isLoading: isGetting }] = useLazyGetATicketQuery();
   const [getComplaint, { isLoading: isLoadingComplaint }] =
     useLazyGetAComplaintQuery();
+  const [getUsers] = useLazyGetUsersQuery();
+  const [engineerOptions, setEngineerOptions] = useState<
+    DropDownOption<string>[]
+  >([]);
   const form = useForm<ITicketFormFields>({
     resolver: zodResolver(ticketFormSchema),
     defaultValues: {
@@ -62,6 +71,37 @@ const TicketForm = () => {
   const values = watch();
   const navigate = useNavigate();
   const [selectedTicket, setSelectedTicket] = useState<ITicket | null>(null);
+
+  const formatEngineerOption = (
+    user: IUser,
+  ): { label: string; value: string } => ({
+    label: `${user.firstName ?? ""} ${user.lastName ?? ""} (${user.email ?? ""})`.trim(),
+    value: user._id ?? "",
+  });
+
+  const engineerDisplayLabel = (
+    val?: ITicketFormFields["assignedEngineerId"],
+  ): string => {
+    const fromOptions = dropdownValueToDisplayLabel(val, engineerOptions);
+    if (fromOptions && fromOptions !== ticketFieldToId(val)) return fromOptions;
+    const engineer = selectedTicket?.assignedEngineer;
+    if (engineer) {
+      return `${engineer.firstName ?? ""} ${engineer.lastName ?? ""}`.trim();
+    }
+    return fromOptions ?? "";
+  };
+
+  useEffect(() => {
+    getUsers(lookup_params)
+      .unwrap()
+      .then((res) => {
+        if (!res?.contents) return;
+        setEngineerOptions(
+          (res.contents as IUser[]).map((user) => formatEngineerOption(user)),
+        );
+      })
+      .catch(() => undefined);
+  }, [getUsers]);
 
   const getCreateDefaultValues = (): ITicketFormFields => ({
     title: "",
@@ -84,10 +124,9 @@ const TicketForm = () => {
         complaintId: selectedTicket.complaint
           ? buildComplaintFormOption(selectedTicket.complaint as IComplaint)
           : undefined,
-        assignedEngineerId:
-          selectedTicket.assignedEngineer?._id ??
-          selectedTicket.assignedEngineerId ??
-          undefined,
+        assignedEngineerId: selectedTicket.assignedEngineer
+          ? formatEngineerOption(selectedTicket.assignedEngineer)
+          : selectedTicket.assignedEngineerId ?? undefined,
         priority: selectedTicket.priority ?? undefined,
         status: selectedTicket.status ?? undefined,
       });
@@ -126,8 +165,9 @@ const TicketForm = () => {
             complaintId: res.complaint
               ? buildComplaintFormOption(res.complaint as IComplaint)
               : undefined,
-            assignedEngineerId:
-              res.assignedEngineer?._id ?? res.assignedEngineerId ?? undefined,
+            assignedEngineerId: res.assignedEngineer
+              ? formatEngineerOption(res.assignedEngineer)
+              : res.assignedEngineerId ?? undefined,
             priority: res.priority ?? undefined,
             status: res.status ?? undefined,
           });
@@ -238,7 +278,7 @@ const TicketForm = () => {
         },
         {
           label: "Assigned Engineer",
-          value: ticketFieldToLabel(values?.assignedEngineerId) ?? "",
+          value: engineerDisplayLabel(values?.assignedEngineerId),
           required: false,
         },
         {

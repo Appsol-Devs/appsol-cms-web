@@ -3,12 +3,21 @@ import { prepareApiHeaders, type IBaseQueryParam } from "@/lib/api";
 import {
   getPaginationMetaDataV2,
   getQueryRequestUrl,
+  type IFilters,
   type IPagination,
   type PaginatedResponse,
 } from "@/lib/pagination";
-import type { ISubscriptionReminder } from "./subscription-reminder";
 
-function buildListQueryParams(args: IBaseQueryParam): string {
+import type {
+  ISubscriptionReminder,
+  TSubscriptionReminderType,
+} from "./subscription-reminder";
+
+export interface ISubscriptionRemindersQueryParam extends IBaseQueryParam {
+  filter?: TSubscriptionReminderType;
+}
+
+function buildListQueryParams(args: ISubscriptionRemindersQueryParam): string {
   const params = new URLSearchParams();
   const pageSize =
     args.pageSize && args.pageSize > 0 ? args.pageSize : 10;
@@ -19,7 +28,17 @@ function buildListQueryParams(args: IBaseQueryParam): string {
   if (args.pageIndex !== undefined) {
     params.set("pageIndex", String(args.pageIndex));
   }
+  const filter = args.filter ?? args.filters?.reminderType;
+  if (filter) {
+    params.set("filter", filter);
+  }
   return params.toString();
+}
+
+function filtersWithoutReminderType(filters?: IFilters): IFilters | undefined {
+  if (!filters?.reminderType) return filters;
+  const { reminderType: _reminderType, ...rest } = filters;
+  return Object.keys(rest).length > 0 ? rest : undefined;
 }
 
 export const subscriptionRemindersApi = createApi({
@@ -33,13 +52,24 @@ export const subscriptionRemindersApi = createApi({
   endpoints: (builder) => ({
     getSubscriptionReminders: builder.query<
       PaginatedResponse<ISubscriptionReminder[]>,
-      IBaseQueryParam
+      ISubscriptionRemindersQueryParam
     >({
+      serializeQueryArgs: ({ queryArgs }) =>
+        JSON.stringify({
+          pageSize: queryArgs.pageSize,
+          pageIndex: queryArgs.pageIndex,
+          search: queryArgs.search,
+          filter: queryArgs.filter ?? null,
+          filters: queryArgs.filters ?? null,
+        }),
       query: (args) => {
         const qs = buildListQueryParams(args);
         const base = `/subscription_reminders${qs ? `?${qs}` : ""}`;
         return {
-          url: getQueryRequestUrl(base, args.filters),
+          url: getQueryRequestUrl(
+            base,
+            filtersWithoutReminderType(args.filters),
+          ),
         };
       },
       transformResponse: async (response: Response) => {
