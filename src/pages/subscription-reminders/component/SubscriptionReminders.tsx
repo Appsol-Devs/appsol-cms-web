@@ -1,4 +1,7 @@
+import ConfirmationDialog from "@/components/ConfirmationDialog";
 import FeatureContentRenderer from "@/components/table/component/FeatureContentRenderer";
+import { showToast } from "@/components/ui/CustomToast";
+import { Button } from "@/components/ui/button";
 import { formatDateTime } from "@/lib/helpers";
 import {
   getLookupBadgeStyle,
@@ -24,13 +27,38 @@ import {
   getDueDateUrgency,
   reminderTypeFromDueDate,
 } from "../common/subscription-reminder";
-import { useLazyGetSubscriptionRemindersQuery } from "../common/subscriptionRemindersApi";
+import {
+  useLazyGetSubscriptionRemindersQuery,
+  useTriggerRemindersMutation,
+} from "../common/subscriptionRemindersApi";
 import SubscriptionReminderDetailsDrawer from "./SubscriptionReminderDetailsDrawer";
 
 const SubscriptionReminders = () => {
   const [fetchQuery, fetchState] = useLazyGetSubscriptionRemindersQuery();
+  const [triggerReminders, { isLoading: isTriggering }] =
+    useTriggerRemindersMutation();
   const [selected, setSelected] = useState<ISubscriptionReminder | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [refetch, setRefetch] = useState(false);
+
+  const handleTriggerReminders = async () => {
+    try {
+      await triggerReminders().unwrap();
+      setRefetch((prev) => !prev);
+      showToast({
+        title: "Success",
+        message: "Reminders triggered successfully.",
+        type: "success",
+      });
+    } catch (error) {
+      console.error("Failed to trigger reminders", error);
+      showToast({
+        title: "Error",
+        message: "Failed to trigger reminders.",
+        type: "error",
+      });
+    }
+  };
 
   const remindersWithDerivedType = useMemo(() => {
     const rows = (fetchState.data?.contents ?? []) as ISubscriptionReminder[];
@@ -186,6 +214,32 @@ const SubscriptionReminders = () => {
   return (
     <>
       <FeatureContentRenderer
+        refetchData={refetch}
+        tableAddComponent={() => (
+          <ConfirmationDialog
+            title="Trigger reminders?"
+            rightActionTitle="Trigger"
+            content={
+              <p className="text-muted-foreground text-center">
+                This will manually send subscription reminders for all due
+                items.
+              </p>
+            }
+            onConfirmClicked={handleTriggerReminders}
+            confirmButtonClassName="!bg-primary hover:!bg-primary/90 !text-primary-foreground"
+            trigger={
+              <Button
+                disabled={isTriggering}
+                className="!bg-primary hover:bg-primary/90 text-white"
+              >
+                <Send className="mr-2 h-4 w-4" />
+                <span className="text-xs">
+                  {isTriggering ? "Triggering..." : "Trigger reminders"}
+                </span>
+              </Button>
+            }
+          />
+        )}
         useDateFilters
         dateFilterNoDefault
         filters={[

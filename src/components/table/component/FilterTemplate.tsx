@@ -26,7 +26,7 @@ import {
   SUBSCRIPTION_STATUS_OPTIONS,
 } from "@/lib/enums";
 import type { TSubscriptionReminderType } from "@/pages/subscription-reminders/common/subscription-reminder";
-import { dueDateRangeForReminderType, SUBSCRIPTION_REMINDER_TYPE_LABELS } from "@/pages/subscription-reminders/common/subscription-reminder";
+import { SUBSCRIPTION_REMINDER_TYPE_LABELS } from "@/pages/subscription-reminders/common/subscription-reminder";
 import { useLazyGetOutReachTypesQuery } from "@/pages/outreach/common/OutReachApi";
 import {
   useLazyGetCallStatusesQuery,
@@ -432,10 +432,9 @@ const FiltersTemplate = ({
     if (returnOnFilterChange) {
       const subscription = watch((values) => {
         const reminderTypeVal = filterFieldToValue(values.reminderType);
-        const dueRange = dueDateRangeForReminderType(reminderTypeVal);
         const payload: IFilters = {
-          startDate: dueRange?.startDate ?? selectedFilters?.startDate,
-          endDate: dueRange?.endDate ?? selectedFilters?.endDate,
+          startDate: selectedFilters?.startDate,
+          endDate: selectedFilters?.endDate,
           customerId: filterFieldToValue(values.customerId),
           status:
             filterFieldToValue(values.outreachStatus) ||
@@ -462,8 +461,7 @@ const FiltersTemplate = ({
           targetEntityId: values.targetEntityId,
           loggedBy: filterFieldToValue(values.loggedBy),
           leadStatusId: filterFieldToValue(values.leadStatusId),
-          // Filter using dueDate range (relative to today), not the raw enum.
-          reminderType: dueRange ? undefined : reminderTypeVal,
+          reminderType: reminderTypeVal,
           isSent: filterFieldToValue(values.isSent),
           setUpStatusId: filterFieldToValue(values.setUpStatusId),
         };
@@ -477,11 +475,10 @@ const FiltersTemplate = ({
     const data: IFilterFields = getValues();
 
     const reminderTypeVal = filterFieldToValue(data.reminderType);
-    const dueRange = dueDateRangeForReminderType(reminderTypeVal);
 
     const payload: IFilters = {
-      startDate: dueRange?.startDate ?? selectedFilters?.startDate,
-      endDate: dueRange?.endDate ?? selectedFilters?.endDate,
+      startDate: selectedFilters?.startDate,
+      endDate: selectedFilters?.endDate,
       customerId: filterFieldToValue(data.customerId),
       status:
         filterFieldToValue(data.outreachStatus) ||
@@ -508,7 +505,7 @@ const FiltersTemplate = ({
       targetEntityId: data.targetEntityId,
       loggedBy: filterFieldToValue(data.loggedBy),
       leadStatusId: filterFieldToValue(data.leadStatusId),
-      reminderType: dueRange ? undefined : reminderTypeVal,
+      reminderType: reminderTypeVal,
       isSent: filterFieldToValue(data.isSent),
       setUpStatusId: filterFieldToValue(data.setUpStatusId),
     };

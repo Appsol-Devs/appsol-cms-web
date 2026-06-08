@@ -181,7 +181,7 @@ const FeatureContentRenderer = <
   }, [refetchData]);
 
   const fetchData = async () => {
-    const applicablePageSize = pageSize ? pageSize : page_size;
+    const applicablePageSize = (pageSize || page_size) || 10;
 
     const params: IBaseQueryParam = {
       search: searchQuery as string,
@@ -247,8 +247,7 @@ const FeatureContentRenderer = <
 
   const handleSelectedFilters = (filters: IFilters) => {
     setQueryFilters((prev) => ({
-      startDate: prev?.startDate,
-      endDate: prev?.endDate,
+      ...prev,
       ...filters,
     }));
   };
