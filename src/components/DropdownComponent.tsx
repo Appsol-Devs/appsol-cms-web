@@ -220,7 +220,7 @@ const DropDownComponent = <T,>({
                 isClearable={isClearable !== undefined ? isClearable : true}
                 value={selectedOption}
                 onChange={(val, actionMeta) => {
-                  field.onChange(val ? val.value : null);
+                  field.onChange(val ?? null);
                   onChanged?.(val, actionMeta);
                 }}
               />

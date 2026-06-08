@@ -33,14 +33,6 @@ const REMINDER_TYPE_TABS: TSubscriptionReminderType[] = [
 
 type TabKey = "all" | TSubscriptionReminderType;
 
-function filterByTab(
-  items: ISubscriptionReminder[],
-  tab: TabKey,
-): ISubscriptionReminder[] {
-  if (tab === "all") return items;
-  return items.filter((r) => reminderTypeFromDueDate(r.dueDate) === tab);
-}
-
 function dueDateSortKey(dueDate?: string): number {
   if (!dueDate) return Number.NEGATIVE_INFINITY;
   const t = new Date(dueDate).getTime();
@@ -53,43 +45,72 @@ function sortRemindersByDueDateNewestFirst(
   return [...items].sort((a, b) => dueDateSortKey(b.dueDate) - dueDateSortKey(a.dueDate));
 }
 
+function filterByTab(
+  items: ISubscriptionReminder[],
+  tab: TabKey,
+): ISubscriptionReminder[] {
+  if (tab === "all") return items;
+  return items.filter(
+    (r) => (reminderTypeFromDueDate(r.dueDate) ?? r.reminderType) === tab,
+  );
+}
+
 const DashboardReminders = () => {
   const [tab, setTab] = useState<TabKey>("all");
   const [selected, setSelected] = useState<ISubscriptionReminder | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  const { data, isLoading, isError } = useGetSubscriptionRemindersQuery({
+  const { data: allData } = useGetSubscriptionRemindersQuery({
     pageSize: 100,
     pageIndex: 1,
   });
 
-  const reminders = (data?.contents ?? []) as ISubscriptionReminder[];
+  const {
+    data: listData,
+    isLoading,
+    isError,
+  } = useGetSubscriptionRemindersQuery(
+    {
+      pageSize: LIST_LIMIT,
+      pageIndex: 1,
+      filter: tab === "all" ? undefined : tab,
+    },
+    { refetchOnMountOrArgChange: true },
+  );
 
-  const remindersWithDerivedType = useMemo(() => {
+  const allRemindersWithType = useMemo(() => {
+    const reminders = (allData?.contents ?? []) as ISubscriptionReminder[];
     return reminders.map((r) => ({
       ...r,
       reminderType: reminderTypeFromDueDate(r.dueDate) ?? r.reminderType,
     }));
-  }, [reminders]);
+  }, [allData?.contents]);
+
+  const listRemindersWithType = useMemo(() => {
+    const reminders = (listData?.contents ?? []) as ISubscriptionReminder[];
+    return reminders.map((r) => ({
+      ...r,
+      reminderType: reminderTypeFromDueDate(r.dueDate) ?? r.reminderType,
+    }));
+  }, [listData?.contents]);
 
   const counts = useMemo(() => {
     const byType = (type: TSubscriptionReminderType) =>
-      remindersWithDerivedType.filter((r) => r.reminderType === type).length;
+      allRemindersWithType.filter((r) => r.reminderType === type).length;
     return {
-      all: remindersWithDerivedType.length,
+      all: allRemindersWithType.length,
       "30_days": byType("30_days"),
       "14_days": byType("14_days"),
       "7_days": byType("7_days"),
       due_today: byType("due_today"),
       overdue: byType("overdue"),
     };
-  }, [remindersWithDerivedType]);
+  }, [allRemindersWithType]);
 
   const filtered = useMemo(() => {
-    const inTab = filterByTab(remindersWithDerivedType, tab);
-    const sorted = sortRemindersByDueDateNewestFirst(inTab);
-    return sorted.slice(0, LIST_LIMIT);
-  }, [remindersWithDerivedType, tab]);
+    const inTab = filterByTab(listRemindersWithType, tab);
+    return sortRemindersByDueDateNewestFirst(inTab).slice(0, LIST_LIMIT);
+  }, [listRemindersWithType, tab]);
 
   const header = (
     <div className="flex items-center justify-between gap-2">

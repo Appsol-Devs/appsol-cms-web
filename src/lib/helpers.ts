@@ -116,6 +116,22 @@ export const filterFieldToValue = (val: unknown): string | undefined => {
   return undefined;
 };
 
+export const dropdownValueToDisplayLabel = (
+  val?: string | number | DropDownOption<string | number> | null,
+  options?: DropDownOption<string | number>[],
+): string | undefined => {
+  if (val == null || val === "") return undefined;
+  if (typeof val === "object" && "label" in val) {
+    const label = val.label?.toString();
+    if (label) return label;
+    val = val.value;
+  }
+  const strVal = String(val);
+  const match = options?.find((o) => String(o.value) === strVal);
+  if (match?.label != null) return match.label.toString();
+  return strVal;
+};
+
 export function formatToTimeAgo(date: string | Date) {
   return formatDistanceToNow(new Date(date), { addSuffix: true });
 }

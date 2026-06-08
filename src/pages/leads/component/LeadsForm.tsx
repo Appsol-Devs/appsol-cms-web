@@ -3,9 +3,18 @@ import MutationFormTemplate from "@/components/form/MutationFormTemplate";
 import { showToast } from "@/components/ui/CustomToast";
 import {
   cleanPayload,
+  dropdownValueToDisplayLabel,
   formatMutationSummaryDateTime,
   resetMutationForm,
+  useGenerateDropdownOptionsFromEnum,
 } from "@/lib/helpers";
+import { lookup_params } from "@/lib/api";
+import type { DropDownOption } from "@/components/DropdownComponent";
+import type { ILeadNextStep, ISoftware } from "@/pages/settings/common/settings";
+import {
+  useLazyGetLeadNextStepsQuery,
+  useLazyGetSoftwaresQuery,
+} from "@/pages/settings/common/settingsApi";
 import { Spotlight, Headset, Home, Lock, StepForward } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -41,6 +50,14 @@ const LeadsForm = () => {
   const [createMutation, { isLoading: isCreating }] = useAddLeadMutation();
   const [updateMutation, { isLoading: isUpdating }] = useUpdateLeadMutation();
   const [getSelectedData, { isLoading: isGetting }] = useLazyGetALeadQuery();
+  const [getSoftwares] = useLazyGetSoftwaresQuery();
+  const [getLeadNextSteps] = useLazyGetLeadNextStepsQuery();
+  const [softwareOptions, setSoftwareOptions] = useState<
+    DropDownOption<string>[]
+  >([]);
+  const [leadNextStepOptions, setLeadNextStepOptions] = useState<
+    DropDownOption<string>[]
+  >([]);
   const form = useForm<ILeadFields>({
     defaultValues: {
       priority: LEAD_PRIORITY_ENUM.MEDIUM,
@@ -49,9 +66,54 @@ const LeadsForm = () => {
   });
   const { watch, getValues, reset } = form;
   const values = watch();
+  const leadPriorityOptions =
+    useGenerateDropdownOptionsFromEnum(LEAD_PRIORITY_ENUM);
+  const leadStatusOptions =
+    useGenerateDropdownOptionsFromEnum(LEAD_STATUS_ENUM);
 
   const navigate = useNavigate();
   const [selectedData, setSelectedData] = useState<ILead | null>(null);
+
+  const toDropdownOption = (
+    id?: string,
+    name?: string,
+    options?: DropDownOption<string>[],
+  ): DropDownOption<string> | string | undefined => {
+    if (!id) return undefined;
+    const match = options?.find((o) => o.value === id);
+    if (match) return match;
+    if (name) return { label: name, value: id };
+    return id;
+  };
+
+  useEffect(() => {
+    getSoftwares(lookup_params)
+      .unwrap()
+      .then((res) => {
+        if (res?.contents) {
+          setSoftwareOptions(
+            res.contents.map((item: ISoftware) => ({
+              label: item.name ?? "",
+              value: item._id ?? "",
+            })),
+          );
+        }
+      })
+      .catch(() => undefined);
+    getLeadNextSteps(lookup_params)
+      .unwrap()
+      .then((res) => {
+        if (res?.contents) {
+          setLeadNextStepOptions(
+            res.contents.map((item: ILeadNextStep) => ({
+              label: item.name ?? "",
+              value: item._id ?? "",
+            })),
+          );
+        }
+      })
+      .catch(() => undefined);
+  }, [getSoftwares, getLeadNextSteps]);
 
   const fetchData = async (id: string) => {
     if (!id) return;
@@ -107,11 +169,23 @@ const LeadsForm = () => {
       location: data.location ?? "",
       notes: data.notes ?? "",
       initialEnquiryDate: data.initialEnquiryDate ?? "",
-      leadStage: data.leadStage?._id ?? undefined,
-      nextStep: data.nextStep?._id ?? undefined,
+      leadStage: toDropdownOption(
+        data.leadStage?._id,
+        data.leadStage?.name,
+        leadNextStepOptions,
+      ),
+      nextStep: toDropdownOption(
+        data.nextStep?._id,
+        data.nextStep?.name,
+        leadNextStepOptions,
+      ),
       priority: data.priority ?? undefined,
       leadStatus: data.leadStatus ?? undefined,
-      software: softwareId ?? undefined,
+      software: toDropdownOption(
+        softwareId,
+        data.software?.name,
+        softwareOptions,
+      ),
     });
   };
 
@@ -125,7 +199,7 @@ const LeadsForm = () => {
     if (id && selectedData) {
       resetFormWithData(selectedData);
     }
-  }, [selectedData]);
+  }, [selectedData, softwareOptions, leadNextStepOptions]);
 
   const handleDataSubmission = async (payload: ILead) => {
     if (!payload) return;
@@ -256,7 +330,9 @@ const LeadsForm = () => {
         },
         {
           label: "Software",
-          value: leadFieldToLabel(values?.software),
+          value:
+            dropdownValueToDisplayLabel(values?.software, softwareOptions) ??
+            selectedData?.software?.name,
           required: true,
         },
       ],
@@ -292,12 +368,16 @@ const LeadsForm = () => {
       data: [
         {
           label: "Current Stage",
-          value: leadFieldToLabel(values?.leadStage),
+          value:
+            dropdownValueToDisplayLabel(values?.leadStage, leadNextStepOptions) ??
+            selectedData?.leadStage?.name,
           required: false,
         },
         {
           label: "Next Stage",
-          value: leadFieldToLabel(values?.nextStep),
+          value:
+            dropdownValueToDisplayLabel(values?.nextStep, leadNextStepOptions) ??
+            selectedData?.nextStep?.name,
           required: true,
         },
         {
@@ -316,12 +396,16 @@ const LeadsForm = () => {
       data: [
         {
           label: "Priority",
-          value: leadFieldToLabel(values?.priority),
+          value:
+            dropdownValueToDisplayLabel(values?.priority, leadPriorityOptions) ??
+            leadFieldToLabel(values?.priority),
           required: true,
         },
         {
           label: "Status",
-          value: leadFieldToLabel(values?.leadStatus),
+          value:
+            dropdownValueToDisplayLabel(values?.leadStatus, leadStatusOptions) ??
+            leadFieldToLabel(values?.leadStatus),
           required: true,
         },
       ],
