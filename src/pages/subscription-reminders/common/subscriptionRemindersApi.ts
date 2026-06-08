@@ -10,9 +10,9 @@ import type { ISubscriptionReminder } from "./subscription-reminder";
 
 function buildListQueryParams(args: IBaseQueryParam): string {
   const params = new URLSearchParams();
-  if (args.pageSize !== undefined) {
-    params.set("pageSize", String(args.pageSize));
-  }
+  const pageSize =
+    args.pageSize && args.pageSize > 0 ? args.pageSize : 10;
+  params.set("pageSize", String(pageSize));
   if (args.search) {
     params.set("search", args.search);
   }
@@ -54,10 +54,22 @@ export const subscriptionRemindersApi = createApi({
         };
       },
     }),
+    triggerReminders: builder.mutation<void, void>({
+      query: () => ({
+        url: "/trigger-reminders",
+        method: "POST",
+        body: {},
+        headers: {
+          "x-api-key": import.meta.env.VITE_REMINDERS_TRIGGER_API_KEY ?? "",
+        },
+      }),
+      invalidatesTags: ["ISubscriptionReminder"],
+    }),
   }),
 });
 
 export const {
   useGetSubscriptionRemindersQuery,
   useLazyGetSubscriptionRemindersQuery,
+  useTriggerRemindersMutation,
 } = subscriptionRemindersApi;
