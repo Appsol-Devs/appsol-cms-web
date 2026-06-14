@@ -13,6 +13,15 @@ import type {
   IVerifyOTPResponse,
 } from "@/pages/customer/common/customers";
 
+export interface IUpdateUserProfilePayload {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  password?: string;
+  phone?: string;
+  imageUrl?: string;
+}
+
 export const usersApi = createApi({
   reducerPath: "usersApi",
   baseQuery: fetchBaseQuery({
@@ -80,6 +89,18 @@ export const usersApi = createApi({
         method: "PUT",
       }),
     }),
+    updateUserProfile: builder.mutation<
+      IUser,
+      { id: string } & IUpdateUserProfilePayload
+    >({
+      query: ({ id, ...payload }) => ({
+        url: `users/${id}`,
+        body: payload,
+        method: "PUT",
+      }),
+      transformResponse: async (response: Response) => response.json(),
+      invalidatesTags: ["IUser"],
+    }),
     deleteUser: builder.mutation<void, { id: string }>({
       query: ({ id }) => ({
         url: `users/${id}`,
@@ -93,6 +114,7 @@ export const {
   useLazyGetUsersQuery,
   useAddUserMutation,
   useUpdateUserMutation,
+  useUpdateUserProfileMutation,
   useRequestVerificationOTPMutation,
   useVerifyOTPMutation,
   useDeleteUserMutation,

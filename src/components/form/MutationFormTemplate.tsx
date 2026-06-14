@@ -31,6 +31,7 @@ export interface IMutationFormTemplateProps<T extends Record<string, unknown>> {
   confirmSubmitActionLabel?: string;
   validateBeforeOpen?: () => Promise<boolean>;
   onResetForm?: () => void;
+  showBack?: boolean;
 }
 
 const MutationFormTemplate = <T extends Record<string, unknown>>({
@@ -47,6 +48,7 @@ const MutationFormTemplate = <T extends Record<string, unknown>>({
   confirmSubmitActionLabel,
   validateBeforeOpen,
   onResetForm,
+  showBack = true,
 }: IMutationFormTemplateProps<T>) => {
   const [confirmOpen, setConfirmOpen] = useState(false);
 
@@ -60,7 +62,7 @@ const MutationFormTemplate = <T extends Record<string, unknown>>({
 
   return (
     <div className="space-y-2">
-      <PageTitle showBack title={pageTitle} />
+      <PageTitle showBack={showBack} title={pageTitle} />
       <PageSummary
         icon={pageSummary.icon}
         title={pageSummary.title}
