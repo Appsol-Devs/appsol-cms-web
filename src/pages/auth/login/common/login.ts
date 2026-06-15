@@ -33,6 +33,7 @@ export type ILoginResponse = {
   status: string;
   createdAt: string;
   updatedAt: string;
+  imageUrl?: string;
   token: string;
 };
 

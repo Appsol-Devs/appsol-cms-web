@@ -1,25 +1,220 @@
-import { useSelector } from "react-redux";
-import type { RootState } from "@/store";
+import type { ISummarySection } from "@/components/form/MutationFormSummary";
+import MutationFormTemplate from "@/components/form/MutationFormTemplate";
+import { showToast } from "@/components/ui/CustomToast";
+import { cleanPayload, resetMutationForm } from "@/lib/helpers";
+import type { ILoginResponse } from "@/pages/auth/login/common/login";
+import { setCurrentUser } from "@/pages/auth/login/common/loginSlice";
+import type { IUser } from "@/pages/customer/common/customers";
 import {
-  User,
-  Mail,
-  Phone,
-  Shield,
-  VerifiedIcon,
-  BadgeX,
-  Activity,
-  Clock,
-} from "lucide-react";
+  useLazyGetAUserQuery,
+  useUpdateUserProfileMutation,
+} from "@/pages/users/common/usersApi";
+import { BookOpenText, Shield, User } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
+import type { RootState } from "@/store";
+import UserProfileFormContent from "./UserProfileFormContent";
+import UserProfileView from "./UserProfileView";
 
-import PageTitle from "@/components/PageTitle";
-import PageSummary from "@/components/PageSummary";
-import DetailItem from "@/components/ui/DetailItem";
-import StatusBadge from "@/components/ui/StatusBadge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { getInitials } from "@/lib/helpers";
+export type IUserProfileFields = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  imageUrl?: string;
+  password?: string;
+  confirm_password?: string;
+};
+
+function mergeUserProfile(
+  current: ILoginResponse,
+  updated: Partial<IUser>,
+): ILoginResponse {
+  const updatedAt =
+    updated.updatedAt instanceof Date
+      ? updated.updatedAt.toISOString()
+      : typeof updated.updatedAt === "string"
+        ? updated.updatedAt
+        : current.updatedAt;
+
+  return {
+    ...current,
+    firstName: updated.firstName ?? current.firstName,
+    lastName: updated.lastName ?? current.lastName,
+    email: updated.email ?? current.email,
+    phone: updated.phone ?? current.phone,
+    imageUrl: updated.imageUrl ?? current.imageUrl,
+    updatedAt,
+  };
+}
 
 const UserProfile = () => {
+  const dispatch = useDispatch();
   const { user } = useSelector((state: RootState) => state.user);
+  const [isEditing, setIsEditing] = useState(false);
+  const [updateProfile, { isLoading: isUpdating }] =
+    useUpdateUserProfileMutation();
+  const [getAUser] = useLazyGetAUserQuery();
+
+  const form = useForm<IUserProfileFields>();
+  const { watch, getValues, reset } = form;
+  const values = watch();
+
+  const getEmptyProfileValues = (): IUserProfileFields => ({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    imageUrl: "",
+    password: "",
+    confirm_password: "",
+  });
+
+  const getProfileValues = (data: ILoginResponse): IUserProfileFields => ({
+    firstName: data.firstName ?? "",
+    lastName: data.lastName ?? "",
+    email: data.email ?? "",
+    phone: data.phone ?? "",
+    imageUrl: data.imageUrl ?? "",
+    password: "",
+    confirm_password: "",
+  });
+
+  useEffect(() => {
+    if (user && !isEditing) {
+      reset(getProfileValues(user));
+    }
+  }, [user, reset, isEditing]);
+
+  const handleResetForm = () => {
+    resetMutationForm(form, getEmptyProfileValues());
+  };
+
+  const validateProfileForm = (): boolean => {
+    const data = getValues();
+    const password = data.password?.trim();
+    const confirmPassword = data.confirm_password?.trim();
+
+    const requiredFields = [
+      { field: data.firstName?.trim(), message: "First name is required." },
+      { field: data.lastName?.trim(), message: "Last name is required." },
+      { field: data.phone?.trim(), message: "Phone number is required." },
+      { field: data.email?.trim(), message: "Email is required." },
+    ];
+
+    for (const { field, message } of requiredFields) {
+      if (!field) {
+        showToast({ title: "Validation", message, type: "info", duration: 2000 });
+        return false;
+      }
+    }
+
+    if (password || confirmPassword) {
+      if (password !== confirmPassword) {
+        showToast({
+          title: "Validation",
+          message: "Passwords do not match.",
+          type: "info",
+          duration: 2000,
+        });
+        return false;
+      }
+      if (!password || password.length < 8) {
+        showToast({
+          title: "Validation",
+          message: "Password must be at least 8 characters long.",
+          type: "info",
+          duration: 2000,
+        });
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  const validateBeforeOpen = async () => validateProfileForm();
+
+  const submitData = async () => {
+    if (!user?._id || !validateProfileForm()) return;
+
+    const data = getValues();
+    const password = data.password?.trim();
+
+    const payload = cleanPayload({
+      firstName: data.firstName.trim(),
+      lastName: data.lastName.trim(),
+      email: data.email.trim(),
+      phone: data.phone.trim(),
+      imageUrl: data.imageUrl?.trim(),
+      password: password || undefined,
+    });
+
+    try {
+      const res = await updateProfile({
+        id: user._id,
+        ...payload,
+      }).unwrap();
+
+      let updatedUser = mergeUserProfile(user, {
+        ...res,
+        firstName: res?.firstName ?? payload.firstName,
+        lastName: res?.lastName ?? payload.lastName,
+        email: res?.email ?? payload.email,
+        phone: res?.phone ?? payload.phone,
+        imageUrl: res?.imageUrl ?? payload.imageUrl,
+      });
+
+      try {
+        const fresh = await getAUser(user._id).unwrap();
+        updatedUser = mergeUserProfile(updatedUser, fresh);
+      } catch {
+      }
+
+      dispatch(setCurrentUser(updatedUser));
+      reset(getProfileValues(updatedUser));
+      setIsEditing(false);
+
+      showToast({
+        title: "Success",
+        message: "Profile updated successfully.",
+        type: "success",
+      });
+    } catch (error) {
+      console.error("Failed to update profile", error);
+      showToast({
+        title: "Error",
+        message: "Failed to update profile.",
+        type: "error",
+      });
+    }
+  };
+
+  const summarySections: ISummarySection[] = [
+    {
+      title: "Basic Information",
+      icon: <BookOpenText className="w-4 h-4" />,
+      data: [
+        { label: "First Name", value: values?.firstName, required: true },
+        { label: "Last Name", value: values?.lastName, required: true },
+        { label: "Phone Number", value: values?.phone, required: true },
+      ],
+    },
+    {
+      title: "Account",
+      icon: <Shield className="w-4 h-4" />,
+      data: [
+        { label: "Email", value: values?.email, required: true },
+        { label: "Role", value: user?.role?.name ?? "—", required: false },
+        {
+          label: "Password",
+          value: values?.password ? "Will be updated" : "Unchanged",
+          required: false,
+        },
+      ],
+    },
+  ];
 
   if (!user) {
     return (
@@ -29,138 +224,49 @@ const UserProfile = () => {
     );
   }
 
-  return (
-    <div className="space-y-2">
-      <PageTitle title="My Profile" />
-
-      <PageSummary
-        icon={User}
-        title={`${user.firstName} ${user.lastName}`}
-        description="Manage your personal account details and preferences."
+  if (!isEditing) {
+    return (
+      <UserProfileView
+        user={user}
+        onEdit={() => {
+          reset(getProfileValues(user));
+          setIsEditing(true);
+        }}
       />
+    );
+  }
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-1 space-y-3">
-          <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center text-center">
-            <div className="relative mb-2">
-              <Avatar className="w-32 h-32 border-4 border-gray-50 shadow-md">
-                <AvatarImage
-                  src={"/avatar.png"}
-                  alt={`${user.firstName} ${user.lastName}`}
-                  className="object-cover"
-                />
-                <AvatarFallback className="text-4xl font-bold text-gray-500 bg-gray-100">
-                  {getInitials(user.firstName, user.lastName) ||
-                    user.firstName?.charAt(0) + user.lastName?.charAt(0)}
-                </AvatarFallback>
-              </Avatar>
-              <div className="absolute bottom-1 right-1 bg-white rounded-full p-1 shadow-sm">
-                {user.isVerified ? (
-                  <VerifiedIcon
-                    className="w-6 h-6 text-blue-500"
-                    fill="currentColor"
-                    color="white"
-                  />
-                ) : (
-                  <BadgeX className="w-6 h-6 text-gray-400" />
-                )}
-              </div>
-            </div>
-
-            <h2 className="text-sm font-bold text-gray-900">
-              {user.firstName} {user.lastName}
-            </h2>
-            <p className="text-xs text-gray-500 mb-2">{user.email}</p>
-
-            <div className="flex flex-wrap gap-2 justify-center w-full">
-              <StatusBadge active={user.isActive} />
-              <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
-                {user.role?.name || "User"}
-              </span>
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-            <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <Shield className="w-4 h-4 text-gray-500" /> Security & Session
-            </h3>
-            <div className="space-y-3">
-              <div>
-                <p className="text-xs text-gray-500 uppercase">
-                  Verification Status
-                </p>
-                <p
-                  className={`text-xs font-medium ${user.isVerified ? "text-green-600" : "text-amber-600"}`}
-                >
-                  {user.isVerified ? "Verified Account" : "Unverified"}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-500 uppercase">
-                  Active Session
-                </p>
-                <p
-                  className={`text-xs font-medium ${user.isActive ? "text-green-600" : "text-gray-600"}`}
-                >
-                  {user.isActive ? "Yes" : "No"}
-                </p>
-              </div>
-            </div>
-          </div>
+  return (
+    <MutationFormTemplate<IUserProfileFields>
+      form={form}
+      showBack={false}
+      pageSummary={{
+        title: "Edit Profile",
+        description: "Update your personal account details and preferences.",
+        icon: User,
+      }}
+      formContent={
+        <UserProfileFormContent form={form} isLoading={isUpdating} />
+      }
+      submitData={submitData}
+      confirmOnSubmit
+      validateBeforeOpen={validateBeforeOpen}
+      confirmSubmitTitle="Confirm Profile Update"
+      confirmSubmitContent={
+        <div className="text-center">
+          <p>Are you sure you want to save changes to your profile?</p>
         </div>
-
-        <div className="lg:col-span-2">
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-            <div className="px-4 py-2 border-b border-gray-100 bg-gray-50/50">
-              <h3 className="font-semibold text-gray-900">Account Details</h3>
-            </div>
-
-            <div className="p-3 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
-              <DetailItem label="First Name" value={user.firstName} />
-              <DetailItem label="Last Name" value={user.lastName} />
-
-              <div className="md:col-span-2 border-t border-gray-100"></div>
-
-              <DetailItem
-                icon={<Mail className="w-4 h-4" />}
-                label="Email Address"
-                value={user.email}
-              />
-              <DetailItem
-                icon={<Phone className="w-4 h-4" />}
-                label="Phone Number"
-                value={user.phone}
-              />
-
-              <div className="md:col-span-2 border-t border-gray-100"></div>
-
-             
-              <DetailItem
-                label="Account Status"
-                value={<span className="capitalize">{user.status}</span>}
-              />
-
-              <div className="md:col-span-2 border-t border-gray-100"></div>
-
-              <DetailItem
-                icon={<Activity className="w-4 h-4" />}
-                label="Total Logins"
-                value={user.loginCount?.toString()}
-              />
-              <DetailItem
-                icon={<Clock className="w-4 h-4" />}
-                label="Last Login Date"
-                value={
-                  user.lastLogin
-                    ? new Date(user.lastLogin).toLocaleString()
-                    : "N/A"
-                }
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+      }
+      confirmSubmitActionLabel="Save Profile"
+      pageTitle="Edit Profile"
+      loading={isUpdating}
+      mutationFormSummary={{
+        summaryData: summarySections,
+        summaryMainTitle: "Profile Summary",
+        summarySaveButtonText: "Save Profile",
+      }}
+      onResetForm={handleResetForm}
+    />
   );
 };
 

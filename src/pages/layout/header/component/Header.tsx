@@ -111,7 +111,10 @@ function Header() {
                 className="relative h-9 w-9 rounded-full p-0 bg-primary!"
               >
                 <Avatar className="h-5 w-5">
-                  <AvatarImage src="/avatar.png" alt="User" />
+                  <AvatarImage
+                    src={activeUser.user?.imageUrl || "/avatar.png"}
+                    alt="User"
+                  />
                   <AvatarFallback className="text-white bg-primary">
                     {getInitials()}
                   </AvatarFallback>
