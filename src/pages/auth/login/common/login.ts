@@ -60,10 +60,45 @@ export type IUserValidationInfo = {
   currentOutletId?: string;
 };
 
+export interface IChangePasswordPayload {
+  newPassword: string;
+  currentPassword: string;
+}
+
 export interface IChangePassword {
   id: string;
   new_password?: string;
   old_password?: string;
+}
+
+export interface IResetPasswordPayload {
+  email: string;
+}
+
+export interface IResetPasswordResponse {
+  status: string;
+  message: string;
+  data: {
+    email: string;
+    userId: string;
+  };
+}
+
+export interface IResendPasswordResetOtpPayload {
+  email: string;
+  userId: string;
+}
+
+export interface IVerifyPasswordResetPayload {
+  userId: string;
+  otp: string;
+  newPassword: string;
+}
+
+export interface IVerifyPasswordResetResponse {
+  message: string;
+  status: string;
+  data: Omit<ILoginResponse, "token">;
 }
 
 export const transformAndLogLoginData = async (

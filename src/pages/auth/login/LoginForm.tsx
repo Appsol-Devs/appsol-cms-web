@@ -124,9 +124,13 @@ const LoginForm = () => {
                 <Checkbox className="h-8! w-8! bg-surface! checked:text-primary! text-primary! border-outline!" />
                 <p>Remember me</p>
               </div>
-              <div>
-                <p>Forgot password?</p>
-              </div>
+              <button
+                type="button"
+                onClick={() => navigate(allRoutes.FORGOT_PASSWORD)}
+                className="text-primary bg-transparent! border-none! hover:underline"
+              >
+                Forgot password?
+              </button>
             </div>
             <Button
               disabled={isLoading}
@@ -138,11 +142,6 @@ const LoginForm = () => {
               <p className="text-sm">Sign In</p>
             </Button>
           </form>
-
-          <p className="text-secondary text-sm mx-auto w-full text-center">
-            New to the console?{" "}
-            <span className="text-primary">Request access.</span>
-          </p>
         </div>
       </div>
       <div className="flex items-center gap-2 text-sm">

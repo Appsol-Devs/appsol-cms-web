@@ -2,6 +2,8 @@ export const allRoutes = Object.freeze({
   HOME: "/",
   PORTAL: "/portal",
   LOGIN: "/login",
+  FORGOT_PASSWORD: "/forgot-password",
+  RESET_PASSWORD: "/reset-password",
   VERIFICATION: "/verification",
   DASHBOARD: "/dashboard",
   CUSTOMERS: "/customers",
