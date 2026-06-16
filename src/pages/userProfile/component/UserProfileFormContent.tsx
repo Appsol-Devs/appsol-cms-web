@@ -147,10 +147,18 @@ const UserProfileFormContent = ({ isLoading, form }: IField) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <CustomInputField<IUserProfileFields>
             type="password"
-            name="password"
+            name="currentPassword"
+            register={register}
+            label="Current Password"
+            placeholder="Enter your current password"
+            disabled={isLoading}
+          />
+          <CustomInputField<IUserProfileFields>
+            type="password"
+            name="newPassword"
             register={register}
             label="New Password"
-            placeholder="Leave blank to keep current password"
+            placeholder="Enter a new password"
             disabled={isLoading}
             rules={{
               minLength: {

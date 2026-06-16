@@ -20,8 +20,9 @@ import SubscriptionReminderDetailsDrawer from "@/pages/subscription-reminders/co
 import { Badge } from "@/components/ui/badge";
 import { DASHBOARD_PRESET_BUTTON_CLASS } from "../common/dashboard";
 
-const CARD_CLASS = "w-full min-w-0 max-w-full overflow-hidden";
-const LIST_LIMIT = 3;
+const CARD_CLASS = "w-full min-w-0 max-w-full overflow-x-hidden";
+const REMINDERS_FETCH_SIZE = 100;
+const REMINDERS_LIST_MAX_HEIGHT = "max-h-[calc(3*5.75rem)]";
 
 const REMINDER_TYPE_TABS: TSubscriptionReminderType[] = [
   "due_today",
@@ -60,23 +61,14 @@ const DashboardReminders = () => {
   const [selected, setSelected] = useState<ISubscriptionReminder | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  const { data: allData } = useGetSubscriptionRemindersQuery({
-    pageSize: 100,
-    pageIndex: 1,
-  });
-
   const {
-    data: listData,
+    data: allData,
     isLoading,
     isError,
-  } = useGetSubscriptionRemindersQuery(
-    {
-      pageSize: LIST_LIMIT,
-      pageIndex: 1,
-      filter: tab === "all" ? undefined : tab,
-    },
-    { refetchOnMountOrArgChange: true },
-  );
+  } = useGetSubscriptionRemindersQuery({
+    pageSize: REMINDERS_FETCH_SIZE,
+    pageIndex: 1,
+  });
 
   const allRemindersWithType = useMemo(() => {
     const reminders = (allData?.contents ?? []) as ISubscriptionReminder[];
@@ -85,14 +77,6 @@ const DashboardReminders = () => {
       reminderType: reminderTypeFromDueDate(r.dueDate) ?? r.reminderType,
     }));
   }, [allData?.contents]);
-
-  const listRemindersWithType = useMemo(() => {
-    const reminders = (listData?.contents ?? []) as ISubscriptionReminder[];
-    return reminders.map((r) => ({
-      ...r,
-      reminderType: reminderTypeFromDueDate(r.dueDate) ?? r.reminderType,
-    }));
-  }, [listData?.contents]);
 
   const counts = useMemo(() => {
     const byType = (type: TSubscriptionReminderType) =>
@@ -108,9 +92,9 @@ const DashboardReminders = () => {
   }, [allRemindersWithType]);
 
   const filtered = useMemo(() => {
-    const inTab = filterByTab(listRemindersWithType, tab);
-    return sortRemindersByDueDateNewestFirst(inTab).slice(0, LIST_LIMIT);
-  }, [listRemindersWithType, tab]);
+    const inTab = filterByTab(allRemindersWithType, tab);
+    return sortRemindersByDueDateNewestFirst(inTab);
+  }, [allRemindersWithType, tab]);
 
   const header = (
     <div className="flex items-center justify-between gap-2">
@@ -149,7 +133,7 @@ const DashboardReminders = () => {
     <>
       <CardComponent className={CARD_CLASS} headerTitle={header}>
         <div className="space-y-0">
-          <div className="flex min-w-0 flex-nowrap overflow-x-auto gap-2 border-b border-border pb-2">
+          <div className="flex min-w-0 flex-nowrap gap-2 overflow-x-auto hide-scrollbar border-b border-border pb-2">
             {tabs.map((t) => (
               <Button
                 key={t.key}
@@ -183,7 +167,7 @@ const DashboardReminders = () => {
             ))}
           </div>
 
-          <div className="pt-3">
+          <div className={cn("pt-3 overflow-y-auto overscroll-contain hide-scrollbar", REMINDERS_LIST_MAX_HEIGHT)}>
             {filtered.length === 0 ? (
               <p className="py-6 text-center text-xs text-muted-foreground">
                 No reminders in this category.

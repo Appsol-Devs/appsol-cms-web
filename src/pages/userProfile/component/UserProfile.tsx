@@ -4,6 +4,7 @@ import { showToast } from "@/components/ui/CustomToast";
 import { cleanPayload, resetMutationForm } from "@/lib/helpers";
 import type { ILoginResponse } from "@/pages/auth/login/common/login";
 import { setCurrentUser } from "@/pages/auth/login/common/loginSlice";
+import { useChangePasswordMutation } from "@/pages/auth/login/common/loginApi";
 import type { IUser } from "@/pages/customer/common/customers";
 import {
   useLazyGetAUserQuery,
@@ -23,7 +24,8 @@ export type IUserProfileFields = {
   email: string;
   phone: string;
   imageUrl?: string;
-  password?: string;
+  currentPassword?: string;
+  newPassword?: string;
   confirm_password?: string;
 };
 
@@ -55,6 +57,8 @@ const UserProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [updateProfile, { isLoading: isUpdating }] =
     useUpdateUserProfileMutation();
+  const [changePassword, { isLoading: isChangingPassword }] =
+    useChangePasswordMutation();
   const [getAUser] = useLazyGetAUserQuery();
 
   const form = useForm<IUserProfileFields>();
@@ -67,7 +71,8 @@ const UserProfile = () => {
     email: "",
     phone: "",
     imageUrl: "",
-    password: "",
+    currentPassword: "",
+    newPassword: "",
     confirm_password: "",
   });
 
@@ -77,7 +82,8 @@ const UserProfile = () => {
     email: data.email ?? "",
     phone: data.phone ?? "",
     imageUrl: data.imageUrl ?? "",
-    password: "",
+    currentPassword: "",
+    newPassword: "",
     confirm_password: "",
   });
 
@@ -91,10 +97,63 @@ const UserProfile = () => {
     resetMutationForm(form, getEmptyProfileValues());
   };
 
+  const validatePasswordChange = (data: IUserProfileFields): boolean => {
+    const currentPassword = data.currentPassword?.trim();
+    const newPassword = data.newPassword?.trim();
+    const confirmPassword = data.confirm_password?.trim();
+
+    const isChangingPassword =
+      Boolean(currentPassword) ||
+      Boolean(newPassword) ||
+      Boolean(confirmPassword);
+
+    if (!isChangingPassword) return true;
+
+    if (!currentPassword) {
+      showToast({
+        title: "Validation",
+        message: "Current password is required to change your password.",
+        type: "info",
+        duration: 2000,
+      });
+      return false;
+    }
+
+    if (!newPassword) {
+      showToast({
+        title: "Validation",
+        message: "New password is required.",
+        type: "info",
+        duration: 2000,
+      });
+      return false;
+    }
+
+    if (newPassword !== confirmPassword) {
+      showToast({
+        title: "Validation",
+        message: "New passwords do not match.",
+        type: "info",
+        duration: 2000,
+      });
+      return false;
+    }
+
+    if (newPassword.length < 8) {
+      showToast({
+        title: "Validation",
+        message: "New password must be at least 8 characters long.",
+        type: "info",
+        duration: 2000,
+      });
+      return false;
+    }
+
+    return true;
+  };
+
   const validateProfileForm = (): boolean => {
     const data = getValues();
-    const password = data.password?.trim();
-    const confirmPassword = data.confirm_password?.trim();
 
     const requiredFields = [
       { field: data.firstName?.trim(), message: "First name is required." },
@@ -110,28 +169,7 @@ const UserProfile = () => {
       }
     }
 
-    if (password || confirmPassword) {
-      if (password !== confirmPassword) {
-        showToast({
-          title: "Validation",
-          message: "Passwords do not match.",
-          type: "info",
-          duration: 2000,
-        });
-        return false;
-      }
-      if (!password || password.length < 8) {
-        showToast({
-          title: "Validation",
-          message: "Password must be at least 8 characters long.",
-          type: "info",
-          duration: 2000,
-        });
-        return false;
-      }
-    }
-
-    return true;
+    return validatePasswordChange(data);
   };
 
   const validateBeforeOpen = async () => validateProfileForm();
@@ -140,7 +178,9 @@ const UserProfile = () => {
     if (!user?._id || !validateProfileForm()) return;
 
     const data = getValues();
-    const password = data.password?.trim();
+    const currentPassword = data.currentPassword?.trim();
+    const newPassword = data.newPassword?.trim();
+    const isChangingPassword = Boolean(currentPassword || newPassword);
 
     const payload = cleanPayload({
       firstName: data.firstName.trim(),
@@ -148,7 +188,6 @@ const UserProfile = () => {
       email: data.email.trim(),
       phone: data.phone.trim(),
       imageUrl: data.imageUrl?.trim(),
-      password: password || undefined,
     });
 
     try {
@@ -156,6 +195,24 @@ const UserProfile = () => {
         id: user._id,
         ...payload,
       }).unwrap();
+
+      if (isChangingPassword && currentPassword && newPassword) {
+        try {
+          await changePassword({
+            currentPassword,
+            newPassword,
+          }).unwrap();
+        } catch (passwordError) {
+          console.error("Failed to change password", passwordError);
+          showToast({
+            title: "Error",
+            message:
+              "Profile was saved, but the password could not be changed. Check your current password and try again.",
+            type: "error",
+          });
+          return;
+        }
+      }
 
       let updatedUser = mergeUserProfile(user, {
         ...res,
@@ -178,7 +235,9 @@ const UserProfile = () => {
 
       showToast({
         title: "Success",
-        message: "Profile updated successfully.",
+        message: isChangingPassword
+          ? "Profile and password updated successfully."
+          : "Profile updated successfully.",
         type: "success",
       });
     } catch (error) {
@@ -209,7 +268,7 @@ const UserProfile = () => {
         { label: "Role", value: user?.role?.name ?? "—", required: false },
         {
           label: "Password",
-          value: values?.password ? "Will be updated" : "Unchanged",
+          value: values?.newPassword ? "Will be updated" : "Unchanged",
           required: false,
         },
       ],
@@ -246,7 +305,10 @@ const UserProfile = () => {
         icon: User,
       }}
       formContent={
-        <UserProfileFormContent form={form} isLoading={isUpdating} />
+        <UserProfileFormContent
+          form={form}
+          isLoading={isUpdating || isChangingPassword}
+        />
       }
       submitData={submitData}
       confirmOnSubmit
@@ -259,7 +321,7 @@ const UserProfile = () => {
       }
       confirmSubmitActionLabel="Save Profile"
       pageTitle="Edit Profile"
-      loading={isUpdating}
+      loading={isUpdating || isChangingPassword}
       mutationFormSummary={{
         summaryData: summarySections,
         summaryMainTitle: "Profile Summary",

@@ -1,4 +1,4 @@
-import { ChartArea, Lock, ShieldCheck, Sparkles, User2 } from "lucide-react";
+import { ChartArea, ShieldCheck, User2 } from "lucide-react";
 
 const LoginBanner = () => {
   return (
@@ -36,14 +36,6 @@ const LoginBanner = () => {
         </div>
 
         <div className="space-y-2 text-primary">
-          <div className="flex items-center gap-1">
-            <Lock className="w-4 h-4" />
-            <p className="text-white">ISO-grade data protection</p>
-          </div>
-          <div className="flex items-center gap-1">
-            <Sparkles className="w-4 h-4" />
-            <p className="text-white">Uptime SLS 99.9%</p>
-          </div>
         </div>
       </div>
     </div>
