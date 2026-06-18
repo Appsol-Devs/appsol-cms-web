@@ -104,7 +104,6 @@ export default function Sidebar({
           </div>
         </div>
 
-        {/* Animated Routes List */}
         <div className="flex-1 overflow-y-auto relative">
           <div
             key={activeView + parentName}
