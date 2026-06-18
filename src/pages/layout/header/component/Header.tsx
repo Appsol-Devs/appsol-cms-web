@@ -1,5 +1,5 @@
-"use client";
 
+import { useState } from "react";
 import { Search, Menu, LogOut, User, CalendarClock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { allRoutes } from "@/utils/routes";
@@ -25,8 +25,11 @@ import ConfirmationDialog from "@/components/ConfirmationDialog";
 
 function Header() {
   const navigate = useNavigate();
-  const activeUser = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
+  
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const activeUser = useSelector((state: RootState) => state.user);
   const isCollapsed: boolean = useSelector(
     (state: RootState) => state.sidebar.isSidebarToggled,
   );
@@ -40,13 +43,10 @@ function Header() {
 
   const getInitials = () => {
     const userData = activeUser;
-
     if (!userData) return "U";
-
     if (userData.user?.firstName && userData.user.lastName) {
       return `${userData.user.firstName[0]}${userData.user.lastName[0]}`.toUpperCase();
     }
-
     return "U";
   };
 
@@ -54,18 +54,32 @@ function Header() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div className="flex h-16 items-center justify-between px-4 md:px-6">
         <div className="flex items-center gap-3">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-64">
-              <Sidebar />
-            </SheetContent>
-          </Sheet>
+          
+          <div className="md:hidden">
+            <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className={`relative bg-transparent! border-onSurface! transition-opacity duration-200 ${
+                    isMobileMenuOpen ? "opacity-0 pointer-events-none" : "opacity-100"
+                  }`}
+                  aria-label="Open mobile menu"
+                >
+                  <Menu className="h-5 w-5 text-onSurface hover:text-foreground transition-colors" />
+                </Button>
+              </SheetTrigger>
+              
+              
+              <SheetContent side="left" className="w-64 p-0 [&>button]:hidden">
+                <Sidebar isMobile={true} onClose={() => setIsMobileMenuOpen(false)} />
+              </SheetContent>
+            </Sheet>
+          </div>
 
-          <SidebarToggler show={isCollapsed} />
+          <div className="hidden md:flex">
+            <SidebarToggler show={isCollapsed} />
+          </div>
 
           <div className="text-xl lg:hidden font-bold tracking-tight animate-in fade-in slide-in-from-top-2 duration-500">
             <div className="p-2">

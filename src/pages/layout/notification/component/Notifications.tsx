@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Bell, X, FileText, Check, CheckCheck, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,101 +14,59 @@ import { useNavigate } from "react-router-dom";
 import { allRoutes } from "@/utils/routes";
 
 import type { INotification } from "@/pages/customer/common/customers";
-import {
-  useLazyGetPaginatedNotificationsQuery,
-  useMarkAllReadMutation,
-  useMarkAsReadMutation,
-} from "../common/notificationsApi";
 import { formatDate } from "@/lib/helpers";
 import { getLookupBadgeStyle } from "@/lib/enums";
 import { showToast } from "@/components/ui/CustomToast";
+
+// Import the hook!
+import { useNotifications } from "../common/notification";
 
 const Notifications = () => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
 
-  const [getNotifications, { isLoading }] = useLazyGetPaginatedNotificationsQuery();
-  const [markAsRead] = useMarkAsReadMutation();
-  const [markAllRead] = useMarkAllReadMutation();
+  // 👇 1. GRAB EVERYTHING FROM CONTEXT
+  const { 
+    notifications, 
+    unreadCount, 
+    isLoading, 
+    markAsReadREST, 
+    markAllReadREST 
+  } = useNotifications();
 
-  const [notifications, setNotifications] = useState<INotification[]>([]);
-
-  const fetchNotifications = async () => {
-    try {
-      const result = await getNotifications({ pageIndex: 1, pageSize: 50}).unwrap();
-      setNotifications(result.contents || []);
-    } catch (error) {
-      console.error("Failed to fetch notifications", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchNotifications();
-  }, []);
-
-  const handleOpenChange = (open: boolean) => {
-    setIsOpen(open);
-    if (open) {
-      fetchNotifications();
-    }
-  };
-
+  // 2. Safely sort notifications from Context
   const modifiedNotifications = notifications
     ? [...notifications].sort((a, b) => {
-      if (a.isRead !== b.isRead) {
-        return a.isRead ? 1 : -1;
-      }
-      return new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime();
-    })
+        if (a.isRead !== b.isRead) {
+          return a.isRead ? 1 : -1;
+        }
+        return new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime();
+      })
     : [];
 
-  const unreadCount = notifications.filter((n) => !n.isRead).length || 0;
-
   const handleMarkAsRead = async (notif: INotification) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n._id === notif._id ? { ...n, isRead: true } : n))
-    );
+    if (notif.isRead) return;
     try {
-      await markAsRead(String(notif._id)).unwrap();
-      showToast({
-        title: "Success",
-        message: "Notification marked as read successfully",
-        type: "success",
-      });
-    } catch  {
-      setNotifications((prev) =>
-        prev.map((n) => (n._id === notif._id ? { ...n, isRead: false } : n))
-      );
-      showToast({
-        title: "Error",
-        message: "Failed to mark notification as read",
-        type: "error",
-      });
+      // Trigger the REST API from context. The socket will handle updating the UI.
+      await markAsReadREST(String(notif._id));
+      showToast({ title: "Success", message: "Notification marked as read", type: "success" });
+    } catch {
+      showToast({ title: "Error", message: "Failed to mark as read", type: "error" });
     }
   };
 
   const handleMarkAllAsRead = async () => {
-    const previousNotifications = [...notifications];
-    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+    if (unreadCount === 0) return;
     try {
-      await markAllRead().unwrap();
-      showToast({
-        title: "Success",
-        message: "All notifications marked as read successfully",
-        type: "success",
-      });
+      await markAllReadREST();
+      showToast({ title: "Success", message: "All notifications marked read", type: "success" });
     } catch {
-      setNotifications(previousNotifications);
-      showToast({
-        title: "Error",
-        message: "Failed to mark all notifications as read",
-        type: "error",
-      });
+      showToast({ title: "Error", message: "Failed to mark all as read", type: "error" });
     }
   };
 
   return (
-    <Popover open={isOpen} onOpenChange={handleOpenChange}>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button variant="ghost" size="icon" className="relative bg-transparent! border-onSurface!">
           <Bell className="h-5 w-5 text-onSurface hover:text-foreground transition-colors" />
@@ -124,7 +82,6 @@ const Notifications = () => {
       </PopoverTrigger>
 
       <PopoverContent align="end" className="w-[300px] p-0 shadow-lg rounded-sm overflow-hidden text-xs">
-
         <div className="flex items-center justify-between px-2 py-1.5 border-b bg-background z-10">
           <span className="font-bold text-xs">Notifications</span>
           <Button
@@ -154,6 +111,7 @@ const Notifications = () => {
                 const statusText = isRead ? "read" : "new";
                 const colorCode = isRead ? "#16a34a" : "#eab308";
                 const style = getLookupBadgeStyle(colorCode);
+
                 return (
                   <div
                     key={notif._id}
@@ -195,7 +153,6 @@ const Notifications = () => {
                           {formatDate(String(notif.createdAt)) || "N/A"}
                         </span>
 
-                        {/* View Complaint  */}
                         {notif.link && notif.link.includes("complaints") && (
                           <>
                             <span className="text-muted-foreground text-[8px]">•</span>
@@ -204,7 +161,6 @@ const Notifications = () => {
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setIsOpen(false);
-
                                 const id = notif.link?.split("/").filter(Boolean).pop();
                                 if (id) {
                                   navigate(allRoutes.PORTAL + allRoutes.VIEW_COMPLAINT(id));
