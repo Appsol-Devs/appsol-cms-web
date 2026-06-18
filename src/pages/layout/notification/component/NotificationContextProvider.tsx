@@ -1,10 +1,8 @@
-// NotificationProvider.tsx
 import React, { useState, useEffect, useCallback } from "react";
 import { useNotificationSocket } from "@/lib/hooks";
 import type { INotification } from "@/pages/customer/common/customers";
 import { NotificationContext } from "../common/notification";
 
-// Import your existing RTK Query hooks
 import { 
   useLazyGetPaginatedNotificationsQuery, 
   useMarkAsReadMutation, 
