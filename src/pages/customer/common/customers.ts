@@ -75,6 +75,14 @@ export interface INotification {
   updatedAt?: string
 }
 
+export interface NotificationContextType {
+  notifications: INotification[];
+  unreadCount: number;
+  isLoading: boolean;
+  markAsReadREST: (id: string) => Promise<void>;
+  markAllReadREST: () => Promise<void>;
+}
+
 export interface IRequestOTPPayload {
   userId: string;
   email: string;
