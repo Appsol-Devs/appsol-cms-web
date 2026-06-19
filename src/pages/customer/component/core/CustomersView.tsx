@@ -89,7 +89,7 @@ const CustomersView = () => {
         </ScrollArea>
 
         <div className="relative min-h-[65vh] pt-2">
-          <Outlet />
+          <Outlet context={{ customerId: id }} />
         </div>
       </div>
     </div>

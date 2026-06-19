@@ -107,15 +107,19 @@ function Header() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
+                type="button"
                 variant="ghost"
-                className="relative h-9 w-9 rounded-full p-0 bg-primary!"
+                size="icon"
+                aria-label="Open account menu"
+                className="h-9 w-9 min-h-0 min-w-0 rounded-full! border-0! bg-transparent! p-0! shadow-none hover:bg-accent/50 overflow-hidden"
               >
-                <Avatar className="h-5 w-5">
+                <Avatar className="h-9 w-9">
                   <AvatarImage
-                    src={activeUser.user?.imageUrl || "/avatar.png"}
+                    src={activeUser.user?.imageUrl || undefined}
                     alt="User"
+                    className="object-cover"
                   />
-                  <AvatarFallback className="text-white bg-primary">
+                  <AvatarFallback className="text-xs font-medium bg-primary text-primary-foreground">
                     {getInitials()}
                   </AvatarFallback>
                 </Avatar>

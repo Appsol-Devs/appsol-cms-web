@@ -1,18 +1,24 @@
 import CardComponent from "@/components/CardComponent";
 import CustomInputField from "@/components/CustomInputField";
 import { Separator } from "@/components/ui/separator";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { getInitials } from "@/lib/helpers";
 import { BookOpenText, ImageIcon, Shield } from "lucide-react";
 import type { UseFormReturn } from "react-hook-form";
 import type { IUserProfileFields } from "./UserProfile";
+import ProfilePhotoUpload from "./ProfilePhotoUpload";
 
 interface IField {
   isLoading?: boolean;
   form: UseFormReturn<IUserProfileFields, any, IUserProfileFields>;
+  onPhotoFileChange: (file: File | null) => void;
+  onImageUrlChange: (imageUrl: string) => void;
 }
 
-const UserProfileFormContent = ({ isLoading, form }: IField) => {
+const UserProfileFormContent = ({
+  isLoading,
+  form,
+  onPhotoFileChange,
+  onImageUrlChange,
+}: IField) => {
   const { register, watch } = form;
   const values = watch();
 
@@ -30,28 +36,14 @@ const UserProfileFormContent = ({ isLoading, form }: IField) => {
           </>
         }
       >
-        <div className="flex flex-col sm:flex-row items-center gap-4">
-          <Avatar className="w-24 h-24 border-4 border-muted shadow-sm">
-            <AvatarImage
-              src={values.imageUrl || undefined}
-              alt={`${values.firstName ?? ""} ${values.lastName ?? ""}`}
-              className="object-cover"
-            />
-            <AvatarFallback className="text-2xl font-bold">
-              {getInitials(values.firstName, values.lastName) || "U"}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1 w-full">
-            <CustomInputField<IUserProfileFields>
-              type="text"
-              label="Image URL"
-              name="imageUrl"
-              placeholder="https://example.com/photo.jpg"
-              disabled={isLoading}
-              register={register}
-            />
-          </div>
-        </div>
+        <ProfilePhotoUpload
+          imageUrl={values.imageUrl}
+          firstName={values.firstName}
+          lastName={values.lastName}
+          disabled={isLoading}
+          onPhotoFileChange={onPhotoFileChange}
+          onImageUrlChange={onImageUrlChange}
+        />
       </CardComponent>
 
       <CardComponent
@@ -150,7 +142,7 @@ const UserProfileFormContent = ({ isLoading, form }: IField) => {
             name="currentPassword"
             register={register}
             label="Current Password"
-            placeholder="Enter your current password"
+            placeholder="Leave blank to keep your current password"
             disabled={isLoading}
           />
           <CustomInputField<IUserProfileFields>
@@ -160,12 +152,6 @@ const UserProfileFormContent = ({ isLoading, form }: IField) => {
             label="New Password"
             placeholder="Enter a new password"
             disabled={isLoading}
-            rules={{
-              minLength: {
-                value: 8,
-                message: "Password must be at least 8 characters long.",
-              },
-            }}
           />
           <CustomInputField<IUserProfileFields>
             type="password"

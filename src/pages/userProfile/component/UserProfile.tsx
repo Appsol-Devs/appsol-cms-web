@@ -2,6 +2,7 @@ import type { ISummarySection } from "@/components/form/MutationFormSummary";
 import MutationFormTemplate from "@/components/form/MutationFormTemplate";
 import { showToast } from "@/components/ui/CustomToast";
 import { cleanPayload, resetMutationForm } from "@/lib/helpers";
+import { readFileAsDataUrl } from "@/lib/upload";
 import type { ILoginResponse } from "@/pages/auth/login/common/login";
 import { setCurrentUser } from "@/pages/auth/login/common/loginSlice";
 import { useChangePasswordMutation } from "@/pages/auth/login/common/loginApi";
@@ -46,7 +47,7 @@ function mergeUserProfile(
     lastName: updated.lastName ?? current.lastName,
     email: updated.email ?? current.email,
     phone: updated.phone ?? current.phone,
-    imageUrl: updated.imageUrl ?? current.imageUrl,
+    imageUrl: updated.imageUrl !== undefined ? updated.imageUrl : current.imageUrl,
     updatedAt,
   };
 }
@@ -55,6 +56,8 @@ const UserProfile = () => {
   const dispatch = useDispatch();
   const { user } = useSelector((state: RootState) => state.user);
   const [isEditing, setIsEditing] = useState(false);
+  const [profilePhotoFile, setProfilePhotoFile] = useState<File | null>(null);
+  const [profilePhotoRemoved, setProfilePhotoRemoved] = useState(false);
   const [updateProfile, { isLoading: isUpdating }] =
     useUpdateUserProfileMutation();
   const [changePassword, { isLoading: isChangingPassword }] =
@@ -62,7 +65,7 @@ const UserProfile = () => {
   const [getAUser] = useLazyGetAUserQuery();
 
   const form = useForm<IUserProfileFields>();
-  const { watch, getValues, reset } = form;
+  const { watch, getValues, reset, setValue } = form;
   const values = watch();
 
   const getEmptyProfileValues = (): IUserProfileFields => ({
@@ -95,6 +98,18 @@ const UserProfile = () => {
 
   const handleResetForm = () => {
     resetMutationForm(form, getEmptyProfileValues());
+    setProfilePhotoFile(null);
+    setProfilePhotoRemoved(false);
+  };
+
+  const handlePhotoFileChange = (file: File | null) => {
+    setProfilePhotoFile(file);
+    if (file) setProfilePhotoRemoved(false);
+  };
+
+  const handleImageUrlChange = (imageUrl: string) => {
+    setValue("imageUrl", imageUrl, { shouldDirty: true });
+    if (!imageUrl) setProfilePhotoRemoved(true);
   };
 
   const validatePasswordChange = (data: IUserProfileFields): boolean => {
@@ -102,32 +117,17 @@ const UserProfile = () => {
     const newPassword = data.newPassword?.trim();
     const confirmPassword = data.confirm_password?.trim();
 
-    const isChangingPassword =
-      Boolean(currentPassword) ||
-      Boolean(newPassword) ||
-      Boolean(confirmPassword);
+    const isAttemptingPasswordChange = Boolean(
+      currentPassword || newPassword || confirmPassword,
+    );
 
-    if (!isChangingPassword) return true;
+    if (!isAttemptingPasswordChange) return true;
 
-    if (!currentPassword) {
-      showToast({
-        title: "Validation",
-        message: "Current password is required to change your password.",
-        type: "info",
-        duration: 2000,
-      });
-      return false;
-    }
+    const isCompletePasswordChange = Boolean(
+      currentPassword && newPassword && confirmPassword,
+    );
 
-    if (!newPassword) {
-      showToast({
-        title: "Validation",
-        message: "New password is required.",
-        type: "info",
-        duration: 2000,
-      });
-      return false;
-    }
+    if (!isCompletePasswordChange) return true;
 
     if (newPassword !== confirmPassword) {
       showToast({
@@ -139,7 +139,7 @@ const UserProfile = () => {
       return false;
     }
 
-    if (newPassword.length < 8) {
+    if (!newPassword || newPassword.length < 8) {
       showToast({
         title: "Validation",
         message: "New password must be at least 8 characters long.",
@@ -180,15 +180,43 @@ const UserProfile = () => {
     const data = getValues();
     const currentPassword = data.currentPassword?.trim();
     const newPassword = data.newPassword?.trim();
-    const isChangingPassword = Boolean(currentPassword || newPassword);
+    const confirmPassword = data.confirm_password?.trim();
+    const isChangingPassword = Boolean(
+      currentPassword && newPassword && confirmPassword,
+    );
 
-    const payload = cleanPayload({
+    let imageUrl: string | undefined;
+
+    if (profilePhotoRemoved) {
+      imageUrl = "";
+    } else if (profilePhotoFile) {
+      try {
+        imageUrl = await readFileAsDataUrl(profilePhotoFile);
+      } catch (error) {
+        console.error("Failed to read profile photo", error);
+        showToast({
+          title: "Error",
+          message: "Could not read the selected photo. Please try again.",
+          type: "error",
+        });
+        return;
+      }
+    } else {
+      const trimmedImageUrl = data.imageUrl?.trim();
+      imageUrl = trimmedImageUrl || undefined;
+    }
+
+    const profileFields = {
       firstName: data.firstName.trim(),
       lastName: data.lastName.trim(),
       email: data.email.trim(),
       phone: data.phone.trim(),
-      imageUrl: data.imageUrl?.trim(),
-    });
+    };
+
+    const payload = {
+      ...cleanPayload(profileFields),
+      ...(imageUrl !== undefined ? { imageUrl } : {}),
+    };
 
     try {
       const res = await updateProfile({
@@ -196,11 +224,11 @@ const UserProfile = () => {
         ...payload,
       }).unwrap();
 
-      if (isChangingPassword && currentPassword && newPassword) {
+      if (isChangingPassword) {
         try {
           await changePassword({
-            currentPassword,
-            newPassword,
+            currentPassword: currentPassword!,
+            newPassword: newPassword!,
           }).unwrap();
         } catch (passwordError) {
           console.error("Failed to change password", passwordError);
@@ -214,23 +242,34 @@ const UserProfile = () => {
         }
       }
 
+      const resolvedImageUrl = profilePhotoRemoved
+        ? ""
+        : res?.imageUrl !== undefined
+          ? res.imageUrl
+          : payload.imageUrl;
+
       let updatedUser = mergeUserProfile(user, {
         ...res,
-        firstName: res?.firstName ?? payload.firstName,
-        lastName: res?.lastName ?? payload.lastName,
-        email: res?.email ?? payload.email,
-        phone: res?.phone ?? payload.phone,
-        imageUrl: res?.imageUrl ?? payload.imageUrl,
+        firstName: res?.firstName ?? profileFields.firstName,
+        lastName: res?.lastName ?? profileFields.lastName,
+        email: res?.email ?? profileFields.email,
+        phone: res?.phone ?? profileFields.phone,
+        imageUrl: resolvedImageUrl,
       });
 
       try {
         const fresh = await getAUser(user._id).unwrap();
-        updatedUser = mergeUserProfile(updatedUser, fresh);
+        updatedUser = mergeUserProfile(updatedUser, {
+          ...fresh,
+          ...(profilePhotoRemoved ? { imageUrl: "" } : {}),
+        });
       } catch {
       }
 
       dispatch(setCurrentUser(updatedUser));
       reset(getProfileValues(updatedUser));
+      setProfilePhotoFile(null);
+      setProfilePhotoRemoved(false);
       setIsEditing(false);
 
       showToast({
@@ -268,7 +307,7 @@ const UserProfile = () => {
         { label: "Role", value: user?.role?.name ?? "—", required: false },
         {
           label: "Password",
-          value: values?.newPassword ? "Will be updated" : "Unchanged",
+          value: values?.newPassword ? "Will be updated" : "Optional — leave blank to keep current",
           required: false,
         },
       ],
@@ -289,6 +328,8 @@ const UserProfile = () => {
         user={user}
         onEdit={() => {
           reset(getProfileValues(user));
+          setProfilePhotoFile(null);
+          setProfilePhotoRemoved(false);
           setIsEditing(true);
         }}
       />
@@ -308,6 +349,8 @@ const UserProfile = () => {
         <UserProfileFormContent
           form={form}
           isLoading={isUpdating || isChangingPassword}
+          onPhotoFileChange={handlePhotoFileChange}
+          onImageUrlChange={handleImageUrlChange}
         />
       }
       submitData={submitData}
