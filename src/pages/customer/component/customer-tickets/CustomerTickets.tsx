@@ -1,4 +1,5 @@
 import { formatDateTime } from "@/lib/helpers";
+import type { IBaseQueryParam } from "@/lib/api";
 import {
   CircleDot,
   Ticket,
@@ -8,7 +9,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { useEffect, useMemo, useState, useCallback } from "react";
-import {  useParams } from "react-router-dom";
+import { useLocation, useOutletContext, useParams } from "react-router-dom";
 import FeatureContentRenderer from "@/components/table/component/FeatureContentRenderer";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
@@ -38,7 +39,16 @@ const TicketCustomerCell = ({ ticket }: { ticket: ITicket }) => {
 };
 
 const CustomerTickets = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id: routeCustomerId } = useParams<{ id: string }>();
+  const { customerId: outletCustomerId } =
+    useOutletContext<{ customerId?: string }>() ?? {};
+  const location = useLocation();
+
+  const customerId = useMemo(() => {
+    if (routeCustomerId) return routeCustomerId;
+    if (outletCustomerId) return outletCustomerId;
+    return location.pathname.match(/\/customers\/([^/]+)/)?.[1];
+  }, [routeCustomerId, outletCustomerId, location.pathname]);
 
   const [trigger, fetchState] = useLazyGetCustomerTicketsQuery();
   const [getATicket] = useLazyGetATicketQuery();
@@ -52,12 +62,17 @@ const CustomerTickets = () => {
     }
   }, [executed]);
 
-  // 3. Intercept data grid requests and inject customerId automatically
   const fetchQuery = useCallback(
-    (params: any) => {
-      return trigger({ ...params, customerId: id });
-    },
-    [trigger, id]
+    (params: IBaseQueryParam) =>
+      trigger({
+        ...params,
+        customerId,
+        filters: {
+          ...params.filters,
+          customerId,
+        },
+      }),
+    [trigger, customerId],
   );
 
   const columns = useMemo<ColumnDef<ITicket>[]>(
@@ -159,9 +174,14 @@ const CustomerTickets = () => {
     [executed]
   );
 
+  if (!customerId) {
+    return null;
+  }
+
   return (
     <>
       <FeatureContentRenderer
+        key={customerId}
         columns={columns}
         pathOnRowSelected={(row) => {
           const ticket = row as ITicket;

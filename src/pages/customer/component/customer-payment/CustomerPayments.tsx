@@ -1,7 +1,8 @@
 import { formatDateTime, formatToCurrency } from "@/lib/helpers";
+import type { IBaseQueryParam } from "@/lib/api";
 import { Banknote, Calendar, FileText, Monitor, User, CreditCard } from "lucide-react";
 import { useEffect, useMemo, useState, useCallback } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useOutletContext, useParams } from "react-router-dom";
 import FeatureContentRenderer from "@/components/table/component/FeatureContentRenderer";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
@@ -11,8 +12,18 @@ import { useLazyGetCustomerPaymentsQuery } from "../../common/customersApi";
 import type { IPayment } from "@/pages/payments/common/payments";
 
 const CustomerPayments = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id: routeCustomerId } = useParams<{ id: string }>();
+  const { customerId: outletCustomerId } =
+    useOutletContext<{ customerId?: string }>() ?? {};
+  const location = useLocation();
   const navigate = useNavigate();
+
+  const customerId = useMemo(() => {
+    if (routeCustomerId) return routeCustomerId;
+    if (outletCustomerId) return outletCustomerId;
+    return location.pathname.match(/\/customers\/([^/]+)/)?.[1];
+  }, [routeCustomerId, outletCustomerId, location.pathname]);
+
   const [trigger, fetchState] = useLazyGetCustomerPaymentsQuery();
   const [executed, setExecuted] = useState(false);
 
@@ -23,10 +34,13 @@ const CustomerPayments = () => {
   }, [executed]);
 
   const fetchQuery = useCallback(
-    (params: any) => {
-      return trigger({ ...params, customerId: id });
-    },
-    [trigger, id]
+    (params: IBaseQueryParam) =>
+      trigger({
+        ...params,
+        customerId,
+        filters: params.filters,
+      }),
+    [trigger, customerId],
   );
 
   const columns = useMemo<ColumnDef<IPayment>[]>(
@@ -129,9 +143,14 @@ const CustomerPayments = () => {
     [executed]
   );
 
+  if (!customerId) {
+    return null;
+  }
+
   return (
     <>
       <FeatureContentRenderer
+        key={customerId}
         tableAddComponent={() => null}
         useDateFilters
         dateFilterNoDefault
@@ -140,7 +159,7 @@ const CustomerPayments = () => {
         pathOnRowSelected={(row) => {
           const payment = row as IPayment;
           navigate(allRoutes.PORTAL + allRoutes.VIEW_PAYMENT(payment._id as string), {
-            state: { initialData: payment, customerId: id },
+            state: { initialData: payment, customerId },
           });
         }}
         refetchData={executed}

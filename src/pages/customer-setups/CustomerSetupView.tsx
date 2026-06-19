@@ -2,33 +2,25 @@ import ActionButton from "@/components/ActionButtons";
 import LoadingComponent from "@/components/LoadingComponent";
 import PageSummary from "@/components/PageSummary";
 import PageTitle from "@/components/PageTitle";
-import DetailItem from "@/components/ui/DetailItem";
 import { formatDate } from "@/lib/helpers";
+import { getLookupBadgeStyle } from "@/lib/enums";
 import {
-  AlertCircle,
-  Calendar,
-  CircleDot,
   FileText,
-  Monitor,
-  StickyNote,
-  User,
-  Users,
   Trash2,
   BookOpenText,
-  PlayCircle,
-  CheckCircle2,
-  CalendarPlus,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { allRoutes } from "@/utils/routes";
 import { Badge } from "@/components/ui/badge";
-import { getLookupBadgeStyle } from "@/lib/enums";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { Button } from "@/components/ui/button";
 import { showToast } from "@/components/ui/CustomToast";
 
-import { useLazyGetACustomerSetupQuery, useDeleteCustomerSetupMutation } from "./customerSetupApi";
+import {
+  useLazyGetACustomerSetupQuery,
+  useDeleteCustomerSetupMutation,
+} from "./customerSetupApi";
 import type { ICustomerSetup } from "./customerSetup";
 import type { IUser } from "@/pages/customer/common/customers";
 
@@ -165,7 +157,7 @@ const CustomerSetupView = () => {
               title="Delete Customer Setup?"
               rightActionTitle="Delete"
               content={
-                <p className="text-gray-500 text-center">
+                <p className="text-muted-foreground text-center">
                   This action cannot be undone. This will permanently delete the
                   setup <strong>{selectedSetup.title}</strong> and remove its data.
                 </p>
@@ -183,7 +175,7 @@ const CustomerSetupView = () => {
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-1 space-y-3">
+        <div className="lg:col-span-1 space-y-4">
           <div className="bg-card p-6 rounded-xl border shadow-sm flex flex-col items-center text-center">
             <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-4">
               <BookOpenText className="w-10 h-10 text-primary" />
@@ -199,24 +191,24 @@ const CustomerSetupView = () => {
 
             <div className="w-full space-y-4 border-t pt-4">
               <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2 flex items-center justify-center gap-1">
-                  <CircleDot className="w-3 h-3" /> General Status
+                <p className="text-xs text-muted-foreground uppercase font-semibold mb-1.5">
+                  General Status
                 </p>
                 <Badge
                   variant="outline"
-                  className="capitalize border text-xs px-3 py-1"
+                  className="capitalize border text-xs font-medium px-2 py-0 rounded-full"
                 >
                   {generalStatusName}
                 </Badge>
               </div>
 
               <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2 flex items-center justify-center gap-1">
-                  <CircleDot className="w-3 h-3" /> Setup Status
+                <p className="text-xs text-muted-foreground uppercase font-semibold mb-1.5">
+                  Setup Status
                 </p>
                 <Badge
                   variant={setupStatusColorCode ? undefined : "secondary"}
-                  className="capitalize border text-xs px-3 py-1"
+                  className="capitalize border text-xs font-medium px-2 py-0 rounded-full"
                   style={getLookupBadgeStyle(setupStatusColorCode)}
                 >
                   {setupStatusName}
@@ -224,8 +216,8 @@ const CustomerSetupView = () => {
               </div>
 
               <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2 flex items-center justify-center gap-1">
-                  <AlertCircle className="w-3 h-3" /> Priority
+                <p className="text-xs text-muted-foreground uppercase font-semibold mb-1.5">
+                  Priority
                 </p>
                 {(() => {
                   const priority = selectedSetup.priority ?? "";
@@ -233,7 +225,7 @@ const CustomerSetupView = () => {
                   return (
                     <Badge
                       variant={color ? undefined : "outline"}
-                      className="capitalize border text-xs px-3 py-1"
+                      className="capitalize border text-xs font-medium px-2 py-0 rounded-full"
                       style={
                         color
                           ? {
@@ -253,97 +245,124 @@ const CustomerSetupView = () => {
           </div>
         </div>
 
-        <div className="lg:col-span-2 space-y-4">
-          <div className="bg-card rounded-xl border shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b bg-muted/30">
+        <div className="lg:col-span-2">
+          <div className="bg-card rounded-xl border shadow-sm overflow-hidden space-y-0">
+            <div className="px-6 py-4 border-b bg-muted/30 flex items-center gap-2">
+              <FileText className="w-4 h-4 text-muted-foreground" />
               <h3 className="font-semibold text-card-foreground">
                 Setup Information
               </h3>
             </div>
-            <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-              <DetailItem
-                icon={<User className="w-4 h-4" />}
-                label="Customer"
-                value={customerName}
-              />
+            <div className="p-6 space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase font-semibold mb-1.5">
+                    Customer
+                  </p>
+                  <p className="text-sm text-card-foreground">
+                    {customerName}
+                  </p>
+                </div>
 
-              <div>
-                <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
-                  <Monitor className="w-4 h-4" /> Related Software
-                </p>
-                <Badge
-                  variant={softwareColorCode ? undefined : "secondary"}
-                  className="capitalize border font-medium"
-                  style={getLookupBadgeStyle(softwareColorCode)}
-                >
-                  {softwareName}
-                </Badge>
-              </div>
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase font-semibold mb-1.5">
+                    Related Software
+                  </p>
+                  <Badge
+                    variant={softwareColorCode ? undefined : "secondary"}
+                    className="capitalize border text-xs font-medium px-2 py-0 rounded-full"
+                    style={getLookupBadgeStyle(softwareColorCode)}
+                  >
+                    {softwareName}
+                  </Badge>
+                </div>
 
-              <div>
-                <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
-                  <Users className="w-4 h-4" /> Assigned Users
-                </p>
-                <div className="flex flex-wrap gap-1 mt-1">
-                  {selectedSetup.assignedTo && selectedSetup.assignedTo.length > 0 ? (
-                    selectedSetup.assignedTo.map((user, idx) => {
-                      const name = formatUserFullName(user);
-                      return (
-                        <Badge
-                          key={idx}
-                          variant="outline"
-                          className="text-xs font-normal bg-muted/30"
-                        >
-                          {name}
-                        </Badge>
-                      );
-                    })
-                  ) : (
-                    <span className="text-sm font-medium text-muted-foreground">
-                      Unassigned
-                    </span>
-                  )}
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase font-semibold mb-1.5">
+                    Assigned Users
+                  </p>
+                  <div className="flex flex-wrap gap-1">
+                    {selectedSetup.assignedTo && selectedSetup.assignedTo.length > 0 ? (
+                      selectedSetup.assignedTo.map((user, idx) => {
+                        const name = formatUserFullName(user);
+                        return (
+                          <Badge
+                            key={idx}
+                            variant="outline"
+                            className="text-xs font-medium px-2 py-0 rounded-full bg-muted/30"
+                          >
+                            {name}
+                          </Badge>
+                        );
+                      })
+                    ) : (
+                      <p className="text-sm text-card-foreground">Unassigned</p>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              <div className="md:col-span-2 border-t pt-4 mt-2">
-                <DetailItem
-                  icon={<FileText className="w-4 h-4" />}
-                  label="Description"
-                  value={selectedSetup.description || "No description provided."}
-                />
+              <div>
+                <label className="text-xs text-muted-foreground uppercase font-semibold mb-2 block">
+                  Description
+                </label>
+                <div className="p-4 bg-muted rounded-lg border border-border text-sm text-card-foreground leading-relaxed whitespace-pre-wrap">
+                  {selectedSetup.description || "No description provided."}
+                </div>
               </div>
 
-              <div className="md:col-span-2 border-t pt-4">
-                <DetailItem
-                  icon={<StickyNote className="w-4 h-4" />}
-                  label="Notes"
-                  value={selectedSetup.notes || "No additional notes."}
-                />
+              <div>
+                <label className="text-xs text-muted-foreground uppercase font-semibold mb-2 block">
+                  Notes
+                </label>
+                <div className="p-4 bg-muted rounded-lg border border-border text-sm text-card-foreground leading-relaxed whitespace-pre-wrap">
+                  {selectedSetup.notes || "No additional notes."}
+                </div>
               </div>
 
-              <div className="md:col-span-2 border-t border-border my-2" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase font-semibold mb-1.5">
+                    Scheduled Start
+                  </p>
+                  <p className="text-sm text-card-foreground">
+                    {selectedSetup.scheduledStart
+                      ? formatDate(selectedSetup.scheduledStart)
+                      : "—"}
+                  </p>
+                </div>
 
-              <DetailItem
-                icon={<PlayCircle className="w-4 h-4 text-muted-foreground" />}
-                label="Scheduled Start"
-                value={selectedSetup.scheduledStart ? formatDate(selectedSetup.scheduledStart) : "—"}
-              />
-              <DetailItem
-                icon={<Calendar className="w-4 h-4 text-muted-foreground" />}
-                label="Scheduled End"
-                value={selectedSetup.scheduledEnd ? formatDate(selectedSetup.scheduledEnd) : "—"}
-              />
-              <DetailItem
-                icon={<CheckCircle2 className="w-4 h-4 text-muted-foreground" />}
-                label="Actual Completion Date"
-                value={selectedSetup.actualCompletionDate ? formatDate(selectedSetup.actualCompletionDate) : "—"}
-              />
-              <DetailItem
-                icon={<CalendarPlus className="w-4 h-4 text-muted-foreground" />}
-                label="Added to Calendar"
-                value={selectedSetup.addToCalendar ? "Yes" : "No"}
-              />
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase font-semibold mb-1.5">
+                    Scheduled End
+                  </p>
+                  <p className="text-sm text-card-foreground">
+                    {selectedSetup.scheduledEnd
+                      ? formatDate(selectedSetup.scheduledEnd)
+                      : "—"}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase font-semibold mb-1.5">
+                    Actual Completion Date
+                  </p>
+                  <p className="text-sm text-card-foreground">
+                    {selectedSetup.actualCompletionDate
+                      ? formatDate(selectedSetup.actualCompletionDate)
+                      : "—"}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase font-semibold mb-1.5">
+                    Added to Calendar
+                  </p>
+                  <p className="text-sm text-card-foreground">
+                    {selectedSetup.addToCalendar ? "Yes" : "No"}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>

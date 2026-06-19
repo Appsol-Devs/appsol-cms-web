@@ -22,6 +22,10 @@ export interface IUpdateUserProfilePayload {
   imageUrl?: string;
 }
 
+export type IUpdateUserProfileArg = {
+  id: string;
+} & IUpdateUserProfilePayload;
+
 export const usersApi = createApi({
   reducerPath: "usersApi",
   baseQuery: fetchBaseQuery({
@@ -89,10 +93,7 @@ export const usersApi = createApi({
         method: "PUT",
       }),
     }),
-    updateUserProfile: builder.mutation<
-      IUser,
-      { id: string } & IUpdateUserProfilePayload
-    >({
+    updateUserProfile: builder.mutation<IUser, IUpdateUserProfileArg>({
       query: ({ id, ...payload }) => ({
         url: `users/${id}`,
         body: payload,
