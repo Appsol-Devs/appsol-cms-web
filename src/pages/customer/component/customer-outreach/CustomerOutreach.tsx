@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { getLookupBadgeStyle } from "@/lib/enums";
 import type { ICustomerOutreach } from "@/pages/customer-outreaches/common/customer-outreach";
 import { useLazyGetCustomerOutreachQuery } from "../../common/customersApi";
+import { formatDateTime } from "@/lib/helpers";
 
 const CustomerOutreach = () => {
   const { id } = useParams<{ id: string }>();
@@ -56,13 +57,21 @@ const CustomerOutreach = () => {
         header: "Outreach Type",
         accessorKey: "outreachType",
         meta: { icon: <Megaphone size={14} /> },
-        cell: ({ row }) => (
-          <div className="flex flex-col items-start gap-1">
-            <span className="font-semibold p-0.5 text-xs">
-              {row.original.outreachType?.name ?? "-"}
-            </span>
-          </div>
-        ),
+        cell: ({ row }) => {
+          <>
+            <div className="flex flex-col items-start gap-1 p-0.5">
+              <span className="font-medium text-sm text-foreground">
+                {row.original.outreachType?.name ?? "-"}
+              </span>
+
+              <span className="text-xs text-muted-foreground font-medium">
+                {row.original.createdAt
+                  ? formatDateTime(row.original.createdAt)
+                  : "-"}
+              </span>
+            </div>
+          </>;
+        },
       },
       {
         header: "Purpose",
@@ -96,7 +105,7 @@ const CustomerOutreach = () => {
         },
       },
     ],
-    [executed]
+    [executed],
   );
 
   return (
@@ -106,11 +115,10 @@ const CustomerOutreach = () => {
         pathOnRowSelected={(row) => {
           const o = row as ICustomerOutreach;
           if (!o._id) return;
-          
-          navigate(
-            allRoutes.PORTAL + allRoutes.VIEW_CUSTOMER_OUTREACH(o._id),
-            { state: { initialData: o, customerId: id } }
-          );
+
+          navigate(allRoutes.PORTAL + allRoutes.VIEW_CUSTOMER_OUTREACH(o._id), {
+            state: { initialData: o, customerId: id },
+          });
         }}
         refetchData={executed}
         title="Customer Outreach"
