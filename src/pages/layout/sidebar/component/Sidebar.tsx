@@ -15,7 +15,13 @@ import type { RootState } from "@/store";
 import SidebarToggler from "./SidebarToggler";
 import SidebarMainMenu from "./SidebarMainMenu";
 
-export default function Sidebar() {
+export default function Sidebar({
+  isMobile = false,
+  onClose,
+}: {
+  isMobile?: boolean;
+  onClose?: () => void;
+}) {
   const [activeView, setActiveView] = useState<
     "main" | "sub" | "config" | "settings"
   >("main");
@@ -25,6 +31,7 @@ export default function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname;
+  
   const sidebarToggleState: boolean = useSelector(
     (state: RootState) => state.sidebar.isSidebarToggled,
   );
@@ -36,6 +43,7 @@ export default function Sidebar() {
       setActiveView("sub");
     } else if (route.path) {
       navigate(allRoutes.PORTAL + route.path);
+      if (isMobile && onClose) onClose(); 
     }
   };
 
@@ -68,7 +76,7 @@ export default function Sidebar() {
     return false;
   };
 
-  const isSidebarCollapsed = sidebarToggleState;
+  const isSidebarCollapsed = isMobile ? false : sidebarToggleState;
 
   return (
     <div className="relative h-full bg-card text-onCard shadow-md border-2">
@@ -90,12 +98,12 @@ export default function Sidebar() {
           />
 
           <div className={` ${isSidebarCollapsed ? "left-2" : ""}`}>
-            <SidebarToggler show={!isSidebarCollapsed} />
+            {!isMobile && (
+              <SidebarToggler show={!isSidebarCollapsed} />
+            )}
           </div>
         </div>
-        {/* Header with Back Button */}
 
-        {/* Animated Routes List */}
         <div className="flex-1 overflow-y-auto relative">
           <div
             key={activeView + parentName}
