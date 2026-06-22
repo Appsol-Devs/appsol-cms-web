@@ -11,7 +11,6 @@ import type { IComplaint } from "../common/complaints";
 import { useLazyGetCustomerComplaintsQuery } from "@/pages/customer/common/customersApi";
 
 const CustomerComplaints = () => {
-  // 1. Fetch the customer id parameter from the route URL
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
@@ -24,7 +23,6 @@ const CustomerComplaints = () => {
     }
   }, [executed]);
 
-  // 2. Intercept table queries and append the customerId parameter
   const fetchQuery = useCallback(
     (params: any) => {
       return trigger({ ...params, customerId: id });

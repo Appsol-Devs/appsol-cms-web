@@ -28,7 +28,7 @@ const CustomerOutreach = () => {
     (params: any) => {
       return trigger({ ...params, customerId: id });
     },
-    [trigger, id]
+    [trigger, id],
   );
 
   const columns = useMemo<ColumnDef<ICustomerOutreach>[]>(

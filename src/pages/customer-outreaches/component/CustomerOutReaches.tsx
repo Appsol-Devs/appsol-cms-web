@@ -8,7 +8,8 @@ import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { useLazyGetCustomerOutReachesQuery } from "../common/customerOutreachApi";
 import type { ICustomerOutreach } from "../common/customer-outreach";
-import {  getLookupBadgeStyle } from "@/lib/enums";
+import { getLookupBadgeStyle } from "@/lib/enums";
+import { formatDateTime } from "@/lib/helpers";
 
 const CustomerOutReaches = () => {
   const [fetchQuery, fetchState] = useLazyGetCustomerOutReachesQuery();
@@ -57,7 +58,6 @@ const CustomerOutReaches = () => {
             <Badge className="text-[11px] font-medium px-2 py-0 rounded-full">
               {row.original.outreachCode}
             </Badge>
-
           </div>
         ),
       },
@@ -68,9 +68,20 @@ const CustomerOutReaches = () => {
         meta: { icon: <Megaphone size={14} /> },
         cell: ({ row }) => (
           <div className=" flex flex-col items-start gap-1">
-            <span className="font-semibold p-0.5 text-xs">
-              {row.original.outreachType?.name ?? "-"}
-            </span>
+            <>
+              <div className="flex flex-col items-start gap-1 p-0.5">
+                <span className="font-medium text-sm text-foreground">
+                  {row.original.outreachType?.name ?? "-"}
+                </span>
+
+                <span className="text-xs text-muted-foreground font-medium">
+                  {row.original.createdAt
+                    ? formatDateTime(row.original.createdAt)
+                    : "-"}
+                </span>
+              </div>
+            </>
+            
           </div>
         ),
       },
@@ -94,7 +105,7 @@ const CustomerOutReaches = () => {
         cell: ({ row }) => {
           const status = row.original.callStatus?.name ?? "N/A";
           const colorCode = row.original.callStatus?.colorCode;
-            const style = getLookupBadgeStyle(colorCode);
+          const style = getLookupBadgeStyle(colorCode);
           return (
             <Badge
               variant={colorCode ? undefined : "secondary"}
@@ -107,7 +118,7 @@ const CustomerOutReaches = () => {
         },
       },
     ],
-    [executed]
+    [executed],
   );
 
   return (
@@ -117,17 +128,18 @@ const CustomerOutReaches = () => {
           <ActionButton
             type="add"
             useText="Add Customer Outreach"
-            onClick={() => navigate(allRoutes.PORTAL + allRoutes.ADD_CUSTOMER_OUTREACH)}
+            onClick={() =>
+              navigate(allRoutes.PORTAL + allRoutes.ADD_CUSTOMER_OUTREACH)
+            }
           />
         )}
         columns={columns}
         pathOnRowSelected={(row) => {
           const o = row as ICustomerOutreach;
           if (!o._id) return;
-          navigate(
-            allRoutes.PORTAL + allRoutes.VIEW_CUSTOMER_OUTREACH(o._id),
-            { state: { initialData: o } },
-          );
+          navigate(allRoutes.PORTAL + allRoutes.VIEW_CUSTOMER_OUTREACH(o._id), {
+            state: { initialData: o },
+          });
         }}
         filters={[
           "outreachStatus",
