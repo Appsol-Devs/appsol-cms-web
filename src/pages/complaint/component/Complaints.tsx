@@ -152,6 +152,8 @@ const Complaints = () => {
   return (
     <>
       <FeatureContentRenderer
+        useDateFilters
+        dateFilterNoDefault
         tableAddComponent={() => (
           <ActionButton
             type="add"

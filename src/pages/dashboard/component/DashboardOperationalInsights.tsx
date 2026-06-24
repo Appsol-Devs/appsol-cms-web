@@ -12,6 +12,8 @@ import { Doughnut } from "react-chartjs-2";
 
 ChartJS.register(DoughnutController, ArcElement, Tooltip, Legend);
 
+ChartJS.defaults.font.family = "Quicksand";
+
 const CARD_CLASS = "w-full min-w-0 max-w-full overflow-hidden";
 const HEADER_TITLE = <p className="font-bold">Operational Insights</p>;
 

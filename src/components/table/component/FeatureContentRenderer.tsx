@@ -205,12 +205,22 @@ const FeatureContentRenderer = <
 
                 // PAGINATION (from transformResponse → getPaginationMetaDataV2)
                 const metaHeaders = res.pagination.metaData ?? {};
+                const pageNum = Number(metaHeaders.page_number ?? page_number ?? 1);
+                const totalPages = Number(metaHeaders.total_pages ?? 0);
 
                 const meta: IMetaData = {
                   total_count: Number(metaHeaders.total_count ?? 0),
-                  total_pages: Number(metaHeaders.total_pages ?? 0),
-                  page_number: Number(metaHeaders.page_number ?? 1),
-                  page_size: Number(metaHeaders.page_size ?? 10),
+                  total_pages: totalPages,
+                  page_number: pageNum,
+                  page_size: Number(metaHeaders.page_size ?? applicablePageSize),
+                  has_next_page:
+                    metaHeaders.has_next_page ?? pageNum < totalPages,
+                  has_prev_page: metaHeaders.has_prev_page ?? pageNum > 1,
+                  next_page:
+                    metaHeaders.next_page ??
+                    (pageNum < totalPages ? pageNum + 1 : null),
+                  prev_page:
+                    metaHeaders.prev_page ?? (pageNum > 1 ? pageNum - 1 : null),
                 };
 
                 onPaginationChange(meta);
