@@ -3,6 +3,8 @@ import { useNotificationSocket } from "@/lib/hooks";
 import type { INotification } from "@/pages/customer/common/customers";
 import { NotificationContext } from "../common/notification";
 
+import { showToast } from "@/components/ui/CustomToast"; 
+
 import { 
   useLazyGetPaginatedNotificationsQuery, 
   useMarkAsReadMutation, 
@@ -45,6 +47,21 @@ export const NotificationProvider: React.FC<{
   const handleNewNotification = useCallback((newNotif: INotification) => {
     setNotifications((prev) => [newNotif, ...prev]);
     setUnreadCount((prev) => prev + 1);
+
+    showToast({
+      title: "New Notification",
+      message: newNotif.message || "You have a new message.",
+      type: "info",
+    });
+    const playSound = () => {
+      const audio = new Audio('/assets/sounds/ariel.mp3'); 
+      
+      audio.play().catch((error) => {
+        console.warn("Browser prevented notification audio from playing:", error);
+      });
+    };
+
+    playSound();
   }, []);
 
   const handleNotificationRead = useCallback((id: string) => {
