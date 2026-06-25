@@ -3,9 +3,10 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, CircleDot, Hash, User } from "lucide-react";
+import { Calendar, CalendarClock, CircleDot, User } from "lucide-react";
 import { formatDateTime } from "@/lib/helpers";
 import ActionButton from "@/components/ActionButtons";
+import CustomerCompanyCell from "@/components/CustomerCompanyCell";
 import { allRoutes } from "@/utils/routes";
 import { getLookupBadgeStyle, getPaymentStatusColor } from "@/lib/enums";
 import type { IReschedule } from "../common/reschedules";
@@ -30,7 +31,7 @@ const Reschedules = () => {
       {
         header: "Schedule Code",
         accessorKey: "rescheduleCode",
-        meta: { icon: <Hash size={14} /> },
+        meta: { icon: <CalendarClock size={14} /> },
         cell: ({ row }) => (
           <div className="flex flex-col items-start gap-1">
             <span className="font-semibold text-xs">
@@ -46,25 +47,9 @@ const Reschedules = () => {
         header: "Customer",
         accessorKey: "customer",
         meta: { icon: <User size={14} /> },
-        cell: ({ row }) => {
-          const customer = row.original?.customer as any;
-          const name =
-            typeof customer === "string"
-              ? customer
-              : (customer?.name ?? "N/A");
-          const company =
-            typeof customer === "string"
-              ? ""
-              : (customer?.companyName ?? "");
-          return (
-            <div className="flex flex-col items-start gap-1">
-              <span className="font-semibold text-xs">{name}</span>
-              <span className="font-semibold text-muted-foreground text-xs">
-                {company}
-              </span>
-            </div>
-          );
-        },
+        cell: ({ row }) => (
+          <CustomerCompanyCell customer={row.original?.customer} />
+        ),
       },
       {
         header: "Entity",

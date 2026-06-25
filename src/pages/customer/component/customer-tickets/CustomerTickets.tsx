@@ -11,6 +11,7 @@ import {
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useLocation, useOutletContext, useParams } from "react-router-dom";
 import FeatureContentRenderer from "@/components/table/component/FeatureContentRenderer";
+import CustomerCompanyCell from "@/components/CustomerCompanyCell";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -23,20 +24,9 @@ import { useLazyGetCustomerTicketsQuery } from "../../common/customersApi";
 import { useLazyGetATicketQuery } from "@/pages/ticket/common/ticketsApi";
 import TicketPreviewDrawer from "@/pages/ticket/component/TicketPreviewDrawer";
 
-const TicketCustomerCell = ({ ticket }: { ticket: ITicket }) => {
-  const customer = ticket.complaint?.customer;
-  const nameToShow = customer?.name ?? "N/A";
-  const companyToShow = customer?.companyName ?? "";
-
-  return (
-    <div className="flex flex-col items-start gap-1">
-      <span className="font-semibold text-xs">{nameToShow}</span>
-      <span className="font-semibold text-muted-foreground text-xs">
-        {companyToShow}
-      </span>
-    </div>
-  );
-};
+const TicketCustomerCell = ({ ticket }: { ticket: ITicket }) => (
+  <CustomerCompanyCell customer={ticket.complaint?.customer} />
+);
 
 const CustomerTickets = () => {
   const { id: routeCustomerId } = useParams<{ id: string }>();

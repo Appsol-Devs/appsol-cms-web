@@ -4,11 +4,12 @@ import {
   Banknote,
   Calendar,
   CircleDot,
-  Hash,
   Monitor,
+  Receipt,
   User,
 } from "lucide-react";
 import ActionButton from "@/components/ActionButtons";
+import CustomerCompanyCell from "@/components/CustomerCompanyCell";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import FeatureContentRenderer from "@/components/table/component/FeatureContentRenderer";
@@ -42,9 +43,9 @@ const Subscriptions = () => {
         cell: ({ row }) => row.index + 1,
       },
       {
-        header: "Code",
+        header: "Subscription Code",
         accessorKey: "subscriptionCode",
-        meta: { icon: <Hash size={14} /> },
+        meta: { icon: <Receipt size={14} /> },
         cell: ({ row }) => (
           <div className="flex flex-col items-start gap-0.5">
             <span className="font-semibold text-xs">
@@ -63,14 +64,7 @@ const Subscriptions = () => {
         accessorKey: "customerId",
         meta: { icon: <User size={14} /> },
         cell: ({ row }) => (
-          <div className="flex flex-col items-start gap-1">
-            <span className="font-semibold text-xs">
-              {row.original?.customer?.name ?? "N/A"}
-            </span>
-            <span className="font-semibold text-muted-foreground text-xs">
-              {row.original?.customer?.companyName ?? "N/A"}
-            </span>
-          </div>
+          <CustomerCompanyCell customer={row.original?.customer} />
         ),
       },
       {

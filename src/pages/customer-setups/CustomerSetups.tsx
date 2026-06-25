@@ -3,9 +3,9 @@ import {
   Briefcase,
   CircleDot,
   User,
-  Hash,
   Tag,
-  Calendar
+  Calendar,
+  UserRoundCog,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import ActionButton from "@/components/ActionButtons";
@@ -38,15 +38,15 @@ const CustomerSetups = () => {
         cell: ({ row }) => row.index + 1,
       },
       {
-        header: "Setup Info",
+        header: "Setup Code",
         accessorKey: "setupCode",
-        meta: { icon: <Hash size={14} /> },
+        meta: { icon: <UserRoundCog size={14} /> },
         cell: ({ row }) => (
           <div className="flex flex-col gap-1">
             <span className="font-semibold text-xs">
               {row.original?.setupCode || "N/A"}
             </span>
-            <span className="text-[10px] text-muted-foreground">
+            <span className="font-semibold text-muted-foreground text-xs">
               {row.original?.createdAt
                 ? formatDateTime(row.original.createdAt)
                 : "N/A"}
@@ -65,26 +65,29 @@ const CustomerSetups = () => {
         ),
       },
       {
-        header: "Customer & Software",
+        header: "Customer",
         accessorKey: "customer",
         meta: { icon: <User size={14} /> },
         cell: ({ row }) => {
           const { customer, software } = row.original;
 
-          const customerName = typeof customer === 'string' ? customer : customer?.name ?? "N/A";
+          const companyName =
+            typeof customer === "string"
+              ? customer
+              : customer?.companyName ?? "N/A";
 
-          const softwareName = typeof software === 'string' ? software : software?.name ?? "N/A";
-          const colorCode = typeof software === 'string' ? undefined : software?.colorCode;
+          const softwareName =
+            typeof software === "string" ? software : software?.name ?? "N/A";
+          const colorCode =
+            typeof software === "string" ? undefined : software?.colorCode;
           const style = getLookupBadgeStyle(colorCode);
 
           return (
             <div className="flex flex-col items-start gap-1.5 py-1">
-              <span className="font-semibold text-xs">
-                {customerName}
-              </span>
+              <span className="font-semibold text-xs">{companyName}</span>
               <Badge
                 variant={colorCode ? undefined : "secondary"}
-                className="capitalize border text-[10px] font-medium px-2 py-0 rounded-full leading-tight"
+                className="capitalize border text-xs font-medium px-2 py-0 rounded-full leading-tight"
                 style={style}
               >
                 {softwareName}
@@ -146,7 +149,7 @@ const CustomerSetups = () => {
         accessorKey: "scheduledStart",
         meta: { icon: <Calendar size={14} /> },
         cell: ({ row }) => (
-          <span className="text-xs text-muted-foreground">
+          <span className="font-semibold text-muted-foreground text-xs">
             {row.original?.scheduledStart
               ? formatDateTime(row.original.scheduledStart)
               : "N/A"}
@@ -158,7 +161,7 @@ const CustomerSetups = () => {
         accessorKey: "scheduledEnd",
         meta: { icon: <Calendar size={14} /> },
         cell: ({ row }) => (
-          <span className="text-xs text-muted-foreground">
+          <span className="font-semibold text-muted-foreground text-xs">
             {row.original?.scheduledEnd
               ? formatDateTime(row.original.scheduledEnd)
               : "N/A"}

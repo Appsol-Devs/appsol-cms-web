@@ -1,15 +1,9 @@
 import { formatDateTime, formatToCurrency } from "@/lib/helpers";
-import {
-  Banknote,
-  Calendar,
-  FileText,
-  Monitor,
-  User,
-  CreditCard,
-} from "lucide-react";
+import { Banknote, Calendar, FileText, Monitor, User, CreditCard } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import FeatureContentRenderer from "@/components/table/component/FeatureContentRenderer";
+import CustomerCompanyCell from "@/components/CustomerCompanyCell";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { allRoutes } from "@/utils/routes";
@@ -41,16 +35,13 @@ const Payments = () => {
         meta: { icon: <Calendar size={14} /> },
         cell: ({ row }) => (
           <div className="flex flex-col items-start gap-1">
-            <Badge
-              variant="secondary"
-              className="capitalize border text-[11px] font-medium px-2 py-0 rounded-full bg-primary text-primary-foreground w-fit"
-            >
-              {row.original?.paymentCode ?? "—"}
-            </Badge>
-            <span className="font-semibold text-muted-foreground text-xs">
+            <span className="font-semibold text-xs">
               {row.original?.paymentDate
                 ? formatDateTime(row.original.paymentDate)
                 : "—"}
+            </span>
+            <span className="font-semibold text-muted-foreground text-xs">
+              {row.original?.paymentCode ?? "—"}
             </span>
           </div>
         ),
@@ -60,14 +51,7 @@ const Payments = () => {
         accessorKey: "customerId",
         meta: { icon: <User size={14} /> },
         cell: ({ row }) => (
-          <div className="flex flex-col items-start gap-1">
-            <span className="font-semibold text-xs">
-              {row.original?.customer?.name ?? "N/A"}
-            </span>
-            <span className="font-semibold text-muted-foreground text-xs">
-              {row.original?.customer?.companyName ?? "N/A"}
-            </span>
-          </div>
+          <CustomerCompanyCell customer={row.original?.customer} />
         ),
       },
       {
@@ -125,7 +109,7 @@ const Payments = () => {
         },
       },
     ],
-    [executed],
+    [executed]
   );
 
   return (

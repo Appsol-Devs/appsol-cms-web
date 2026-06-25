@@ -8,6 +8,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import ActionButton from "@/components/ActionButtons";
+import CustomerCompanyCell from "@/components/CustomerCompanyCell";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import FeatureContentRenderer from "@/components/table/component/FeatureContentRenderer";
@@ -23,20 +24,9 @@ import {
   getLookupBadgeStyle,
 } from "@/lib/enums";
 
-const TicketCustomerCell = ({ ticket }: { ticket: ITicket }) => {
-  const customer = ticket.complaint?.customer;
-  const nameToShow = customer?.name ?? "N/A";
-  const companyToShow = customer?.companyName ?? "";
-
-  return (
-    <div className="flex flex-col items-start gap-1">
-      <span className="font-semibold text-xs">{nameToShow}</span>
-      <span className="font-semibold text-muted-foreground text-xs">
-        {companyToShow}
-      </span>
-    </div>
-  );
-};
+const TicketCustomerCell = ({ ticket }: { ticket: ITicket }) => (
+  <CustomerCompanyCell customer={ticket.complaint?.customer} />
+);
 
 const Tickets = () => {
   const [fetchQuery, fetchState] = useLazyGetTicketsQuery();
