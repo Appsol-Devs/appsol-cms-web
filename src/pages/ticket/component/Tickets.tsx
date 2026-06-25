@@ -154,6 +154,8 @@ const Tickets = () => {
   return (
     <>
       <FeatureContentRenderer
+        useDateFilters
+        dateFilterNoDefault
         tableAddComponent={() => (
           <ActionButton
             type="add"

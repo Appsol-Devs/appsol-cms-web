@@ -79,7 +79,7 @@ const LoginForm = () => {
       />
       <div className="p-8 bg-card text-onCard rounded-3xl w-3/5 min-h-1/3 shadow-lg">
         <div className="h-full">
-          <div>
+          <div className="text-center">
             <p className="text-2xl font-bold text-primary">
               Sign in to your account
             </p>

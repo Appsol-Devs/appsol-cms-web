@@ -46,6 +46,8 @@ ChartJS.register(
   Filler,
 );
 
+ChartJS.defaults.font.family = "Quicksand";
+
 const CHART_HEIGHT = 300;
 
 function formatYAxisTick(v: number | string): string {

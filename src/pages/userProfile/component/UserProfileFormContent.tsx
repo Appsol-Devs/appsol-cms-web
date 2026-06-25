@@ -1,7 +1,7 @@
 import CardComponent from "@/components/CardComponent";
 import CustomInputField from "@/components/CustomInputField";
 import { Separator } from "@/components/ui/separator";
-import { BookOpenText, ImageIcon, Shield } from "lucide-react";
+import { BookOpenText, ImageIcon } from "lucide-react";
 import type { UseFormReturn } from "react-hook-form";
 import type { IUserProfileFields } from "./UserProfile";
 import ProfilePhotoUpload from "./ProfilePhotoUpload";
@@ -119,47 +119,6 @@ const UserProfileFormContent = ({
             name="email"
             placeholder="e.g., mail@example.com"
             label="Email"
-          />
-        </div>
-      </CardComponent>
-
-      <CardComponent
-        headerTitle={
-          <>
-            <div className="flex items-center justify-between gap-2 mb-2">
-              <p className="flex items-center gap-2">
-                <Shield className="w-4 h-4" /> Security
-              </p>
-              <p className="text-xs text-rx-secondary">Optional</p>
-            </div>
-            <Separator orientation="horizontal" />
-          </>
-        }
-      >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <CustomInputField<IUserProfileFields>
-            type="password"
-            name="currentPassword"
-            register={register}
-            label="Current Password"
-            placeholder="Leave blank to keep your current password"
-            disabled={isLoading}
-          />
-          <CustomInputField<IUserProfileFields>
-            type="password"
-            name="newPassword"
-            register={register}
-            label="New Password"
-            placeholder="Enter a new password"
-            disabled={isLoading}
-          />
-          <CustomInputField<IUserProfileFields>
-            type="password"
-            name="confirm_password"
-            register={register}
-            label="Confirm New Password"
-            placeholder="Re-enter new password"
-            disabled={isLoading}
           />
         </div>
       </CardComponent>

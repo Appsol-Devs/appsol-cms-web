@@ -24,11 +24,22 @@ export function PaginationComponent({
     prev_page,
   } = pagination;
 
+  const currentPage = page_number ?? 1;
+  const pages = total_pages ?? 1;
+  const canGoPrev = has_prev_page ?? currentPage > 1;
+  const canGoNext = has_next_page ?? currentPage < pages;
+  const targetPrevPage = prev_page ?? (canGoPrev ? currentPage - 1 : null);
+  const targetNextPage = next_page ?? (canGoNext ? currentPage + 1 : null);
+
   const gotoPage = (page: number | null) => {
-    if (!page) return;
+    if (!page || page < 1 || page > pages) return;
     onPaginationChange?.({
       ...pagination,
       page_number: page,
+      has_next_page: page < pages,
+      has_prev_page: page > 1,
+      next_page: page < pages ? page + 1 : null,
+      prev_page: page > 1 ? page - 1 : null,
     });
   };
 
@@ -38,7 +49,11 @@ export function PaginationComponent({
       links.push(
         <PaginationItem className="" key={i}>
           <PaginationLink
-            onClick={() => gotoPage(i)}
+            href="#"
+            onClick={(event) => {
+              event.preventDefault();
+              gotoPage(i);
+            }}
             isActive={i === page_number}
             className="cursor-pointer"
           >
@@ -56,13 +71,16 @@ export function PaginationComponent({
         {/* Previous */}
         <PaginationItem>
           <PaginationPrevious
-            onClick={() => has_prev_page && gotoPage(prev_page!)}
+            onClick={(event) => {
+              event.preventDefault();
+              if (canGoPrev) gotoPage(targetPrevPage);
+            }}
             className={
-              !has_prev_page
-                ? "opacity-50 cursor-not-allowed"
+              !canGoPrev
+                ? "opacity-50 cursor-not-allowed pointer-events-none"
                 : "cursor-pointer"
             }
-            aria-disabled={!has_prev_page}
+            aria-disabled={!canGoPrev}
           />
         </PaginationItem>
 
@@ -72,13 +90,16 @@ export function PaginationComponent({
         {/* Next */}
         <PaginationItem>
           <PaginationNext
-            onClick={() => has_next_page && gotoPage(next_page!)}
+            onClick={(event) => {
+              event.preventDefault();
+              if (canGoNext) gotoPage(targetNextPage);
+            }}
             className={
-              !has_next_page
-                ? "opacity-50 cursor-not-allowed"
+              !canGoNext
+                ? "opacity-50 cursor-not-allowed pointer-events-none"
                 : "cursor-pointer"
             }
-            aria-disabled={!has_next_page}
+            aria-disabled={!canGoNext}
           />
         </PaginationItem>
       </PaginationContent>

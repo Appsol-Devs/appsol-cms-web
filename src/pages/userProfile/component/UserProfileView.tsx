@@ -11,12 +11,15 @@ import {
   BadgeX,
   Clock,
   Edit,
+  KeyRound,
   Mail,
   Phone,
   Shield,
   User,
   VerifiedIcon,
 } from "lucide-react";
+import { useState } from "react";
+import ChangePasswordModal from "./ChangePasswordModal";
 
 interface UserProfileViewProps {
   user: ILoginResponse;
@@ -24,6 +27,8 @@ interface UserProfileViewProps {
 }
 
 const UserProfileView = ({ user, onEdit }: UserProfileViewProps) => {
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+
   return (
     <div className="space-y-2">
       <PageTitle title="My Profile" />
@@ -33,14 +38,30 @@ const UserProfileView = ({ user, onEdit }: UserProfileViewProps) => {
         title={`${user.firstName} ${user.lastName}`}
         description="Manage your personal account details and preferences."
         actionComponent={
-          <Button
-            onClick={onEdit}
-            className="rounded-full bg-primary! text-primary-foreground! text-xs!"
-          >
-            <Edit className="mr-2 h-4 w-4" />
-            Edit Profile
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              variant="default"
+              onClick={() => setChangePasswordOpen(true)}
+              className="rounded-full text-xs! bg-primary! text-primary-foreground! "
+            >
+              <KeyRound className="mr-2 h-4 w-4" />
+              Change Password
+            </Button>
+            <Button
+              onClick={onEdit}
+              className="rounded-full bg-primary! text-primary-foreground! text-xs!"
+            >
+              <Edit className="mr-2 h-4 w-4" />
+              Edit Profile
+            </Button>
+          </div>
         }
+      />
+
+      <ChangePasswordModal
+        open={changePasswordOpen}
+        onOpenChange={setChangePasswordOpen}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
