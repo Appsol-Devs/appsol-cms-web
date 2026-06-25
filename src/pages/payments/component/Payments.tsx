@@ -1,5 +1,12 @@
 import { formatDateTime, formatToCurrency } from "@/lib/helpers";
-import { Banknote, Calendar, FileText, Monitor, User, CreditCard } from "lucide-react";
+import {
+  Banknote,
+  Calendar,
+  FileText,
+  Monitor,
+  User,
+  CreditCard,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import FeatureContentRenderer from "@/components/table/component/FeatureContentRenderer";
@@ -118,7 +125,7 @@ const Payments = () => {
         },
       },
     ],
-    [executed]
+    [executed],
   );
 
   return (
@@ -127,13 +134,16 @@ const Payments = () => {
         tableAddComponent={() => null}
         useDateFilters
         dateFilterNoDefault
-        filters={["status"]}
+        filters={["status", "softwareId", "customerId"]}
         columns={columns}
         pathOnRowSelected={(row) => {
           const payment = row as IPayment;
-          navigate(allRoutes.PORTAL + allRoutes.VIEW_PAYMENT(payment._id as string), {
-            state: { initialData: payment },
-          });
+          navigate(
+            allRoutes.PORTAL + allRoutes.VIEW_PAYMENT(payment._id as string),
+            {
+              state: { initialData: payment },
+            },
+          );
         }}
         refetchData={executed}
         title="Payments"

@@ -81,7 +81,6 @@ const CustomerOutReaches = () => {
                 </span>
               </div>
             </>
-            
           </div>
         ),
       },
@@ -141,6 +140,8 @@ const CustomerOutReaches = () => {
             state: { initialData: o },
           });
         }}
+        useDateFilters
+        dateFilterNoDefault
         filters={[
           "outreachStatus",
           "customerId",

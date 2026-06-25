@@ -166,6 +166,8 @@ const Complaints = () => {
             state: { initialData: complaint },
           });
         }}
+        useDateFilters
+        dateFilterNoDefault
         filters={[
           "complaintStatus",
           "customerId",

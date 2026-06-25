@@ -155,7 +155,7 @@ const Reschedules = () => {
             />
             <ActionButton
               type="add"
-              useText="Add Schedules"
+              useText="Add Schedule"
               onClick={() =>
                 navigate(allRoutes.PORTAL + allRoutes.ADD_RESCHEDULE)
               }
