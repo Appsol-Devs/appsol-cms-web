@@ -1,8 +1,9 @@
 import ActionButton from "@/components/ActionButtons";
+import CustomerCompanyCell from "@/components/CustomerCompanyCell";
 import FeatureContentRenderer from "@/components/table/component/FeatureContentRenderer";
 import { allRoutes } from "@/utils/routes";
 import type { ColumnDef } from "@tanstack/react-table";
-import { CircleDot, Megaphone, Target, User } from "lucide-react";
+import { CircleDot, Headset, Megaphone, Target, User } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
@@ -47,18 +48,28 @@ const CustomerOutReaches = () => {
       //   ),
       // },
       {
+        header: "Outreach Code",
+        accessorKey: "outreachCode",
+        meta: { icon: <Headset size={14} /> },
+        cell: ({ row }) => (
+          <div className="flex flex-col items-start gap-1">
+            <span className="font-semibold text-xs">
+              {row.original.outreachCode ?? "N/A"}
+            </span>
+            <span className="font-semibold text-muted-foreground text-xs">
+              {row.original.createdAt
+                ? formatDateTime(row.original.createdAt)
+                : "—"}
+            </span>
+          </div>
+        ),
+      },
+      {
         header: "Customer",
         accessorKey: "customer",
         meta: { icon: <User size={14} /> },
         cell: ({ row }) => (
-          <div className=" flex flex-col items-start gap-1">
-            <span className="font-semibold text-xs">
-              {row.original?.customer?.name ?? "N/A"}
-            </span>
-            <Badge className="text-[11px] font-medium px-2 py-0 rounded-full">
-              {row.original.outreachCode}
-            </Badge>
-          </div>
+          <CustomerCompanyCell customer={row.original?.customer} />
         ),
       },
 
@@ -67,21 +78,9 @@ const CustomerOutReaches = () => {
         accessorKey: "outreachType",
         meta: { icon: <Megaphone size={14} /> },
         cell: ({ row }) => (
-          <div className=" flex flex-col items-start gap-1">
-            <>
-              <div className="flex flex-col items-start gap-1 p-0.5">
-                <span className="font-medium text-sm text-foreground">
-                  {row.original.outreachType?.name ?? "-"}
-                </span>
-
-                <span className="text-xs text-muted-foreground font-medium">
-                  {row.original.createdAt
-                    ? formatDateTime(row.original.createdAt)
-                    : "-"}
-                </span>
-              </div>
-            </>
-          </div>
+          <span className="font-semibold text-xs">
+            {row.original.outreachType?.name ?? "—"}
+          </span>
         ),
       },
       {

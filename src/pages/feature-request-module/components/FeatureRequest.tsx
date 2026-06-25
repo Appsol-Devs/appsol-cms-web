@@ -3,7 +3,7 @@ import {
   Briefcase,
   CircleDot,
   User,
-  Hash,
+  Sparkles,
   Tag
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -36,15 +36,15 @@ const FeatureRequest = () => {
         cell: ({ row }) => row.index + 1,
       },
       {
-        header: "Request Info",
+        header: "Request Code",
         accessorKey: "requestCode",
-        meta: { icon: <Hash size={14} /> },
+        meta: { icon: <Sparkles size={14} /> },
         cell: ({ row }) => (
           <div className="flex flex-col gap-1">
             <span className="font-semibold text-xs">
               {row.original?.requestCode || "N/A"}
             </span>
-            <span className="text-[10px] text-muted-foreground">
+            <span className="font-semibold text-muted-foreground text-xs">
               {row.original?.createdAt
                 ? formatDateTime(row.original.createdAt)
                 : "N/A"}
@@ -63,28 +63,29 @@ const FeatureRequest = () => {
         ),
       },
       {
-        header: "Customer & Software",
+        header: "Customer",
         accessorKey: "customer",
         meta: { icon: <User size={14} /> },
         cell: ({ row }) => {
           const { customer, software } = row.original;
 
-          // Customer Label
-          const customerName = typeof customer === 'string' ? customer : customer?.name ?? "N/A";
+          const companyName =
+            typeof customer === "string"
+              ? customer
+              : customer?.companyName ?? "N/A";
 
-          // Software Label & Style
-          const softwareName = typeof software === 'string' ? software : software?.name ?? "N/A";
-          const colorCode = typeof software === 'string' ? undefined : software?.colorCode;
+          const softwareName =
+            typeof software === "string" ? software : software?.name ?? "N/A";
+          const colorCode =
+            typeof software === "string" ? undefined : software?.colorCode;
           const style = getLookupBadgeStyle(colorCode);
 
           return (
             <div className="flex flex-col items-start gap-1.5 py-1">
-              <span className="font-semibold text-xs">
-                {customerName}
-              </span>
+              <span className="font-semibold text-xs">{companyName}</span>
               <Badge
                 variant={colorCode ? undefined : "secondary"}
-                className="capitalize border text-[10px] font-medium px-2 py-0 rounded-full leading-tight"
+                className="capitalize border text-xs font-medium px-2 py-0 rounded-full leading-tight"
                 style={style}
               >
                 {softwareName}
