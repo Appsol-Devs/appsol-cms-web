@@ -1,6 +1,10 @@
 import { useMemo, useState, type ReactNode } from "react";
+import DateRangeComponent from "@/components/DateRangePicker";
 import {
   buildSummaryCards,
+  dashboardRangeToDates,
+  datesToDashboardRange,
+  getThisMonthRange,
   getThisWeekRange,
   SUMMARY_CARD_ICON_CLASSES,
   toChartDate,
@@ -34,14 +38,20 @@ function withCardIcons(cards: IDashboardSummaryCardProps[]): IDashboardSummaryCa
 }
 
 const Dashboard = () => {
-  const [dateRange, setDateRange] = useState<IDashboardDateRange>(() => getThisWeekRange());
+  const [summaryDateRange, setSummaryDateRange] = useState<IDashboardDateRange>(
+    () => getThisMonthRange(),
+  );
+  const [chartDateRange, setChartDateRange] = useState<IDashboardDateRange>(
+    () => getThisWeekRange(),
+  );
 
-  const { data: summary, isError: summaryError } = useGetDashboardSummaryQuery(dateRange);
+  const { data: summary, isError: summaryError } =
+    useGetDashboardSummaryQuery(summaryDateRange);
   const {
     data: revenueTrends,
     isLoading: revenueLoading,
     isError: revenueError,
-  } = useGetWeeklyRevenueTrendsQuery(toChartDate(dateRange));
+  } = useGetWeeklyRevenueTrendsQuery(toChartDate(chartDateRange));
   const {
     data: operationalInsights,
     isLoading: insightsLoading,
@@ -51,6 +61,11 @@ const Dashboard = () => {
   const summaryCards = useMemo(
     () => withCardIcons(buildSummaryCards(summary ?? null)),
     [summary]
+  );
+
+  const summaryDefaultDates = useMemo(
+    () => dashboardRangeToDates(summaryDateRange),
+    [summaryDateRange.startDate, summaryDateRange.endDate],
   );
 
   return (
@@ -63,6 +78,19 @@ const Dashboard = () => {
       ) : null}
       <div className="grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-2 lg:items-start">
         <div className="flex min-w-0 max-w-full flex-col gap-5">
+          <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm font-semibold text-foreground">Summary</p>
+            <DateRangeComponent
+              dateRange={({ start, end }) => {
+                const next = datesToDashboardRange(start, end);
+                if (next) setSummaryDateRange(next);
+              }}
+              defaultDate={summaryDefaultDates}
+              dateOnly
+              allowFuture={false}
+              placeholder="Select date range"
+            />
+          </div>
           <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2">
             {summaryCards.map((card) => (
               <DashboardSummaryCard key={card.title} summary={card} />
@@ -72,8 +100,8 @@ const Dashboard = () => {
             data={revenueTrends ?? null}
             isLoading={revenueLoading}
             isError={revenueError}
-            dateRange={dateRange}
-            onDateRangeChange={setDateRange}
+            dateRange={chartDateRange}
+            onDateRangeChange={setChartDateRange}
           />
         </div>
         <div className="flex min-w-0 max-w-full flex-col gap-5">

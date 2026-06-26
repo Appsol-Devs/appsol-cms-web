@@ -33,6 +33,7 @@ import { useNavigate } from "react-router-dom";
 import {
   type ISubscriptionReminder,
   formatReminderTypeLabel,
+  formatReminderTitle,
   getDueDateUrgency,
 } from "../common/subscription-reminder";
 
@@ -93,7 +94,7 @@ export default function SubscriptionReminderDetailsDrawer({
           <div className="flex-1 overflow-hidden flex flex-col min-h-0">
             <div className="shrink-0 px-4 py-3 space-y-3 border-b">
               <p className="font-semibold text-foreground text-sm leading-snug">
-                {reminder.title ?? "—"}
+                {formatReminderTitle(reminder.title)}
               </p>
               <div className="flex flex-wrap gap-2 items-center">
                 <span className="text-xs text-muted-foreground font-medium">

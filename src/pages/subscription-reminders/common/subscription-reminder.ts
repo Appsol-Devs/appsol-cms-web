@@ -52,6 +52,55 @@ export function formatReminderTypeLabel(
   return SUBSCRIPTION_REMINDER_TYPE_LABELS[type] ?? type;
 }
 
+function pluralUnit(count: number, unit: string): string {
+  return `${count} ${unit}${count === 1 ? "" : "s"}`;
+}
+
+export function formatDurationFromDays(totalDays: number): string {
+  const abs = Math.abs(Math.round(totalDays));
+  if (abs <= 30) return pluralUnit(abs, "day");
+
+  let remaining = abs;
+  const months = Math.floor(remaining / 30);
+  remaining %= 30;
+  const weeks = Math.floor(remaining / 7);
+  const days = remaining % 7;
+
+  const parts: string[] = [];
+  if (months > 0) parts.push(pluralUnit(months, "month"));
+  if (weeks > 0) parts.push(pluralUnit(weeks, "week"));
+  if (days > 0) parts.push(pluralUnit(days, "day"));
+
+  return parts.join(", ");
+}
+
+const DAYS_AGO_PATTERN = /(\d+)\s+days?\s+ago/i;
+const IN_DAYS_PATTERN = /\bin\s+(\d+)\s+days?\b/i;
+
+/** Rewrites API reminder titles so long day counts read as months, weeks, and days. */
+export function formatReminderTitle(title?: string): string {
+  if (!title) return "—";
+
+  const daysAgoMatch = title.match(DAYS_AGO_PATTERN);
+  if (daysAgoMatch) {
+    const days = parseInt(daysAgoMatch[1], 10);
+    if (days > 30) {
+      return title.replace(DAYS_AGO_PATTERN, `${formatDurationFromDays(days)} ago`);
+    }
+    return title;
+  }
+
+  const inDaysMatch = title.match(IN_DAYS_PATTERN);
+  if (inDaysMatch) {
+    const days = parseInt(inDaysMatch[1], 10);
+    if (days > 30) {
+      return title.replace(IN_DAYS_PATTERN, `in ${formatDurationFromDays(days)}`);
+    }
+  }
+
+  return title;
+}
+
 export function getDueDateUrgency(
   dueDateStr?: string,
 ): "overdue" | "soon" | "normal" {
