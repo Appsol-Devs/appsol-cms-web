@@ -254,15 +254,7 @@ export function DatePicker({
               {dateOnly ? format(date, "do MMM y") : formatDateTime(date)}
             </span>
           ) : null}
-          <div className="font-bold text-sm bg-gray-300 flex items-center mb-1">
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            <div className="text-xs flex items-center space-x-1">
-              <p className="mr-1 text-onCard">{title}</p>
-              {required ? <span className="text-destructive">*</span> : ""}
-            </div>
-            {date && (dateOnly ? format(date, "do MMM y") : formatDateTime(date))}
-          </div>
-        </div> 
+        </div>
       ) : null}
       <div className="w-full">
         {showInPopover ? (

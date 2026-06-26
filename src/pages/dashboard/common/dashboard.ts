@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { format, startOfDay, subDays } from "date-fns";
+import { format, startOfDay, startOfMonth, subDays } from "date-fns";
 
 export interface IDashboardDateRange {
   startDate: string;
@@ -65,6 +65,15 @@ export const DEFAULT_SUMMARY_CARDS: IDashboardSummaryCardProps[] = [
 
 export const DEFAULT_DASHBOARD_DAYS = 7;
 
+export const getThisMonthRange = (): IDashboardDateRange => {
+  const end = startOfDay(new Date());
+  const start = startOfMonth(end);
+  return {
+    startDate: format(start, "yyyy-MM-dd"),
+    endDate: format(end, "yyyy-MM-dd"),
+  };
+};
+
 export const getThisWeekRange = (): IDashboardDateRange => {
   const end = startOfDay(new Date());
   const start = subDays(end, DEFAULT_DASHBOARD_DAYS - 1);
@@ -112,6 +121,24 @@ export function toChartDate(range: IDashboardDateRange): IChartDate {
   const anchor =
     range.startDate === range.endDate ? range.startDate : range.endDate;
   return { startDate: dateOnly(anchor) };
+}
+
+export function dashboardRangeToDates(range: IDashboardDateRange) {
+  return {
+    start: new Date(`${range.startDate}T00:00:00`),
+    end: new Date(`${range.endDate}T00:00:00`),
+  };
+}
+
+export function datesToDashboardRange(
+  start: Date | null,
+  end: Date | null,
+): IDashboardDateRange | null {
+  if (!start || !end) return null;
+  return {
+    startDate: format(start, "yyyy-MM-dd"),
+    endDate: format(end, "yyyy-MM-dd"),
+  };
 }
 
 export function buildSummaryCards(

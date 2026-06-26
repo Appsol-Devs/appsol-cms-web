@@ -14,6 +14,7 @@ import {
   type ISubscriptionReminder,
   type TSubscriptionReminderType,
   formatReminderTypeLabel,
+  formatReminderTitle,
   reminderTypeFromDueDate,
 } from "@/pages/subscription-reminders/common/subscription-reminder";
 import SubscriptionReminderDetailsDrawer from "@/pages/subscription-reminders/component/SubscriptionReminderDetailsDrawer";
@@ -192,7 +193,7 @@ const DashboardReminders = () => {
                       <span className="mt-1.5 h-3.5 w-3.5 shrink-0 rounded-full border !border-muted-foreground !bg-card" />
                       <div className="min-w-0 flex-1 space-y-1 !bg-card">
                         <p className="font-semibold text-sm leading-tight line-clamp-2">
-                          {r.title ?? "—"}
+                          {formatReminderTitle(r.title)}
                         </p>
                         <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs">
                           <Badge
