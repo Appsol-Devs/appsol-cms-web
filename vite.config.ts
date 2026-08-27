@@ -6,8 +6,8 @@ import { VitePWA } from "vite-plugin-pwa";
 
 // const BASE_URL = "https://enneadic-mee-authentically.ngrok-free.dev/api/";
 
-const BASE_URL = "https://appsol-cms-api.onrender.com/api";
-// const BASE_URL = "http://192.168.60.33:3000/api";
+//const BASE_URL = "https://appsol-cms-api.onrender.com/api";
+const BASE_URL = "http://localhost:3000/api";
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
