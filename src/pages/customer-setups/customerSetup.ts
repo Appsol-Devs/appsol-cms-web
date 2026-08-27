@@ -6,7 +6,7 @@ export interface ICustomerSetup {
   setupCode?: string;
   title?: string;
   customerId?: string;
-  customer?: ICustomer | string;
+  customer?: ICustomer;
 
   softwareId?: string;
   software?: ISoftware | string;
