@@ -78,7 +78,7 @@ const LeadStatuses = () => {
               onClick={() =>
                 navigate(
                   allRoutes.PORTAL +
-                    allRoutes.UPDATE_LEAD_STATUS(row.original._id as string)
+                    allRoutes.UPDATE_LEAD_STATUS(row.original.id as string),
                 )
               }
             />
@@ -86,7 +86,7 @@ const LeadStatuses = () => {
         ),
       },
     ],
-    [executed]
+    [executed],
   );
 
   return (

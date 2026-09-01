@@ -78,7 +78,7 @@ const CallStatuses = () => {
               onClick={() =>
                 navigate(
                   allRoutes.PORTAL +
-                    allRoutes.UPDATE_CALL_STATUS(row.original._id as string)
+                    allRoutes.UPDATE_CALL_STATUS(row.original.id as string),
                 )
               }
             />
@@ -86,7 +86,7 @@ const CallStatuses = () => {
         ),
       },
     ],
-    [executed]
+    [executed],
   );
 
   return (

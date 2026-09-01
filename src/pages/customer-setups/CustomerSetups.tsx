@@ -74,10 +74,10 @@ const CustomerSetups = () => {
           const companyName =
             typeof customer === "string"
               ? customer
-              : customer?.companyName ?? "N/A";
+              : (customer?.companyName ?? "N/A");
 
           const softwareName =
-            typeof software === "string" ? software : software?.name ?? "N/A";
+            typeof software === "string" ? software : (software?.name ?? "N/A");
           const colorCode =
             typeof software === "string" ? undefined : software?.colorCode;
           const style = getLookupBadgeStyle(colorCode);
@@ -123,13 +123,15 @@ const CustomerSetups = () => {
         cell: ({ row }) => {
           const { setupStatus } = row.original;
 
-          const statusName = typeof setupStatus === 'string'
-            ? setupStatus
-            : (setupStatus?.name ?? "N/A");
+          const statusName =
+            typeof setupStatus === "string"
+              ? setupStatus
+              : (setupStatus?.name ?? "N/A");
 
-          const colorCode = typeof setupStatus === 'string'
-            ? undefined
-            : setupStatus?.colorCode;
+          const colorCode =
+            typeof setupStatus === "string"
+              ? undefined
+              : setupStatus?.colorCode;
 
           const style = getLookupBadgeStyle(colorCode);
 
@@ -173,12 +175,10 @@ const CustomerSetups = () => {
   );
 
   const pathOnRowSelected = (data: ICustomerSetup) => {
-    const { _id } = data;
-    if (!_id) return;
+    const { id } = data;
+    if (!id) return;
 
-    navigate(
-      allRoutes.PORTAL + allRoutes.VIEW_CUSTOMER_SETUP(_id)
-    );
+    navigate(allRoutes.PORTAL + allRoutes.VIEW_CUSTOMER_SETUP(id));
   };
 
   return (
@@ -190,10 +190,19 @@ const CustomerSetups = () => {
           <ActionButton
             type="add"
             useText="Add Customer Setup"
-            onClick={() => navigate(allRoutes.PORTAL + allRoutes.ADD_CUSTOMER_SETUP)}
+            onClick={() =>
+              navigate(allRoutes.PORTAL + allRoutes.ADD_CUSTOMER_SETUP)
+            }
           />
         )}
-        filters={["priority", "softwareId", "customerId", "CustomerSetupStatus", "assignedTo", "setUpStatusId"]}
+        filters={[
+          "priority",
+          "softwareId",
+          "customerId",
+          "CustomerSetupStatus",
+          "assignedTo",
+          "setUpStatusId",
+        ]}
         pathOnRowSelected={pathOnRowSelected}
         columns={columns}
         refetchData={executed}

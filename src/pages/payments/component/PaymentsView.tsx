@@ -4,10 +4,7 @@ import PageTitle from "@/components/PageTitle";
 import DetailItem from "@/components/ui/DetailItem";
 import { Badge } from "@/components/ui/badge";
 import { formatDate, formatToCurrency } from "@/lib/helpers";
-import {
-  getLookupBadgeStyle,
-  getPaymentStatusColor,
-} from "@/lib/enums";
+import { getLookupBadgeStyle, getPaymentStatusColor } from "@/lib/enums";
 import {
   Calendar,
   Check,
@@ -32,17 +29,19 @@ import ConfirmationDialog from "@/components/ConfirmationDialog";
 const PaymentsView = () => {
   const { id } = useParams();
   const location = useLocation();
-  const initialData = (location.state as { initialData?: IPayment } | null)?.initialData;
+  const initialData = (location.state as { initialData?: IPayment } | null)
+    ?.initialData;
 
   const [approveOrRejectPayment] = useApproveOrRejectPaymentMutation();
   const [getPayment, { isLoading: isFetching }] = useLazyGetPaymentQuery();
 
   const [selectedPayment, setSelectedPayment] = useState<IPayment | null>(() =>
-    initialData && initialData._id === id ? initialData : null
+    initialData && initialData.id === id ? initialData : null,
   );
   const [executed, setExecuted] = useState(false);
   const [loggedByName, setLoggedByName] = useState<string>("—");
-  const [approvedOrRejectedByName, setApprovedOrRejectedByName] = useState<string>("—");
+  const [approvedOrRejectedByName, setApprovedOrRejectedByName] =
+    useState<string>("—");
   const [getAUser] = useLazyGetAUserQuery();
 
   useEffect(() => {
@@ -54,7 +53,7 @@ const PaymentsView = () => {
         if (res) setSelectedPayment(res);
       })
       .catch(() => {
-        if (initialData && initialData._id === id) {
+        if (initialData && initialData.id === id) {
           setSelectedPayment(initialData);
         }
       });
@@ -69,7 +68,7 @@ const PaymentsView = () => {
     if (typeof loggedBy === "object") {
       const user = loggedBy as { firstName?: string; lastName?: string };
       setLoggedByName(
-        `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "—"
+        `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "—",
       );
       return;
     }
@@ -77,7 +76,7 @@ const PaymentsView = () => {
       .unwrap()
       .then((user) => {
         setLoggedByName(
-          `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "—"
+          `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "—",
         );
       })
       .catch(() => setLoggedByName("—"));
@@ -90,9 +89,12 @@ const PaymentsView = () => {
       return;
     }
     if (typeof approvedOrRejectedBy === "object") {
-      const user = approvedOrRejectedBy as { firstName?: string; lastName?: string };
+      const user = approvedOrRejectedBy as {
+        firstName?: string;
+        lastName?: string;
+      };
       setApprovedOrRejectedByName(
-        `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "—"
+        `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "—",
       );
       return;
     }
@@ -100,7 +102,7 @@ const PaymentsView = () => {
       .unwrap()
       .then((user) => {
         setApprovedOrRejectedByName(
-          `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "—"
+          `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "—",
         );
       })
       .catch(() => setApprovedOrRejectedByName("—"));
@@ -191,7 +193,10 @@ const PaymentsView = () => {
                 }
                 onConfirmClicked={() => handleApproveOrReject("rejected")}
                 trigger={
-                  <Button variant="destructive" className="!bg-red-600 hover:bg-red-800 text-white">
+                  <Button
+                    variant="destructive"
+                    className="!bg-red-600 hover:bg-red-800 text-white"
+                  >
                     <X className="mr-2 h-4 w-4" />
                     <span className="text-xs">Reject</span>
                   </Button>
@@ -291,7 +296,7 @@ const PaymentsView = () => {
                     }
                     className="capitalize border text-xs font-medium px-2 py-0 rounded-full"
                     style={getLookupBadgeStyle(
-                      getPaymentStatusColor(selectedPayment.status ?? "")
+                      getPaymentStatusColor(selectedPayment.status ?? ""),
                     )}
                   >
                     {selectedPayment.status ?? "—"}

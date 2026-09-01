@@ -16,7 +16,7 @@ import {
 import type { DropDownOption } from "@/components/DropdownComponent";
 import ComplaintsFormContent from "./ComplaintsFormContent";
 
-export type IComplaintFields = Omit<IComplaint, "_id"> & {
+export type IComplaintFields = Omit<IComplaint, "id"> & {
   customerId?: DropDownOption<string>;
   complaintTypeId?: string | DropDownOption<string> | null;
   complaintCategoryId?: string | DropDownOption<string> | null;
@@ -96,11 +96,11 @@ const ComplaintsForm = () => {
     reset({
       description: data.description ?? "",
       customerId: data.customer
-        ? { label: data.customer.name ?? "", value: data.customer._id ?? "" }
+        ? { label: data.customer.name ?? "", value: data.customer.id ?? "" }
         : undefined,
-      complaintTypeId: data.complaintType?._id ?? undefined,
-      complaintCategoryId: data.complaintCategory?._id ?? undefined,
-      relatedSoftwareId: data.relatedSoftware?._id ?? undefined,
+      complaintTypeId: data.complaintType?.id ?? undefined,
+      complaintCategoryId: data.complaintCategory?.id ?? undefined,
+      relatedSoftwareId: data.relatedSoftware?.id ?? undefined,
       status: data.status ?? COMPLAINT_STATUS_ENUM.Open,
     });
   };
@@ -121,7 +121,7 @@ const ComplaintsForm = () => {
     if (!payload) return;
     try {
       const res = id
-        ? await updateMutation({ _id: id, ...payload }).unwrap()
+        ? await updateMutation({ id: id, ...payload }).unwrap()
         : await createNewMutation(payload).unwrap();
 
       if (res) {

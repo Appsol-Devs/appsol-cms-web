@@ -21,10 +21,7 @@ export const ticketsApi = createApi({
   }),
   tagTypes: ["ITicket"],
   endpoints: (builder) => ({
-    getTickets: builder.query<
-      PaginatedResponse<ITicket[]>,
-      IBaseQueryParam
-    >({
+    getTickets: builder.query<PaginatedResponse<ITicket[]>, IBaseQueryParam>({
       query: ({ pageIndex, search, pageSize, filters }) => {
         const params = new URLSearchParams();
         if (pageSize !== undefined) params.set("pageSize", String(pageSize));
@@ -32,10 +29,7 @@ export const ticketsApi = createApi({
         if (pageIndex !== undefined) params.set("pageIndex", String(pageIndex));
 
         return {
-          url: getQueryRequestUrl(
-            `/tickets?${params.toString()}`,
-            filters,
-          ),
+          url: getQueryRequestUrl(`/tickets?${params.toString()}`, filters),
         };
       },
       transformResponse: async (response: Response) => {
@@ -74,10 +68,10 @@ export const ticketsApi = createApi({
     }),
     updateTicket: builder.mutation<
       ITicket,
-      { _id: string } & ICreateTicketPayload
+      { id: string } & ICreateTicketPayload
     >({
-      query: ({ _id, ...payload }) => ({
-        url: `/tickets/${_id}`,
+      query: ({ id, ...payload }) => ({
+        url: `tickets/${id}`,
         body: payload,
         method: "PUT",
       }),

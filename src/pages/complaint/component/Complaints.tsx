@@ -67,8 +67,8 @@ const Complaints = () => {
               </Badge>
               <span className="font-semibold text-muted-foreground text-xs">
                 {row.original?.createdAt
-                ? formatDateTime(row.original.createdAt)
-                : ""}
+                  ? formatDateTime(row.original.createdAt)
+                  : ""}
               </span>
             </div>
           );
@@ -140,7 +140,7 @@ const Complaints = () => {
         },
       },
     ],
-    [executed]
+    [executed],
   );
 
   return (
@@ -158,9 +158,12 @@ const Complaints = () => {
         columns={columns}
         pathOnRowSelected={(row) => {
           const complaint = row as IComplaint;
-          navigate(allRoutes.PORTAL + allRoutes.VIEW_COMPLAINT(complaint._id as string), {
-            state: { initialData: complaint },
-          });
+          navigate(
+            allRoutes.PORTAL + allRoutes.VIEW_COMPLAINT(complaint.id as string),
+            {
+              state: { initialData: complaint },
+            },
+          );
         }}
         filters={[
           "complaintStatus",

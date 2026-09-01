@@ -225,7 +225,7 @@ export default function SubscriptionReminderDetailsDrawer({
                         </Badge>
                       </div>
                     </div>
-                    {sub?._id && (
+                    {sub?.id && (
                       <Button
                         type="button"
                         variant="link"
@@ -234,7 +234,7 @@ export default function SubscriptionReminderDetailsDrawer({
                           onOpenChange(false);
                           navigate(
                             allRoutes.PORTAL +
-                              allRoutes.VIEW_SUBSCRIPTION(sub._id as string),
+                              allRoutes.VIEW_SUBSCRIPTION(sub.id as string),
                           );
                         }}
                       >

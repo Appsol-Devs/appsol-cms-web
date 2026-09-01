@@ -44,19 +44,23 @@ const ComplaintsFormContent = ({ isLoading, form }: IField) => {
     DropDownOption<string>[]
   >([]);
 
-  const statusOptions =
-    useGenerateDropdownOptionsFromEnum(COMPLAINT_STATUS_ENUM);
+  const statusOptions = useGenerateDropdownOptionsFromEnum(
+    COMPLAINT_STATUS_ENUM,
+  );
 
   const loadCustomerOptions = useCallback(
     async (inputValue: string): Promise<DropDownOption<string>[]> => {
-      const res = await getCustomers({ ...lookup_params, search: inputValue || undefined }).unwrap();
+      const res = await getCustomers({
+        ...lookup_params,
+        search: inputValue || undefined,
+      }).unwrap();
       if (!res?.contents) return [];
       return res.contents.map((item: ICustomer) => ({
         label: item.name ?? "",
-        value: item._id ?? "",
+        value: item.id ?? "",
       }));
     },
-    [getCustomers]
+    [getCustomers],
   );
 
   useEffect(() => {
@@ -67,8 +71,8 @@ const ComplaintsFormContent = ({ isLoading, form }: IField) => {
           setSoftwareOptions(
             res.contents.map((item: ISoftware) => ({
               label: item.name ?? "",
-              value: item._id ?? "",
-            }))
+              value: item.id ?? "",
+            })),
           );
         }
       });
@@ -82,7 +86,7 @@ const ComplaintsFormContent = ({ isLoading, form }: IField) => {
           const options: DropDownOption<string>[] = res.contents.map(
             (item) => ({
               label: item.name ?? "",
-              value: item._id ?? "",
+              value: item.id ?? "",
             }),
           );
           setComplaintTypeOptions(options);
@@ -96,7 +100,7 @@ const ComplaintsFormContent = ({ isLoading, form }: IField) => {
           const options: DropDownOption<string>[] = res.contents.map(
             (item) => ({
               label: item.name ?? "",
-              value: item._id ?? "",
+              value: item.id ?? "",
             }),
           );
           setComplaintCategoryOptions(options);

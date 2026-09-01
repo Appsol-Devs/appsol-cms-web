@@ -17,7 +17,10 @@ import type { ICustomer, IUser } from "@/pages/customer/common/customers";
 import AsyncDropDownComponent from "@/components/AsyncDropDownComponent";
 import DropDownComponent from "@/components/DropdownComponent";
 import { useGenerateDropdownOptionsFromEnum } from "@/lib/helpers";
-import { REQUEST_FEATURE_STATUS_ENUM, REQUEST_FEATURE_PRIORITY_ENUM } from "@/lib/enums";
+import {
+  REQUEST_FEATURE_STATUS_ENUM,
+  REQUEST_FEATURE_PRIORITY_ENUM,
+} from "@/lib/enums";
 
 interface IField {
   isLoading?: boolean;
@@ -30,19 +33,24 @@ const FeatureRequestFormContent = ({ isLoading, form, isUpdate }: IField) => {
   const [getSoftwares] = useLazyGetSoftwaresQuery();
   const [getUsers] = useLazyGetUsersQuery();
 
-  const [softwareOptions, setSoftwareOptions] = useState<DropDownOption<string>[]>([]);
+  const [softwareOptions, setSoftwareOptions] = useState<
+    DropDownOption<string>[]
+  >([]);
   const [userOptions, setUserOptions] = useState<DropDownOption<string>[]>([]);
 
   const loadCustomerOptions = useCallback(
     async (inputValue: string): Promise<DropDownOption<string>[]> => {
-      const res = await getCustomers({ ...lookup_params, search: inputValue || undefined }).unwrap();
+      const res = await getCustomers({
+        ...lookup_params,
+        search: inputValue || undefined,
+      }).unwrap();
       if (!res?.contents) return [];
       return res.contents.map((item: ICustomer) => ({
         label: item.name ?? "",
-        value: item._id ?? "",
+        value: item.id ?? "",
       }));
     },
-    [getCustomers]
+    [getCustomers],
   );
 
   useEffect(() => {
@@ -53,8 +61,8 @@ const FeatureRequestFormContent = ({ isLoading, form, isUpdate }: IField) => {
           setSoftwareOptions(
             res.contents.map((item: ISoftware) => ({
               label: item.name ?? "",
-              value: item._id ?? "",
-            }))
+              value: item.id ?? "",
+            })),
           );
         }
       });
@@ -66,15 +74,19 @@ const FeatureRequestFormContent = ({ isLoading, form, isUpdate }: IField) => {
           setUserOptions(
             res.contents.map((item: IUser) => ({
               label: `${item.firstName ?? ""} ${item.lastName ?? ""}`.trim(),
-              value: item._id ?? "",
-            }))
+              value: item.id ?? "",
+            })),
           );
         }
       });
   }, [getSoftwares, getUsers]);
 
-  const priorityOptions = useGenerateDropdownOptionsFromEnum(REQUEST_FEATURE_PRIORITY_ENUM);
-  const statusOptions = useGenerateDropdownOptionsFromEnum(REQUEST_FEATURE_STATUS_ENUM);
+  const priorityOptions = useGenerateDropdownOptionsFromEnum(
+    REQUEST_FEATURE_PRIORITY_ENUM,
+  );
+  const statusOptions = useGenerateDropdownOptionsFromEnum(
+    REQUEST_FEATURE_STATUS_ENUM,
+  );
 
   const { control, register } = form;
 
@@ -151,11 +163,16 @@ const FeatureRequestFormContent = ({ isLoading, form, isUpdate }: IField) => {
           <Controller
             control={control}
             name="requestedDate"
-            rules={{ required: !isUpdate ? "Requested Date is required" : false }}
+            rules={{
+              required: !isUpdate ? "Requested Date is required" : false,
+            }}
             render={({ field }) => (
               <div className="space-y-1 w-full">
                 <p className="text-xs text-onCard font-medium">
-                  Requested Date {!isUpdate && <span className="text-destructive ml-0.5">*</span>}
+                  Requested Date{" "}
+                  {!isUpdate && (
+                    <span className="text-destructive ml-0.5">*</span>
+                  )}
                 </p>
                 <DatePicker
                   title=""

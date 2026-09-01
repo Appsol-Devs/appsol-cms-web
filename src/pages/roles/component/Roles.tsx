@@ -45,7 +45,7 @@ const Roles = () => {
           </div>
         ),
       },
-     {
+      {
         header: "Permissions",
         accessorKey: "permissions",
         meta: { icon: <Shield size={14} /> },
@@ -70,7 +70,7 @@ const Roles = () => {
         ),
       },
     ],
-    []
+    [],
   );
 
   return (
@@ -86,8 +86,8 @@ const Roles = () => {
         columns={columns}
         pathOnRowSelected={(row) => {
           const role = row as IRole;
-          if (!role._id) return;
-          navigate(allRoutes.PORTAL + allRoutes.VIEW_ROLE(role._id), {
+          if (!role.id) return;
+          navigate(allRoutes.PORTAL + allRoutes.VIEW_ROLE(role.id), {
             state: { initialData: role },
           });
         }}

@@ -4,7 +4,11 @@ import PageTitle from "@/components/PageTitle";
 import SearchComponent from "@/components/SearchComponent";
 import ActionButton from "@/components/ActionButtons";
 import { Button } from "@/components/ui/button";
-import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverAnchor,
+  PopoverContent,
+} from "@/components/ui/popover";
 import { allRoutes } from "@/utils/routes";
 import {
   addDays,
@@ -46,7 +50,10 @@ import {
   getScheduleStart,
   parseRescheduleDate,
 } from "../common/reschedules";
-import { useLazyGetReschedulesQuery, useUpdateRescheduleMutation } from "../common/reschedulesApi";
+import {
+  useLazyGetReschedulesQuery,
+  useUpdateRescheduleMutation,
+} from "../common/reschedulesApi";
 import RescheduleDetailsDrawer from "./RescheduleDetailsDrawer";
 import { DASHBOARD_PRESET_BUTTON_CLASS } from "@/pages/dashboard/common/dashboard";
 
@@ -103,7 +110,7 @@ function isMultiDayReschedule(r: IReschedule): boolean {
 }
 
 function rescheduleStableKey(r: IReschedule): string {
-  return r._id ?? r.rescheduleCode ?? "";
+  return r.id ?? r.rescheduleCode ?? "";
 }
 
 const HOUR_ROW_PX = 48;
@@ -200,7 +207,7 @@ function buildTimedLayoutForDay(
     (a, b) =>
       a.startMin - b.startMin ||
       a.endMin - b.endMin ||
-      (a.cell.reschedule._id ?? "").localeCompare(b.cell.reschedule._id ?? ""),
+      (a.cell.reschedule.id ?? "").localeCompare(b.cell.reschedule.id ?? ""),
   );
   const laneEndMin: number[] = [];
   const laneIdx: number[] = [];
@@ -345,7 +352,7 @@ function packRangeSegmentsIntoLanes(
     if (c !== 0) return c;
     const e = a.colEnd - b.colEnd;
     if (e !== 0) return e;
-    return (a.r._id ?? "").localeCompare(b.r._id ?? "");
+    return (a.r.id ?? "").localeCompare(b.r.id ?? "");
   });
   const lanes: RangeBarSegment[][] = [];
   for (const seg of sorted) {
@@ -435,7 +442,7 @@ function getCalendarCellsForDay(
   out.sort(
     (a, b) =>
       a.at.getTime() - b.at.getTime() ||
-      (a.reschedule._id ?? "").localeCompare(b.reschedule._id ?? ""),
+      (a.reschedule.id ?? "").localeCompare(b.reschedule.id ?? ""),
   );
   return out;
 }
@@ -455,10 +462,9 @@ function parseScheduleDragPayload(
       const at = new Date(j.at);
       if (!Number.isNaN(at.getTime())) return { id: j.id, previousAt: at };
     }
-  } catch {
-  }
+  } catch {}
   const id = raw.trim();
-  const previousAt = fallbackEvents.find((ev) => ev.reschedule._id === id)?.at;
+  const previousAt = fallbackEvents.find((ev) => ev.reschedule.id === id)?.at;
   if (!previousAt) return null;
   return { id, previousAt };
 }
@@ -540,17 +546,14 @@ function ScheduleSegmentLanePill({
       : "mt-px text-[8px] leading-tight text-zinc-600 sm:text-[9px] tabular-nums";
   const mx = density === "month" ? "mx-px" : "";
   const gridPlacement =
-    gridColumn != null && gridRow != null
-      ? { gridColumn, gridRow }
-      : undefined;
-  const subLine =
-    subtitleOverride ?? scheduleCellTimeAndCustomer(r, displayAt);
+    gridColumn != null && gridRow != null ? { gridColumn, gridRow } : undefined;
+  const subLine = subtitleOverride ?? scheduleCellTimeAndCustomer(r, displayAt);
 
   return (
     <button
       type="button"
-      draggable={Boolean(r._id && onDropOnDay)}
-      title={onDropOnDay && r._id ? "drag to move" : undefined}
+      draggable={Boolean(r.id && onDropOnDay)}
+      title={onDropOnDay && r.id ? "drag to move" : undefined}
       style={{
         ...gridPlacement,
         backgroundColor: `color-mix(in srgb, ${typeColor} 18%, transparent)`,
@@ -563,7 +566,7 @@ function ScheduleSegmentLanePill({
           : "items-start",
         pad,
         mx,
-        onDropOnDay && r._id
+        onDropOnDay && r.id
           ? "cursor-grab active:cursor-grabbing"
           : "cursor-pointer",
       ]
@@ -574,12 +577,12 @@ function ScheduleSegmentLanePill({
         onSelectEvent(r);
       }}
       onDragStart={(ev) => {
-        if (!r._id || !onDropOnDay) return;
+        if (!r.id || !onDropOnDay) return;
         ev.stopPropagation();
         dragLockRef.current = true;
-        const payload = encodeScheduleDrag(r._id, dragAt);
+        const payload = encodeScheduleDrag(r.id, dragAt);
         ev.dataTransfer.setData(DRAG_MIME, payload);
-        ev.dataTransfer.setData("text/plain", r._id);
+        ev.dataTransfer.setData("text/plain", r.id);
         ev.dataTransfer.effectAllowed = "move";
       }}
       onDragEnd={() => {
@@ -708,7 +711,10 @@ function ScheduleMonthCalendar({
   const monthEnd = endOfMonth(visibleMonth);
   const monthGridStart = startOfWeek(monthStart, { weekStartsOn: 1 });
   const monthGridEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
-  const monthDays = eachDayOfInterval({ start: monthGridStart, end: monthGridEnd });
+  const monthDays = eachDayOfInterval({
+    start: monthGridStart,
+    end: monthGridEnd,
+  });
 
   const weekStart = startOfWeek(anchorDate, { weekStartsOn: 1 });
   const weekEnd = endOfWeek(anchorDate, { weekStartsOn: 1 });
@@ -869,20 +875,25 @@ function ScheduleMonthCalendar({
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-          {(onDayClick || onDropOnDay) ? (
+          {onDayClick || onDropOnDay ? (
             <p className="text-[11px] text-zinc-500 leading-snug flex-1 min-w-[12rem]">
-              Click a date to add a schedule. Drag an event to move it to another day.
+              Click a date to add a schedule. Drag an event to move it to
+              another day.
             </p>
           ) : (
             <span className="flex-1 min-w-0" />
           )}
           <div className="flex flex-wrap items-center justify-center sm:justify-end gap-x-4 gap-y-2 text-[11px] text-zinc-600 shrink-0">
             {ENTITY_LEGEND.map(({ type, label }) => (
-              <span key={type} className="inline-flex items-center gap-1.5 whitespace-nowrap">
+              <span
+                key={type}
+                className="inline-flex items-center gap-1.5 whitespace-nowrap"
+              >
                 <span
                   className="h-2 w-2 shrink-0 rounded-full"
                   style={{
-                    backgroundColor: getTargetEntityTypeColor(type) ?? "#64748b",
+                    backgroundColor:
+                      getTargetEntityTypeColor(type) ?? "#64748b",
                   }}
                 />
                 {label}
@@ -927,7 +938,10 @@ function ScheduleMonthCalendar({
             </div>
             <div
               className="relative min-w-0 flex-1"
-              style={{ height: DAY_TIMELINE_HEIGHT_PX, ...HOUR_GRID_BACKGROUND_STYLE }}
+              style={{
+                height: DAY_TIMELINE_HEIGHT_PX,
+                ...HOUR_GRID_BACKGROUND_STYLE,
+              }}
             >
               {Array.from({ length: 24 }).map((_, hour) => {
                 const rowKey = `${dayKey(anchorDate)}-${hour}`;
@@ -1085,7 +1099,8 @@ function ScheduleMonthCalendar({
                             key={rowKey}
                             className={cn(
                               "absolute right-0 left-0 border-b border-zinc-200",
-                              onDayClick && "cursor-pointer hover:bg-zinc-50/90",
+                              onDayClick &&
+                                "cursor-pointer hover:bg-zinc-50/90",
                               isDraggingOver &&
                                 "z-[5] bg-primary/5 ring-2 ring-inset ring-primary/50",
                             )}
@@ -1123,7 +1138,10 @@ function ScheduleMonthCalendar({
                               const raw =
                                 e.dataTransfer.getData(DRAG_MIME) ||
                                 e.dataTransfer.getData("text/plain");
-                              const parsed = parseScheduleDragPayload(raw, events);
+                              const parsed = parseScheduleDragPayload(
+                                raw,
+                                events,
+                              );
                               if (!parsed) return;
                               onDropOnDay({
                                 rescheduleId: parsed.id,
@@ -1190,7 +1208,8 @@ function ScheduleMonthCalendar({
                       const clip = clipScheduleToCalendarDay(seg.r, d);
                       if (!clip) return [];
                       const midnight = startOfDay(d).getTime();
-                      const startMin = (clip.start.getTime() - midnight) / 60000;
+                      const startMin =
+                        (clip.start.getTime() - midnight) / 60000;
                       const endMin = (clip.end.getTime() - midnight) / 60000;
                       const durMin = endMin - startMin;
                       const topPx =
@@ -1259,7 +1278,10 @@ function ScheduleMonthCalendar({
               monthRangeOverlayTopPx +
               rangeLanes.length * (monthRangeLaneH + 2) +
               6;
-            const monthWeekRowMinPx = Math.max(132, monthRangeBandBottomPx + 16);
+            const monthWeekRowMinPx = Math.max(
+              132,
+              monthRangeBandBottomPx + 16,
+            );
             const monthVisibleKeySet = new Set(
               monthWeekSegsVisible.map(monthSegmentRowKey),
             );
@@ -1298,137 +1320,147 @@ function ScheduleMonthCalendar({
                   </div>
                 ) : null}
                 {week.map((day, dayIndex) => {
-          const inMonth = isSameMonth(day, visibleMonth);
-          const isToday = isSameDay(day, today);
-          const key = dayKey(day);
-          const weekColumn = dayIndex + 1;
-          const hiddenSegments = monthWeekSegs
-            .filter(
-              (s) =>
-                s.colStart <= weekColumn &&
-                s.colEnd >= weekColumn &&
-                !monthVisibleKeySet.has(monthSegmentRowKey(s)),
-            )
-            .sort((a, b) => {
-              const t = segmentSortTime(a) - segmentSortTime(b);
-              if (t !== 0) return t;
-              return monthSegmentRowKey(a).localeCompare(monthSegmentRowKey(b));
-            });
-          const isClickableCell = inMonth;
-          const isDroppableCell = true;
+                  const inMonth = isSameMonth(day, visibleMonth);
+                  const isToday = isSameDay(day, today);
+                  const key = dayKey(day);
+                  const weekColumn = dayIndex + 1;
+                  const hiddenSegments = monthWeekSegs
+                    .filter(
+                      (s) =>
+                        s.colStart <= weekColumn &&
+                        s.colEnd >= weekColumn &&
+                        !monthVisibleKeySet.has(monthSegmentRowKey(s)),
+                    )
+                    .sort((a, b) => {
+                      const t = segmentSortTime(a) - segmentSortTime(b);
+                      if (t !== 0) return t;
+                      return monthSegmentRowKey(a).localeCompare(
+                        monthSegmentRowKey(b),
+                      );
+                    });
+                  const isClickableCell = inMonth;
+                  const isDroppableCell = true;
 
-          const monthCellBgClass =
-            viewMode === "month" && rangeLanes.length > 0
-              ? ""
-              : viewMode === "month" && !inMonth
-                ? "bg-zinc-50/80 opacity-70"
-                : isToday
-                  ? "bg-primary/8"
-                  : "bg-white";
+                  const monthCellBgClass =
+                    viewMode === "month" && rangeLanes.length > 0
+                      ? ""
+                      : viewMode === "month" && !inMonth
+                        ? "bg-zinc-50/80 opacity-70"
+                        : isToday
+                          ? "bg-primary/8"
+                          : "bg-white";
 
-          const monthCellBgStyle =
-            viewMode === "month" && rangeLanes.length > 0
-              ? {
-                  backgroundImage: !inMonth
-                    ? `linear-gradient(to bottom, transparent 0px, transparent ${monthRangeBandBottomPx}px, rgba(249,250,251,0.92) ${monthRangeBandBottomPx}px)`
-                    : isToday
-                      ? `linear-gradient(to bottom, transparent 0px, transparent ${monthRangeBandBottomPx}px, rgba(236,253,245,0.96) ${monthRangeBandBottomPx}px)`
-                      : `linear-gradient(to bottom, transparent 0px, transparent ${monthRangeBandBottomPx}px, white ${monthRangeBandBottomPx}px)`,
-                }
-              : undefined;
+                  const monthCellBgStyle =
+                    viewMode === "month" && rangeLanes.length > 0
+                      ? {
+                          backgroundImage: !inMonth
+                            ? `linear-gradient(to bottom, transparent 0px, transparent ${monthRangeBandBottomPx}px, rgba(249,250,251,0.92) ${monthRangeBandBottomPx}px)`
+                            : isToday
+                              ? `linear-gradient(to bottom, transparent 0px, transparent ${monthRangeBandBottomPx}px, rgba(236,253,245,0.96) ${monthRangeBandBottomPx}px)`
+                              : `linear-gradient(to bottom, transparent 0px, transparent ${monthRangeBandBottomPx}px, white ${monthRangeBandBottomPx}px)`,
+                        }
+                      : undefined;
 
-          return (
-            <div
-              key={key}
-              style={monthCellBgStyle}
-              role={onDayClick && isClickableCell ? "button" : undefined}
-              tabIndex={onDayClick && isClickableCell ? 0 : undefined}
-              onKeyDown={(e) => {
-                if (!onDayClick || !isClickableCell) return;
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  onDayClick(day);
-                }
-              }}
-              onClick={() => {
-                if (!isClickableCell || !onDayClick) return;
-                if (dragLockRef.current) return;
-                onDayClick(day);
-              }}
-              onDragOver={(e) => {
-                if (!onDropOnDay || !isDroppableCell) return;
-                e.preventDefault();
-                e.dataTransfer.dropEffect = "move";
-                setDragOverKey(key);
-              }}
-              onDrop={(e) => {
-                if (!onDropOnDay || !isDroppableCell) return;
-                e.preventDefault();
-                setDragOverKey(null);
-                window.setTimeout(() => {
-                  dragLockRef.current = false;
-                }, 0);
-                const raw =
-                  e.dataTransfer.getData(DRAG_MIME) ||
-                  e.dataTransfer.getData("text/plain");
-                const parsed = parseScheduleDragPayload(raw, events);
-                if (!parsed) return;
-                onDropOnDay({
-                  rescheduleId: parsed.id,
-                  targetDate: day,
-                  previousAt: parsed.previousAt,
-                  mode: viewMode,
-                });
-              }}
-              className={[
-                "relative z-[1] flex flex-col min-h-[120px] sm:min-h-[132px] border-b border-r border-zinc-200 p-1 sm:p-1.5",
-                dayIndex === 6 ? "border-r-0" : "",
-                monthCellBgClass,
-                isToday ? "ring-1 ring-inset ring-primary/45" : "",
-                isClickableCell && onDayClick ? "cursor-pointer hover:brightness-[0.99]" : "",
-                onDropOnDay && isDroppableCell && dragOverKey === key
-                  ? "ring-2 ring-inset ring-primary/50 bg-primary/5"
-                  : "",
-              ]
-                .filter(Boolean)
-                .join(" ")}
-              aria-label={
-                onDayClick && isClickableCell
-                  ? `Add schedule on ${format(day, "MMMM d, yyyy")}`
-                  : undefined
-              }
-            >
-              {isToday && (
-                <span
-                  className="pointer-events-none absolute left-0 top-0 bottom-0 z-[25] w-1 rounded-r-sm bg-primary"
-                  aria-hidden
-                />
-              )}
-              <div className="relative z-[20] flex min-h-0 flex-1 flex-col">
-                <div
-                  className={[
-                    "shrink-0 text-left text-xs font-medium tabular-nums leading-none pointer-events-none",
-                    isToday ? "text-primary" : inMonth ? "text-zinc-800" : "text-zinc-400",
-                  ].join(" ")}
-                >
-                  {format(day, "d")}
-                </div>
-                <div className="min-h-0 flex-1" aria-hidden />
-                {hiddenSegments.length > 0 ? (
-                  <MonthDayOverflowPopover
-                    day={day}
-                    weekDays={week}
-                    hiddenSegments={hiddenSegments}
-                    onSelectEvent={onSelectEvent}
-                    onDropOnDay={onDropOnDay}
-                    dragLockRef={dragLockRef}
-                    setDragOverKey={setDragOverKey}
-                  />
-                ) : null}
-              </div>
-            </div>
-          );
-        })}
+                  return (
+                    <div
+                      key={key}
+                      style={monthCellBgStyle}
+                      role={
+                        onDayClick && isClickableCell ? "button" : undefined
+                      }
+                      tabIndex={onDayClick && isClickableCell ? 0 : undefined}
+                      onKeyDown={(e) => {
+                        if (!onDayClick || !isClickableCell) return;
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          onDayClick(day);
+                        }
+                      }}
+                      onClick={() => {
+                        if (!isClickableCell || !onDayClick) return;
+                        if (dragLockRef.current) return;
+                        onDayClick(day);
+                      }}
+                      onDragOver={(e) => {
+                        if (!onDropOnDay || !isDroppableCell) return;
+                        e.preventDefault();
+                        e.dataTransfer.dropEffect = "move";
+                        setDragOverKey(key);
+                      }}
+                      onDrop={(e) => {
+                        if (!onDropOnDay || !isDroppableCell) return;
+                        e.preventDefault();
+                        setDragOverKey(null);
+                        window.setTimeout(() => {
+                          dragLockRef.current = false;
+                        }, 0);
+                        const raw =
+                          e.dataTransfer.getData(DRAG_MIME) ||
+                          e.dataTransfer.getData("text/plain");
+                        const parsed = parseScheduleDragPayload(raw, events);
+                        if (!parsed) return;
+                        onDropOnDay({
+                          rescheduleId: parsed.id,
+                          targetDate: day,
+                          previousAt: parsed.previousAt,
+                          mode: viewMode,
+                        });
+                      }}
+                      className={[
+                        "relative z-[1] flex flex-col min-h-[120px] sm:min-h-[132px] border-b border-r border-zinc-200 p-1 sm:p-1.5",
+                        dayIndex === 6 ? "border-r-0" : "",
+                        monthCellBgClass,
+                        isToday ? "ring-1 ring-inset ring-primary/45" : "",
+                        isClickableCell && onDayClick
+                          ? "cursor-pointer hover:brightness-[0.99]"
+                          : "",
+                        onDropOnDay && isDroppableCell && dragOverKey === key
+                          ? "ring-2 ring-inset ring-primary/50 bg-primary/5"
+                          : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
+                      aria-label={
+                        onDayClick && isClickableCell
+                          ? `Add schedule on ${format(day, "MMMM d, yyyy")}`
+                          : undefined
+                      }
+                    >
+                      {isToday && (
+                        <span
+                          className="pointer-events-none absolute left-0 top-0 bottom-0 z-[25] w-1 rounded-r-sm bg-primary"
+                          aria-hidden
+                        />
+                      )}
+                      <div className="relative z-[20] flex min-h-0 flex-1 flex-col">
+                        <div
+                          className={[
+                            "shrink-0 text-left text-xs font-medium tabular-nums leading-none pointer-events-none",
+                            isToday
+                              ? "text-primary"
+                              : inMonth
+                                ? "text-zinc-800"
+                                : "text-zinc-400",
+                          ].join(" ")}
+                        >
+                          {format(day, "d")}
+                        </div>
+                        <div className="min-h-0 flex-1" aria-hidden />
+                        {hiddenSegments.length > 0 ? (
+                          <MonthDayOverflowPopover
+                            day={day}
+                            weekDays={week}
+                            hiddenSegments={hiddenSegments}
+                            onSelectEvent={onSelectEvent}
+                            onDropOnDay={onDropOnDay}
+                            dragLockRef={dragLockRef}
+                            setDragOverKey={setDragOverKey}
+                          />
+                        ) : null}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             );
           })
@@ -1489,7 +1521,7 @@ export default function ReschedulesScheduler() {
 
   const allWithOptimisticDates = useMemo(() => {
     return all.map((r) => {
-      const id = r._id;
+      const id = r.id;
       if (!id) return r;
       const o = optimisticScheduleById[id];
       return o
@@ -1505,7 +1537,7 @@ export default function ReschedulesScheduler() {
       let changed = false;
       const next = { ...prev };
       for (const id of ids) {
-        const row = all.find((r) => r._id === id);
+        const row = all.find((r) => r.id === id);
         const want = prev[id];
         if (
           row?.newDateTime &&
@@ -1554,9 +1586,7 @@ export default function ReschedulesScheduler() {
     out.sort((a, b) => {
       const t = a.at.getTime() - b.at.getTime();
       if (t !== 0) return t;
-      return (a.reschedule._id ?? "").localeCompare(
-        b.reschedule._id ?? "",
-      );
+      return (a.reschedule.id ?? "").localeCompare(b.reschedule.id ?? "");
     });
     return out;
   }, [eventsInRange]);
@@ -1590,8 +1620,8 @@ export default function ReschedulesScheduler() {
       previousAt: Date;
       mode: "month" | "week" | "day";
     }) => {
-      const row = allWithOptimisticDates.find((r) => r._id === rescheduleId);
-      if (!row?._id) return;
+      const row = allWithOptimisticDates.find((r) => r.id === rescheduleId);
+      if (!row?.id) return;
 
       const prevFrom = getScheduleStart(row);
       if (!prevFrom) return;
@@ -1638,7 +1668,7 @@ export default function ReschedulesScheduler() {
 
       try {
         await updateReschedule({
-          _id: rescheduleId,
+          id: rescheduleId,
           newDateTime: newNewIso,
           from: newFromIso,
           to: newToIso,
@@ -1676,9 +1706,7 @@ export default function ReschedulesScheduler() {
           <ActionButton
             type="view"
             useText="List"
-            onClick={() =>
-              navigate(allRoutes.PORTAL + allRoutes.RESCHEDULES)
-            }
+            onClick={() => navigate(allRoutes.PORTAL + allRoutes.RESCHEDULES)}
           />
           <ActionButton
             type="add"

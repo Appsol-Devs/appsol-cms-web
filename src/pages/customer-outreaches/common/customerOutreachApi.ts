@@ -62,8 +62,8 @@ export const customerOutreachApi = createApi({
       ICustomerOutreach,
       ICustomerOutreach
     >({
-      query: ({ _id, ...payload }) => ({
-        url: `customer_outreachs/${_id}`,
+      query: ({ id, ...payload }) => ({
+        url: `customer_outreachs/${id}`,
         body: payload,
         method: "PUT",
       }),

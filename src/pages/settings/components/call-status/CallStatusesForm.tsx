@@ -15,7 +15,7 @@ import {
 import type { ICallStatus } from "../../common/settings";
 import CallStatusesFormContent from "./CallStatusesFormContent";
 
-export type ICallStatusFields = Omit<ICallStatus, "_id"> & {};
+export type ICallStatusFields = Omit<ICallStatus, "id"> & {};
 
 const CallStatusesForm = () => {
   const { id } = useParams();
@@ -24,15 +24,15 @@ const CallStatusesForm = () => {
     useAddCallStatusMutation();
   const [updateCallStatus, { isLoading: isUpdating }] =
     useUpdateCallStatusMutation();
-  const [getACallStatus, { isLoading: isGetting }] = useLazyGetACallStatusQuery();
+  const [getACallStatus, { isLoading: isGetting }] =
+    useLazyGetACallStatusQuery();
   const form = useForm<ICallStatusFields>();
   const { watch, getValues, reset } = form;
   const values = watch();
 
   const navigate = useNavigate();
-  const [selectedCallStatus, setSelectedCallStatus] = useState<ICallStatus | null>(
-    null
-  );
+  const [selectedCallStatus, setSelectedCallStatus] =
+    useState<ICallStatus | null>(null);
 
   const fetchData = async (id: string) => {
     if (!id) return;
@@ -92,7 +92,7 @@ const CallStatusesForm = () => {
     if (!payload) return;
     try {
       const res = id
-        ? await updateCallStatus({ _id: id, ...payload }).unwrap()
+        ? await updateCallStatus({ id: id, ...payload }).unwrap()
         : await createNewCallStatus(payload).unwrap();
 
       if (res) {

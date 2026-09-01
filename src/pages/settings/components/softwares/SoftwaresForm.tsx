@@ -15,7 +15,7 @@ import {
 import type { ISoftware } from "../../common/settings";
 import SoftwaresFormContent from "./SoftwaresFormContent";
 
-export type ISoftwareFields = Omit<ISoftware, "_id"> & {};
+export type ISoftwareFields = Omit<ISoftware, "id"> & {};
 
 const SoftwaresForm = () => {
   const { id } = useParams();
@@ -31,7 +31,7 @@ const SoftwaresForm = () => {
 
   const navigate = useNavigate();
   const [selectedSoftware, setSelectedSoftware] = useState<ISoftware | null>(
-    null
+    null,
   );
 
   const fetchData = async (id: string) => {
@@ -90,7 +90,7 @@ const SoftwaresForm = () => {
     if (!payload) return;
     try {
       const res = id
-        ? await updateSoftware({ _id: id, ...payload }).unwrap()
+        ? await updateSoftware({ id: id, ...payload }).unwrap()
         : await createNewSoftware(payload).unwrap();
 
       if (res) {

@@ -31,10 +31,7 @@ export const reschedulesApi = createApi({
         if (pageSize !== undefined) params.set("pageSize", String(pageSize));
         if (pageIndex !== undefined) params.set("pageIndex", String(pageIndex));
         return {
-          url: getQueryRequestUrl(
-            `/reschedules?${params.toString()}`,
-            filters,
-          ),
+          url: getQueryRequestUrl(`/reschedules?${params.toString()}`, filters),
         };
       },
       transformResponse: async (response: Response) => {
@@ -79,10 +76,10 @@ export const reschedulesApi = createApi({
     }),
     updateReschedule: builder.mutation<
       IReschedule,
-      { _id: string } & Partial<ICreateReschedulePayload>
+      { id: string } & Partial<ICreateReschedulePayload>
     >({
-      query: ({ _id, ...payload }) => ({
-        url: `/reschedules/${_id}`,
+      query: ({ id, ...payload }) => ({
+        url: `reschedules/${id}`,
         body: payload,
         method: "PUT",
       }),
@@ -106,4 +103,3 @@ export const {
   useUpdateRescheduleMutation,
   useDeleteRescheduleMutation,
 } = reschedulesApi;
-

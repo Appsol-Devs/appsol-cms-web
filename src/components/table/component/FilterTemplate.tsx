@@ -123,7 +123,8 @@ const FiltersTemplate = ({
   const [getComplaintCategories] = useLazyGetComplaintCategoriesQuery();
   const [getOutreachTypes] = useLazyGetOutReachTypesQuery();
   const [getCallStatuses] = useLazyGetCallStatusesQuery();
-  const { getValues, control, reset, watch, register } = useForm<IFilterFields>();
+  const { getValues, control, reset, watch, register } =
+    useForm<IFilterFields>();
 
   const queryParams = useMemo(
     () => ({ paginate: false, filters: initialQueryFilters }),
@@ -136,7 +137,9 @@ const FiltersTemplate = ({
   );
 
   // Dropdown Options from query (Dropdown component)
-  const [engineOptions, setEngineOptions] = useState<DropDownOption<string>[]>([]);
+  const [engineOptions, setEngineOptions] = useState<DropDownOption<string>[]>(
+    [],
+  );
   const [leadStatusOptions, setLeadStatusOptions] = useState<
     DropDownOption<string>[]
   >([]);
@@ -170,8 +173,7 @@ const FiltersTemplate = ({
   //   --------------------------------------------------------
 
   //   Dropdown options from enums
-  const statusOptions =
-    useGenerateDropdownOptionsFromEnum(PAYMENT_STATUS_ENUM);
+  const statusOptions = useGenerateDropdownOptionsFromEnum(PAYMENT_STATUS_ENUM);
   const targetEntityTypeOptions: DropDownOption<string>[] = [
     { label: "CustomerSetup", value: "CustomerSetup" },
     { label: "Generic", value: "Generic" },
@@ -180,20 +182,25 @@ const FiltersTemplate = ({
     { label: "CustomerComplaint", value: "CustomerComplaint" },
     { label: "SubscriptionReminder", value: "SubscriptionReminder" },
   ];
-  const featureStatusOptions =
-    useGenerateDropdownOptionsFromEnum(REQUEST_FEATURE_STATUS_ENUM);
+  const featureStatusOptions = useGenerateDropdownOptionsFromEnum(
+    REQUEST_FEATURE_STATUS_ENUM,
+  );
   // -------------------------------------------------------
-  const featurePriorityOptions =
-    useGenerateDropdownOptionsFromEnum(REQUEST_FEATURE_PRIORITY_ENUM);
+  const featurePriorityOptions = useGenerateDropdownOptionsFromEnum(
+    REQUEST_FEATURE_PRIORITY_ENUM,
+  );
 
-  const customerSetUpStatusOptions = useGenerateDropdownOptionsFromEnum(CUSTOMER_SETUP_STATUS_ENUM);
+  const customerSetUpStatusOptions = useGenerateDropdownOptionsFromEnum(
+    CUSTOMER_SETUP_STATUS_ENUM,
+  );
   const ticketStatusOptions: DropDownOption<string>[] = TICKET_STATUS_OPTIONS;
   const ticketPriorityOptions =
     useGenerateDropdownOptionsFromEnum(TICKET_PRIORITY_ENUM);
   const subscriptionStatusOptions: DropDownOption<string>[] =
     SUBSCRIPTION_STATUS_OPTIONS;
-  const complaintStatusOptions =
-    useGenerateDropdownOptionsFromEnum(COMPLAINT_STATUS_ENUM);
+  const complaintStatusOptions = useGenerateDropdownOptionsFromEnum(
+    COMPLAINT_STATUS_ENUM,
+  );
   const outreachStatusOptions = useGenerateDropdownOptionsFromEnum(
     CUSTOMER_OUTREACH_STATUS,
   );
@@ -247,7 +254,7 @@ const FiltersTemplate = ({
               res.contents.map((data) => {
                 const payload: DropDownOption<string> = {
                   label: data.name,
-                  value: data?._id as string,
+                  value: data?.id as string,
                 };
                 return payload;
               }),
@@ -263,10 +270,11 @@ const FiltersTemplate = ({
           if (res && res.contents) {
             setLoggedByOptions(
               res.contents.map((user) => {
-                const name = `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim();
+                const name =
+                  `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim();
                 return {
                   label: name || user.email || "User",
-                  value: user._id as string,
+                  value: user.id as string,
                 } as DropDownOption<string>;
               }),
             );
@@ -285,7 +293,7 @@ const FiltersTemplate = ({
               res.contents.map((data) => {
                 const payload: DropDownOption<string> = {
                   label: data.name,
-                  value: data?._id as string,
+                  value: data?.id as string,
                 };
                 return payload;
               }),
@@ -305,7 +313,7 @@ const FiltersTemplate = ({
                   `${data.firstName ?? ""} ${data.lastName ?? ""}`.trim();
                 const payload: DropDownOption<string> = {
                   label: name || data.email || "User",
-                  value: data?._id as string,
+                  value: data?.id as string,
                 };
                 return payload;
               }),
@@ -314,7 +322,10 @@ const FiltersTemplate = ({
         });
     };
 
-    if (checkIfHasString("assignedTo") || checkIfHasString("assignedEngineerId")) {
+    if (
+      checkIfHasString("assignedTo") ||
+      checkIfHasString("assignedEngineerId")
+    ) {
       loadEngineerOptions();
     }
     if (checkIfHasString("setUpStatusId")) {
@@ -326,7 +337,7 @@ const FiltersTemplate = ({
               res.contents.map((data) => {
                 const payload: DropDownOption<string> = {
                   label: data.name,
-                  value: data?._id as string,
+                  value: data?.id as string,
                 };
                 return payload;
               }),
@@ -343,7 +354,7 @@ const FiltersTemplate = ({
             setSubscriptionTypeOptions(
               res.contents.map((data) => ({
                 label: data.name ?? "",
-                value: data._id as string,
+                value: data.id as string,
               })),
             );
           }
@@ -358,7 +369,7 @@ const FiltersTemplate = ({
             setComplaintTypeOptions(
               res.contents.map((data) => ({
                 label: data.name ?? "",
-                value: data._id as string,
+                value: data.id as string,
               })),
             );
           }
@@ -373,7 +384,7 @@ const FiltersTemplate = ({
             setComplaintCategoryOptions(
               res.contents.map((data) => ({
                 label: data.name ?? "",
-                value: data._id as string,
+                value: data.id as string,
               })),
             );
           }
@@ -388,7 +399,7 @@ const FiltersTemplate = ({
             setOutreachTypeOptions(
               res.contents.map((data) => ({
                 label: data.name ?? "",
-                value: data._id as string,
+                value: data.id as string,
               })),
             );
           }
@@ -403,16 +414,12 @@ const FiltersTemplate = ({
             setCallStatusOptions(
               res.contents.map((data) => ({
                 label: data.name ?? "",
-                value: data._id as string,
+                value: data.id as string,
               })),
             );
           }
         });
     }
-
-
-
-
   }, [
     toggleFilter,
     checkIfHasString,

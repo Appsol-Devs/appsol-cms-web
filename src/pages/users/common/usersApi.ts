@@ -87,8 +87,8 @@ export const usersApi = createApi({
       }),
     }),
     updateUser: builder.mutation<IUser, IUser>({
-      query: ({ _id, ...payload }) => ({
-        url: `users/${_id}`,
+      query: ({ id, ...payload }) => ({
+        url: `users/${id}`,
         body: payload,
         method: "PUT",
       }),

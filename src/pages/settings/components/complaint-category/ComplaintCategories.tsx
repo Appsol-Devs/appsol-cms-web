@@ -81,8 +81,8 @@ const ComplaintCategories = () => {
                 navigate(
                   allRoutes.PORTAL +
                     allRoutes.UPDATE_COMPLAINT_CATEGORIES(
-                      row.original._id as string
-                    )
+                      row.original.id as string,
+                    ),
                 )
               }
             />
@@ -90,7 +90,7 @@ const ComplaintCategories = () => {
         ),
       },
     ],
-    [executed]
+    [executed],
   );
 
   return (

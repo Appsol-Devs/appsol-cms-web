@@ -170,7 +170,7 @@ const Leads = () => {
         )}
         pathOnRowSelected={(row) => {
           const lead = row as ILead;
-          navigate(allRoutes.PORTAL + allRoutes.VIEW_LEAD(lead._id as string), {
+          navigate(allRoutes.PORTAL + allRoutes.VIEW_LEAD(lead.id as string), {
             state: { initialData: lead },
           });
         }}

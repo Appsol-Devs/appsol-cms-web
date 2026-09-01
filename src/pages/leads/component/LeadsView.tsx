@@ -36,13 +36,14 @@ const LeadsView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const initialData = (location.state as { initialData?: ILead } | null)?.initialData;
+  const initialData = (location.state as { initialData?: ILead } | null)
+    ?.initialData;
 
   const [deleteLead] = useDeleteLeadMutation();
   const [convertLead, { isLoading: isConverting }] = useConvertLeadMutation();
   const [getLeadDetails, { isLoading: isFetching }] = useLazyGetALeadQuery();
   const [selectedLead, setSelectedLead] = useState<ILead | null>(() =>
-    initialData && initialData._id === id ? initialData : null
+    initialData && initialData.id === id ? initialData : null,
   );
 
   useEffect(() => {
@@ -93,7 +94,7 @@ const LeadsView = () => {
 
       setSelectedLead(mergedLead);
 
-      const customerId = mergedLead.customerId ?? mergedLead.customer?._id;
+      const customerId = mergedLead.customerId ?? mergedLead.customer?.id;
 
       showToast({
         title: "Success",
@@ -167,7 +168,9 @@ const LeadsView = () => {
                 <p className="text-muted-foreground text-center">
                   This action cannot be undone. This will permanently delete the
                   lead{" "}
-                  <strong>{selectedLead.name ?? selectedLead.companyName}</strong>
+                  <strong>
+                    {selectedLead.name ?? selectedLead.companyName}
+                  </strong>
                   .
                 </p>
               }
@@ -267,7 +270,9 @@ const LeadsView = () => {
             <div className="space-y-2 text-sm">
               <p className="text-muted-foreground">Current</p>
               <Badge
-                variant={selectedLead.leadStage?.colorCode ? undefined : "secondary"}
+                variant={
+                  selectedLead.leadStage?.colorCode ? undefined : "secondary"
+                }
                 className="capitalize border"
                 style={getLookupBadgeStyle(selectedLead.leadStage?.colorCode)}
               >
@@ -275,7 +280,9 @@ const LeadsView = () => {
               </Badge>
               <p className="text-muted-foreground mt-2">Next Step</p>
               <Badge
-                variant={selectedLead.nextStep?.colorCode ? undefined : "secondary"}
+                variant={
+                  selectedLead.nextStep?.colorCode ? undefined : "secondary"
+                }
                 className="capitalize border"
                 style={getLookupBadgeStyle(selectedLead.nextStep?.colorCode)}
               >
@@ -319,8 +326,10 @@ const LeadsView = () => {
               content={
                 <p className="text-muted-foreground text-center">
                   This will convert{" "}
-                  <strong>{selectedLead.name ?? selectedLead.companyName}</strong>{" "}.
-                  You won't be able to change its status afterwards.
+                  <strong>
+                    {selectedLead.name ?? selectedLead.companyName}
+                  </strong>{" "}
+                  . You won't be able to change its status afterwards.
                 </p>
               }
               onConfirmClicked={handleConvert}

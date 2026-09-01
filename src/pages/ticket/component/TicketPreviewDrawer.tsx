@@ -15,15 +15,25 @@ import {
   getLookupBadgeStyle,
 } from "@/lib/enums";
 import { allRoutes } from "@/utils/routes";
-import { X, Wrench, Calendar, History, Ticket, CheckCircle2 } from "lucide-react";
+import {
+  X,
+  Wrench,
+  Calendar,
+  History,
+  Ticket,
+  CheckCircle2,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import type { ITicket, ITicketHistoryEntry } from "../common/tickets";
-import { useCloseTicketMutation, useLazyGetATicketQuery } from "../common/ticketsApi";
+import {
+  useCloseTicketMutation,
+  useLazyGetATicketQuery,
+} from "../common/ticketsApi";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { showToast } from "@/components/ui/CustomToast";
 
 function formatUserName(
-  user?: { firstName?: string; lastName?: string } | string | null
+  user?: { firstName?: string; lastName?: string } | string | null,
 ): string {
   if (!user) return "—";
   if (typeof user === "string") return user;
@@ -32,7 +42,7 @@ function formatUserName(
 
 function formatHistoryDescription(
   entry: ITicketHistoryEntry,
-  firstAssignee?: { firstName?: string; lastName?: string } | null
+  firstAssignee?: { firstName?: string; lastName?: string } | null,
 ): string {
   const from = entry.from;
   const to = entry.to;
@@ -55,7 +65,10 @@ function ActivityItem({
 }) {
   const description = formatHistoryDescription(entry, firstAssignee);
   const reason = entry.reason;
-  const date = (entry.date ?? entry.createdAt) ? formatDate(entry.date ?? entry.createdAt!) : "—";
+  const date =
+    (entry.date ?? entry.createdAt)
+      ? formatDate(entry.date ?? entry.createdAt!)
+      : "—";
 
   return (
     <div className="flex gap-3 py-3">
@@ -90,20 +103,19 @@ const TicketPreviewDrawer = ({
 }: TicketPreviewDrawerProps) => {
   const navigate = useNavigate();
   const [closeTicket, { isLoading: isClosing }] = useCloseTicketMutation();
-   const [getTicket] = useLazyGetATicketQuery();
+  const [getTicket] = useLazyGetATicketQuery();
 
   const handleClose = async () => {
-    if (!ticket?._id) return;
+    if (!ticket?.id) return;
     try {
-      const id = ticket._id;
+      const id = ticket.id;
       const closed = await closeTicket(id).unwrap();
 
       let latest: ITicket | null = closed ?? null;
       try {
         const fresh = await getTicket(id).unwrap();
         if (fresh) latest = fresh;
-      } catch {
-      }
+      } catch {}
 
       if (latest) {
         onTicketUpdated?.(latest);
@@ -125,9 +137,9 @@ const TicketPreviewDrawer = ({
   };
 
   const handleViewFullDetails = () => {
-    if (ticket?._id) {
+    if (ticket?.id) {
       onOpenChange(false);
-      navigate(allRoutes.PORTAL + allRoutes.VIEW_TICKET(ticket._id), {
+      navigate(allRoutes.PORTAL + allRoutes.VIEW_TICKET(ticket.id), {
         state: { initialData: ticket },
       });
     }
@@ -142,8 +154,12 @@ const TicketPreviewDrawer = ({
     ? [...otherEntries, ticketCreatedEntry]
     : apiHistory;
   const firstAssignee = ticket?.assignedEngineer;
-  const priorityColor = ticket ? getTicketPriorityColor(ticket.priority ?? "") : undefined;
-  const statusColor = ticket ? getTicketStatusColor(ticket.status ?? "") : undefined;
+  const priorityColor = ticket
+    ? getTicketPriorityColor(ticket.priority ?? "")
+    : undefined;
+  const statusColor = ticket
+    ? getTicketStatusColor(ticket.status ?? "")
+    : undefined;
 
   return (
     <Drawer direction="right" open={open} onOpenChange={onOpenChange}>
@@ -151,10 +167,12 @@ const TicketPreviewDrawer = ({
         <DrawerHeader className="shrink-0 flex flex-row items-center justify-between gap-3 space-y-0 border-b p-0 px-4 py-4 text-left">
           <div className="flex min-w-0 flex-1 items-center gap-2">
             <Ticket className="h-5 w-5 shrink-0 text-muted-foreground" />
-            <DrawerTitle className="text-left text-base">Ticket Preview</DrawerTitle>
+            <DrawerTitle className="text-left text-base">
+              Ticket Preview
+            </DrawerTitle>
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            {ticket?._id && (
+            {ticket?.id && (
               <Button
                 variant="default"
                 size="sm"
@@ -255,7 +273,7 @@ const TicketPreviewDrawer = ({
                     <div className="divide-y divide-border">
                       {history.map((entry, index) => (
                         <ActivityItem
-                          key={entry._id ?? index}
+                          key={entry.id ?? index}
                           entry={entry}
                           firstAssignee={firstAssignee}
                         />

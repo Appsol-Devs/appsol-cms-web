@@ -5,9 +5,7 @@ import {
   type IPagination,
   type PaginatedResponse,
 } from "@/lib/pagination";
-import type {
-  IOutReachType,
-} from "@/pages/customer/common/customers";
+import type { IOutReachType } from "@/pages/customer/common/customers";
 
 export const outReachApi = createApi({
   reducerPath: "outReachApi",
@@ -16,7 +14,7 @@ export const outReachApi = createApi({
     prepareHeaders: (headers) => prepareApiHeaders(headers),
     responseHandler: async (response) => response,
   }),
-  tagTypes: ["IOutReachType",],
+  tagTypes: ["IOutReachType"],
   endpoints: (builder) => ({
     getOutReachTypes: builder.query<
       PaginatedResponse<IOutReachType[]>,
@@ -57,8 +55,8 @@ export const outReachApi = createApi({
       }),
     }),
     updateOutReachType: builder.mutation<IOutReachType, IOutReachType>({
-      query: ({ _id, ...payload }) => ({
-        url: `outreach_types/${_id}`,
+      query: ({ id, ...payload }) => ({
+        url: `outreach_types/${id}`,
         body: payload,
         method: "PUT",
       }),
@@ -69,7 +67,6 @@ export const outReachApi = createApi({
         method: "DELETE",
       }),
     }),
-   
   }),
 });
 export const {
@@ -78,5 +75,4 @@ export const {
   useAddOutReachTypeMutation,
   useUpdateOutReachTypeMutation,
   useDeleteOutReachTypeMutation,
- 
 } = outReachApi;

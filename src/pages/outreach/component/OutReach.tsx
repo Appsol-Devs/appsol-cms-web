@@ -39,7 +39,6 @@ const OutReach = () => {
             <Badge className="text-[11px] font-medium px-2 py-0 rounded-full">
               {row.original.outreachTypeCode}
             </Badge>
-
           </div>
         ),
       },
@@ -82,7 +81,7 @@ const OutReach = () => {
         ),
       },
     ],
-    []
+    [],
   );
 
   return (
@@ -92,14 +91,16 @@ const OutReach = () => {
           <ActionButton
             type="add"
             useText="Add Outreach Type"
-            onClick={() => navigate(allRoutes.PORTAL + allRoutes.ADD_OUTREACH_TYPE)}
+            onClick={() =>
+              navigate(allRoutes.PORTAL + allRoutes.ADD_OUTREACH_TYPE)
+            }
           />
         )}
         columns={columns}
         pathOnRowSelected={(row) => {
           const item = row as IOutReachType;
-          if (!item._id) return;
-          navigate(allRoutes.PORTAL + allRoutes.VIEW_OUTREACH_TYPE(item._id), {
+          if (!item.id) return;
+          navigate(allRoutes.PORTAL + allRoutes.VIEW_OUTREACH_TYPE(item.id), {
             state: { initialData: item },
           });
         }}

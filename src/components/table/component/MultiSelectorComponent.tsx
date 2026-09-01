@@ -48,7 +48,6 @@ const MultiSelectorComponent: React.FC<MultiSelectProps> = ({
   width = "100%",
   disabled = false,
 }) => {
-
   const {
     field: { onChange, value = [] },
   } = useController({
@@ -58,21 +57,26 @@ const MultiSelectorComponent: React.FC<MultiSelectProps> = ({
   });
 
   const [search, setSearch] = useState("");
-  const [displayOptions, setDisplayOptions] = useState<DropDownOption[]>(options);
+  const [displayOptions, setDisplayOptions] =
+    useState<DropDownOption[]>(options);
 
   useEffect(() => {
     setDisplayOptions(
       options.filter(
         (option) =>
           !value.includes(option?.value?.toString()) &&
-          option.label?.toString().toLowerCase().includes(search.toLowerCase())
-      )
+          option.label?.toString().toLowerCase().includes(search.toLowerCase()),
+      ),
     );
   }, [value, search, options]);
 
   const handleChange = (event: SelectChangeEvent<typeof value>) => {
     const selectedValues = event.target.value;
-    onChange(typeof selectedValues === "string" ? selectedValues.split(",") : selectedValues);
+    onChange(
+      typeof selectedValues === "string"
+        ? selectedValues.split(",")
+        : selectedValues,
+    );
   };
 
   const handleDelete = (item: string) => {
@@ -105,7 +109,13 @@ const MultiSelectorComponent: React.FC<MultiSelectProps> = ({
                   size="small"
                   sx={{ fontSize: "12px", paddingBlock: "3px" }}
                   label={
-                    options.find((opt) => opt.value === val?.toString())?.label || val
+                    options.find(
+                      (opt) =>
+                        opt.value ===
+                        (typeof val === "string"
+                          ? val?.toString()
+                          : (val as any).value?.toString()),
+                    )?.label || val
                   }
                   onDelete={() => handleDelete(val)}
                   deleteIcon={
@@ -139,7 +149,9 @@ const MultiSelectorComponent: React.FC<MultiSelectProps> = ({
               },
               "&.MuiOutlinedInput-root": {
                 "& fieldset": { borderColor: "#ccc" },
-                "& :hover fieldset": { borderColor: disabled ? "#ccc" : "#888" },
+                "& :hover fieldset": {
+                  borderColor: disabled ? "#ccc" : "#888",
+                },
                 "&.Mui-focused fieldset": { borderColor: "var(--primary)" },
               },
             }}

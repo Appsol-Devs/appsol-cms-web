@@ -66,14 +66,14 @@ const PaymentForm = () => {
     const subscriptionType = subscription.subscriptionType;
 
     const opts = {
-      customerOptions: customer?._id
-        ? [{ label: customer.name ?? "", value: customer._id }]
+      customerOptions: customer?.id
+        ? [{ label: customer.name ?? "", value: customer.id }]
         : [],
-      softwareOptions: software?._id
-        ? [{ label: software.name ?? "", value: software._id }]
+      softwareOptions: software?.id
+        ? [{ label: software.name ?? "", value: software.id }]
         : [],
-      subscriptionTypeOptions: subscriptionType?._id
-        ? [{ label: subscriptionType.name ?? "", value: subscriptionType._id }]
+      subscriptionTypeOptions: subscriptionType?.id
+        ? [{ label: subscriptionType.name ?? "", value: subscriptionType.id }]
         : [],
     };
     setPrefillOptions(opts);
@@ -91,8 +91,10 @@ const PaymentForm = () => {
   }, [subscription, reset]);
 
   useEffect(() => {
-    if (!paymentDate || !subscription?.subscriptionType?.durationInMonths) return;
-    const durationInMonths = subscription.subscriptionType.durationInMonths ?? 1;
+    if (!paymentDate || !subscription?.subscriptionType?.durationInMonths)
+      return;
+    const durationInMonths =
+      subscription.subscriptionType.durationInMonths ?? 1;
     const start = new Date(paymentDate);
     const renewal = addMonths(start, durationInMonths);
     setValue("renewalDate", renewal.toISOString());
@@ -157,7 +159,8 @@ const PaymentForm = () => {
       .then(() => {
         showToast({
           title: "Success",
-          message: "Payment initialized successfully. Status is pending until approved.",
+          message:
+            "Payment initialized successfully. Status is pending until approved.",
           type: "success",
         });
         navigate(-1);
@@ -177,8 +180,16 @@ const PaymentForm = () => {
       title: "Payment Information",
       icon: <CreditCard className="w-4 h-4" />,
       data: [
-        { label: "Customer", value: values?.customerId?.label as string, required: true },
-        { label: "Software", value: values?.softwareId?.label as string, required: true },
+        {
+          label: "Customer",
+          value: values?.customerId?.label as string,
+          required: true,
+        },
+        {
+          label: "Software",
+          value: values?.softwareId?.label as string,
+          required: true,
+        },
         {
           label: "Subscription Type",
           value: values?.subscriptionTypeId?.label as string,
@@ -241,8 +252,7 @@ const PaymentForm = () => {
         form={form}
         pageSummary={{
           title: "Initialize Payment",
-          description:
-            "Enter payment details. ",
+          description: "Enter payment details. ",
           icon: CreditCard,
         }}
         formContent={
@@ -250,9 +260,7 @@ const PaymentForm = () => {
             form={form}
             isLoading={isLoading}
             prefillFromSubscription={!!subscription}
-            prefillOptions={
-              subscription ? prefillOptions : undefined
-            }
+            prefillOptions={subscription ? prefillOptions : undefined}
           />
         }
         submitData={submitData}

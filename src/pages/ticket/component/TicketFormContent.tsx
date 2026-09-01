@@ -83,7 +83,7 @@ const TicketFormContent = ({
             label: `${item.firstName ?? ""} ${item.lastName ?? ""} (${
               item.email ?? ""
             })`.trim(),
-            value: item._id ?? "",
+            value: item.id ?? "",
           })),
         );
       })
@@ -134,9 +134,7 @@ const TicketFormContent = ({
                   placeholder="Select date and time"
                   required
                   disabled={isLoading}
-                  defaultDate={
-                    field.value ? new Date(field.value) : undefined
-                  }
+                  defaultDate={field.value ? new Date(field.value) : undefined}
                   onChange={(date) =>
                     field.onChange(date ? date.toISOString() : "")
                   }
@@ -152,7 +150,9 @@ const TicketFormContent = ({
             required
             disabled={isLoading || !!prefillComplaintId}
             options={loadComplaintOptions}
-            formatOptionLabel={(option) => formatComplaintOptionLabel(option.value)}
+            formatOptionLabel={(option) =>
+              formatComplaintOptionLabel(option.value)
+            }
             width="100%"
           />
           {prefillComplaintId && prefillComplaint && (

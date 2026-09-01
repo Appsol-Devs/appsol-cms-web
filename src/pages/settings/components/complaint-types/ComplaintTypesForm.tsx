@@ -15,7 +15,7 @@ import {
 } from "../../common/settingsApi";
 import ComplaintTypesFormContent from "./ComplaintTypesFormContent";
 
-export type IComplaintTypeFields = Omit<IComplaintType, "_id"> & {};
+export type IComplaintTypeFields = Omit<IComplaintType, "id"> & {};
 
 const ComplaintTypesForm = () => {
   const { id } = useParams();
@@ -90,7 +90,7 @@ const ComplaintTypesForm = () => {
     if (!payload) return;
     try {
       const res = id
-        ? await updateComplaintType({ _id: id, ...payload }).unwrap()
+        ? await updateComplaintType({ id: id, ...payload }).unwrap()
         : await createNewComplaintType(payload).unwrap();
 
       if (res) {

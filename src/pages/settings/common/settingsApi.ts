@@ -64,8 +64,8 @@ export const settingsApi = createApi({
       }),
     }),
     updateSoftware: builder.mutation<ISoftware, ISoftware>({
-      query: ({ _id, ...payload }) => ({
-        url: `softwares/${_id}`,
+      query: ({ id, ...payload }) => ({
+        url: `softwares/${id}`,
         body: payload,
         method: "PUT",
       }),
@@ -114,8 +114,8 @@ export const settingsApi = createApi({
       }),
     }),
     updateComplaintType: builder.mutation<IComplaintType, IComplaintType>({
-      query: ({ _id, ...payload }) => ({
-        url: `complaint_types/${_id}`,
+      query: ({ id, ...payload }) => ({
+        url: `complaint_types/${id}`,
         body: payload,
         method: "PUT",
       }),
@@ -170,8 +170,8 @@ export const settingsApi = createApi({
       IComplaintCategory,
       IComplaintCategory
     >({
-      query: ({ _id, ...payload }) => ({
-        url: `complaint_categories/${_id}`,
+      query: ({ id, ...payload }) => ({
+        url: `complaint_categories/${id}`,
         body: payload,
         method: "PUT",
       }),
@@ -220,8 +220,8 @@ export const settingsApi = createApi({
       }),
     }),
     updateCallStatus: builder.mutation<ICallStatus, ICallStatus>({
-      query: ({ _id, ...payload }) => ({
-        url: `call_statuses/${_id}`,
+      query: ({ id, ...payload }) => ({
+        url: `call_statuses/${id}`,
         body: payload,
         method: "PUT",
       }),
@@ -270,8 +270,8 @@ export const settingsApi = createApi({
       }),
     }),
     updateSetupStatus: builder.mutation<ISetupStatus, ISetupStatus>({
-      query: ({ _id, ...payload }) => ({
-        url: `setup_statuses/${_id}`,
+      query: ({ id, ...payload }) => ({
+        url: `setup_statuses/${id}`,
         body: payload,
         method: "PUT",
       }),
@@ -319,14 +319,14 @@ export const settingsApi = createApi({
           body: payload,
           method: "POST",
         }),
-      }
+      },
     ),
     updateSubscriptionType: builder.mutation<
       ISubscriptionType,
       ISubscriptionType
     >({
-      query: ({ _id, ...payload }) => ({
-        url: `subscription_types/${_id}`,
+      query: ({ id, ...payload }) => ({
+        url: `subscription_types/${id}`,
         body: payload,
         method: "PUT",
       }),
@@ -375,8 +375,8 @@ export const settingsApi = createApi({
       }),
     }),
     updateLeadStatus: builder.mutation<ILeadStatus, ILeadStatus>({
-      query: ({ _id, ...payload }) => ({
-        url: `lead_statuses/${_id}`,
+      query: ({ id, ...payload }) => ({
+        url: `lead_statuses/${id}`,
         body: payload,
         method: "PUT",
       }),
@@ -426,8 +426,8 @@ export const settingsApi = createApi({
       }),
     }),
     updateLeadNextStep: builder.mutation<ILeadNextStep, ILeadNextStep>({
-      query: ({ _id, ...payload }) => ({
-        url: `lead_next_steps/${_id}`,
+      query: ({ id, ...payload }) => ({
+        url: `lead_next_steps/${id}`,
         body: payload,
         method: "PUT",
       }),

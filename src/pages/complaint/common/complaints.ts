@@ -7,7 +7,7 @@ import type {
 import type { ITicket } from "@/pages/ticket/common/tickets";
 
 export type IComplaint = {
-  _id?: string;
+  id?: string;
   complaintCode?: string;
   customerId?: string;
   customer?: ICustomer;

@@ -27,7 +27,7 @@ const CustomerComplaints = () => {
     (params: any) => {
       return trigger({ ...params, customerId: id });
     },
-    [trigger, id]
+    [trigger, id],
   );
 
   const columns = useMemo<ColumnDef<IComplaint>[]>(
@@ -46,8 +46,10 @@ const CustomerComplaints = () => {
             <span className="font-semibold text-xs">
               {row.original?.complaintCode ?? "N/A"}
             </span>
-            <Badge 
-              variant={row.original.complaintType?.colorCode ? undefined : "secondary"}
+            <Badge
+              variant={
+                row.original.complaintType?.colorCode ? undefined : "secondary"
+              }
               className="text-[11px] font-medium px-2 py-0 rounded-full"
               style={getLookupBadgeStyle(row.original.complaintType?.colorCode)}
             >
@@ -62,9 +64,15 @@ const CustomerComplaints = () => {
         meta: { icon: <Layers size={14} /> },
         cell: ({ row }) => (
           <Badge
-            variant={row.original.complaintCategory?.colorCode ? undefined : "secondary"}
+            variant={
+              row.original.complaintCategory?.colorCode
+                ? undefined
+                : "secondary"
+            }
             className="capitalize border text-xs font-medium px-2 py-0 rounded-full"
-            style={getLookupBadgeStyle(row.original.complaintCategory?.colorCode)}
+            style={getLookupBadgeStyle(
+              row.original.complaintCategory?.colorCode,
+            )}
           >
             {row.original.complaintCategory?.name ?? "—"}
           </Badge>
@@ -110,7 +118,7 @@ const CustomerComplaints = () => {
         },
       },
     ],
-    [executed]
+    [executed],
   );
 
   return (
@@ -119,12 +127,11 @@ const CustomerComplaints = () => {
         columns={columns}
         pathOnRowSelected={(row) => {
           const c = row as IComplaint;
-          if (!c._id) return;
-          
-          navigate(
-            allRoutes.PORTAL + allRoutes.VIEW_COMPLAINT(c._id),
-            { state: { initialData: c, customerId: id } }
-          );
+          if (!c.id) return;
+
+          navigate(allRoutes.PORTAL + allRoutes.VIEW_COMPLAINT(c.id), {
+            state: { initialData: c, customerId: id },
+          });
         }}
         refetchData={executed}
         title="Customer Complaints"

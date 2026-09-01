@@ -80,7 +80,7 @@ const ComplaintTypes = () => {
               onClick={() =>
                 navigate(
                   allRoutes.PORTAL +
-                    allRoutes.UPDATE_COMPLAINT_TYPE(row.original._id as string)
+                    allRoutes.UPDATE_COMPLAINT_TYPE(row.original.id as string),
                 )
               }
             />
@@ -88,7 +88,7 @@ const ComplaintTypes = () => {
         ),
       },
     ],
-    [executed]
+    [executed],
   );
 
   return (

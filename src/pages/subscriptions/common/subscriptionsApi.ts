@@ -61,10 +61,10 @@ export const subscriptionsApi = createApi({
     }),
     updateSubscription: builder.mutation<
       ISubscription,
-      Partial<ISubscription> & { _id: string }
+      Partial<ISubscription> & { id: string }
     >({
-      query: ({ _id, ...payload }) => ({
-        url: `/subscriptions/${_id}`,
+      query: ({ id, ...payload }) => ({
+        url: `/subscriptions/${id}`,
         body: payload,
         method: "PUT",
       }),

@@ -15,7 +15,7 @@ import {
 } from "../../common/settingsApi";
 import ComplaintCategoriesFormContent from "./ComplaintCategoriesFormContent";
 
-export type IComplaintCategoryFields = Omit<IComplaintCategory, "_id"> & {};
+export type IComplaintCategoryFields = Omit<IComplaintCategory, "id"> & {};
 
 const ComplaintCategoriesForm = () => {
   const { id } = useParams();
@@ -32,7 +32,7 @@ const ComplaintCategoriesForm = () => {
 
   const navigate = useNavigate();
   const [selectedData, setSelectedData] = useState<IComplaintCategory | null>(
-    null
+    null,
   );
 
   const fetchData = async (id: string) => {
@@ -91,7 +91,7 @@ const ComplaintCategoriesForm = () => {
     if (!payload) return;
     try {
       const res = id
-        ? await updateMutation({ _id: id, ...payload }).unwrap()
+        ? await updateMutation({ id: id, ...payload }).unwrap()
         : await createNewMutation(payload).unwrap();
 
       if (res) {

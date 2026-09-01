@@ -4,7 +4,10 @@ import { showToast } from "@/components/ui/CustomToast";
 import { cleanPayload, formatMutationSummaryDateTime } from "@/lib/helpers";
 import { lookup_params } from "@/lib/api";
 import type { DropDownOption } from "@/components/DropdownComponent";
-import type { ISoftware, ISubscriptionType } from "@/pages/settings/common/settings";
+import type {
+  ISoftware,
+  ISubscriptionType,
+} from "@/pages/settings/common/settings";
 import {
   useLazyGetSoftwaresQuery,
   useLazyGetSubscriptionTypesQuery,
@@ -76,7 +79,7 @@ const SubscriptionsForm = () => {
           setSoftwareOptions(
             res.contents.map((item) => ({
               label: item.name ?? "",
-              value: item._id ?? "",
+              value: item.id ?? "",
             })),
           );
         }
@@ -89,7 +92,7 @@ const SubscriptionsForm = () => {
           setSubscriptionTypeOptions(
             res.contents.map((item) => ({
               label: item.name ?? "",
-              value: item._id ?? "",
+              value: item.id ?? "",
             })),
           );
         }
@@ -115,17 +118,13 @@ const SubscriptionsForm = () => {
     if (!data) return;
 
     const customerId =
-      typeof data.customerId === "string"
-        ? data.customerId
-        : data.customer?._id;
+      typeof data.customerId === "string" ? data.customerId : data.customer?.id;
     const softwareId =
-      typeof data.softwareId === "string"
-        ? data.softwareId
-        : data.software?._id;
+      typeof data.softwareId === "string" ? data.softwareId : data.software?.id;
     const subscriptionTypeId =
       typeof data.subscriptionTypeId === "string"
         ? data.subscriptionTypeId
-        : data.subscriptionType?._id;
+        : data.subscriptionType?.id;
 
     reset({
       customerId: customerId
@@ -163,7 +162,7 @@ const SubscriptionsForm = () => {
     if (!payload) return;
     try {
       const res = id
-        ? await updateMutation({ _id: id, ...payload }).unwrap()
+        ? await updateMutation({ id: id, ...payload }).unwrap()
         : await createNewMutation(payload).unwrap();
 
       if (res) {

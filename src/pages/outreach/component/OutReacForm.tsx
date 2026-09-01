@@ -9,10 +9,14 @@ import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 
 import type { IOutReachType } from "@/pages/customer/common/customers";
-import { useAddOutReachTypeMutation, useLazyGetOutReachTypeQuery, useUpdateOutReachTypeMutation } from "../common/OutReachApi";
+import {
+  useAddOutReachTypeMutation,
+  useLazyGetOutReachTypeQuery,
+  useUpdateOutReachTypeMutation,
+} from "../common/OutReachApi";
 import OutReachFormContent from "./OutReachFormContent";
 
-export type IOutReachTypeFields = Omit<IOutReachType, "_id" | "isActive"> & {
+export type IOutReachTypeFields = Omit<IOutReachType, "id" | "isActive"> & {
   isActive?: boolean;
   name?: string;
   description?: string;
@@ -92,7 +96,7 @@ const OutReachForm = () => {
     if (!payload) return;
     try {
       const res = id
-        ? await updateOutReachType({ _id: id, ...payload }).unwrap()
+        ? await updateOutReachType({ id: id, ...payload }).unwrap()
         : await addOutReachType(payload).unwrap();
 
       if (res) {
@@ -130,22 +134,17 @@ const OutReachForm = () => {
       name: data.name,
       description: data.description,
       isActive: id ? data.isActive : true,
-      colorCode: data.colorCode
-
-
+      colorCode: data.colorCode,
     }) as unknown as IOutReachType;
 
     handleDataSubmission(payload);
   };
 
   const summarySections: ISummarySection[] = [
-
     {
       title: "Name",
       icon: <File className="w-4 h-4" />,
-      data: [
-        { label: "Name", value: values?.name, required: true },
-      ],
+      data: [{ label: "Name", value: values?.name, required: true }],
     },
     {
       title: "OutReach Description",
@@ -164,8 +163,9 @@ const OutReachForm = () => {
         form={form}
         pageSummary={{
           title: id ? "Update Outreach" : "Create New Outreach",
-          description: `Enter all the details of the Outreach you want to ${id ? "update" : "create"
-            }.`,
+          description: `Enter all the details of the Outreach you want to ${
+            id ? "update" : "create"
+          }.`,
           icon: Phone,
         }}
         formContent={

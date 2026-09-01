@@ -4,7 +4,7 @@ export type ILoginDetails = {
 };
 
 export type IRole = {
-  _id: string;
+  id: string;
   name: string;
   description: string;
   permissions: string[];
@@ -15,12 +15,12 @@ export type IRole = {
 };
 
 export interface IPermission {
-  _id: number;
+  id: number;
   name: string;
 }
 
 export type ILoginResponse = {
-  _id: string;
+  id: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -103,7 +103,7 @@ export interface IVerifyPasswordResetResponse {
 
 export const transformAndLogLoginData = async (
   token: string,
-  avoidClear?: boolean
+  avoidClear?: boolean,
 ) => {
   if (token) {
     if (!avoidClear) localStorage.clear();

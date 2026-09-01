@@ -46,7 +46,8 @@ const TicketView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const initialData = (location.state as { initialData?: ITicket } | null)?.initialData;
+  const initialData = (location.state as { initialData?: ITicket } | null)
+    ?.initialData;
 
   const [getTicketDetails, { isLoading: isFetching }] =
     useLazyGetATicketQuery();
@@ -57,11 +58,15 @@ const TicketView = () => {
   const [getUsers] = useLazyGetUsersQuery();
   const [getAUser] = useLazyGetAUserQuery();
   const [loggedByName, setLoggedByName] = useState<string>("—");
-  const [reassignTo, setReassignTo] = useState<DropDownOption<string> | null>(null);
+  const [reassignTo, setReassignTo] = useState<DropDownOption<string> | null>(
+    null,
+  );
   const [reassignReason, setReassignReason] = useState("");
-  const [engineerOptions, setEngineerOptions] = useState<DropDownOption<string>[]>([]);
-  const [selectedTicket, setSelectedTicket] = useState<ITicket | null>(
-    () => (initialData && initialData._id === id ? initialData : null),
+  const [engineerOptions, setEngineerOptions] = useState<
+    DropDownOption<string>[]
+  >([]);
+  const [selectedTicket, setSelectedTicket] = useState<ITicket | null>(() =>
+    initialData && initialData.id === id ? initialData : null,
   );
 
   useEffect(() => {
@@ -84,7 +89,7 @@ const TicketView = () => {
     if (typeof loggedBy === "object") {
       const user = loggedBy as { firstName?: string; lastName?: string };
       setLoggedByName(
-        `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "—"
+        `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "—",
       );
       return;
     }
@@ -92,7 +97,7 @@ const TicketView = () => {
       .unwrap()
       .then((user) => {
         setLoggedByName(
-          `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "—"
+          `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "—",
         );
       })
       .catch(() => setLoggedByName("—"));
@@ -105,8 +110,9 @@ const TicketView = () => {
         if (!res?.contents) return;
         setEngineerOptions(
           (res.contents as IUser[]).map((item) => ({
-            label: `${item.firstName ?? ""} ${item.lastName ?? ""} (${item.email ?? ""})`.trim(),
-            value: item._id ?? "",
+            label:
+              `${item.firstName ?? ""} ${item.lastName ?? ""} (${item.email ?? ""})`.trim(),
+            value: item.id ?? "",
           })),
         );
       })
@@ -124,7 +130,7 @@ const TicketView = () => {
     }
     const fromId =
       selectedTicket?.assignedEngineerId ??
-      selectedTicket?.assignedEngineer?._id;
+      selectedTicket?.assignedEngineer?.id;
     if (!fromId) {
       showToast({
         title: "Cannot Reassign",
@@ -244,13 +250,20 @@ const TicketView = () => {
                 content={
                   <p className="text-muted-foreground text-center">
                     Are you sure you want to close this ticket{" "}
-                    <strong>{selectedTicket.ticketCode ?? selectedTicket.title}</strong>?
+                    <strong>
+                      {selectedTicket.ticketCode ?? selectedTicket.title}
+                    </strong>
+                    ?
                   </p>
                 }
                 onConfirmClicked={handleClose}
                 confirmButtonClassName="!bg-primary hover:!bg-primary/90 !text-primary-foreground"
                 trigger={
-                  <Button variant="default" disabled={isClosing} className="bg-primary! text-primary-foreground! rounded-md! text-xs! hover:opacity-90! hover:bg-primary/90!">
+                  <Button
+                    variant="default"
+                    disabled={isClosing}
+                    className="bg-primary! text-primary-foreground! rounded-md! text-xs! hover:opacity-90! hover:bg-primary/90!"
+                  >
                     <CheckCircle2 className="mr-2 h-4 w-4" />
                     <span className="text-xs">Mark as Closed</span>
                   </Button>
@@ -259,11 +272,15 @@ const TicketView = () => {
             )}
             <ActionButton
               onClick={() => {
-                const complaintId = selectedTicket.complaintId ?? selectedTicket.complaint?._id;
+                const complaintId =
+                  selectedTicket.complaintId ?? selectedTicket.complaint?.id;
                 if (complaintId) {
-                  navigate(allRoutes.PORTAL + allRoutes.VIEW_COMPLAINT(complaintId), {
-                    state: { initialData: selectedTicket.complaint },
-                  });
+                  navigate(
+                    allRoutes.PORTAL + allRoutes.VIEW_COMPLAINT(complaintId),
+                    {
+                      state: { initialData: selectedTicket.complaint },
+                    },
+                  );
                 } else {
                   navigate(allRoutes.PORTAL + allRoutes.COMPLAINTS);
                 }
@@ -431,12 +448,11 @@ const TicketView = () => {
               </h3>
             </div>
             <div className="p-6 space-y-4">
-              {selectedTicket.assignedEngineer || selectedTicket.assignedEngineerId ? (
+              {selectedTicket.assignedEngineer ||
+              selectedTicket.assignedEngineerId ? (
                 <>
                   <div className="space-y-2">
-                    <Label className="text-xs font-semibold">
-                      Reassign to
-                    </Label>
+                    <Label className="text-xs font-semibold">Reassign to</Label>
                     <DropDownComponent
                       label="Select engineer"
                       title="Engineer"
@@ -444,7 +460,7 @@ const TicketView = () => {
                         (o) =>
                           o.value !==
                           (selectedTicket.assignedEngineerId ??
-                            selectedTicket.assignedEngineer?._id),
+                            selectedTicket.assignedEngineer?.id),
                       )}
                       defaultValue={reassignTo ?? undefined}
                       onChanged={(val) =>
@@ -467,7 +483,9 @@ const TicketView = () => {
                   <Button
                     onClick={handleReassign}
                     disabled={
-                      isReassigning || !reassignTo?.value || !reassignReason.trim()
+                      isReassigning ||
+                      !reassignTo?.value ||
+                      !reassignReason.trim()
                     }
                     className="bg-primary! text-primary-foreground! rounded-md! text-xs!"
                   >

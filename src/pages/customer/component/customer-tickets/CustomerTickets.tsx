@@ -161,7 +161,7 @@ const CustomerTickets = () => {
         },
       },
     ],
-    [executed]
+    [executed],
   );
 
   if (!customerId) {
@@ -177,7 +177,7 @@ const CustomerTickets = () => {
           const ticket = row as ITicket;
           setPreviewTicket(ticket);
           setDrawerOpen(true);
-          const ticketId = ticket._id;
+          const ticketId = ticket.id;
           if (ticketId) {
             getATicket(ticketId)
               .unwrap()

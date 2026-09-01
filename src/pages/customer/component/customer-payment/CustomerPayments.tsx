@@ -1,8 +1,20 @@
 import { formatDateTime, formatToCurrency } from "@/lib/helpers";
 import type { IBaseQueryParam } from "@/lib/api";
-import { Banknote, Calendar, FileText, Monitor, User, CreditCard } from "lucide-react";
+import {
+  Banknote,
+  Calendar,
+  FileText,
+  Monitor,
+  User,
+  CreditCard,
+} from "lucide-react";
 import { useEffect, useMemo, useState, useCallback } from "react";
-import { useLocation, useNavigate, useOutletContext, useParams } from "react-router-dom";
+import {
+  useLocation,
+  useNavigate,
+  useOutletContext,
+  useParams,
+} from "react-router-dom";
 import FeatureContentRenderer from "@/components/table/component/FeatureContentRenderer";
 import CustomerCompanyCell from "@/components/CustomerCompanyCell";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -131,7 +143,7 @@ const CustomerPayments = () => {
         },
       },
     ],
-    [executed]
+    [executed],
   );
 
   if (!customerId) {
@@ -149,9 +161,12 @@ const CustomerPayments = () => {
         columns={columns}
         pathOnRowSelected={(row) => {
           const payment = row as IPayment;
-          navigate(allRoutes.PORTAL + allRoutes.VIEW_PAYMENT(payment._id as string), {
-            state: { initialData: payment, customerId },
-          });
+          navigate(
+            allRoutes.PORTAL + allRoutes.VIEW_PAYMENT(payment.id as string),
+            {
+              state: { initialData: payment, customerId },
+            },
+          );
         }}
         refetchData={executed}
         title="Customer Payments"

@@ -16,7 +16,7 @@ import {
 } from "../common/usersApi";
 import UsersFormContent from "./UsersFormContent";
 
-export type IUserFields = Omit<IUser, "_id"> & {
+export type IUserFields = Omit<IUser, "id"> & {
   role?: DropDownOption<string>;
   confirm_password?: string;
 };
@@ -68,7 +68,7 @@ const UsersForm = () => {
       password: "",
       confirm_password: "",
       role: data.role
-        ? { label: data.role.name, value: data.role._id as string }
+        ? { label: data.role.name, value: data.role.id as string }
         : undefined,
     });
   };
@@ -100,7 +100,7 @@ const UsersForm = () => {
     if (!payload) return;
     try {
       const res = id
-        ? await updateUser({ _id: id, ...payload }).unwrap()
+        ? await updateUser({ id: id, ...payload }).unwrap()
         : await createNewUser(payload).unwrap();
 
       if (res) {
@@ -117,8 +117,6 @@ const UsersForm = () => {
       if (!error) return;
     }
   };
-
-
 
   const submitData = () => {
     const data = getValues();
@@ -153,12 +151,13 @@ const UsersForm = () => {
     }
 
     const payload: IUser = cleanPayload({
-      role: data.role?.value,
+      // role: data.role?.value,
       firstName: data.firstName,
       lastName: data.lastName,
       email: data.email,
       phone: data.phone,
       password: id ? undefined : data.password,
+      roleId: data.role?.value,
     });
 
     // console.log(payload);

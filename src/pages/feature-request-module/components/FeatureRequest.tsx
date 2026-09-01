@@ -1,11 +1,5 @@
 import { formatDateTime } from "@/lib/helpers";
-import {
-  Briefcase,
-  CircleDot,
-  User,
-  Sparkles,
-  Tag
-} from "lucide-react";
+import { Briefcase, CircleDot, User, Sparkles, Tag } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import ActionButton from "@/components/ActionButtons";
 import { useNavigate } from "react-router-dom";
@@ -14,7 +8,11 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { allRoutes } from "@/utils/routes";
 import { getLookupBadgeStyle } from "@/lib/enums";
-import { getPriorityColor, getStatusColor, type IFeatureRequest } from "../common/feature-request";
+import {
+  getPriorityColor,
+  getStatusColor,
+  type IFeatureRequest,
+} from "../common/feature-request";
 import { useLazyGetFeatureRequestsQuery } from "../common/featureRequestApi";
 
 const FeatureRequest = () => {
@@ -72,10 +70,10 @@ const FeatureRequest = () => {
           const companyName =
             typeof customer === "string"
               ? customer
-              : customer?.companyName ?? "N/A";
+              : (customer?.companyName ?? "N/A");
 
           const softwareName =
-            typeof software === "string" ? software : software?.name ?? "N/A";
+            typeof software === "string" ? software : (software?.name ?? "N/A");
           const colorCode =
             typeof software === "string" ? undefined : software?.colorCode;
           const style = getLookupBadgeStyle(colorCode);
@@ -139,12 +137,10 @@ const FeatureRequest = () => {
   );
 
   const pathOnRowSelected = (data: IFeatureRequest) => {
-    const { _id } = data;
-    if (!_id) return;
+    const { id } = data;
+    if (!id) return;
 
-    navigate(
-      allRoutes.PORTAL + allRoutes.VIEW_FEATURE_REQUEST(_id)
-    );
+    navigate(allRoutes.PORTAL + allRoutes.VIEW_FEATURE_REQUEST(id));
   };
 
   return (
@@ -154,12 +150,20 @@ const FeatureRequest = () => {
           <ActionButton
             type="add"
             useText="Add Feature Request"
-            onClick={() => navigate(allRoutes.PORTAL + allRoutes.ADD_FEATURE_REQUEST)}
+            onClick={() =>
+              navigate(allRoutes.PORTAL + allRoutes.ADD_FEATURE_REQUEST)
+            }
           />
         )}
         useDateFilters
         dateFilterNoDefault
-        filters={["featurePriority", "softwareId", "customerId", "featureStatus","assignedTo"]} 
+        filters={[
+          "featurePriority",
+          "softwareId",
+          "customerId",
+          "featureStatus",
+          "assignedTo",
+        ]}
         pathOnRowSelected={pathOnRowSelected}
         columns={columns}
         refetchData={executed}

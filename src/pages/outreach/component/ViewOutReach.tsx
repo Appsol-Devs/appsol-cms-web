@@ -9,31 +9,29 @@ import DetailItem from "@/components/ui/DetailItem";
 import StatusBadge from "@/components/ui/StatusBadge";
 import type { IOutReachType } from "@/pages/customer/common/customers";
 import { allRoutes } from "@/utils/routes";
-import {
-  Megaphone,
-  Palette,
-  Tag,
-  Target,
-  Trash2
-} from "lucide-react";
+import { Megaphone, Palette, Tag, Target, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { useDeleteOutReachTypeMutation, useLazyGetOutReachTypeQuery } from "../common/OutReachApi";
-
+import {
+  useDeleteOutReachTypeMutation,
+  useLazyGetOutReachTypeQuery,
+} from "../common/OutReachApi";
 
 const ViewOutReach = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const initialData = (location.state as { initialData?: IOutReachType } | null)?.initialData;
+  const initialData = (location.state as { initialData?: IOutReachType } | null)
+    ?.initialData;
 
   const [deleteOutReach] = useDeleteOutReachTypeMutation();
   const [getOutReachDetails, { isLoading: isFetching }] =
-      useLazyGetOutReachTypeQuery();
+    useLazyGetOutReachTypeQuery();
 
-  const [selectedOutReach, setSelectedOutReach] = useState<IOutReachType | null>(() =>
-    initialData && initialData._id === id ? initialData : null
-  );
+  const [selectedOutReach, setSelectedOutReach] =
+    useState<IOutReachType | null>(() =>
+      initialData && initialData.id === id ? initialData : null,
+    );
 
   useEffect(() => {
     if (id) {
@@ -98,7 +96,7 @@ const ViewOutReach = () => {
               onClick={() =>
                 navigate(
                   allRoutes.PORTAL +
-                    allRoutes.UPDATE_OUTREACH_TYPE(id as string)
+                    allRoutes.UPDATE_OUTREACH_TYPE(id as string),
                 )
               }
               type="edit"
@@ -136,7 +134,7 @@ const ViewOutReach = () => {
               className="w-24 h-24 rounded-full flex items-center justify-center mb-4 border-4 border-white shadow-sm"
               style={{
                 backgroundColor: selectedOutReach.colorCode
-                  ? `${selectedOutReach.colorCode}20` 
+                  ? `${selectedOutReach.colorCode}20`
                   : "#eff6ff",
               }}
             >
@@ -184,7 +182,9 @@ const ViewOutReach = () => {
               <div className="md:col-span-2">
                 <DetailItem
                   label="Description"
-                  value={selectedOutReach.description || "No description provided."}
+                  value={
+                    selectedOutReach.description || "No description provided."
+                  }
                 />
               </div>
             </div>
@@ -215,8 +215,6 @@ const ViewOutReach = () => {
                   </span>
                 </div>
               </div>
-
-             
             </div>
           </div>
         </div>
