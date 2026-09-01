@@ -132,7 +132,8 @@ const Subscriptions = () => {
         meta: { icon: <AlertCircle size={14} /> },
         cell: ({ row }) => {
           const dueInfo = getDueStatus(row.original?.nextBillingDate);
-          if (!dueInfo) return <span className="text-xs text-muted-foreground">—</span>;
+          if (!dueInfo)
+            return <span className="text-xs text-muted-foreground">—</span>;
           const style = getLookupBadgeStyle(dueInfo.color);
           return (
             <Badge
@@ -146,7 +147,7 @@ const Subscriptions = () => {
         },
       },
     ],
-    [executed]
+    [executed],
   );
 
   return (
@@ -164,9 +165,13 @@ const Subscriptions = () => {
         columns={columns}
         pathOnRowSelected={(row) => {
           const subscription = row as ISubscription;
-          navigate(allRoutes.PORTAL + allRoutes.VIEW_SUBSCRIPTION(subscription._id as string), {
-            state: { initialData: subscription },
-          });
+          navigate(
+            allRoutes.PORTAL +
+              allRoutes.VIEW_SUBSCRIPTION(subscription.id as string),
+            {
+              state: { initialData: subscription },
+            },
+          );
         }}
         refetchData={executed}
         title="Subscriptions"

@@ -79,7 +79,7 @@ const CustomerSetupFormContent = ({ isLoading, form, isUpdate }: IField) => {
           setSoftwareOptions(
             res.contents.map((item: ISoftware) => ({
               label: item.name ?? "",
-              value: item._id ?? "",
+              value: item.id ?? "",
             })),
           );
         }
@@ -92,7 +92,7 @@ const CustomerSetupFormContent = ({ isLoading, form, isUpdate }: IField) => {
           setUserOptions(
             res.contents.map((item: IUser) => ({
               label: `${item.firstName ?? ""} ${item.lastName ?? ""}`.trim(),
-              value: item._id ?? "",
+              value: item.id ?? "",
             })),
           );
         }
@@ -106,7 +106,7 @@ const CustomerSetupFormContent = ({ isLoading, form, isUpdate }: IField) => {
               label:
                 (SETUP_STATUS_LABEL_MAP[status.name ?? ""] || status.name) ??
                 "",
-              value: status._id ?? "",
+              value: status.id ?? "",
             })),
           );
         }

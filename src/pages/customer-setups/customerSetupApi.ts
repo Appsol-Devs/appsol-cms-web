@@ -56,8 +56,8 @@ export const customerSetupApi = createApi({
       }),
     }),
     updateCustomerSetup: builder.mutation<ICustomerSetup, ICustomerSetup>({
-      query: ({ _id, ...payload }) => ({
-        url: `customer_setups/${_id}`,
+      query: ({ id, ...payload }) => ({
+        url: `customer_setups/${id}`,
         body: payload,
         method: "PUT",
       }),

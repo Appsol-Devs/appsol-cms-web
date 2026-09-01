@@ -4,11 +4,7 @@ import PageSummary from "@/components/PageSummary";
 import PageTitle from "@/components/PageTitle";
 import { formatDate } from "@/lib/helpers";
 import { getLookupBadgeStyle } from "@/lib/enums";
-import {
-  FileText,
-  Trash2,
-  BookOpenText,
-} from "lucide-react";
+import { FileText, Trash2, BookOpenText } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { allRoutes } from "@/utils/routes";
@@ -38,10 +34,14 @@ const formatUserFullName = (user: unknown): string => {
 
 const getPriorityColor = (priority: string) => {
   switch (priority?.toLowerCase()) {
-    case "high": return "#ef4444";
-    case "medium": return "#f59e0b";
-    case "low": return "#10b981";
-    default: return undefined;
+    case "high":
+      return "#ef4444";
+    case "medium":
+      return "#f59e0b";
+    case "low":
+      return "#10b981";
+    default:
+      return undefined;
   }
 };
 
@@ -54,10 +54,11 @@ const CustomerSetupView = () => {
   )?.initialData;
 
   const [deleteCustomerSetup] = useDeleteCustomerSetupMutation();
-  const [getCustomerSetupDetails, { isLoading: isFetching }] = useLazyGetACustomerSetupQuery();
+  const [getCustomerSetupDetails, { isLoading: isFetching }] =
+    useLazyGetACustomerSetupQuery();
 
-  const [selectedSetup, setSelectedSetup] = useState<ICustomerSetup | null>(() =>
-    initialData && initialData._id === id ? initialData : null,
+  const [selectedSetup, setSelectedSetup] = useState<ICustomerSetup | null>(
+    () => (initialData && initialData.id === id ? initialData : null),
   );
 
   useEffect(() => {
@@ -124,8 +125,9 @@ const CustomerSetupView = () => {
       ? undefined
       : selectedSetup.software?.colorCode;
 
-  const generalStatusName = selectedSetup.status?.replace(/([a-z])([A-Z])/g, '$1 $2') || "—";
-  
+  const generalStatusName =
+    selectedSetup.status?.replace(/([a-z])([A-Z])/g, "$1 $2") || "—";
+
   const setupStatusName =
     typeof selectedSetup.setupStatus === "string"
       ? selectedSetup.setupStatus || "—"
@@ -147,7 +149,10 @@ const CustomerSetupView = () => {
           <div className="flex items-center gap-3 flex-wrap">
             <ActionButton
               onClick={() =>
-                navigate(allRoutes.PORTAL + allRoutes.UPDATE_CUSTOMER_SETUP(String(id)))
+                navigate(
+                  allRoutes.PORTAL +
+                    allRoutes.UPDATE_CUSTOMER_SETUP(String(id)),
+                )
               }
               type="edit"
               useText="Edit"
@@ -159,12 +164,16 @@ const CustomerSetupView = () => {
               content={
                 <p className="text-muted-foreground text-center">
                   This action cannot be undone. This will permanently delete the
-                  setup <strong>{selectedSetup.title}</strong> and remove its data.
+                  setup <strong>{selectedSetup.title}</strong> and remove its
+                  data.
                 </p>
               }
               onConfirmClicked={() => handleDeletion(id as string)}
               trigger={
-                <Button variant="destructive" className="bg-red-700! text-white">
+                <Button
+                  variant="destructive"
+                  className="bg-red-700! text-white"
+                >
                   <Trash2 className="mr-2 h-4 w-4" />
                   <span className="text-xs">Delete</span>
                 </Button>
@@ -259,9 +268,7 @@ const CustomerSetupView = () => {
                   <p className="text-xs text-muted-foreground uppercase font-semibold mb-1.5">
                     Customer
                   </p>
-                  <p className="text-sm text-card-foreground">
-                    {customerName}
-                  </p>
+                  <p className="text-sm text-card-foreground">{customerName}</p>
                 </div>
 
                 <div>
@@ -282,7 +289,8 @@ const CustomerSetupView = () => {
                     Assigned Users
                   </p>
                   <div className="flex flex-wrap gap-1">
-                    {selectedSetup.assignedTo && selectedSetup.assignedTo.length > 0 ? (
+                    {selectedSetup.assignedTo &&
+                    selectedSetup.assignedTo.length > 0 ? (
                       selectedSetup.assignedTo.map((user, idx) => {
                         const name = formatUserFullName(user);
                         return (

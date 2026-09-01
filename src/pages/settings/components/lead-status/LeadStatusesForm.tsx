@@ -15,7 +15,7 @@ import {
 import type { ILeadStatus } from "../../common/settings";
 import LeadStatusesFormContent from "./LeadStatusesFormContent";
 
-export type ILeadStatusFields = Omit<ILeadStatus, "_id"> & {};
+export type ILeadStatusFields = Omit<ILeadStatus, "id"> & {};
 
 const LeadStatusesForm = () => {
   const { id } = useParams();
@@ -24,15 +24,15 @@ const LeadStatusesForm = () => {
     useAddLeadStatusMutation();
   const [updateLeadStatus, { isLoading: isUpdating }] =
     useUpdateLeadStatusMutation();
-  const [getALeadStatus, { isLoading: isGetting }] = useLazyGetALeadStatusQuery();
+  const [getALeadStatus, { isLoading: isGetting }] =
+    useLazyGetALeadStatusQuery();
   const form = useForm<ILeadStatusFields>();
   const { watch, getValues, reset } = form;
   const values = watch();
 
   const navigate = useNavigate();
-  const [selectedLeadStatus, setSelectedLeadStatus] = useState<ILeadStatus | null>(
-    null
-  );
+  const [selectedLeadStatus, setSelectedLeadStatus] =
+    useState<ILeadStatus | null>(null);
 
   const fetchData = async (id: string) => {
     if (!id) return;
@@ -90,7 +90,7 @@ const LeadStatusesForm = () => {
     if (!payload) return;
     try {
       const res = id
-        ? await updateLeadStatus({ _id: id, ...payload }).unwrap()
+        ? await updateLeadStatus({ id: id, ...payload }).unwrap()
         : await createNewLeadStatus(payload).unwrap();
 
       if (res) {

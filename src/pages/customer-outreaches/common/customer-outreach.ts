@@ -17,10 +17,8 @@ export interface ICustomerOutreach {
   isRoutineCall: boolean;
   loggedBy: IUser;
   status: string;
-  _id: string;
+  id: string;
   createdAt: string;
   updatedAt: string;
   outreachCode?: string;
 }
-
-

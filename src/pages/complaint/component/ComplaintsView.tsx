@@ -8,13 +8,7 @@ import { Button } from "@/components/ui/button";
 import { showToast } from "@/components/ui/CustomToast";
 import { formatDate } from "@/lib/helpers";
 import { allRoutes } from "@/utils/routes";
-import {
-  Calendar,
-  FileText,
-  Headset,
-  Trash2,
-  User,
-} from "lucide-react";
+import { Calendar, FileText, Headset, Trash2, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import type { IComplaint } from "../common/complaints";
@@ -31,7 +25,8 @@ const ComplaintsView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const initialData = (location.state as { initialData?: IComplaint } | null)?.initialData;
+  const initialData = (location.state as { initialData?: IComplaint } | null)
+    ?.initialData;
 
   const [deleteComplaint] = useDeleteComplaintMutation();
   const [getComplaintDetails, { isLoading: isFetching }] =
@@ -40,7 +35,7 @@ const ComplaintsView = () => {
   const [linkedTicket, setLinkedTicket] = useState<ITicket | null>(null);
 
   const [selectedComplaint, setSelectedComplaint] = useState<IComplaint | null>(
-    () => (initialData && initialData._id === id ? initialData : null),
+    () => (initialData && initialData.id === id ? initialData : null),
   );
 
   useEffect(() => {
@@ -59,11 +54,11 @@ const ComplaintsView = () => {
   useEffect(() => {
     if (!selectedComplaint) return;
     const ticket = selectedComplaint.ticket;
-    if (ticket?._id) {
+    if (ticket?.id) {
       setLinkedTicket(ticket);
       return;
     }
-    const complaintId = selectedComplaint._id;
+    const complaintId = selectedComplaint.id;
     if (!complaintId) {
       setLinkedTicket(null);
       return;
@@ -122,12 +117,15 @@ const ComplaintsView = () => {
         }`}
         actionComponent={
           <div className="flex items-center gap-2 flex-wrap">
-            {linkedTicket?._id && (
+            {linkedTicket?.id && (
               <ActionButton
                 onClick={() => {
-                  navigate(allRoutes.PORTAL + allRoutes.VIEW_TICKET(linkedTicket._id!), {
-                    state: { initialData: linkedTicket },
-                  });
+                  navigate(
+                    allRoutes.PORTAL + allRoutes.VIEW_TICKET(linkedTicket.id!),
+                    {
+                      state: { initialData: linkedTicket },
+                    },
+                  );
                 }}
                 type="view"
                 useText="View Ticket"
@@ -135,10 +133,12 @@ const ComplaintsView = () => {
             )}
             <ActionButton
               onClick={() =>
-                navigate(
-                  allRoutes.PORTAL + allRoutes.ADD_TICKET,
-                  { state: { complaint: selectedComplaint, complaintId: selectedComplaint._id } },
-                )
+                navigate(allRoutes.PORTAL + allRoutes.ADD_TICKET, {
+                  state: {
+                    complaint: selectedComplaint,
+                    complaintId: selectedComplaint.id,
+                  },
+                })
               }
               type="add"
               useText="Create Ticket"
@@ -146,8 +146,7 @@ const ComplaintsView = () => {
             <ActionButton
               onClick={() =>
                 navigate(
-                  allRoutes.PORTAL +
-                    allRoutes.UPDATE_COMPLAINT(id as string),
+                  allRoutes.PORTAL + allRoutes.UPDATE_COMPLAINT(id as string),
                 )
               }
               type="edit"
@@ -261,7 +260,7 @@ const ComplaintsView = () => {
                     }
                     className="capitalize border text-xs font-medium px-2 py-0 rounded-full"
                     style={getLookupBadgeStyle(
-                      selectedComplaint.complaintType?.colorCode
+                      selectedComplaint.complaintType?.colorCode,
                     )}
                   >
                     {selectedComplaint.complaintType?.name ?? "—"}
@@ -279,7 +278,7 @@ const ComplaintsView = () => {
                     }
                     className="capitalize border text-xs font-medium px-2 py-0 rounded-full"
                     style={getLookupBadgeStyle(
-                      selectedComplaint.complaintCategory?.colorCode
+                      selectedComplaint.complaintCategory?.colorCode,
                     )}
                   >
                     {selectedComplaint.complaintCategory?.name ?? "—"}
@@ -305,7 +304,7 @@ const ComplaintsView = () => {
                     }
                     className="capitalize border text-xs font-medium px-2 py-0 rounded-full"
                     style={getLookupBadgeStyle(
-                      getComplaintStatusColor(selectedComplaint.status ?? "")
+                      getComplaintStatusColor(selectedComplaint.status ?? ""),
                     )}
                   >
                     {selectedComplaint.status ?? "—"}

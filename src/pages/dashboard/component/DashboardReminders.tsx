@@ -7,9 +7,7 @@ import { allRoutes } from "@/utils/routes";
 import { Building2, User } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  useGetSubscriptionRemindersQuery,
-} from "@/pages/subscription-reminders/common/subscriptionRemindersApi";
+import { useGetSubscriptionRemindersQuery } from "@/pages/subscription-reminders/common/subscriptionRemindersApi";
 import {
   type ISubscriptionReminder,
   type TSubscriptionReminderType,
@@ -44,7 +42,9 @@ function dueDateSortKey(dueDate?: string): number {
 function sortRemindersByDueDateNewestFirst(
   items: ISubscriptionReminder[],
 ): ISubscriptionReminder[] {
-  return [...items].sort((a, b) => dueDateSortKey(b.dueDate) - dueDateSortKey(a.dueDate));
+  return [...items].sort(
+    (a, b) => dueDateSortKey(b.dueDate) - dueDateSortKey(a.dueDate),
+  );
 }
 
 function filterByTab(
@@ -100,7 +100,11 @@ const DashboardReminders = () => {
   const header = (
     <div className="flex items-center justify-between gap-2">
       <p className="font-bold">Reminders</p>
-      <Button variant="link" className="h-auto p-0 text-xs font-medium !text-primary" asChild>
+      <Button
+        variant="link"
+        className="h-auto p-0 text-xs font-medium !text-primary"
+        asChild
+      >
         <Link to={allRoutes.PORTAL + allRoutes.SUBSCRIPTION_REMINDERS}>
           View all
         </Link>
@@ -144,7 +148,8 @@ const DashboardReminders = () => {
                   DASHBOARD_PRESET_BUTTON_CLASS,
                   "shrink-0",
                   "focus-visible:outline-none focus-visible:border-transparent focus-visible:ring-0 focus-visible:ring-offset-0",
-                  tab !== t.key && "!bg-transparent !text-black dark:!text-foreground",
+                  tab !== t.key &&
+                    "!bg-transparent !text-black dark:!text-foreground",
                   tab === t.key && "!bg-primary !text-onPrimary",
                 )}
                 onClick={() => setTab(t.key)}
@@ -168,7 +173,12 @@ const DashboardReminders = () => {
             ))}
           </div>
 
-          <div className={cn("pt-3 overflow-y-auto overscroll-contain hide-scrollbar", REMINDERS_LIST_MAX_HEIGHT)}>
+          <div
+            className={cn(
+              "pt-3 overflow-y-auto overscroll-contain hide-scrollbar",
+              REMINDERS_LIST_MAX_HEIGHT,
+            )}
+          >
             {filtered.length === 0 ? (
               <p className="py-6 text-center text-xs text-muted-foreground">
                 No reminders in this category.
@@ -182,7 +192,7 @@ const DashboardReminders = () => {
                   const softwareName = r.software?.name ?? "—";
                   return (
                     <button
-                      key={r._id}
+                      key={r.id}
                       type="button"
                       className="flex w-full items-start gap-2 py-3 text-left transition-colors !bg-card hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-0"
                       onClick={() => {

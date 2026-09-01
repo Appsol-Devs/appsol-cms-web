@@ -4,7 +4,10 @@ import PageSummary from "@/components/PageSummary";
 import PageTitle from "@/components/PageTitle";
 import { Shield, Trash2, Briefcase, KeyRound, Calendar } from "lucide-react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { useDeleteRoleMutation, useLazyGetARoleQuery } from "../common/rolesApi";
+import {
+  useDeleteRoleMutation,
+  useLazyGetARoleQuery,
+} from "../common/rolesApi";
 import { useEffect, useState } from "react";
 import { allRoutes } from "@/utils/routes";
 import { showToast } from "@/components/ui/CustomToast";
@@ -19,12 +22,13 @@ const RolesView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const initialData = (location.state as { initialData?: IRole } | null)?.initialData;
+  const initialData = (location.state as { initialData?: IRole } | null)
+    ?.initialData;
 
   const [deleteRole] = useDeleteRoleMutation();
   const [getRoleDetails, { isLoading: isFetching }] = useLazyGetARoleQuery();
   const [selectedRole, setSelectedRole] = useState<IRole | null>(() =>
-    initialData && initialData._id === id ? initialData : null
+    initialData && initialData.id === id ? initialData : null,
   );
 
   useEffect(() => {
@@ -53,7 +57,11 @@ const RolesView = () => {
       navigate(-1);
     } catch (error) {
       console.error("Failed to delete role", error);
-      showToast({ title: "Error", message: "Failed to delete role", type: "error" });
+      showToast({
+        title: "Error",
+        message: "Failed to delete role",
+        type: "error",
+      });
     }
   };
 
@@ -83,7 +91,9 @@ const RolesView = () => {
         actionComponent={
           <div className="flex items-center gap-3">
             <ActionButton
-              onClick={() => navigate(allRoutes.PORTAL + allRoutes.UPDATE_ROLE(id as string))}
+              onClick={() =>
+                navigate(allRoutes.PORTAL + allRoutes.UPDATE_ROLE(id as string))
+              }
               type="edit"
               useText="Edit Role"
             />
@@ -93,13 +103,17 @@ const RolesView = () => {
               rightActionTitle="Delete"
               content={
                 <p className="text-gray-500 text-center">
-                  This action cannot be undone. This will permanently delete
-                  the role <strong>{selectedRole.name}</strong>. Users assigned to this role may lose access.
+                  This action cannot be undone. This will permanently delete the
+                  role <strong>{selectedRole.name}</strong>. Users assigned to
+                  this role may lose access.
                 </p>
               }
               onConfirmClicked={() => handleRoleDeletion(id as string)}
               trigger={
-                <Button variant="destructive" className="bg-red-700! text-white">
+                <Button
+                  variant="destructive"
+                  className="bg-red-700! text-white"
+                >
                   <Trash2 className="mr-2 h-4 w-4" />
                   <span className="text-xs">Delete Role</span>
                 </Button>
@@ -113,23 +127,23 @@ const RolesView = () => {
         <div className="lg:col-span-1 space-y-3">
           <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center text-center">
             <div className="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mb-4">
-               <Briefcase className="w-10 h-10 text-blue-600" />
+              <Briefcase className="w-10 h-10 text-blue-600" />
             </div>
 
             <h2 className="text-lg font-bold text-gray-900 mb-1">
               {selectedRole.name}
             </h2>
             <p className="text-sm text-gray-500 mb-4 px-4">
-               {selectedRole.description}
+              {selectedRole.description}
             </p>
 
             <div className="w-full border-t border-gray-100 pt-4 mt-2">
-                <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-500">Total Permissions</span>
-                    <Badge variant="secondary" className="text-blue-700 bg-blue-50">
-                        {selectedRole.permissions?.length || 0}
-                    </Badge>
-                </div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-gray-500">Total Permissions</span>
+                <Badge variant="secondary" className="text-blue-700 bg-blue-50">
+                  {selectedRole.permissions?.length || 0}
+                </Badge>
+              </div>
             </div>
           </div>
         </div>
@@ -143,8 +157,11 @@ const RolesView = () => {
 
             <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
               <DetailItem label="Role Name" value={selectedRole.name} />
-              <DetailItem label="Description" value={selectedRole.description} />
-              
+              <DetailItem
+                label="Description"
+                value={selectedRole.description}
+              />
+
               <div className="md:col-span-2 border-t border-gray-100 my-2"></div>
 
               <DetailItem
@@ -163,23 +180,30 @@ const RolesView = () => {
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
               <KeyRound className="w-4 h-4 text-gray-500" />
-              <h3 className="font-semibold text-gray-900">Assigned Permissions</h3>
+              <h3 className="font-semibold text-gray-900">
+                Assigned Permissions
+              </h3>
             </div>
-            
+
             <div className="p-6">
-                {selectedRole.permissions && selectedRole.permissions.length > 0 ? (
-                    <div className="flex flex-wrap gap-2">
-                        {selectedRole.permissions.map((perm: any, index: number) => (
-                             <Badge key={index} variant="outline" className="py-1.5 px-3 text-gray-600 border-gray-300">
-                                {typeof perm === 'string' ? perm : perm.name}
-                             </Badge>
-                        ))}
-                    </div>
-                ) : (
-                    <div className="text-center py-4 text-gray-500 text-sm">
-                        No permissions assigned to this role.
-                    </div>
-                )}
+              {selectedRole.permissions &&
+              selectedRole.permissions.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {selectedRole.permissions.map((perm: any, index: number) => (
+                    <Badge
+                      key={index}
+                      variant="outline"
+                      className="py-1.5 px-3 text-gray-600 border-gray-300"
+                    >
+                      {typeof perm === "string" ? perm : perm.name}
+                    </Badge>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-4 text-gray-500 text-sm">
+                  No permissions assigned to this role.
+                </div>
+              )}
             </div>
           </div>
         </div>

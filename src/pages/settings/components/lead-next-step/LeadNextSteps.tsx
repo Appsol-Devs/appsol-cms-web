@@ -80,7 +80,7 @@ const LeadNextSteps = () => {
               onClick={() =>
                 navigate(
                   allRoutes.PORTAL +
-                    allRoutes.UPDATE_LEAD_NEXT_STEP(row.original._id as string)
+                    allRoutes.UPDATE_LEAD_NEXT_STEP(row.original.id as string),
                 )
               }
             />
@@ -88,7 +88,7 @@ const LeadNextSteps = () => {
         ),
       },
     ],
-    [executed]
+    [executed],
   );
 
   return (

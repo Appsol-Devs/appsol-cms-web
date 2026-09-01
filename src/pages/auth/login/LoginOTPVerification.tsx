@@ -32,14 +32,14 @@ const LoginOTPVerification = () => {
   const navigate = useNavigate();
 
   const user = useSelector(
-    (state: RootState) => state.user.user as ILoginResponse
+    (state: RootState) => state.user.user as ILoginResponse,
   );
   const [otpSent, setOtpSent] = useState(false);
   const [userOTP, setUserOTP] = useState<string>("");
 
   const requestOTP = async () => {
     const payload: IRequestOTPPayload = {
-      userId: user?._id as string,
+      userId: user?.id as string,
       email: user?.email as string,
     };
     const res = await requestVerificationOTP(payload).unwrap();
@@ -56,7 +56,7 @@ const LoginOTPVerification = () => {
   const verifyOTP = async () => {
     const payload: IVerifiyOTPPayload = {
       otp: userOTP,
-      userId: user?._id as string,
+      userId: user?.id as string,
     };
     const res = await verifyUserOTP(payload).unwrap();
     if (res) {

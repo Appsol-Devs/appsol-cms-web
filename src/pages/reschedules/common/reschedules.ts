@@ -16,7 +16,7 @@ export type TargetEntityType =
 export type RescheduleStatus = "pending" | "approved" | "rejected";
 
 export interface IReschedule {
-  _id?: string;
+  id?: string;
   rescheduleCode?: string;
   colorCode?: string;
   reason?: string;
@@ -50,12 +50,23 @@ export interface IReschedule {
 
 export type ICreateReschedulePayload = Omit<
   IReschedule,
-  "_id" | "rescheduleCode" | "createdAt" | "updatedAt" | "customer" | "targetEntity" | "loggedBy"
+  | "_id"
+  | "rescheduleCode"
+  | "createdAt"
+  | "updatedAt"
+  | "customer"
+  | "targetEntity"
+  | "loggedBy"
 >;
 
 export type IRescheduleFormFields = Omit<
   IReschedule,
-  "_id" | "customer" | "targetEntity" | "loggedBy" | "status" | "targetEntityType"
+  | "_id"
+  | "customer"
+  | "targetEntity"
+  | "loggedBy"
+  | "status"
+  | "targetEntityType"
 > & {
   customerId?: DropDownOption<ICustomer> | null;
   targetEntityType?: string | DropDownOption<TargetEntityType> | null;
@@ -68,7 +79,7 @@ export const rescheduleCustomerToId = (
   if (!customer?.value) return undefined;
   const val = customer.value;
   if (typeof val === "string") return val;
-  return val._id;
+  return val.id;
 };
 
 export const rescheduleFieldToId = <T extends string>(
@@ -119,4 +130,3 @@ export function getScheduleInterval(
   const end = a.getTime() <= b.getTime() ? b : a;
   return { start, end };
 }
-

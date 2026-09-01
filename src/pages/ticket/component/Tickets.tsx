@@ -16,7 +16,10 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { allRoutes } from "@/utils/routes";
 import type { ITicket } from "../common/tickets";
-import { useLazyGetTicketsQuery, useLazyGetATicketQuery } from "../common/ticketsApi";
+import {
+  useLazyGetTicketsQuery,
+  useLazyGetATicketQuery,
+} from "../common/ticketsApi";
 import TicketPreviewDrawer from "./TicketPreviewDrawer";
 import {
   getTicketPriorityColor,
@@ -150,9 +153,7 @@ const Tickets = () => {
           <ActionButton
             type="add"
             useText="Add Ticket"
-            onClick={() =>
-              navigate(allRoutes.PORTAL + allRoutes.ADD_TICKET)
-            }
+            onClick={() => navigate(allRoutes.PORTAL + allRoutes.ADD_TICKET)}
           />
         )}
         columns={columns}
@@ -160,7 +161,7 @@ const Tickets = () => {
           const ticket = row as ITicket;
           setPreviewTicket(ticket);
           setDrawerOpen(true);
-          const id = ticket._id;
+          const id = ticket.id;
           if (id) {
             getATicket(id)
               .unwrap()
@@ -172,11 +173,7 @@ const Tickets = () => {
         }}
         refetchData={executed}
         title="Tickets"
-        filters={[
-          "ticketStatus",
-          "ticketPriority",
-          "assignedEngineerId",
-        ]}
+        filters={["ticketStatus", "ticketPriority", "assignedEngineerId"]}
         lazyFetchQuery={[fetchQuery, fetchState]}
       />
       <TicketPreviewDrawer

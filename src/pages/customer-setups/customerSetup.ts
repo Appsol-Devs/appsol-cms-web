@@ -2,7 +2,7 @@ import type { ICustomer, IUser } from "@/pages/customer/common/customers";
 import type { ISetupStatus, ISoftware } from "@/pages/settings/common/settings";
 
 export interface ICustomerSetup {
-  _id?: string;
+  id?: string;
   setupCode?: string;
   title?: string;
   customerId?: string;

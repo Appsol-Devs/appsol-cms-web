@@ -43,9 +43,9 @@ export default function RescheduleDetailsDrawer({
     typeof customer === "string" ? "" : (customer?.companyName ?? "");
 
   const handleView = () => {
-    if (!reschedule?._id) return;
+    if (!reschedule?.id) return;
     onOpenChange(false);
-    navigate(allRoutes.PORTAL + allRoutes.VIEW_RESCHEDULE(reschedule._id), {
+    navigate(allRoutes.PORTAL + allRoutes.VIEW_RESCHEDULE(reschedule.id), {
       state: { initialData: reschedule },
     });
   };
@@ -59,7 +59,7 @@ export default function RescheduleDetailsDrawer({
             <DrawerTitle>Schedule Preview</DrawerTitle>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            {reschedule?._id && (
+            {reschedule?.id && (
               <Button
                 variant="default"
                 size="sm"
@@ -113,7 +113,9 @@ export default function RescheduleDetailsDrawer({
                     )}
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-xs text-muted-foreground">Entity</span>
+                    <span className="text-xs text-muted-foreground">
+                      Entity
+                    </span>
                     <span className="text-sm font-medium">
                       {reschedule.targetEntityType ?? "—"}
                     </span>
@@ -174,8 +176,8 @@ export default function RescheduleDetailsDrawer({
                         rightActionTitle="Approve"
                         content={
                           <p className="text-muted-foreground text-center">
-                            Are you sure you want to{" "}
-                            <strong>approve</strong> this schedule{" "}
+                            Are you sure you want to <strong>approve</strong>{" "}
+                            this schedule{" "}
                             <strong>
                               {reschedule.rescheduleCode ?? reschedule.title}
                             </strong>
@@ -183,10 +185,10 @@ export default function RescheduleDetailsDrawer({
                           </p>
                         }
                         onConfirmClicked={async () => {
-                          if (!reschedule?._id) return;
+                          if (!reschedule?.id) return;
                           try {
                             await updateReschedule({
-                              _id: reschedule._id,
+                              id: reschedule.id,
                               status: "approved",
                             }).unwrap();
                             showToast({
@@ -221,8 +223,8 @@ export default function RescheduleDetailsDrawer({
                         rightActionTitle="Reject"
                         content={
                           <p className="text-muted-foreground text-center">
-                            Are you sure you want to{" "}
-                            <strong>reject</strong> this schedule{" "}
+                            Are you sure you want to <strong>reject</strong>{" "}
+                            this schedule{" "}
                             <strong>
                               {reschedule.rescheduleCode ?? reschedule.title}
                             </strong>
@@ -230,10 +232,10 @@ export default function RescheduleDetailsDrawer({
                           </p>
                         }
                         onConfirmClicked={async () => {
-                          if (!reschedule?._id) return;
+                          if (!reschedule?.id) return;
                           try {
                             await updateReschedule({
-                              _id: reschedule._id,
+                              id: reschedule.id,
                               status: "rejected",
                             }).unwrap();
                             showToast({
@@ -277,4 +279,3 @@ export default function RescheduleDetailsDrawer({
     </Drawer>
   );
 }
-

@@ -17,27 +17,34 @@ import {
   PhoneOutgoing,
   Trash2,
   User,
-  UserCircle
+  UserCircle,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 import type { ICustomerOutreach } from "../common/customer-outreach";
-import { useDeleteCustomerOutReachMutation, useLazyGetCustomerOutReachQuery } from "../common/customerOutreachApi";
+import {
+  useDeleteCustomerOutReachMutation,
+  useLazyGetCustomerOutReachQuery,
+} from "../common/customerOutreachApi";
 import { formatDate } from "@/lib/helpers";
 
 const CustomerOutReachView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const initialData = (location.state as { initialData?: ICustomerOutreach } | null)?.initialData;
+  const initialData = (
+    location.state as { initialData?: ICustomerOutreach } | null
+  )?.initialData;
 
   const [deleteOutreach] = useDeleteCustomerOutReachMutation();
-  const [getOutreachDetails, { isLoading: isFetching }] = useLazyGetCustomerOutReachQuery();
+  const [getOutreachDetails, { isLoading: isFetching }] =
+    useLazyGetCustomerOutReachQuery();
 
-  const [selectedOutreach, setSelectedOutreach] = useState<ICustomerOutreach | null>(() =>
-    initialData && initialData._id === id ? initialData : null
-  );
+  const [selectedOutreach, setSelectedOutreach] =
+    useState<ICustomerOutreach | null>(() =>
+      initialData && initialData.id === id ? initialData : null,
+    );
 
   useEffect(() => {
     if (id) {
@@ -102,7 +109,7 @@ const CustomerOutReachView = () => {
               onClick={() =>
                 navigate(
                   allRoutes.PORTAL +
-                  allRoutes.UPDATE_CUSTOMER_OUTREACH(id as string)
+                    allRoutes.UPDATE_CUSTOMER_OUTREACH(id as string),
                 )
               }
               type="edit"
@@ -114,8 +121,12 @@ const CustomerOutReachView = () => {
               rightActionTitle="Delete"
               content={
                 <p className="text-gray-500 text-center">
-                  This action cannot be undone. This will permanently delete this
-                  interaction log with <strong>{selectedOutreach.customer?.name ?? "this customer"}</strong>.
+                  This action cannot be undone. This will permanently delete
+                  this interaction log with{" "}
+                  <strong>
+                    {selectedOutreach.customer?.name ?? "this customer"}
+                  </strong>
+                  .
                 </p>
               }
               onConfirmClicked={() => handleDeletion(id as string)}
@@ -163,7 +174,7 @@ const CustomerOutReachView = () => {
                 className="px-3 py-1 bg-white"
                 style={{
                   borderColor: selectedOutreach.outreachType?.colorCode,
-                  color: selectedOutreach.outreachType?.colorCode
+                  color: selectedOutreach.outreachType?.colorCode,
                 }}
               >
                 {selectedOutreach.outreachType?.name ?? "—"}
@@ -172,8 +183,9 @@ const CustomerOutReachView = () => {
               <Badge
                 variant="secondary"
                 style={{
-                  backgroundColor: selectedOutreach.callStatus?.colorCode ?? "#e5e7eb",
-                  color: "#fff"
+                  backgroundColor:
+                    selectedOutreach.callStatus?.colorCode ?? "#e5e7eb",
+                  color: "#fff",
                 }}
               >
                 {selectedOutreach.callStatus?.name ?? "—"}
@@ -183,14 +195,18 @@ const CustomerOutReachView = () => {
 
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
             <div className="px-5 py-3 border-b border-gray-100 bg-gray-50/50">
-              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">System Info</h3>
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                System Info
+              </h3>
             </div>
             <div className="p-5 space-y-4">
               <DetailItem
                 label="Logged By"
                 value={
-                  selectedOutreach.loggedBy && typeof selectedOutreach.loggedBy === "object"
-                    ? `${selectedOutreach.loggedBy.firstName ?? ""} ${selectedOutreach.loggedBy.lastName ?? ""}`.trim() || "—"
+                  selectedOutreach.loggedBy &&
+                  typeof selectedOutreach.loggedBy === "object"
+                    ? `${selectedOutreach.loggedBy.firstName ?? ""} ${selectedOutreach.loggedBy.lastName ?? ""}`.trim() ||
+                      "—"
                     : "—"
                 }
                 icon={<UserCircle className="w-4 h-4 text-gray-400" />}
@@ -210,7 +226,6 @@ const CustomerOutReachView = () => {
         </div>
 
         <div className="lg:col-span-2 space-y-4">
-
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
               <FileText className="w-4 h-4 text-gray-500" />
@@ -220,7 +235,10 @@ const CustomerOutReachView = () => {
             <div className="p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <DetailItem label="Purpose" value={selectedOutreach.purpose} />
-                <DetailItem label="Outreach Code" value={selectedOutreach.outreachCode || "N/A"} />
+                <DetailItem
+                  label="Outreach Code"
+                  value={selectedOutreach.outreachCode || "N/A"}
+                />
               </div>
 
               <div>
@@ -228,7 +246,8 @@ const CustomerOutReachView = () => {
                   Notes
                 </label>
                 <div className="p-4 bg-gray-50 rounded-lg border border-gray-100 text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
-                  {selectedOutreach.notes || "No notes recorded for this interaction."}
+                  {selectedOutreach.notes ||
+                    "No notes recorded for this interaction."}
                 </div>
               </div>
             </div>
@@ -257,7 +276,6 @@ const CustomerOutReachView = () => {
               />
             </div>
           </div>
-
         </div>
       </div>
     </div>

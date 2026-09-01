@@ -15,7 +15,7 @@ import {
 } from "../../common/settingsApi";
 import SubscriptionTypesFormContent from "./SubscriptionTypesFormContent";
 
-export type ISubscriptionTypeFields = Omit<ISubscriptionType, "_id"> & {};
+export type ISubscriptionTypeFields = Omit<ISubscriptionType, "id"> & {};
 
 const SubscriptionTypesForm = () => {
   const { id } = useParams();
@@ -32,7 +32,7 @@ const SubscriptionTypesForm = () => {
 
   const navigate = useNavigate();
   const [selectedData, setSelectedData] = useState<ISubscriptionType | null>(
-    null
+    null,
   );
 
   const fetchData = async (id: string) => {
@@ -93,7 +93,7 @@ const SubscriptionTypesForm = () => {
     if (!payload) return;
     try {
       const res = id
-        ? await updateMutation({ _id: id, ...payload }).unwrap()
+        ? await updateMutation({ id: id, ...payload }).unwrap()
         : await createNewMutation(payload).unwrap();
 
       if (res) {

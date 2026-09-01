@@ -29,15 +29,15 @@ import FeatureRequestFormContent from "./FeatureRequestFormContent";
 
 export type IFeatureRequestFields = Omit<
   IFeatureRequest,
-  "_id" | "assignedTo" | "requestedDate" | "customerId" | "softwareId"
+  "id" | "assignedTo" | "requestedDate" | "customerId" | "softwareId"
 > & {
   title: string;
   customerId: DropDownOption<string> | string;
   softwareId: DropDownOption<string> | string;
   description: string;
   notes: string;
-  priority: string;
-  status: string;
+  priority: DropDownOption<string> | string;
+  status: DropDownOption<string> | string;
   requestedDate: string;
   assignedTo: DropDownOption<string>[];
 };
@@ -118,7 +118,7 @@ const FeatureRequestForm = () => {
             if (typeof user === "string") {
               return { value: user, label: user } as DropDownOption<string>;
             }
-            const userId = user._id;
+            const userId = user.id;
             if (!userId) return null;
             const name =
               `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() ||
@@ -162,7 +162,7 @@ const FeatureRequestForm = () => {
   const handleDataSubmission = async (payload: Partial<IFeatureRequest>) => {
     try {
       const res = id
-        ? await updateFeatureRequest({ ...payload, _id: id }).unwrap()
+        ? await updateFeatureRequest({ ...payload, id: id }).unwrap()
         : await createFeatureRequest(payload as IFeatureRequest).unwrap();
 
       if (res) {
@@ -188,7 +188,7 @@ const FeatureRequestForm = () => {
   const getSoftwareLabel = (val: any) => {
     if (!val) return "";
     if (typeof val !== "string") return val.label;
-    const found = softwareList.find((s) => s._id === val);
+    const found = softwareList.find((s) => s.id === val);
     return found ? found.name : val;
   };
 
@@ -228,8 +228,8 @@ const FeatureRequestForm = () => {
       title: data.title,
       description: data.description,
       notes: data.notes,
-      priority: data.priority,
-      status: data.status,
+      priority: (data.priority as DropDownOption).value,
+      status: (data.status as DropDownOption).value,
       assignedTo: data.assignedTo?.map((user: any) => extractValue(user)) || [],
     };
 
@@ -253,8 +253,16 @@ const FeatureRequestForm = () => {
       icon: <BookOpenText className="w-4 h-4" />,
       data: [
         { label: "Title", value: values?.title, required: true },
-        { label: "Priority", value: values?.priority, required: true },
-        { label: "Status", value: values?.status, required: true },
+        {
+          label: "Priority",
+          value: (values?.priority as DropDownOption)?.value,
+          required: true,
+        },
+        {
+          label: "Status",
+          value: (values?.status as DropDownOption)?.value,
+          required: true,
+        },
         {
           label: "Customer",
           value: getCustomerLabel(values?.customerId) as string,

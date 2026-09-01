@@ -40,11 +40,13 @@ import TicketFormContent from "./TicketFormContent";
 const TicketForm = () => {
   const { id } = useParams();
   const location = useLocation();
-  const fromComplaint = location.state as
-    | { complaint?: IComplaint; complaintId?: string }
-    | null;
+  const fromComplaint = location.state as {
+    complaint?: IComplaint;
+    complaintId?: string;
+  } | null;
   const prefillComplaint = fromComplaint?.complaint ?? null;
-  const prefillComplaintId = fromComplaint?.complaintId ?? prefillComplaint?._id ?? undefined;
+  const prefillComplaintId =
+    fromComplaint?.complaintId ?? prefillComplaint?.id ?? undefined;
 
   const [addTicket, { isLoading: isCreating }] = useAddTicketMutation();
   const [updateTicket, { isLoading: isUpdating }] = useUpdateTicketMutation();
@@ -75,8 +77,9 @@ const TicketForm = () => {
   const formatEngineerOption = (
     user: IUser,
   ): { label: string; value: string } => ({
-    label: `${user.firstName ?? ""} ${user.lastName ?? ""} (${user.email ?? ""})`.trim(),
-    value: user._id ?? "",
+    label:
+      `${user.firstName ?? ""} ${user.lastName ?? ""} (${user.email ?? ""})`.trim(),
+    value: user.id ?? "",
   });
 
   const engineerDisplayLabel = (
@@ -126,7 +129,7 @@ const TicketForm = () => {
           : undefined,
         assignedEngineerId: selectedTicket.assignedEngineer
           ? formatEngineerOption(selectedTicket.assignedEngineer)
-          : selectedTicket.assignedEngineerId ?? undefined,
+          : (selectedTicket.assignedEngineerId ?? undefined),
         priority: selectedTicket.priority ?? undefined,
         status: selectedTicket.status ?? undefined,
       });
@@ -147,7 +150,9 @@ const TicketForm = () => {
       .then((res) => {
         if (res) setValue("complaintId", buildComplaintFormOption(res));
       })
-      .catch((err) => console.error("Failed to load complaint for ticket", err));
+      .catch((err) =>
+        console.error("Failed to load complaint for ticket", err),
+      );
   }, [prefillComplaintId, prefillComplaint, id, getComplaint, setValue]);
 
   useEffect(() => {
@@ -167,7 +172,7 @@ const TicketForm = () => {
               : undefined,
             assignedEngineerId: res.assignedEngineer
               ? formatEngineerOption(res.assignedEngineer)
-              : res.assignedEngineerId ?? undefined,
+              : (res.assignedEngineerId ?? undefined),
             priority: res.priority ?? undefined,
             status: res.status ?? undefined,
           });
@@ -182,7 +187,7 @@ const TicketForm = () => {
       const isEdit = !!id;
       const res = isEdit
         ? await updateTicket({
-            _id: id as string,
+            id: id as string,
             ...payload,
           }).unwrap()
         : await addTicket(payload).unwrap();
@@ -216,14 +221,16 @@ const TicketForm = () => {
       }
 
       const payload = cleanPayload({
-      title: data.title.trim(),
-      requestedDate: data.requestedDate,
-      notes: data.notes?.trim() || undefined,
-      complaintId,
-      assignedEngineerId: ticketFieldToId(data.assignedEngineerId),
-      priority: ticketFieldToId(data.priority) as ICreateTicketPayload["priority"],
-      status: ticketFieldToId(data.status) ?? "open",
-    }) as ICreateTicketPayload;
+        title: data.title.trim(),
+        requestedDate: data.requestedDate,
+        notes: data.notes?.trim() || undefined,
+        complaintId,
+        assignedEngineerId: ticketFieldToId(data.assignedEngineerId),
+        priority: ticketFieldToId(
+          data.priority,
+        ) as ICreateTicketPayload["priority"],
+        status: ticketFieldToId(data.status) ?? "open",
+      }) as ICreateTicketPayload;
 
       handleDataSubmission(payload);
     },
@@ -237,11 +244,14 @@ const TicketForm = () => {
         type: "info",
         duration: 2000,
       });
-    }
+    },
   );
 
   const validateBeforeOpen = async () => {
-    if (!ticketComplaintToId(form.getValues().complaintId) && prefillComplaint) {
+    if (
+      !ticketComplaintToId(form.getValues().complaintId) &&
+      prefillComplaint
+    ) {
       setValue("complaintId", buildComplaintFormOption(prefillComplaint));
     }
     const valid = await trigger();
@@ -273,7 +283,8 @@ const TicketForm = () => {
         },
         {
           label: "Complaint",
-          value: ticketComplaintToLabel(values?.complaintId, prefillComplaint) ?? "",
+          value:
+            ticketComplaintToLabel(values?.complaintId, prefillComplaint) ?? "",
           required: true,
         },
         {
@@ -315,7 +326,9 @@ const TicketForm = () => {
             isLoading={isCreating || isLoadingComplaint}
             prefillComplaintId={prefillComplaintId}
             prefillComplaint={prefillComplaint}
-            isStatusDisabled={selectedTicket?.status?.toLowerCase() === "closed"}
+            isStatusDisabled={
+              selectedTicket?.status?.toLowerCase() === "closed"
+            }
             isAssignedEngineerDisabled={!!id}
           />
         }
@@ -327,7 +340,9 @@ const TicketForm = () => {
         }
         confirmOnSubmit
         validateBeforeOpen={validateBeforeOpen}
-        confirmSubmitTitle={id ? "Confirm Ticket Update" : "Confirm Ticket Creation"}
+        confirmSubmitTitle={
+          id ? "Confirm Ticket Update" : "Confirm Ticket Creation"
+        }
         confirmSubmitContent={
           <div className="text-center">
             <p>

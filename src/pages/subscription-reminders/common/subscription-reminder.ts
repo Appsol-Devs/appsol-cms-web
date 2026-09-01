@@ -11,7 +11,7 @@ export type TSubscriptionReminderType =
   | "overdue";
 
 export interface ISubscriptionReminder {
-  _id?: string;
+  id?: string;
   reminderCode?: string;
   title?: string;
 
@@ -85,7 +85,10 @@ export function formatReminderTitle(title?: string): string {
   if (daysAgoMatch) {
     const days = parseInt(daysAgoMatch[1], 10);
     if (days > 30) {
-      return title.replace(DAYS_AGO_PATTERN, `${formatDurationFromDays(days)} ago`);
+      return title.replace(
+        DAYS_AGO_PATTERN,
+        `${formatDurationFromDays(days)} ago`,
+      );
     }
     return title;
   }
@@ -94,7 +97,10 @@ export function formatReminderTitle(title?: string): string {
   if (inDaysMatch) {
     const days = parseInt(inDaysMatch[1], 10);
     if (days > 30) {
-      return title.replace(IN_DAYS_PATTERN, `in ${formatDurationFromDays(days)}`);
+      return title.replace(
+        IN_DAYS_PATTERN,
+        `in ${formatDurationFromDays(days)}`,
+      );
     }
   }
 

@@ -3,7 +3,7 @@ import type { ICustomer, IUser } from "@/pages/customer/common/customers";
 import type { ISoftware } from "@/pages/settings/common/settings";
 
 export interface IFeatureRequest {
-  _id?: string;
+  id?: string;
   requestCode?: string;
   title?: string;
   customerId?: string;

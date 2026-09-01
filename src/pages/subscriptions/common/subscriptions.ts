@@ -6,7 +6,7 @@ import type {
 } from "@/pages/settings/common/settings";
 
 export interface ILastPayment {
-  _id?: string;
+  id?: string;
   customerId?: string;
   customer?: ICustomer;
   softwareId?: string;
@@ -28,7 +28,7 @@ export interface ILastPayment {
 }
 
 export interface ISubscription {
-  _id?: string;
+  id?: string;
   subscriptionCode?: string;
   customerId?: string;
   customer?: ICustomer;

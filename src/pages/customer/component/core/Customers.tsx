@@ -96,7 +96,12 @@ const Customers = () => {
         meta: { icon: <CircleDot size={14} /> },
         cell: ({ row }) => {
           const status = row.original.status ?? "N/A";
-          const colorCode = row.original.status === "active" ? "#16a34a" : row.original.status === "inactive" ? "#dc2626" : undefined;
+          const colorCode =
+            row.original.status === "active"
+              ? "#16a34a"
+              : row.original.status === "inactive"
+                ? "#dc2626"
+                : undefined;
 
           const style = getLookupBadgeStyle(colorCode);
           return (
@@ -115,11 +120,11 @@ const Customers = () => {
   );
 
   const pathOnRowSelected = (data: ICustomer) => {
-    const { _id } = data;
-    if (!_id) return;
+    const { id } = data;
+    if (!id) return;
 
     navigate(
-      allRoutes.PORTAL + allRoutes.VIEW_CUSTOMER(_id) + customerRoutes.OVERVIEW,
+      allRoutes.PORTAL + allRoutes.VIEW_CUSTOMER(id) + customerRoutes.OVERVIEW,
     );
   };
 

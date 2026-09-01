@@ -30,9 +30,9 @@ const UsersFormContent = ({ isLoading, form, isUpdate }: IField) => {
         if (res?.contents) {
           setRoleOptions(
             res.contents.map((role: IRole) => ({
-              value: role._id ?? "",
+              value: role.id ?? "",
               label: role.name ?? "",
-            }))
+            })),
           );
         }
       });

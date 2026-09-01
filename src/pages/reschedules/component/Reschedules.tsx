@@ -61,16 +61,16 @@ const Reschedules = () => {
               {row.original?.targetEntityType === "CustomerSetup"
                 ? "Customer Setup"
                 : row.original?.targetEntityType === "CustomerOutreach"
-                ? "Customer Outreach"
-                : row.original?.targetEntityType === "CustomerComplaint"
-                ? "Customer Complaint"
-                : row.original?.targetEntityType === "SubscriptionReminder"
-                ? "Subscription Reminder"
-                : row.original?.targetEntityType === "Ticket"
-                ? "Ticket"
-                : row.original?.targetEntityType === "Generic"
-                ? "Generic"
-                : "—"}
+                  ? "Customer Outreach"
+                  : row.original?.targetEntityType === "CustomerComplaint"
+                    ? "Customer Complaint"
+                    : row.original?.targetEntityType === "SubscriptionReminder"
+                      ? "Subscription Reminder"
+                      : row.original?.targetEntityType === "Ticket"
+                        ? "Ticket"
+                        : row.original?.targetEntityType === "Generic"
+                          ? "Generic"
+                          : "—"}
             </span>
           </div>
         ),
@@ -149,9 +149,9 @@ const Reschedules = () => {
         )}
         pathOnRowSelected={(row) => {
           const reschedule = row as IReschedule;
-          if (reschedule?._id) {
+          if (reschedule?.id) {
             navigate(
-              allRoutes.PORTAL + allRoutes.VIEW_RESCHEDULE(reschedule._id),
+              allRoutes.PORTAL + allRoutes.VIEW_RESCHEDULE(reschedule.id),
               { state: { initialData: reschedule } },
             );
           }
@@ -165,4 +165,3 @@ const Reschedules = () => {
 };
 
 export default Reschedules;
-

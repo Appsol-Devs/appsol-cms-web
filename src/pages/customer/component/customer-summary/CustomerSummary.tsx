@@ -17,8 +17,7 @@ import {
   CalendarCheck,
   Monitor,
   Target,
-  AlertCircle, 
-  
+  AlertCircle,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -44,12 +43,14 @@ const CustomerSummary = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-
   const [getCustomerDetails, { isFetching, isLoading, isError, isSuccess }] =
     useLazyGetACustomerQuery();
-  const [customerDetails, setCustomerDetails] = useState<ICustomer | null>(null);
+  const [customerDetails, setCustomerDetails] = useState<ICustomer | null>(
+    null,
+  );
 
-  const [updateCustomer, { isLoading: isUpdating }] = useUpdateCustomerMutation();
+  const [updateCustomer, { isLoading: isUpdating }] =
+    useUpdateCustomerMutation();
   const [deleteCustomer] = useDeleteCustomerMutation();
   const [getLeadByCustomer] = useLazyGetALeadQuery();
   const [lead, setLead] = useState<ILead>();
@@ -64,7 +65,7 @@ const CustomerSummary = () => {
       console.error("Failed to fetch lead details", error);
       return null;
     }
-  }
+  };
 
   const fetchCustomerDetails = async (customerId: string) => {
     try {
@@ -81,10 +82,10 @@ const CustomerSummary = () => {
     if (id) {
       fetchCustomerDetails(id);
     }
-    if(customerDetails?.leadId) {
+    if (customerDetails?.leadId) {
       fetchLeadDetails(customerDetails.leadId);
     }
-  }, [id,customerDetails]);
+  }, [id, customerDetails]);
 
   const handleStatusToggle = async () => {
     if (!customerDetails || !id) return;
@@ -98,7 +99,7 @@ const CustomerSummary = () => {
     });
 
     try {
-      await updateCustomer({ _id: id, status: newStatus }).unwrap();
+      await updateCustomer({ id: id, status: newStatus }).unwrap();
 
       showToast({
         title: "Success",
@@ -106,7 +107,7 @@ const CustomerSummary = () => {
         type: "success",
       });
     } catch {
-      // 2. Rollback 
+      // 2. Rollback
       setCustomerDetails((prevDetails) => {
         if (!prevDetails) return prevDetails;
         return { ...prevDetails, status: previousStatus };
@@ -126,8 +127,6 @@ const CustomerSummary = () => {
       state: { customerData: customerDetails },
     });
   };
-
- 
 
   const loading = isFetching || isLoading;
 
@@ -156,7 +155,6 @@ const CustomerSummary = () => {
     }
   };
 
-
   if (loading) return <LoadingComponent loading={loading} />;
   if (isError) return <FetchingError />;
   if (!isSuccess || !customerDetails) return null;
@@ -178,11 +176,20 @@ const CustomerSummary = () => {
             />
             <ConfirmationDialog
               alertType="update"
-              title={customerDetails.status === "active" ? "Set Customer Inactive?" : "Set Customer Active?"}
-              rightActionTitle={customerDetails.status === "active" ? "Set Inactive" : "Set Active"}
+              title={
+                customerDetails.status === "active"
+                  ? "Set Customer Inactive?"
+                  : "Set Customer Active?"
+              }
+              rightActionTitle={
+                customerDetails.status === "active"
+                  ? "Set Inactive"
+                  : "Set Active"
+              }
               content={
                 <p className="text-gray-500 text-center">
-                  This action will change the customer's status to {customerDetails.status === "active" ? "inactive" : "active"}.
+                  This action will change the customer's status to{" "}
+                  {customerDetails.status === "active" ? "inactive" : "active"}.
                 </p>
               }
               onConfirmClicked={handleStatusToggle}
@@ -195,7 +202,9 @@ const CustomerSummary = () => {
                 >
                   <Activity className="w-4 h-4 mr-2" />
                   <span className="text-xs ">
-                    {customerDetails.status === "active" ? "Set Inactive" : "Set Active"}
+                    {customerDetails.status === "active"
+                      ? "Set Inactive"
+                      : "Set Active"}
                   </span>
                 </Button>
               }
@@ -206,8 +215,8 @@ const CustomerSummary = () => {
               rightActionTitle="Delete"
               content={
                 <p className="text-gray-500 text-center">
-                  This action cannot be undone. This will permanently delete this
-                  customer profile.
+                  This action cannot be undone. This will permanently delete
+                  this customer profile.
                 </p>
               }
               onConfirmClicked={() => handleDeleteCustomer(id as string)}
@@ -241,8 +250,7 @@ const CustomerSummary = () => {
 
             <StatusBadge
               active={customerDetails.status === "active"}
-            >
-            </StatusBadge>
+            ></StatusBadge>
           </div>
 
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
@@ -255,10 +263,9 @@ const CustomerSummary = () => {
               {customerDetails.loggedBy && (
                 <DetailItem
                   label="Registered By"
-                  value={
-                    `${customerDetails.loggedBy.firstName || ""} ${customerDetails.loggedBy.lastName || ""
-                    }`
-                  }
+                  value={`${customerDetails.loggedBy.firstName || ""} ${
+                    customerDetails.loggedBy.lastName || ""
+                  }`}
                   icon={<UserCircle className="w-4 h-4 text-gray-400" />}
                 />
               )}
@@ -297,7 +304,9 @@ const CustomerSummary = () => {
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
               <Globe className="w-4 h-4 text-gray-500" />
-              <h3 className="font-semibold text-gray-900">Contact & Business Details</h3>
+              <h3 className="font-semibold text-gray-900">
+                Contact & Business Details
+              </h3>
             </div>
 
             <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
@@ -337,8 +346,6 @@ const CustomerSummary = () => {
               </div>
 
               <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-             
-           
                 <DetailItem
                   label="Lead Source"
                   value={lead.leadSource}
@@ -351,7 +358,11 @@ const CustomerSummary = () => {
                 />
                 <DetailItem
                   label="Initial Enquiry"
-                  value={lead.initialEnquiryDate ? formatDate(lead.initialEnquiryDate) : "N/A"}
+                  value={
+                    lead.initialEnquiryDate
+                      ? formatDate(lead.initialEnquiryDate)
+                      : "N/A"
+                  }
                   icon={<Calendar className="w-4 h-4 text-gray-400" />}
                 />
                 <DetailItem
@@ -367,7 +378,9 @@ const CustomerSummary = () => {
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
               <FileText className="w-4 h-4 text-gray-500" />
-              <h3 className="font-semibold text-gray-900">Notes & Description</h3>
+              <h3 className="font-semibold text-gray-900">
+                Notes & Description
+              </h3>
             </div>
 
             <div className="p-6">

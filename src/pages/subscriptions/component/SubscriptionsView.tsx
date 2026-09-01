@@ -8,7 +8,14 @@ import { Button } from "@/components/ui/button";
 import { showToast } from "@/components/ui/CustomToast";
 import { formatDate, formatToCurrency } from "@/lib/helpers";
 import { allRoutes } from "@/utils/routes";
-import { Calendar, CreditCard, Info, Receipt, Trash2, User } from "lucide-react";
+import {
+  Calendar,
+  CreditCard,
+  Info,
+  Receipt,
+  Trash2,
+  User,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import type { ISubscription } from "../common/subscriptions";
@@ -18,16 +25,14 @@ import {
 } from "../common/subscriptionsApi";
 import { useLazyGetAUserQuery } from "@/pages/users/common/usersApi";
 import { Badge } from "@/components/ui/badge";
-import {
-  getLookupBadgeStyle,
-  getSubscriptionStatusColor,
-} from "@/lib/enums";
+import { getLookupBadgeStyle, getSubscriptionStatusColor } from "@/lib/enums";
 
 const SubscriptionsView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const initialData = (location.state as { initialData?: ISubscription } | null)?.initialData;
+  const initialData = (location.state as { initialData?: ISubscription } | null)
+    ?.initialData;
 
   const [deleteSubscription] = useDeleteSubscriptionMutation();
   const [getSubscriptionDetails, { isLoading: isFetching }] =
@@ -35,7 +40,7 @@ const SubscriptionsView = () => {
 
   const [selectedSubscription, setSelectedSubscription] =
     useState<ISubscription | null>(() =>
-      initialData && initialData._id === id ? initialData : null
+      initialData && initialData.id === id ? initialData : null,
     );
   const [loggedByName, setLoggedByName] = useState<string>("—");
   const [getAUser] = useLazyGetAUserQuery();
@@ -51,7 +56,7 @@ const SubscriptionsView = () => {
         }
       })
       .catch((err) =>
-        console.error("Failed to fetch subscription details", err)
+        console.error("Failed to fetch subscription details", err),
       );
   }, [id, getSubscriptionDetails]);
 
@@ -64,7 +69,7 @@ const SubscriptionsView = () => {
     if (typeof loggedBy === "object") {
       const user = loggedBy as { firstName?: string; lastName?: string };
       setLoggedByName(
-        `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "—"
+        `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "—",
       );
       return;
     }
@@ -72,7 +77,7 @@ const SubscriptionsView = () => {
       .unwrap()
       .then((user) => {
         setLoggedByName(
-          `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "—"
+          `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "—",
         );
       })
       .catch(() => setLoggedByName("—"));
@@ -130,7 +135,7 @@ const SubscriptionsView = () => {
               onClick={() =>
                 navigate(
                   allRoutes.PORTAL +
-                    allRoutes.ADD_SUBSCRIPTION_PAYMENT(id as string)
+                    allRoutes.ADD_SUBSCRIPTION_PAYMENT(id as string),
                 )
               }
               className="!bg-primary text-primary-foreground hover:bg-primary/90"
@@ -141,7 +146,8 @@ const SubscriptionsView = () => {
             <ActionButton
               onClick={() =>
                 navigate(
-                  allRoutes.PORTAL + allRoutes.UPDATE_SUBSCRIPTION(id as string)
+                  allRoutes.PORTAL +
+                    allRoutes.UPDATE_SUBSCRIPTION(id as string),
                 )
               }
               type="edit"
@@ -217,7 +223,7 @@ const SubscriptionsView = () => {
               }
               className="capitalize border text-xs font-medium px-2 py-1 rounded-full"
               style={getLookupBadgeStyle(
-                selectedSubscription.software?.colorCode
+                selectedSubscription.software?.colorCode,
               )}
             >
               {selectedSubscription.software?.name ?? "—"}
@@ -264,7 +270,7 @@ const SubscriptionsView = () => {
                   <Badge
                     variant={
                       getSubscriptionStatusColor(
-                        selectedSubscription.status ?? ""
+                        selectedSubscription.status ?? "",
                       )
                         ? undefined
                         : "secondary"
@@ -272,8 +278,8 @@ const SubscriptionsView = () => {
                     className="capitalize border text-xs font-medium px-2 py-0 rounded-full"
                     style={getLookupBadgeStyle(
                       getSubscriptionStatusColor(
-                        selectedSubscription.status ?? ""
-                      )
+                        selectedSubscription.status ?? "",
+                      ),
                     )}
                   >
                     {selectedSubscription.status ?? "—"}
@@ -301,7 +307,8 @@ const SubscriptionsView = () => {
                   </p>
                   <p className="text-sm text-card-foreground">
                     {selectedSubscription.subscriptionType?.name ??
-                      selectedSubscription.lastPayment?.subscriptionType?.name ??
+                      selectedSubscription.lastPayment?.subscriptionType
+                        ?.name ??
                       "—"}
                   </p>
                 </div>
@@ -350,7 +357,7 @@ const SubscriptionsView = () => {
                     <p>
                       <span className="font-medium">Amount:</span>{" "}
                       {formatToCurrency(
-                        selectedSubscription.lastPayment.amount ?? 0
+                        selectedSubscription.lastPayment.amount ?? 0,
                       )}
                     </p>
                     <p>

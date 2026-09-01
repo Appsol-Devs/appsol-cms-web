@@ -12,10 +12,10 @@ import {
   useLazyGetALeadNextStepQuery,
   useUpdateLeadNextStepMutation,
 } from "../../common/settingsApi";
-import type { ILeadNextStep, } from "../../common/settings";
+import type { ILeadNextStep } from "../../common/settings";
 import LeadNextStepsFormContent from "./LeadNextStepsFormContent";
 
-export type ILeadNextStepFields = Omit<ILeadNextStep, "_id"> & {};
+export type ILeadNextStepFields = Omit<ILeadNextStep, "id"> & {};
 
 const LeadNextStepsForm = () => {
   const { id } = useParams();
@@ -24,15 +24,15 @@ const LeadNextStepsForm = () => {
     useAddLeadNextStepMutation();
   const [updateLeadNextStep, { isLoading: isUpdating }] =
     useUpdateLeadNextStepMutation();
-  const [getALeadNextStep, { isLoading: isGetting }] = useLazyGetALeadNextStepQuery();
+  const [getALeadNextStep, { isLoading: isGetting }] =
+    useLazyGetALeadNextStepQuery();
   const form = useForm<ILeadNextStepFields>();
   const { watch, getValues, reset } = form;
   const values = watch();
 
   const navigate = useNavigate();
-  const [selectedLeadNextStep, setSelectedLeadNextStep] = useState<ILeadNextStep | null>(
-    null
-  );
+  const [selectedLeadNextStep, setSelectedLeadNextStep] =
+    useState<ILeadNextStep | null>(null);
 
   const fetchData = async (id: string) => {
     if (!id) return;
@@ -90,7 +90,7 @@ const LeadNextStepsForm = () => {
     if (!payload) return;
     try {
       const res = id
-        ? await updateLeadNextStep({ _id: id, ...payload }).unwrap()
+        ? await updateLeadNextStep({ id: id, ...payload }).unwrap()
         : await createNewLeadNextStep(payload).unwrap();
 
       if (res) {

@@ -51,8 +51,8 @@ export const leadsApi = createApi({
       }),
     }),
     updateLead: builder.mutation<ILead, ILead>({
-      query: ({ _id, ...payload }) => ({
-        url: `leads/${_id}`,
+      query: ({ id, ...payload }) => ({
+        url: `leads/${id}`,
         body: payload,
         method: "PUT",
       }),

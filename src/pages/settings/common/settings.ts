@@ -1,6 +1,6 @@
 export interface ISoftware {
   name?: string;
-  _id?: string;
+  id?: string;
   softwareCode?: string;
   description?: string;
   isActive?: boolean;
@@ -9,7 +9,7 @@ export interface ISoftware {
 
 export interface IComplaintType {
   name?: string;
-  _id?: string;
+  id?: string;
   complaintTypeCode?: string;
   description?: string;
   isActive?: boolean;
@@ -18,7 +18,7 @@ export interface IComplaintType {
 
 export interface IComplaintCategory {
   name?: string;
-  _id?: string;
+  id?: string;
   complaintCategoryCode?: string;
   description?: string;
   isActive?: boolean;
@@ -27,7 +27,7 @@ export interface IComplaintCategory {
 
 export interface ICallStatus {
   name?: string;
-  _id?: string;
+  id?: string;
   callStatusCode?: string;
   description?: string;
   isActive?: boolean;
@@ -37,7 +37,7 @@ export interface ICallStatus {
 
 export interface ISetupStatus {
   name?: string;
-  _id?: string;
+  id?: string;
   setupStatusCode?: string;
   description?: string;
   colorCode?: string;
@@ -46,7 +46,7 @@ export interface ISetupStatus {
 
 export interface ISubscriptionType {
   name?: string;
-  _id?: string;
+  id?: string;
   subscriptionTypeCode?: string;
   description?: string;
   isActive?: boolean;
@@ -56,7 +56,7 @@ export interface ISubscriptionType {
 
 export interface ILeadStatus {
   name?: string;
-  _id?: string;
+  id?: string;
   leadStatusCode?: string;
   colorCode?: string;
   description?: string;
@@ -65,7 +65,7 @@ export interface ILeadStatus {
 
 export interface ILeadNextStep {
   name?: string;
-  _id?: string;
+  id?: string;
   leadNextStepCode?: string;
   description?: string;
   isActive?: boolean;

@@ -43,7 +43,8 @@ function mergeUserProfile(
     lastName: updated.lastName ?? current.lastName,
     email: updated.email ?? current.email,
     phone: updated.phone ?? current.phone,
-    imageUrl: updated.imageUrl !== undefined ? updated.imageUrl : current.imageUrl,
+    imageUrl:
+      updated.imageUrl !== undefined ? updated.imageUrl : current.imageUrl,
     updatedAt,
   };
 }
@@ -112,7 +113,12 @@ const UserProfile = () => {
 
     for (const { field, message } of requiredFields) {
       if (!field) {
-        showToast({ title: "Validation", message, type: "info", duration: 2000 });
+        showToast({
+          title: "Validation",
+          message,
+          type: "info",
+          duration: 2000,
+        });
         return false;
       }
     }
@@ -123,7 +129,7 @@ const UserProfile = () => {
   const validateBeforeOpen = async () => validateProfileForm();
 
   const submitData = async () => {
-    if (!user?._id || !validateProfileForm()) return;
+    if (!user?.id || !validateProfileForm()) return;
 
     const data = getValues();
 
@@ -162,7 +168,7 @@ const UserProfile = () => {
 
     try {
       const res = await updateProfile({
-        id: user._id,
+        id: user.id,
         ...payload,
       }).unwrap();
 
@@ -182,13 +188,12 @@ const UserProfile = () => {
       });
 
       try {
-        const fresh = await getAUser(user._id).unwrap();
+        const fresh = await getAUser(user.id).unwrap();
         updatedUser = mergeUserProfile(updatedUser, {
           ...fresh,
           ...(profilePhotoRemoved ? { imageUrl: "" } : {}),
         });
-      } catch {
-      }
+      } catch {}
 
       dispatch(setCurrentUser(updatedUser));
       reset(getProfileValues(updatedUser));

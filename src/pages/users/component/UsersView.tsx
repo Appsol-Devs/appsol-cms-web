@@ -2,9 +2,21 @@ import ActionButton from "@/components/ActionButtons";
 import LoadingComponent from "@/components/LoadingComponent";
 import PageSummary from "@/components/PageSummary";
 import PageTitle from "@/components/PageTitle";
-import { User, Mail, Phone, Calendar, Shield, VerifiedIcon, BadgeX, Trash2, } from "lucide-react";
+import {
+  User,
+  Mail,
+  Phone,
+  Calendar,
+  Shield,
+  VerifiedIcon,
+  BadgeX,
+  Trash2,
+} from "lucide-react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { useDeleteUserMutation, useLazyGetAUserQuery } from "../common/usersApi";
+import {
+  useDeleteUserMutation,
+  useLazyGetAUserQuery,
+} from "../common/usersApi";
 import { useEffect, useState } from "react";
 import { allRoutes } from "@/utils/routes";
 import { showToast } from "@/components/ui/CustomToast";
@@ -16,20 +28,17 @@ import StatusBadge from "@/components/ui/StatusBadge";
 import { Button } from "@/components/ui/button";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 
-
-
-
-
 const UsersView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const initialData = (location.state as { initialData?: IUser } | null)?.initialData;
+  const initialData = (location.state as { initialData?: IUser } | null)
+    ?.initialData;
 
-  const [deleteUser,] = useDeleteUserMutation();
+  const [deleteUser] = useDeleteUserMutation();
   const [getUserDetails, { isLoading: isFetching }] = useLazyGetAUserQuery();
   const [selectedUser, setSelectedUser] = useState<IUser | null>(() =>
-    initialData && initialData._id === id ? initialData : null
+    initialData && initialData.id === id ? initialData : null,
   );
   const [getUser] = useLazyGetAUserQuery();
   const [creator, setCreator] = useState("");
@@ -38,11 +47,10 @@ const UsersView = () => {
     try {
       const user = await getUser(userId).unwrap();
       setCreator(user.firstName + " " + user.lastName);
-    }
-    catch (error) {
+    } catch (error) {
       console.error("Failed to fetch creator details", error);
     }
-  }
+  };
   useEffect(() => {
     if (id) {
       getUserDetails(id)
@@ -69,16 +77,18 @@ const UsersView = () => {
       navigate(-1);
     } catch (error) {
       console.error("Failed to delete user", error);
-      showToast({ title: "Error", message: "Failed to delete user", type: "error" });
+      showToast({
+        title: "Error",
+        message: "Failed to delete user",
+        type: "error",
+      });
     }
   };
 
   useEffect(() => {
     if (selectedUser && selectedUser.createdBy)
-      fetchUser(String(selectedUser.createdBy))
+      fetchUser(String(selectedUser.createdBy));
   }, [selectedUser, selectedUser?.createdBy]);
-
-
 
   if (!selectedUser) {
     if (isFetching) {
@@ -95,7 +105,6 @@ const UsersView = () => {
     );
   }
 
-
   return (
     <div className="space-y-2">
       <PageTitle showBack title="User Management" />
@@ -107,7 +116,9 @@ const UsersView = () => {
         actionComponent={
           <div className="flex items-center gap-3">
             <ActionButton
-              onClick={() => navigate(allRoutes.PORTAL + allRoutes.UPDATE_USER(id as string))}
+              onClick={() =>
+                navigate(allRoutes.PORTAL + allRoutes.UPDATE_USER(id as string))
+              }
               type="edit"
               useText="Edit User"
             />
@@ -117,15 +128,20 @@ const UsersView = () => {
               rightActionTitle="Delete"
               content={
                 <p className="text-gray-500 text-center">
-                  This action cannot be undone. This will permanently delete
-                  the user <strong>{selectedUser.firstName} {selectedUser.lastName}</strong> and remove their data.
+                  This action cannot be undone. This will permanently delete the
+                  user{" "}
+                  <strong>
+                    {selectedUser.firstName} {selectedUser.lastName}
+                  </strong>{" "}
+                  and remove their data.
                 </p>
               }
-
               onConfirmClicked={() => handleUserDeletion(id as string)}
-
               trigger={
-                <Button variant="destructive" className="bg-red-700! text-white">
+                <Button
+                  variant="destructive"
+                  className="bg-red-700! text-white"
+                >
                   <Trash2 className="mr-2 h-4 w-4" />
                   <span className="text-xs">Delete User</span>
                 </Button>
@@ -139,7 +155,6 @@ const UsersView = () => {
         <div className="lg:col-span-1 space-y-3">
           <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center text-center">
             <div className="relative mb-2">
-
               <Avatar className="w-32 h-32 border-4 border-gray-50 shadow-md">
                 <AvatarImage
                   src={selectedUser.imageUrl}
@@ -153,7 +168,11 @@ const UsersView = () => {
               </Avatar>
               <div className="absolute bottom-1 right-1 bg-white rounded-full p-1 shadow-sm">
                 {selectedUser.isVerified ? (
-                  <VerifiedIcon className="w-6 h-6 text-blue-500" fill="currentColor" color="white" />
+                  <VerifiedIcon
+                    className="w-6 h-6 text-blue-500"
+                    fill="currentColor"
+                    color="white"
+                  />
                 ) : (
                   <BadgeX className="w-6 h-6 text-gray-400" />
                 )}
@@ -179,12 +198,15 @@ const UsersView = () => {
             </h3>
             <div className="space-y-2">
               <div>
-                <p className="text-xs text-gray-500 uppercase">Verification Status</p>
-                <p className={`text-xs font-medium ${selectedUser.isVerified ? 'text-green-600' : 'text-amber-600'}`}>
+                <p className="text-xs text-gray-500 uppercase">
+                  Verification Status
+                </p>
+                <p
+                  className={`text-xs font-medium ${selectedUser.isVerified ? "text-green-600" : "text-amber-600"}`}
+                >
                   {selectedUser.isVerified ? "Verified Account" : "Unverified"}
                 </p>
               </div>
-
             </div>
           </div>
         </div>
@@ -214,10 +236,7 @@ const UsersView = () => {
 
               <div className="md:col-span-2 border-t border-gray-100"></div>
 
-              <DetailItem
-                label="Role"
-                value={selectedUser.role?.name}
-              />
+              <DetailItem label="Role" value={selectedUser.role?.name} />
 
               <div className="md:col-span-2 border-t border-gray-100"></div>
 
@@ -231,10 +250,7 @@ const UsersView = () => {
                 label="Last Updated"
                 value={formatDate(selectedUser.updatedAt)}
               />
-              <DetailItem
-                label="Created By"
-                value={creator || "System"}
-              />
+              <DetailItem label="Created By" value={creator || "System"} />
             </div>
           </div>
         </div>
@@ -242,7 +258,5 @@ const UsersView = () => {
     </div>
   );
 };
-
-
 
 export default UsersView;

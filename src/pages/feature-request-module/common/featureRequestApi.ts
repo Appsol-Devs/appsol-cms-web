@@ -56,8 +56,8 @@ export const featureRequestApi = createApi({
       }),
     }),
     updateFeatureRequest: builder.mutation<IFeatureRequest, IFeatureRequest>({
-      query: ({ _id, ...payload }) => ({
-        url: `feature_requests/${_id}`,
+      query: ({ id, ...payload }) => ({
+        url: `feature_requests/${id}`,
         body: payload,
         method: "PUT",
       }),

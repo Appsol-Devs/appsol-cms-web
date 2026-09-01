@@ -10,7 +10,10 @@ import {
 } from "@/lib/helpers";
 import { lookup_params } from "@/lib/api";
 import type { DropDownOption } from "@/components/DropdownComponent";
-import type { ILeadNextStep, ISoftware } from "@/pages/settings/common/settings";
+import type {
+  ILeadNextStep,
+  ISoftware,
+} from "@/pages/settings/common/settings";
 import {
   useLazyGetLeadNextStepsQuery,
   useLazyGetSoftwaresQuery,
@@ -35,7 +38,7 @@ import { LEAD_PRIORITY_ENUM, LEAD_STATUS_ENUM } from "@/lib/enums";
 
 export type ILeadFields = Omit<
   ILead,
-  "_id" | "leadStage" | "nextStep" | "software"
+  "id" | "leadStage" | "nextStep" | "software"
 > & {
   nextStep?: LeadFormDropdownValue;
   leadStage?: LeadFormDropdownValue;
@@ -94,7 +97,7 @@ const LeadsForm = () => {
           setSoftwareOptions(
             res.contents.map((item: ISoftware) => ({
               label: item.name ?? "",
-              value: item._id ?? "",
+              value: item.id ?? "",
             })),
           );
         }
@@ -107,7 +110,7 @@ const LeadsForm = () => {
           setLeadNextStepOptions(
             res.contents.map((item: ILeadNextStep) => ({
               label: item.name ?? "",
-              value: item._id ?? "",
+              value: item.id ?? "",
             })),
           );
         }
@@ -156,9 +159,7 @@ const LeadsForm = () => {
     if (!data) return;
 
     const softwareId =
-      typeof data.softwareId === "string"
-        ? data.softwareId
-        : data.software?._id;
+      typeof data.softwareId === "string" ? data.softwareId : data.software?.id;
 
     reset({
       name: data.name ?? "",
@@ -170,12 +171,12 @@ const LeadsForm = () => {
       notes: data.notes ?? "",
       initialEnquiryDate: data.initialEnquiryDate ?? "",
       leadStage: toDropdownOption(
-        data.leadStage?._id,
+        data.leadStage?.id,
         data.leadStage?.name,
         leadNextStepOptions,
       ),
       nextStep: toDropdownOption(
-        data.nextStep?._id,
+        data.nextStep?.id,
         data.nextStep?.name,
         leadNextStepOptions,
       ),
@@ -205,7 +206,7 @@ const LeadsForm = () => {
     if (!payload) return;
     try {
       const res = id
-        ? await updateMutation({ _id: id, ...payload }).unwrap()
+        ? await updateMutation({ id: id, ...payload }).unwrap()
         : await createMutation(payload).unwrap();
 
       if (res) {
@@ -228,8 +229,7 @@ const LeadsForm = () => {
     }
   };
 
-  const trim = (v: unknown) =>
-    typeof v === "string" ? v.trim() : v;
+  const trim = (v: unknown) => (typeof v === "string" ? v.trim() : v);
 
   const submitData = () => {
     const data = getValues();
@@ -244,7 +244,10 @@ const LeadsForm = () => {
         field: leadFieldToId(data.software),
         message: "Software is required.",
       },
-      { field: data.initialEnquiryDate, message: "Initial Enquiry Date is required." },
+      {
+        field: data.initialEnquiryDate,
+        message: "Initial Enquiry Date is required.",
+      },
       {
         field: leadFieldToId(data.nextStep),
         message: "Next Step is required.",
@@ -261,14 +264,23 @@ const LeadsForm = () => {
 
     for (const { field, message } of requiredFields) {
       if (!field) {
-        showToast({ title: "Validation", message, type: "info", duration: 2000 });
+        showToast({
+          title: "Validation",
+          message,
+          type: "info",
+          duration: 2000,
+        });
         return;
       }
     }
 
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
     const emailTrimmed = trim(data.email);
-    if (typeof emailTrimmed === "string" && emailTrimmed && !emailRegex.test(emailTrimmed)) {
+    if (
+      typeof emailTrimmed === "string" &&
+      emailTrimmed &&
+      !emailRegex.test(emailTrimmed)
+    ) {
       showToast({
         title: "Validation",
         message: "Please enter a valid email address.",
@@ -301,8 +313,8 @@ const LeadsForm = () => {
       leadSource: trim(data.leadSource),
       softwareId: leadFieldToId(data.software),
       initialEnquiryDate: data.initialEnquiryDate,
-      leadStage: leadFieldToId(data.leadStage),
-      nextStep: leadFieldToId(data.nextStep),
+      leadStageId: leadFieldToId(data.leadStage),
+      nextStepId: leadFieldToId(data.nextStep),
       priority: leadFieldToId(data.priority),
       ...(shouldSendLeadStatus &&
         leadStatusValue && { leadStatus: leadStatusValue }),
@@ -369,15 +381,19 @@ const LeadsForm = () => {
         {
           label: "Current Stage",
           value:
-            dropdownValueToDisplayLabel(values?.leadStage, leadNextStepOptions) ??
-            selectedData?.leadStage?.name,
+            dropdownValueToDisplayLabel(
+              values?.leadStage,
+              leadNextStepOptions,
+            ) ?? selectedData?.leadStage?.name,
           required: false,
         },
         {
           label: "Next Stage",
           value:
-            dropdownValueToDisplayLabel(values?.nextStep, leadNextStepOptions) ??
-            selectedData?.nextStep?.name,
+            dropdownValueToDisplayLabel(
+              values?.nextStep,
+              leadNextStepOptions,
+            ) ?? selectedData?.nextStep?.name,
           required: true,
         },
         {
@@ -397,15 +413,19 @@ const LeadsForm = () => {
         {
           label: "Priority",
           value:
-            dropdownValueToDisplayLabel(values?.priority, leadPriorityOptions) ??
-            leadFieldToLabel(values?.priority),
+            dropdownValueToDisplayLabel(
+              values?.priority,
+              leadPriorityOptions,
+            ) ?? leadFieldToLabel(values?.priority),
           required: true,
         },
         {
           label: "Status",
           value:
-            dropdownValueToDisplayLabel(values?.leadStatus, leadStatusOptions) ??
-            leadFieldToLabel(values?.leadStatus),
+            dropdownValueToDisplayLabel(
+              values?.leadStatus,
+              leadStatusOptions,
+            ) ?? leadFieldToLabel(values?.leadStatus),
           required: true,
         },
       ],

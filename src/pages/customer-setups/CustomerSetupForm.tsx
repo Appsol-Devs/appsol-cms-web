@@ -33,7 +33,7 @@ import type { ICustomer } from "../customer/common/customers";
 
 export type ICustomerSetupFields = Omit<
   ICustomerSetup,
-  | "_id"
+  | "id"
   | "assignedTo"
   | "scheduledStart"
   | "scheduledEnd"
@@ -123,9 +123,7 @@ const CustomerSetupForm = () => {
   const resetFormWithData = (data: ICustomerSetup) => {
     const setupStatusId =
       data.setupStatusId ||
-      (typeof data.setupStatus !== "string"
-        ? data.setupStatus?._id
-        : undefined);
+      (typeof data.setupStatus !== "string" ? data.setupStatus?.id : undefined);
     const setupStatusLabel =
       typeof data.setupStatus === "string"
         ? SETUP_STATUS_LABEL_MAP[data.setupStatus] || data.setupStatus
@@ -170,7 +168,7 @@ const CustomerSetupForm = () => {
             if (typeof user === "string") {
               return { value: user, label: user } as DropDownOption<string>;
             }
-            const userId = user._id;
+            const userId = user.id;
             if (!userId) return null;
             const name =
               `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() ||
@@ -214,7 +212,7 @@ const CustomerSetupForm = () => {
   const handleDataSubmission = async (payload: Partial<ICustomerSetup>) => {
     try {
       const res = id
-        ? await updateCustomerSetup({ ...payload, _id: id }).unwrap()
+        ? await updateCustomerSetup({ ...payload, id: id }).unwrap()
         : await createCustomerSetup(payload as ICustomerSetup).unwrap();
 
       if (res) {
@@ -240,13 +238,13 @@ const CustomerSetupForm = () => {
   const getSoftwareLabel = (val: any) => {
     if (!val) return "";
     if (typeof val !== "string") return val.label;
-    const found = softwareList.find((s) => s._id === val);
+    const found = softwareList.find((s) => s.id === val);
     return found ? found.name : val;
   };
   const getSetupStatusLabel = (val: any) => {
     if (!val) return "";
     if (typeof val !== "string") return val.label;
-    const found = setupStatusList.find((s) => s._id === val);
+    const found = setupStatusList.find((s) => s.id === val);
     return found ? SETUP_STATUS_LABEL_MAP[found.name ?? ""] || found.name : val;
   };
 
@@ -254,7 +252,7 @@ const CustomerSetupForm = () => {
     const data = getValues();
 
     const selectedStatusId = extractValue(data.setupStatus);
-    const foundStatus = setupStatusList.find((s) => s._id === selectedStatusId);
+    const foundStatus = setupStatusList.find((s) => s.id === selectedStatusId);
 
     const requiredFields = id
       ? [
@@ -266,7 +264,7 @@ const CustomerSetupForm = () => {
           { field: data.setupStatus, message: "Setup status is required." },
           { field: data.title, message: "Title is required." },
           {
-            field: extractValue(data.customer.value._id),
+            field: extractValue(data.customer.value.id),
             message: "Customer is required.",
           },
           {
@@ -305,7 +303,7 @@ const CustomerSetupForm = () => {
       assignedTo: data.assignedTo?.map((user: any) => extractValue(user)) || [],
       setupStatusId: selectedStatusId,
       setupStatus: foundStatus?.name?.toLowerCase() || "",
-      customerId: data.customer.value._id,
+      customerId: data.customer.value.id,
       softwareId: extractValue(data.softwareId),
       addToCalendar: data.addToCalendar,
     };

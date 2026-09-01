@@ -45,8 +45,8 @@ export const rolesApi = createApi({
       }),
     }),
     updateRole: builder.mutation<IRole, IRole>({
-      query: ({ _id, ...payload }) => ({
-        url: `roles/${_id}`,
+      query: ({ id, ...payload }) => ({
+        url: `roles/${id}`,
         body: payload,
         method: "PUT",
       }),

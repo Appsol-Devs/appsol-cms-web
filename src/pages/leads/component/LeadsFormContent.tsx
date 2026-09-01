@@ -15,10 +15,7 @@ import { lookup_params } from "@/lib/api";
 import DropDownComponent from "@/components/DropdownComponent";
 import { useGenerateDropdownOptionsFromEnum } from "@/lib/helpers";
 import { useEffect, useState } from "react";
-import {
-  LEAD_PRIORITY_ENUM,
-  LEAD_STATUS_ENUM,
-} from "@/lib/enums";
+import { LEAD_PRIORITY_ENUM, LEAD_STATUS_ENUM } from "@/lib/enums";
 
 interface IField {
   isLoading?: boolean;
@@ -55,8 +52,8 @@ const LeadsFormContent = ({ isLoading, form, isConverted }: IField) => {
           setSoftwareOptions(
             res.contents.map((item: ISoftware) => ({
               label: item.name ?? "",
-              value: item._id ?? "",
-            }))
+              value: item.id ?? "",
+            })),
           );
         }
       });
@@ -70,7 +67,7 @@ const LeadsFormContent = ({ isLoading, form, isConverted }: IField) => {
           const options: DropDownOption<string>[] = res.contents.map(
             (item) => ({
               label: item.name ?? "",
-              value: item._id ?? "",
+              value: item.id ?? "",
             }),
           );
           setLeadNextStepOptions(options);
@@ -193,7 +190,8 @@ const LeadsFormContent = ({ isLoading, form, isConverted }: IField) => {
               render={({ field }) => (
                 <div className="space-y-1 max-w-[180px]">
                   <p className="text-xs text-onCard font-medium">
-                    Initial Enquiry Date <span className="text-destructive ml-0.5">*</span>
+                    Initial Enquiry Date{" "}
+                    <span className="text-destructive ml-0.5">*</span>
                   </p>
                   <DatePicker
                     title=""
@@ -209,7 +207,7 @@ const LeadsFormContent = ({ isLoading, form, isConverted }: IField) => {
                     }
                     onChange={(date) =>
                       field.onChange(
-                        date ? date.toISOString().split("T")[0] : ""
+                        date ? date.toISOString().split("T")[0] : "",
                       )
                     }
                   />

@@ -65,7 +65,12 @@ const Users = () => {
                 className="rounded-sm!"
               >
                 {row.original?.isVerified ? (
-                  <VerifiedIcon size={10} className="w-6 h-6 text-blue-500" fill="currentColor" color="white" />
+                  <VerifiedIcon
+                    size={10}
+                    className="w-6 h-6 text-blue-500"
+                    fill="currentColor"
+                    color="white"
+                  />
                 ) : (
                   <MailX size={10} />
                 )}
@@ -96,7 +101,12 @@ const Users = () => {
         meta: { icon: <CircleDot size={14} /> },
         cell: ({ row }) => {
           const status = row.original.status ?? "";
-          const colorCode = row.original.status === "active" ? "#16a34a" : row.original.status === "inactive" ? "#dc2626" : undefined;
+          const colorCode =
+            row.original.status === "active"
+              ? "#16a34a"
+              : row.original.status === "inactive"
+                ? "#dc2626"
+                : undefined;
           const style = getLookupBadgeStyle(colorCode);
 
           return (
@@ -111,7 +121,7 @@ const Users = () => {
         },
       },
     ],
-    [executed]
+    [executed],
   );
 
   return (
@@ -127,8 +137,8 @@ const Users = () => {
         columns={columns}
         pathOnRowSelected={(row) => {
           const user = row as IUser;
-          if (!user._id) return;
-          navigate(allRoutes.PORTAL + allRoutes.VIEW_USER(user._id), {
+          if (!user.id) return;
+          navigate(allRoutes.PORTAL + allRoutes.VIEW_USER(user.id), {
             state: { initialData: user },
           });
         }}

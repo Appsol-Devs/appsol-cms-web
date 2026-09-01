@@ -24,11 +24,14 @@ export const ticketFormSchema = z.object({
         value: z.union([z.string(), z.record(z.string(), z.any())]),
       }),
     ])
-    .refine((v) => {
-      if (v == null) return false;
-      const val = (v as { value?: string | { _id?: string } }).value;
-      return typeof val === "string" ? !!val?.trim() : !!val?._id;
-    }, { message: "Complaint is required" }),
+    .refine(
+      (v) => {
+        if (v == null) return false;
+        const val = (v as { value?: string | { id?: string } }).value;
+        return typeof val === "string" ? !!val?.trim() : !!val?.id;
+      },
+      { message: "Complaint is required" },
+    ),
   assignedEngineerId: formDropdownFieldSchema.optional(),
   priority: formDropdownFieldSchema.optional(),
   status: formDropdownFieldSchema.optional(),
@@ -61,7 +64,7 @@ export const ticketComplaintToId = (
   if (!complaint) return undefined;
   const rawValue = complaint.value;
   if (typeof rawValue === "string") return rawValue;
-  return rawValue?._id;
+  return rawValue?.id;
 };
 
 export const ticketComplaintToLabel = (
@@ -77,17 +80,22 @@ export const ticketComplaintToLabel = (
 };
 
 export type ITicketFormFields = z.infer<typeof ticketFormSchema>;
-export type TicketStatus = "open" | "fixed" | "closed" | "assigned" | "rejected";
+export type TicketStatus =
+  | "open"
+  | "fixed"
+  | "closed"
+  | "assigned"
+  | "rejected";
 
 export interface ITicketComplaint {
-  _id?: string;
+  id?: string;
   customer?: ICustomer;
   description?: string;
   complaintCode?: string;
 }
 
 export interface ITicketHistoryEntry {
-  _id?: string;
+  id?: string;
   from?: string | IUser | null;
   to?: string | IUser | null;
   date?: string;
@@ -96,7 +104,7 @@ export interface ITicketHistoryEntry {
 }
 
 export interface ITicket {
-  _id?: string;
+  id?: string;
   ticketCode?: string;
   title?: string;
   requestedDate?: string;

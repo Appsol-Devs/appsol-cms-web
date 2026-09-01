@@ -15,7 +15,7 @@ import {
 import type { ISetupStatus } from "../../common/settings";
 import SetupStatuesFormContent from "./SetupStatusesFormContent";
 
-export type ISetupStatusFields = Omit<ISetupStatus, "_id"> & {};
+export type ISetupStatusFields = Omit<ISetupStatus, "id"> & {};
 
 const SetupStatusesForm = () => {
   const { id } = useParams();
@@ -24,15 +24,15 @@ const SetupStatusesForm = () => {
     useAddSetupStatusMutation();
   const [updateSetupStatus, { isLoading: isUpdating }] =
     useUpdateSetupStatusMutation();
-  const [getASetupStatus, { isLoading: isGetting }] = useLazyGetASetupStatusQuery();
+  const [getASetupStatus, { isLoading: isGetting }] =
+    useLazyGetASetupStatusQuery();
   const form = useForm<ISetupStatusFields>();
   const { watch, getValues, reset } = form;
   const values = watch();
 
   const navigate = useNavigate();
-  const [selectedSetupStatus, setSelectedSetupStatus] = useState<ISetupStatus | null>(
-    null
-  );
+  const [selectedSetupStatus, setSelectedSetupStatus] =
+    useState<ISetupStatus | null>(null);
 
   const fetchData = async (id: string) => {
     if (!id) return;
@@ -90,7 +90,7 @@ const SetupStatusesForm = () => {
     if (!payload) return;
     try {
       const res = id
-        ? await updateSetupStatus({ _id: id, ...payload }).unwrap()
+        ? await updateSetupStatus({ id: id, ...payload }).unwrap()
         : await createNewSetupStatus(payload).unwrap();
 
       if (res) {
@@ -104,7 +104,7 @@ const SetupStatusesForm = () => {
         navigate(-1);
       }
     } catch (error) {
-      console.error(error); 
+      console.error(error);
     }
   };
 

@@ -56,8 +56,8 @@ export const complaintsApi = createApi({
       }),
     }),
     updateComplaint: builder.mutation<IComplaint, IComplaint>({
-      query: ({ _id, ...payload }) => ({
-        url: `customer_complaints/${_id}`,
+      query: ({ id, ...payload }) => ({
+        url: `customer_complaints/${id}`,
         body: payload,
         method: "PUT",
       }),

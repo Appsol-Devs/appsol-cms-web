@@ -6,7 +6,7 @@ import type {
 } from "@/pages/settings/common/settings";
 
 export interface IPayment {
-  _id?: string;
+  id?: string;
   paymentCode?: string;
   customerId?: string;
   customer?: ICustomer;

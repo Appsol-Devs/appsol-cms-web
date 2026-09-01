@@ -19,7 +19,7 @@ import { getLookupBadgeStyle } from "@/lib/enums";
 import { showToast } from "@/components/ui/CustomToast";
 
 import { useNotifications } from "../common/notification";
-import NotificationDetailsDrawer from "./NotificationDetailsDrawer"; 
+import NotificationDetailsDrawer from "./NotificationDetailsDrawer";
 
 const Notifications = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -51,7 +51,7 @@ const Notifications = () => {
   const handleMarkAsRead = async (notif: INotification) => {
     if (notif.isRead) return;
     try {
-      await markAsReadREST(String(notif._id));
+      await markAsReadREST(String(notif.id));
       showToast({
         title: "Success",
         message: "Notification marked as read",
@@ -151,7 +151,7 @@ const Notifications = () => {
 
                   return (
                     <div
-                      key={notif._id}
+                      key={notif.id}
                       onClick={() => handleNotificationClick(notif)}
                       className={cn(
                         "group flex items-start gap-1.5 p-1 rounded-sm transition-colors border-b last:border-0 cursor-pointer",

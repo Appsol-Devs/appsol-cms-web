@@ -80,7 +80,7 @@ const SetupStatuses = () => {
               onClick={() =>
                 navigate(
                   allRoutes.PORTAL +
-                    allRoutes.UPDATE_SETUP_STATUS(row.original._id as string)
+                    allRoutes.UPDATE_SETUP_STATUS(row.original.id as string),
                 )
               }
             />
@@ -88,7 +88,7 @@ const SetupStatuses = () => {
         ),
       },
     ],
-    [executed]
+    [executed],
   );
 
   return (

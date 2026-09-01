@@ -44,11 +44,16 @@ function validateFromToRangeOrder(from: string, to: string): boolean {
 const RescheduleForm = () => {
   const { id } = useParams();
   const location = useLocation();
-  const initialData = (location.state as any)?.initialData as IReschedule | undefined;
+  const initialData = (location.state as any)?.initialData as
+    | IReschedule
+    | undefined;
 
-  const [createMutation, { isLoading: isCreating }] = useAddRescheduleMutation();
-  const [updateMutation, { isLoading: isUpdating }] = useUpdateRescheduleMutation();
-  const [getSelectedData, { isLoading: isGetting }] = useLazyGetARescheduleQuery();
+  const [createMutation, { isLoading: isCreating }] =
+    useAddRescheduleMutation();
+  const [updateMutation, { isLoading: isUpdating }] =
+    useUpdateRescheduleMutation();
+  const [getSelectedData, { isLoading: isGetting }] =
+    useLazyGetARescheduleQuery();
 
   const form = useForm<IRescheduleFormFields>({
     defaultValues: {
@@ -79,8 +84,8 @@ const RescheduleForm = () => {
 
   const resetFormWithData = (data: IReschedule) => {
     if (!data) return;
-    const fromVal = data.from?.trim() ? data.from : data.newDateTime ?? "";
-    const toVal = data.to?.trim() ? data.to : data.newDateTime ?? "";
+    const fromVal = data.from?.trim() ? data.from : (data.newDateTime ?? "");
+    const toVal = data.to?.trim() ? data.to : (data.newDateTime ?? "");
     const customer =
       data.customer && typeof data.customer !== "string"
         ? (data.customer as ICustomer)
@@ -103,7 +108,7 @@ const RescheduleForm = () => {
         : data.customerId
           ? {
               label: data.customerId,
-              value: { _id: data.customerId } as ICustomer,
+              value: { id: data.customerId } as ICustomer,
             }
           : undefined,
       targetEntityType: data.targetEntityType ?? undefined,
@@ -129,13 +134,15 @@ const RescheduleForm = () => {
     if (!payload) return;
     try {
       const res = id
-        ? await updateMutation({ _id: id, ...payload }).unwrap()
+        ? await updateMutation({ id: id, ...payload }).unwrap()
         : await createMutation(payload).unwrap();
 
       if (res) {
         showToast({
           title: "Success",
-          message: id ? "Schedule updated successfully." : "Schedule created successfully.",
+          message: id
+            ? "Schedule updated successfully."
+            : "Schedule created successfully.",
           type: "success",
         });
         navigate(allRoutes.PORTAL + allRoutes.RESCHEDULES);
@@ -143,7 +150,9 @@ const RescheduleForm = () => {
     } catch {
       showToast({
         title: "Error",
-        message: id ? "Failed to update schedule." : "Failed to create schedule.",
+        message: id
+          ? "Failed to update schedule."
+          : "Failed to create schedule.",
         type: "error",
       });
     }
@@ -154,22 +163,36 @@ const RescheduleForm = () => {
 
     const requiredFields: { field: unknown; message: string }[] = [
       { field: data.title?.trim(), message: "Title is required." },
-      { field: rescheduleCustomerToId(data.customerId), message: "Customer is required." },
+      {
+        field: rescheduleCustomerToId(data.customerId),
+        message: "Customer is required.",
+      },
       {
         field: getTargetEntityTypeFromForm(data.targetEntityType),
         message: "Target Entity Type is required.",
       },
-      { field: data.originalDateTime, message: "Original Date & Time is required." },
+      {
+        field: data.originalDateTime,
+        message: "Original Date & Time is required.",
+      },
       { field: data.newDateTime, message: "New Date & Time is required." },
       { field: data.from, message: "From date & time is required." },
       { field: data.to, message: "To date & time is required." },
-      { field: rescheduleFieldToId(data.status), message: "Status is required." },
+      {
+        field: rescheduleFieldToId(data.status),
+        message: "Status is required.",
+      },
       { field: data.reason?.trim(), message: "Reason is required." },
     ];
 
     for (const { field, message } of requiredFields) {
       if (!field) {
-        showToast({ title: "Validation", message, type: "info", duration: 2000 });
+        showToast({
+          title: "Validation",
+          message,
+          type: "info",
+          duration: 2000,
+        });
         return;
       }
     }
@@ -199,27 +222,42 @@ const RescheduleForm = () => {
 
     const requiredFields: { field: unknown; message: string }[] = [
       { field: data.title?.trim(), message: "Title is required." },
-      { field: rescheduleCustomerToId(data.customerId), message: "Customer is required." },
+      {
+        field: rescheduleCustomerToId(data.customerId),
+        message: "Customer is required.",
+      },
       {
         field: getTargetEntityTypeFromForm(data.targetEntityType),
         message: "Target Entity Type is required.",
       },
-      { field: data.originalDateTime, message: "Original Date & Time is required." },
+      {
+        field: data.originalDateTime,
+        message: "Original Date & Time is required.",
+      },
       { field: data.newDateTime, message: "New Date & Time is required." },
       { field: data.from, message: "From date & time is required." },
       { field: data.to, message: "To date & time is required." },
-      { field: rescheduleFieldToId(data.status), message: "Status is required." },
+      {
+        field: rescheduleFieldToId(data.status),
+        message: "Status is required.",
+      },
       { field: data.reason?.trim(), message: "Reason is required." },
     ];
 
     for (const { field, message } of requiredFields) {
       if (!field) {
-        showToast({ title: "Validation", message, type: "info", duration: 2000 });
+        showToast({
+          title: "Validation",
+          message,
+          type: "info",
+          duration: 2000,
+        });
         return false;
       }
     }
 
-    if (!validateFromToRangeOrder(String(data.from), String(data.to))) return false;
+    if (!validateFromToRangeOrder(String(data.from), String(data.to)))
+      return false;
 
     return true;
   };
@@ -240,8 +278,9 @@ const RescheduleForm = () => {
           value: (() => {
             const v = getTargetEntityTypeFromForm(values?.targetEntityType);
             if (!v) return "";
-            const label = TARGET_ENTITY_TYPE_OPTIONS.find((o) => o.value === v)
-              ?.label;
+            const label = TARGET_ENTITY_TYPE_OPTIONS.find(
+              (o) => o.value === v,
+            )?.label;
             return typeof label === "string" ? label : v;
           })(),
           required: true,
@@ -286,13 +325,21 @@ const RescheduleForm = () => {
           description: "Schedule, track, and manage scheduled activities.",
           icon: CalendarClock,
         }}
-        formContent={<RescheduleFormContent form={form} isLoading={isLoading} />}
+        formContent={
+          <RescheduleFormContent form={form} isLoading={isLoading} />
+        }
         submitData={submitData}
-        pageTitle={id ? `Update Schedule - ${selectedData?.rescheduleCode ?? ""}` : "Add Schedule"}
+        pageTitle={
+          id
+            ? `Update Schedule - ${selectedData?.rescheduleCode ?? ""}`
+            : "Add Schedule"
+        }
         loading={isLoading}
         confirmOnSubmit
         validateBeforeOpen={validateBeforeOpen}
-        confirmSubmitTitle={id ? "Confirm Schedule Update" : "Confirm Schedule Creation"}
+        confirmSubmitTitle={
+          id ? "Confirm Schedule Update" : "Confirm Schedule Creation"
+        }
         confirmSubmitActionLabel={id ? "Save Changes" : "Create Schedule"}
         mutationFormSummary={{
           summaryData: summarySections,
@@ -305,4 +352,3 @@ const RescheduleForm = () => {
 };
 
 export default RescheduleForm;
-

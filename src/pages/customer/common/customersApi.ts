@@ -17,10 +17,12 @@ import type { IPayment } from "@/pages/payments/common/payments";
 async function readListFromBqResponse<T>(data: unknown): Promise<T[]> {
   if (data instanceof Response) {
     const raw = await data.json();
-    return Array.isArray(raw) ? raw : ((raw as { contents?: T[] }).contents ?? []);
+    return Array.isArray(raw)
+      ? raw
+      : ((raw as { contents?: T[] }).contents ?? []);
   }
   if (Array.isArray(data)) return data;
-  return ((data as { contents?: T[] })?.contents ?? []);
+  return (data as { contents?: T[] })?.contents ?? [];
 }
 
 function buildListPagination(
@@ -46,7 +48,7 @@ function getPaymentCustomerId(payment: IPayment): string | undefined {
   if (!customer) return undefined;
   if (typeof customer === "string") return customer;
 
-  if (customer._id) return String(customer._id);
+  if (customer.id) return String(customer.id);
   const customerRecord = customer as { id?: string };
   if (customerRecord.id) return String(customerRecord.id);
 
@@ -168,8 +170,8 @@ export const customersApi = createApi({
       transformResponse: async (response: Response) => response.json(),
     }),
     updateCustomer: builder.mutation<ICustomer, ICustomer>({
-      query: ({ _id, ...payload }) => ({
-        url: `customers/${_id}`,
+      query: ({ id, ...payload }) => ({
+        url: `customers/${id}`,
         body: payload,
         method: "PUT",
       }),
@@ -244,15 +246,15 @@ export const customersApi = createApi({
         const complaintsMissingTicket: IComplaint[] = [];
 
         for (const complaint of complaints) {
-          if (complaint.ticket?._id) {
-            ticketMap.set(complaint.ticket._id, {
+          if (complaint.ticket?.id) {
+            ticketMap.set(complaint.ticket.id, {
               ...complaint.ticket,
               complaint,
-              complaintId: complaint._id ?? complaint.ticket.complaintId,
+              complaintId: complaint.id ?? complaint.ticket.complaintId,
             });
             continue;
           }
-          if (complaint._id) {
+          if (complaint.id) {
             complaintsMissingTicket.push(complaint);
           }
         }
@@ -260,7 +262,7 @@ export const customersApi = createApi({
         await Promise.all(
           complaintsMissingTicket.map(async (complaint) => {
             const ticketsResult = await fetchWithBQ(
-              `/tickets?complaintId=${encodeURIComponent(complaint._id!)}&pageSize=100`,
+              `/tickets?complaintId=${encodeURIComponent(complaint.id!)}&pageSize=100`,
             );
             if (ticketsResult.error) return;
 
@@ -269,11 +271,11 @@ export const customersApi = createApi({
             );
 
             for (const ticket of tickets) {
-              if (!ticket._id || ticketMap.has(ticket._id)) continue;
-              ticketMap.set(ticket._id, {
+              if (!ticket.id || ticketMap.has(ticket.id)) continue;
+              ticketMap.set(ticket.id, {
                 ...ticket,
                 complaint: ticket.complaint ?? complaint,
-                complaintId: ticket.complaintId ?? complaint._id,
+                complaintId: ticket.complaintId ?? complaint.id,
               });
             }
           }),
@@ -288,7 +290,8 @@ export const customersApi = createApi({
         const query = search?.trim().toLowerCase();
         if (query) {
           tickets = tickets.filter((ticket) => {
-            const customerName = ticket.complaint?.customer?.name?.toLowerCase() ?? "";
+            const customerName =
+              ticket.complaint?.customer?.name?.toLowerCase() ?? "";
             return (
               ticket.ticketCode?.toLowerCase().includes(query) ||
               ticket.title?.toLowerCase().includes(query) ||
@@ -304,184 +307,177 @@ export const customersApi = createApi({
         return {
           data: {
             contents,
-            pagination: buildTicketPagination(total, safePageIndex, safePageSize),
+            pagination: buildTicketPagination(
+              total,
+              safePageIndex,
+              safePageSize,
+            ),
           },
         };
       },
     }),
-     getCustomerComplaints: builder.query<
-          PaginatedResponse<IComplaint[]>,
-          IBaseQueryParam
-        >({
-          query: ({ pageIndex, search, pageSize,customerId }) => {
-            let url = `/customer_complaints?pageSize=${pageSize}`;
-            if (search) {
-              url += `&search=${search}`;
-            }
-            if (pageIndex) {
-              url += `&pageIndex=${pageIndex}`;
-            }
-            if(customerId){
-              url += `&customerId=${customerId}`;
-            }
+    getCustomerComplaints: builder.query<
+      PaginatedResponse<IComplaint[]>,
+      IBaseQueryParam
+    >({
+      query: ({ pageIndex, search, pageSize, customerId }) => {
+        let url = `/customer_complaints?pageSize=${pageSize}`;
+        if (search) {
+          url += `&search=${search}`;
+        }
+        if (pageIndex) {
+          url += `&pageIndex=${pageIndex}`;
+        }
+        if (customerId) {
+          url += `&customerId=${customerId}`;
+        }
+        return {
+          url: url,
+        };
+      },
+      transformResponse: async (response: Response) => {
+        const data: IComplaint[] = await response.json();
+        return {
+          pagination: getPaginationMetaDataV2(response) as IPagination,
+          contents: data as IComplaint[],
+        };
+      },
+    }),
+    getCustomerPayments: builder.query<
+      PaginatedResponse<IPayment[]>,
+      IBaseQueryParam
+    >({
+      async queryFn(
+        { customerId, pageIndex = 1, pageSize = 10, search, filters },
+        _api,
+        _extraOptions,
+        fetchWithBQ,
+      ) {
+        const safePageSize = pageSize && pageSize > 0 ? pageSize : 10;
+        const safePageIndex = pageIndex && pageIndex > 0 ? pageIndex : 1;
+
+        if (!customerId) {
+          return {
+            data: {
+              contents: [],
+              pagination: buildListPagination(0, safePageIndex, safePageSize),
+            },
+          };
+        }
+
+        const serverFilters = { ...filters };
+        delete serverFilters.customerId;
+
+        const scopedParams = new URLSearchParams();
+        scopedParams.set("pageSize", String(safePageSize));
+        scopedParams.set("pageIndex", String(safePageIndex));
+        if (search) scopedParams.set("search", search);
+        scopedParams.set("customerId", customerId);
+
+        const scopedResult = await fetchWithBQ(
+          getQueryRequestUrl(
+            `/payments?${scopedParams.toString()}`,
+            serverFilters,
+          ),
+        );
+
+        if (!scopedResult.error) {
+          const scopedBatch = await readListFromBqResponse<IPayment>(
+            scopedResult.data,
+          );
+          const scopedMatches = scopedBatch.filter((payment) =>
+            paymentBelongsToCustomer(payment, customerId),
+          );
+          const apiScopesByCustomer =
+            scopedBatch.length > 0 &&
+            scopedMatches.length === scopedBatch.length;
+
+          if (apiScopesByCustomer) {
+            const scopedPagination =
+              scopedResult.data instanceof Response
+                ? getPaginationMetaDataV2(scopedResult.data)
+                : null;
+
             return {
-              url: url,
-            };
-          },
-          transformResponse: async (response: Response) => {
-            const data: IComplaint[] = await response.json();
-            return {
-              pagination: getPaginationMetaDataV2(response) as IPagination,
-              contents: data as IComplaint[],
-            };
-          },
-        }),
-          getCustomerPayments: builder.query<
-              PaginatedResponse<IPayment[]>,
-              IBaseQueryParam
-            >({
-              async queryFn(
-                { customerId, pageIndex = 1, pageSize = 10, search, filters },
-                _api,
-                _extraOptions,
-                fetchWithBQ,
-              ) {
-                const safePageSize = pageSize && pageSize > 0 ? pageSize : 10;
-                const safePageIndex = pageIndex && pageIndex > 0 ? pageIndex : 1;
-
-                if (!customerId) {
-                  return {
-                    data: {
-                      contents: [],
-                      pagination: buildListPagination(
-                        0,
-                        safePageIndex,
-                        safePageSize,
-                      ),
-                    },
-                  };
-                }
-
-                const serverFilters = { ...filters };
-                delete serverFilters.customerId;
-
-                const scopedParams = new URLSearchParams();
-                scopedParams.set("pageSize", String(safePageSize));
-                scopedParams.set("pageIndex", String(safePageIndex));
-                if (search) scopedParams.set("search", search);
-                scopedParams.set("customerId", customerId);
-
-                const scopedResult = await fetchWithBQ(
-                  getQueryRequestUrl(
-                    `/payments?${scopedParams.toString()}`,
-                    serverFilters,
-                  ),
-                );
-
-                if (!scopedResult.error) {
-                  const scopedBatch = await readListFromBqResponse<IPayment>(
-                    scopedResult.data,
-                  );
-                  const scopedMatches = scopedBatch.filter((payment) =>
-                    paymentBelongsToCustomer(payment, customerId),
-                  );
-                  const apiScopesByCustomer =
-                    scopedBatch.length > 0 &&
-                    scopedMatches.length === scopedBatch.length;
-
-                  if (apiScopesByCustomer) {
-                    const scopedPagination =
-                      scopedResult.data instanceof Response
-                        ? getPaginationMetaDataV2(scopedResult.data)
-                        : null;
-
-                    return {
-                      data: {
-                        contents: scopedMatches,
-                        pagination: (scopedPagination ?? buildListPagination(
-                          scopedMatches.length,
-                          safePageIndex,
-                          safePageSize,
-                        )) as IPagination,
-                      },
-                    };
-                  }
-                }
-
-                try {
-                  const collected: IPayment[] = [];
-                  const seenIds = new Set<string>();
-                  let scanPageIndex = 1;
-                  const scanPageSize = 100;
-
-                  while (scanPageIndex <= 100) {
-                    const params = new URLSearchParams();
-                    params.set("pageSize", String(scanPageSize));
-                    params.set("pageIndex", String(scanPageIndex));
-
-                    const paymentsResult = await fetchWithBQ(
-                      `/payments?${params.toString()}`,
-                    );
-                    if (paymentsResult.error) {
-                      return {
-                        error: paymentsResult.error as FetchBaseQueryError,
-                      };
-                    }
-
-                    const batch = await readListFromBqResponse<IPayment>(
-                      paymentsResult.data,
-                    );
-                    if (!batch.length) break;
-
-                    for (const payment of batch) {
-                      if (!paymentBelongsToCustomer(payment, customerId)) {
-                        continue;
-                      }
-                      const paymentId = payment._id ?? payment.paymentCode;
-                      if (paymentId && seenIds.has(paymentId)) continue;
-                      if (paymentId) seenIds.add(paymentId);
-                      collected.push(payment);
-                    }
-
-                    if (batch.length < scanPageSize) break;
-                    scanPageIndex += 1;
-                  }
-
-                  const payments = collected.sort((a, b) => {
-                    const aTime = new Date(
-                      a.paymentDate ?? a.createdAt ?? 0,
-                    ).getTime();
-                    const bTime = new Date(
-                      b.paymentDate ?? b.createdAt ?? 0,
-                    ).getTime();
-                    return bTime - aTime;
-                  });
-
-                  const filtered = applyPaymentListFilters(
-                    payments,
-                    filters,
-                    search,
-                  );
-
-                  const total = filtered.length;
-                  const start = (safePageIndex - 1) * safePageSize;
-                  const contents = filtered.slice(start, start + safePageSize);
-
-                  return {
-                    data: {
-                      contents,
-                      pagination: buildListPagination(
-                        total,
-                        safePageIndex,
-                        safePageSize,
-                      ),
-                    },
-                  };
-                } catch (error) {
-                  return { error: error as FetchBaseQueryError };
-                }
+              data: {
+                contents: scopedMatches,
+                pagination: (scopedPagination ??
+                  buildListPagination(
+                    scopedMatches.length,
+                    safePageIndex,
+                    safePageSize,
+                  )) as IPagination,
               },
-            }),
+            };
+          }
+        }
+
+        try {
+          const collected: IPayment[] = [];
+          const seenIds = new Set<string>();
+          let scanPageIndex = 1;
+          const scanPageSize = 100;
+
+          while (scanPageIndex <= 100) {
+            const params = new URLSearchParams();
+            params.set("pageSize", String(scanPageSize));
+            params.set("pageIndex", String(scanPageIndex));
+
+            const paymentsResult = await fetchWithBQ(
+              `/payments?${params.toString()}`,
+            );
+            if (paymentsResult.error) {
+              return {
+                error: paymentsResult.error as FetchBaseQueryError,
+              };
+            }
+
+            const batch = await readListFromBqResponse<IPayment>(
+              paymentsResult.data,
+            );
+            if (!batch.length) break;
+
+            for (const payment of batch) {
+              if (!paymentBelongsToCustomer(payment, customerId)) {
+                continue;
+              }
+              const paymentId = payment.id ?? payment.paymentCode;
+              if (paymentId && seenIds.has(paymentId)) continue;
+              if (paymentId) seenIds.add(paymentId);
+              collected.push(payment);
+            }
+
+            if (batch.length < scanPageSize) break;
+            scanPageIndex += 1;
+          }
+
+          const payments = collected.sort((a, b) => {
+            const aTime = new Date(a.paymentDate ?? a.createdAt ?? 0).getTime();
+            const bTime = new Date(b.paymentDate ?? b.createdAt ?? 0).getTime();
+            return bTime - aTime;
+          });
+
+          const filtered = applyPaymentListFilters(payments, filters, search);
+
+          const total = filtered.length;
+          const start = (safePageIndex - 1) * safePageSize;
+          const contents = filtered.slice(start, start + safePageSize);
+
+          return {
+            data: {
+              contents,
+              pagination: buildListPagination(
+                total,
+                safePageIndex,
+                safePageSize,
+              ),
+            },
+          };
+        } catch (error) {
+          return { error: error as FetchBaseQueryError };
+        }
+      },
+    }),
   }),
 });
 

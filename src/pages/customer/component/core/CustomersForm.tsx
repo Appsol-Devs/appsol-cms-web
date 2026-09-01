@@ -69,15 +69,12 @@ const CustomersForm = () => {
         phone: existingData.phone ?? "",
         location: existingData.location ?? "",
         dateConverted:
-          existingData.dateConverted ??
-          new Date().toISOString().split("T")[0],
+          existingData.dateConverted ?? new Date().toISOString().split("T")[0],
         notes: existingData.notes ?? "",
         status: existingData.status ?? "active",
         geolocation: existingData.geolocation,
         softwareId:
-          existingData.softwareId ??
-          existingData.software?._id ??
-          undefined,
+          existingData.softwareId ?? existingData.software?.id ?? undefined,
       }
     : {};
   const form = useForm<ICustomerFields>({
@@ -103,14 +100,13 @@ const CustomersForm = () => {
           setSoftwareOptions(
             res.contents.map((item) => ({
               label: item.name ?? "",
-              value: item._id ?? "",
+              value: item.id ?? "",
             })),
           );
         }
       })
       .catch(console.error);
   }, [getSoftwares]);
-
 
   const fetchCustomerData = async (id: string) => {
     if (!id) return;
@@ -143,9 +139,7 @@ const CustomersForm = () => {
     if (!data) return;
 
     const softwareId =
-      typeof data.softwareId === "string"
-        ? data.softwareId
-        : data.software?._id;
+      typeof data.softwareId === "string" ? data.softwareId : data.software?.id;
 
     reset({
       name: data.name ?? "",
@@ -200,7 +194,7 @@ const CustomersForm = () => {
     if (!payload) return;
     try {
       const res = id
-        ? await updateCustomer({ ...payload, _id: id }).unwrap()
+        ? await updateCustomer({ ...payload, id: id }).unwrap()
         : await createNewCustomer(payload).unwrap();
 
       if (res) {
@@ -208,7 +202,10 @@ const CustomersForm = () => {
           try {
             await convertLead(fromLeadId).unwrap();
           } catch (convertError) {
-            console.error("Customer created but lead convert failed", convertError);
+            console.error(
+              "Customer created but lead convert failed",
+              convertError,
+            );
             showToast({
               title: "Warning",
               message:
@@ -228,8 +225,8 @@ const CustomersForm = () => {
           type: "success",
         });
 
-        if (!id && res._id) {
-          navigate(allRoutes.PORTAL + allRoutes.VIEW_CUSTOMER(res._id));
+        if (!id && res.id) {
+          navigate(allRoutes.PORTAL + allRoutes.VIEW_CUSTOMER(res.id));
         } else {
           navigate(-1);
         }
@@ -239,8 +236,7 @@ const CustomersForm = () => {
     }
   };
 
-const submitData = handleSubmit(
-  (data) => {
+  const submitData = handleSubmit((data) => {
     const payload: ICustomer = cleanPayload({
       name: data.name,
       companyName: data.companyName,
@@ -256,10 +252,7 @@ const submitData = handleSubmit(
     });
 
     handleDataSubmission(payload);
-  },
-  
-
-);
+  });
 
   const summarySections: ISummarySection[] = [
     {
@@ -300,10 +293,7 @@ const submitData = handleSubmit(
         {
           label: "Related Software",
           value:
-            customerFieldToDisplayLabel(
-              values?.softwareId,
-              softwareOptions,
-            ) ??
+            customerFieldToDisplayLabel(values?.softwareId, softwareOptions) ??
             (typeof selectedCustomer?.software !== "string"
               ? selectedCustomer?.software?.name
               : undefined),

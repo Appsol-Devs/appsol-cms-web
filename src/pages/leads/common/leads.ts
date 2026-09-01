@@ -18,11 +18,13 @@ export type ILead = {
   createdAt?: string;
   updatedAt?: string;
   leadStage?: ILeadNextStep;
+  leadStageId?: string;
   priority?: string;
   nextStep?: ILeadNextStep;
+  nextStepId?: string;
   location?: string;
   notes?: string;
-  _id?: string;
+  id?: string;
   isConverted?: boolean;
   customerId?: string;
   customer?: ICustomer;
@@ -37,7 +39,7 @@ export const mapLeadToCustomerPrefill = (lead: ILead): Partial<ICustomer> => ({
   notes: lead.notes ?? "",
   softwareId: lead.softwareId,
   dateConverted: new Date().toISOString().split("T")[0],
-  leadId: lead._id,
+  leadId: lead.id,
   status: "active",
 });
 

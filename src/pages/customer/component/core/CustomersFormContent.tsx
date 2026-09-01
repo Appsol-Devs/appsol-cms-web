@@ -6,7 +6,9 @@ import { Controller, type UseFormReturn } from "react-hook-form";
 import { DatePicker } from "@/components/DatePicker";
 import { useLazyGetSoftwaresQuery } from "@/pages/settings/common/settingsApi";
 import { useEffect, useState } from "react";
-import DropDownComponent, { type DropDownOption } from "@/components/DropdownComponent";
+import DropDownComponent, {
+  type DropDownOption,
+} from "@/components/DropdownComponent";
 import { lookup_params } from "@/lib/api";
 import type { ICustomerFields } from "../../common/customers";
 
@@ -18,9 +20,15 @@ interface IField {
 
 const CustomersFormContent = ({ isLoading, form }: IField) => {
   const [getSoftwares] = useLazyGetSoftwaresQuery();
-  const { control, register, formState: { errors } } = form;
+  const {
+    control,
+    register,
+    formState: { errors },
+  } = form;
 
-  const [softwareOptions, setSoftwareOptions] = useState<DropDownOption<string>[]>([]);
+  const [softwareOptions, setSoftwareOptions] = useState<
+    DropDownOption<string>[]
+  >([]);
 
   const fetchSoftwares = async () => {
     try {
@@ -28,7 +36,7 @@ const CustomersFormContent = ({ isLoading, form }: IField) => {
       if (res && res.contents) {
         const options = res.contents.map((software) => ({
           label: software.name ?? "",
-          value: software._id ?? "",
+          value: software.id ?? "",
         }));
         setSoftwareOptions(options);
       }
@@ -68,10 +76,10 @@ const CustomersFormContent = ({ isLoading, form }: IField) => {
             register={register}
             errors={errors}
 
-          // rules={{
-          //   required: "Name is required",
-          //   minLength: { value: 2, message: "Name must be at least 2 characters" },
-          // }}
+            // rules={{
+            //   required: "Name is required",
+            //   minLength: { value: 2, message: "Name must be at least 2 characters" },
+            // }}
           />
           <CustomInputField<ICustomerFields>
             type="email"
@@ -81,13 +89,13 @@ const CustomersFormContent = ({ isLoading, form }: IField) => {
             disabled={isLoading}
             register={register}
             errors={errors}
-          // rules={{
-          //   required: "Email is required",
-          //   pattern: {
-          //     value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
-          //     message: "Please enter a valid email address.",
-          //   },
-          // }}
+            // rules={{
+            //   required: "Email is required",
+            //   pattern: {
+            //     value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+            //     message: "Please enter a valid email address.",
+            //   },
+            // }}
           />
           <CustomInputField<ICustomerFields>
             type="text"
@@ -98,13 +106,13 @@ const CustomersFormContent = ({ isLoading, form }: IField) => {
             register={register}
             errors={errors}
 
-          // rules={{
-          //   required: "Phone number is required",
-          //   pattern: {
-          //     value: /^\+?[0-9]{10,15}$/,
-          //     message: "Please enter a valid phone number.",
-          //   },
-          // }}
+            // rules={{
+            //   required: "Phone number is required",
+            //   pattern: {
+            //     value: /^\+?[0-9]{10,15}$/,
+            //     message: "Please enter a valid phone number.",
+            //   },
+            // }}
           />
         </div>
       </CardComponent>
@@ -131,7 +139,7 @@ const CustomersFormContent = ({ isLoading, form }: IField) => {
             register={register}
             errors={errors}
 
-          // rules={{ required: "Company Name is required" }}
+            // rules={{ required: "Company Name is required" }}
           />
           <CustomInputField<ICustomerFields>
             type="text"
@@ -142,7 +150,7 @@ const CustomersFormContent = ({ isLoading, form }: IField) => {
             register={register}
             errors={errors}
 
-          // rules={{ required: "Location is required" }}
+            // rules={{ required: "Location is required" }}
           />
           <DropDownComponent
             control={control}
@@ -188,9 +196,7 @@ const CustomersFormContent = ({ isLoading, form }: IField) => {
                     : undefined
                 }
                 onChange={(date) =>
-                  field.onChange(
-                    date ? date.toISOString().split("T")[0] : "",
-                  )
+                  field.onChange(date ? date.toISOString().split("T")[0] : "")
                 }
               />
             )}

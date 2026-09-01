@@ -92,7 +92,7 @@ const Softwares = () => {
               onClick={() =>
                 navigate(
                   allRoutes.PORTAL +
-                    allRoutes.UPDATE_SOFTWARE(row.original._id as string)
+                    allRoutes.UPDATE_SOFTWARE(row.original.id as string),
                 )
               }
             />
@@ -100,7 +100,7 @@ const Softwares = () => {
         ),
       },
     ],
-    [executed]
+    [executed],
   );
 
   return (

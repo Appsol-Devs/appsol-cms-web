@@ -46,7 +46,7 @@ const RescheduleView = () => {
 
   const [loggedByName, setLoggedByName] = useState<string>("—");
   const [selected, setSelected] = useState<IReschedule | null>(() =>
-    initialData && initialData._id === id ? initialData : null,
+    initialData && initialData.id === id ? initialData : null,
   );
 
   useEffect(() => {
@@ -122,7 +122,7 @@ const RescheduleView = () => {
   const handleStatusChange = async (next: RescheduleStatus) => {
     if (!id) return;
     try {
-      await updateReschedule({ _id: id, status: next }).unwrap();
+      await updateReschedule({ id: id, status: next }).unwrap();
       showToast({
         title: "Success",
         message: `Status updated to ${next}.`,
@@ -199,9 +199,12 @@ const RescheduleView = () => {
               type="edit"
               useText="Edit"
               onClick={() =>
-                navigate(allRoutes.PORTAL + allRoutes.UPDATE_RESCHEDULE(id as string), {
-                  state: { initialData: selected },
-                })
+                navigate(
+                  allRoutes.PORTAL + allRoutes.UPDATE_RESCHEDULE(id as string),
+                  {
+                    state: { initialData: selected },
+                  },
+                )
               }
             />
             <ConfirmationDialog
@@ -270,7 +273,6 @@ const RescheduleView = () => {
               icon={<Calendar className="w-4 h-4 text-muted-foreground" />}
             />
           </div>
-
         </div>
 
         <div className="lg:col-span-2">
@@ -286,7 +288,9 @@ const RescheduleView = () => {
                 <p className="text-xs text-muted-foreground uppercase font-semibold mb-1.5">
                   Title
                 </p>
-                <p className="text-sm text-card-foreground">{selected.title ?? "—"}</p>
+                <p className="text-sm text-card-foreground">
+                  {selected.title ?? "—"}
+                </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -313,7 +317,9 @@ const RescheduleView = () => {
                     New Date & Time
                   </p>
                   <p className="text-sm text-card-foreground">
-                    {selected.newDateTime ? formatDateTime(selected.newDateTime) : "—"}
+                    {selected.newDateTime
+                      ? formatDateTime(selected.newDateTime)
+                      : "—"}
                   </p>
                 </div>
                 <div>
@@ -355,8 +361,8 @@ const RescheduleView = () => {
                       rightActionTitle="Approve"
                       content={
                         <p className="text-muted-foreground text-center">
-                          Are you sure you want to{" "}
-                          <strong>approve</strong> this schedule{" "}
+                          Are you sure you want to <strong>approve</strong> this
+                          schedule{" "}
                           <strong>
                             {selected.rescheduleCode ?? selected.title}
                           </strong>
@@ -382,8 +388,8 @@ const RescheduleView = () => {
                       rightActionTitle="Reject"
                       content={
                         <p className="text-muted-foreground text-center">
-                          Are you sure you want to{" "}
-                          <strong>reject</strong> this schedule{" "}
+                          Are you sure you want to <strong>reject</strong> this
+                          schedule{" "}
                           <strong>
                             {selected.rescheduleCode ?? selected.title}
                           </strong>
@@ -415,4 +421,3 @@ const RescheduleView = () => {
 };
 
 export default RescheduleView;
-

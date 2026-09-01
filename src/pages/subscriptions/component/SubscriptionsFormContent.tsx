@@ -53,14 +53,17 @@ const SubscriptionsFormContent = ({ isLoading, form, isUpdate }: IField) => {
 
   const loadCustomerOptions = useCallback(
     async (inputValue: string): Promise<DropDownOption<string>[]> => {
-      const res = await getCustomers({ ...lookup_params, search: inputValue || undefined }).unwrap();
+      const res = await getCustomers({
+        ...lookup_params,
+        search: inputValue || undefined,
+      }).unwrap();
       if (!res?.contents) return [];
       return res.contents.map((item: ICustomer) => ({
         label: item.name ?? "",
-        value: item._id ?? "",
+        value: item.id ?? "",
       }));
     },
-    [getCustomers]
+    [getCustomers],
   );
 
   useEffect(() => {
@@ -71,8 +74,8 @@ const SubscriptionsFormContent = ({ isLoading, form, isUpdate }: IField) => {
           setSoftwareOptions(
             res.contents.map((item: ISoftware) => ({
               label: item.name ?? "",
-              value: item._id ?? "",
-            }))
+              value: item.id ?? "",
+            })),
           );
         }
       });
@@ -86,22 +89,20 @@ const SubscriptionsFormContent = ({ isLoading, form, isUpdate }: IField) => {
           const options: DropDownOption<string>[] = res.contents.map(
             (item: ISubscriptionType) => ({
               label: item.name ?? "",
-              value: item._id ?? "",
-            })
+              value: item.id ?? "",
+            }),
           );
           setSubscriptionTypeOptions(options);
           const map = new Map<string, ISubscriptionType>();
           res.contents.forEach((item) => {
-            if (item._id) map.set(item._id, item);
+            if (item.id) map.set(item.id, item);
           });
           setSubscriptionTypesMap(map);
         }
       });
   }, []);
 
-  const subscriptionTypeId = subscriptionFieldToId(
-    watch("subscriptionTypeId"),
-  );
+  const subscriptionTypeId = subscriptionFieldToId(watch("subscriptionTypeId"));
   const startDate = watch("startDate");
 
   useEffect(() => {
@@ -214,7 +215,8 @@ const SubscriptionsFormContent = ({ isLoading, form, isUpdate }: IField) => {
                   required
                   disabled={isLoading}
                   defaultDate={
-                    field.value && !Number.isNaN(new Date(field.value).getTime())
+                    field.value &&
+                    !Number.isNaN(new Date(field.value).getTime())
                       ? new Date(field.value)
                       : undefined
                   }
@@ -241,7 +243,8 @@ const SubscriptionsFormContent = ({ isLoading, form, isUpdate }: IField) => {
                   required
                   disabled={isLoading}
                   defaultDate={
-                    field.value && !Number.isNaN(new Date(field.value).getTime())
+                    field.value &&
+                    !Number.isNaN(new Date(field.value).getTime())
                       ? new Date(field.value)
                       : undefined
                   }
@@ -271,7 +274,8 @@ const SubscriptionsFormContent = ({ isLoading, form, isUpdate }: IField) => {
                   required
                   disabled
                   defaultDate={
-                    field.value && !Number.isNaN(new Date(field.value).getTime())
+                    field.value &&
+                    !Number.isNaN(new Date(field.value).getTime())
                       ? new Date(field.value)
                       : undefined
                   }
@@ -301,7 +305,8 @@ const SubscriptionsFormContent = ({ isLoading, form, isUpdate }: IField) => {
                   required
                   disabled
                   defaultDate={
-                    field.value && !Number.isNaN(new Date(field.value).getTime())
+                    field.value &&
+                    !Number.isNaN(new Date(field.value).getTime())
                       ? new Date(field.value)
                       : undefined
                   }

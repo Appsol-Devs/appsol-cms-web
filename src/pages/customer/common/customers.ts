@@ -1,27 +1,27 @@
-import type { ISoftware } from '@/pages/settings/common/settings';
+import type { ISoftware } from "@/pages/settings/common/settings";
 import type { ILoginResponse, IRole } from "@/pages/auth/login/common/login";
 import type { DropDownOption } from "@/components/DropdownComponent";
 import { z } from "zod";
 
 export interface ICustomer {
-  customerCode?: string
-  name?: string
-  email?: string
-  phone?: string
-  companyName?: string
-  status?: string
-  loggedBy?: IUser
-  softwareId?: string
-  software?: ISoftware
-  location?: string
-  notes?: string
-  geolocation?: Geolocation
-  image?: string
-  _id?: string
-  createdAt?: string
-  updatedAt?: string
-  dateConverted?: string
-  leadId?: string
+  customerCode?: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+  companyName?: string;
+  status?: string;
+  loggedBy?: IUser;
+  softwareId?: string;
+  software?: ISoftware;
+  location?: string;
+  notes?: string;
+  geolocation?: Geolocation;
+  image?: string;
+  id?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  dateConverted?: string;
+  leadId?: string;
 }
 
 export interface IGeolocation {
@@ -33,12 +33,13 @@ export interface IGeolocation {
 export type CustomerStatus = "active" | "inactive";
 
 export interface IUser {
-  _id?: string;
+  id?: string;
   firstName?: string;
   lastName?: string;
   email?: string;
   phone?: string;
   role?: IRole;
+  roleId?: string;
   isActive?: boolean;
   isVerified?: boolean;
   imageUrl?: string;
@@ -57,22 +58,22 @@ export interface IOutReachType {
   description: string;
   isActive: boolean;
   colorCode?: string;
-  _id?: string;
+  id?: string;
 }
 
 export interface INotification {
-  notificationCode?: string
-  message?: string
-  targetEntityType?: string
-  userId?: string
-  user?: IUser
-  link?: string
-  isRead?: boolean
-  targetEntityId?: string
-  targetEntity?: string
-  _id?: string
-  createdAt?: string
-  updatedAt?: string
+  notificationCode?: string;
+  message?: string;
+  targetEntityType?: string;
+  userId?: string;
+  user?: IUser;
+  link?: string;
+  isRead?: boolean;
+  targetEntityId?: string;
+  targetEntity?: string;
+  id?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface NotificationContextType {
@@ -107,8 +108,6 @@ export interface IVerifyOTPResponse {
   data: ILoginResponse;
 }
 
-
-
 const customerSoftwareFieldSchema = z.union([
   z.string().min(1, "Associated Software is required"),
   z.object({
@@ -120,7 +119,9 @@ const customerSoftwareFieldSchema = z.union([
 export const customerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.email("Please enter a valid email address."),
-  phone: z.string().regex(/^\+?[0-9]{10,15}$/, "Please enter a valid phone number."),
+  phone: z
+    .string()
+    .regex(/^\+?[0-9]{10,15}$/, "Please enter a valid phone number."),
   companyName: z.string().min(1, "Company Name is required"),
   location: z.string().min(1, "Location is required"),
   softwareId: customerSoftwareFieldSchema,

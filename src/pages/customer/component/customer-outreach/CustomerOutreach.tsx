@@ -115,9 +115,9 @@ const CustomerOutreach = () => {
         columns={columns}
         pathOnRowSelected={(row) => {
           const o = row as ICustomerOutreach;
-          if (!o._id) return;
+          if (!o.id) return;
 
-          navigate(allRoutes.PORTAL + allRoutes.VIEW_CUSTOMER_OUTREACH(o._id), {
+          navigate(allRoutes.PORTAL + allRoutes.VIEW_CUSTOMER_OUTREACH(o.id), {
             state: { initialData: o, customerId: id },
           });
         }}
